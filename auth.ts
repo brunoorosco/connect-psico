@@ -48,7 +48,7 @@ export const {
           token.isTwoFactorEnabled = isTwoFactorEnabled;
           const org = await findOrgByOwnerId(user.id);
           token.orgId = org?.id || "";
-          token.role = user?.role || UserRole.DEFAULT;
+          token.role = user.role || UserRole.DEFAULT;
           if (org?.id) {
             token.role = UserRole.ADMIN;
           }

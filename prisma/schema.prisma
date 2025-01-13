@@ -11,6 +11,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  bindaryTargets = ["native", "darwin-arm64"]
 }
 
 enum UserRole {
