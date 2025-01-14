@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { menus, menusFooter } from "./menu";
+import useDynamicMenus, { menus, menusFooter } from "./menu";
 import Link from "next/link";
 import Logo from "../logo";
 import { auth } from "@/auth";
@@ -47,7 +47,12 @@ export async function AppSidebar() {
                   return hasPermission ? (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <Link href={item.url}>
+                        <Link
+                          href={item.url.replace(
+                            "/{userId}",
+                            `/${session?.user.id}`
+                          )}
+                        >
                           <item.icon />
                           <span>{item.title}</span>
                         </Link>

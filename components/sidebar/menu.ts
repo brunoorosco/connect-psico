@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import {
   Calendar,
   Home,
@@ -7,6 +8,26 @@ import {
   GraduationCap,
   User,
 } from "lucide-react";
+
+const useDynamicMenus = async () => {
+  const session = await auth();
+
+  const userId = session?.user?.id;
+
+  const updatedMenus = menus.map((menu) => {
+    if (menu.url.endsWith("/1")) {
+      return {
+        ...menu,
+        url: menu.url.replace("/1", `/${userId}`),
+      };
+    }
+    return menu;
+  });
+
+  return updatedMenus;
+};
+
+export default useDynamicMenus;
 export const menus = [
   {
     title: "Dashboard",
@@ -38,13 +59,13 @@ export const menus = [
   },
   {
     title: "Visão Estudantes",
-    url: "/view/students/1",
+    url: "/students/{userId}",
     icon: GraduationCap,
     rules: ["ADMIN", "STUDENT"],
   },
   {
     title: "Visão Supervisores",
-    url: "/view/supervisors/1",
+    url: "/supervisors/{userId}",
     icon: User,
     rules: ["ADMIN", "SUPERVISOR"],
   },
