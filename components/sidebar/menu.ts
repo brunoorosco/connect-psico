@@ -27,7 +27,7 @@ export const menus = [
   },
   {
     title: "Estudantes",
-    url: "/STUDENTs",
+    url: "/students",
     icon: GraduationCap,
     rules: ["ADMIN", "STUDENT"],
   },
@@ -38,7 +38,7 @@ export const menus = [
   },
   {
     title: "Visão Estudantes",
-    url: "/view/STUDENTs/1",
+    url: "/view/students/1",
     icon: GraduationCap,
     rules: ["ADMIN", "STUDENT"],
   },
