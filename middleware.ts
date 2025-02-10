@@ -20,7 +20,7 @@ export default auth(async (req) => {
   const isLoggedIn = !!req.auth;
   const token = await getToken({
     req,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET as string,
     salt: "1d",
   });
   // console.log(`Public: ${isPublicRoute}`);
