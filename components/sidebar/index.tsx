@@ -21,14 +21,14 @@ export async function AppSidebar() {
   const session = await auth();
 
   return (
-    <Sidebar>
+    <Sidebar className="dark:bg-zinc-600 dark:text-zinc-200">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className='flex items-center'>
               <Link
                 href='/'
-                className='text-gray-700 hover:text-gray-900 h-4 pb-3'
+              //  className='text-gray-700 hover:text-gray-900 h-4 pb-3 dark:text-gray-100'
               >
                 <Logo />
               </Link>
@@ -45,9 +45,9 @@ export async function AppSidebar() {
                     item.rules.includes(session?.user.role as string);
 
                   return hasPermission ? (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={item.title} >
                       <SidebarMenuButton asChild>
-                        <Link
+                        <Link 
                           href={item.url.replace(
                             "/{userId}",
                             `/${session?.user.id}`
