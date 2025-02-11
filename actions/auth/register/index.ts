@@ -15,41 +15,44 @@ import { sendAccountVerificationEmail } from "../email-verification";
  * @returns {Promise<{error?: string, success?: string}>} The result of the password change request.
  */
 export const register = async (user: z.infer<typeof RegisterSchema>) => {
-	const valid = await RegisterSchema.safeParse(user);
+  console.log(user);
+  const valid = await RegisterSchema.safeParse(user);
 
-	if (!valid.success) {
-		return {
-			error: "Dados inválidos",
-		};
-	}
+  if (!valid.success) {
+    return {
+      error: "Dados inválidos",
+    };
+  }
 
-	try {
-		const { name, email, password } = user;
-		const hashedPassword = await bcryptjs.hash(password, 10);
-		const createdUser = await prisma.user.create({
-			data: {
-				name,
-				email,
-				password: hashedPassword,
-				role: UserRole.DEFAULT,
-			},
-		});
-		//Account verification flow with e-mail
-		const verificationToken = await createVerificationToken(email);
-		await sendAccountVerificationEmail(createdUser, verificationToken.token);
-		return {
-			success: "E-mail de verificação enviado",
-		};
-	} catch (error) {
-		if (error instanceof PrismaClientKnownRequestError) {
-			if (error.code === "P2002") {
-				return {
-					error: "Já existe uma conta relacionada a este e-mail.",
-				};
-			}
-		}
-		// return { error };
+  try {
+    const { name, email, password } = user;
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    const createdUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        phone: user.phone,
+        role:
+          user.professional === true ? UserRole.SUPERVISOR : UserRole.STUDENT,
+      },
+    });
+    //Account verification flow with e-mail
+    const verificationToken = await createVerificationToken(email);
+    await sendAccountVerificationEmail(createdUser, verificationToken.token);
+    return {
+      success: "E-mail de verificação enviado",
+    };
+  } catch (error) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return {
+          error: "Já existe uma conta relacionada a este e-mail.",
+        };
+      }
+    }
+    // return { error };
 
-		throw error;
-	}
+    throw error;
+  }
 };

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Check, MenuIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/logo.png";
 import womanImg from "@/assets/woman.svg";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -26,7 +26,7 @@ export default async function Home() {
     <main>
       <section className='container mx-auto text-center pb-20 px-2 md:px-0'>
         <nav className='flex justify-between items-center py-4'>
-          <Image src={logo} alt='Logotipo' />
+          <Image src={logo} alt='Logotipo' height={41} />
           <DropdownMenu>
             <DropdownMenuTrigger>
               <MenuIcon size={24} className='md:hidden cursor-pointer' />

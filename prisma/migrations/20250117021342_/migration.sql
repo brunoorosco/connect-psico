@@ -1,13 +1,14 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('DEFAULT', 'ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('DEFAULT', 'ADMIN', 'SUPERVISOR', 'STUDENT');
 
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "name" TEXT,
     "email" TEXT NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "phone" TEXT,
     "role" "UserRole" NOT NULL DEFAULT 'DEFAULT',
     "password" TEXT,
     "isTwoFactorAuthEnabled" BOOLEAN NOT NULL DEFAULT false,
@@ -15,7 +16,7 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -26,6 +27,19 @@ CREATE TABLE "Org" (
     "owner" TEXT NOT NULL,
 
     CONSTRAINT "Org_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "professionals" (
+    "id" SERIAL NOT NULL,
+    "crp" TEXT NOT NULL,
+    "estado" TEXT NOT NULL,
+    "publicoAlvo" TEXT NOT NULL,
+    "especialidade" TEXT NOT NULL,
+    "abordagem" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "professionals_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -78,7 +92,10 @@ CREATE TABLE "ResetPasswordToken" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE INDEX "professionals_id_idx" ON "professionals"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_email_key" ON "VerificationToken"("email");
@@ -108,4 +125,7 @@ CREATE UNIQUE INDEX "ResetPasswordToken_token_key" ON "ResetPasswordToken"("toke
 CREATE UNIQUE INDEX "ResetPasswordToken_email_token_key" ON "ResetPasswordToken"("email", "token");
 
 -- AddForeignKey
-ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "professionals" ADD CONSTRAINT "professionals_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

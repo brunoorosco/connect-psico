@@ -14,12 +14,19 @@ enum UserRole {
   STUDENT
 }
 
+enum Status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
 model User {
   id                     String    @id @default(cuid())
   name                   String?
   email                  String    @unique
   emailVerified          DateTime?
   image                  String?
+  phone                  String?
   role                   UserRole  @default(DEFAULT)
   password               String?
   isTwoFactorAuthEnabled Boolean   @default(false)
@@ -27,6 +34,16 @@ model User {
   accounts               Account[]
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
+
+  professionalAppointments Appointment[]  @relation(name: "ProfessionalAppointments")
+  patientAppointments      Appointment[]  @relation(name: "PatientAppointments")
+  availabilities           Availability[]
+  sentMessages             Message[]      @relation(name: "SentMessages")
+  receivedMessages         Message[]      @relation(name: "ReceivedMessages")
+  Professional             Professional[]
+  Message                  Message[]
+
+  @@map("users")
 }
 
 model Org {
@@ -34,6 +51,21 @@ model Org {
   name  String?
   image String?
   owner String
+}
+
+model Professional {
+  id            Int    @id @default(autoincrement())
+  crp           String
+  estado        String
+  publicoAlvo   String
+  especialidade String
+  abordagem     String
+  userId        String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+  @@map("professionals")
 }
 
 model Account {
@@ -83,3 +115,55 @@ model ResetPasswordToken {
 
   @@unique([email, token])
 }
+
+model Appointment {
+  id              String   @id @default(uuid())
+  professionalId  String   @map("professional_id")
+  patientId       String   @map("patient_id")
+  appointmentDate DateTime @map("appointment_date")
+  status          Status   @default(PENDING)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  professional User @relation(name: "ProfessionalAppointments", fields: [professionalId], references: [id])
+  patient      User @relation(name: "PatientAppointments", fields: [patientId], references: [id])
+
+  @@map("appointments")
+}
+
+model Availability {
+  id             String   @id @default(uuid())
+  professionalId String   @map("professional_id")
+  dayOfWeek      Int      @map("day_of_week")
+  startTime      DateTime @map("start_time")
+  endTime        DateTime @map("end_time")
+  isAvailable    Boolean  @default(true) @map("is_available")
+
+  psychologist User @relation(fields: [professionalId], references: [id])
+
+  @@map("availabilities")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String   @map("sender_id")
+  receiverId String   @map("receiver_id")
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  sender   User    @relation(name: "SentMessages", fields: [senderId], references: [id])
+  receiver User    @relation(name: "ReceivedMessages", fields: [receiverId], references: [id])
+  User     User?   @relation(fields: [userId], references: [id])
+  userId   String?
+
+  @@map("messages")
+}
+
+// model User {
+//   id                  String         @id @default(uuid())
+//   appointments        Appointment[]  @relation("Appointment_psychologistId")
+//   patientAppointments Appointment[]  @relation("Appointment_patientId")
+//   availabilities      Availability[]
+//   sentMessages        Message[]      @relation("Message_senderId")
+//   receivedMessages    Message[]      @relation("Message_receiverId")
+// }

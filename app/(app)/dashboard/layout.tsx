@@ -20,7 +20,7 @@ export default async function DashboardLayout({
         <AppSidebar />
         <div className='flex-1'>
           <Navbar userName={session?.user?.name as string} />
-          <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-8'>
+          <main className='max-w-8xl mx-auto px-4 sm:px-6 lg:px-6 py-2'>
             {children}
           </main>
         </div>
