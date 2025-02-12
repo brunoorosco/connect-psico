@@ -40,7 +40,7 @@ export default async function Home() {
               <DropdownMenuItem>Preço</DropdownMenuItem>
               <DropdownMenuItem>
                 <Link href='/auth/login'>
-                  <Button variant={"bg-white"}>Login</Button>
+                  <Button variant={"default"}>Login</Button>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
