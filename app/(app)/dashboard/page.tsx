@@ -8,9 +8,9 @@ const DashboardPage = async () => {
   return (
     <>
       {session?.user.role !== "STUDENT" ? (
-        <DashboardProfessional />
-      ) : (
         <DashboardStudent />
+      ) : (
+        <DashboardProfessional />
       )}
     </>
   );
