@@ -1,33 +1,31 @@
-import type { DefaultSession } from "next-auth";
-// The `JWT` interface can be found in the `next-auth/jwt` submodule
+import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+// import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
+type UserRole = "ADMIN" | "DEFAULT" | "SUPERVISOR";
 declare module "next-auth" {
-  /**
-   * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-   */
-  interface Session {
+  interface Session extends DefaultSession {
     user: {
-      role: UserRole;
-      isTwoFactorEnabled: boolean;
-      orgId: string;
-      /**
-       * By default, TypeScript merges new interface properties and overwrites existing ones.
-       * In this case, the default session user properties will be overwritten,
-       * with the new ones defined above. To keep the default session user properties,
-       * you need to add them back into the newly declared interface.
-       */
+      role: string;
+      isTwoFactorEnabled?: boolean;
     } & DefaultSession["user"];
   }
-  interface User {
-    role: UserRole;
+  interface User extends DefaultUser {
+    role: string;
+    isTwoFactorEnabled?: boolean;
+  }
+  interface JWT {
+    role: string;
+    isTwoFactorEnabled?: boolean;
   }
 }
 
+declare module "next/server" {
+  interface NextRequest {
+    auth?: Session;
+  }
+}
 declare module "next-auth/jwt" {
-  /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
-    /** Two Factor Authentication */
     isTwoFactorEnabled?: boolean;
-    orgId: string;
   }
 }
