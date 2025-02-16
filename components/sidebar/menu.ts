@@ -50,7 +50,7 @@ export const menus = [
     title: "Estudantes",
     url: "/students",
     icon: GraduationCap,
-    rules: ["ADMIN", "STUDENT"],
+    rules: ["ADMIN", "DEFAULT"],
   },
   {
     title: "Settings",
@@ -61,7 +61,7 @@ export const menus = [
     title: "Visão Estudantes",
     url: "/students/{userId}",
     icon: GraduationCap,
-    rules: ["ADMIN", "STUDENT"],
+    rules: ["ADMIN", "DEFAULT"],
   },
   {
     title: "Visão Supervisores",
