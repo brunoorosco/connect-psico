@@ -16,9 +16,20 @@ export const {
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24,
   },
   pages: {
     signIn: "/auth/login",
+  },
+  cookies: {
+    sessionToken: {
+      name: "authjs.session-token", // Defina explicitamente o nome do cookie
+      options: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Apenas para produção
+        sameSite: "lax", // Ajuste conforme necessário
+      },
+    },
   },
   callbacks: {
     async signIn({ user, email, account, profile }) {
@@ -42,7 +53,7 @@ export const {
         // User is available during sign-in
         if (user.id) {
           const isTwoFactorEnabled = await isTwoFactorAutenticationEnabled(
-            user?.id || ""
+            user.id
           );
           token.isTwoFactorEnabled = isTwoFactorEnabled;
           token.role = user.role || UserRole.DEFAULT;
@@ -51,21 +62,13 @@ export const {
       return token;
     },
     async session({ session, token }) {
-      // `session.user.role` is now a valid property, and will be type-checked
-      // in places like `useSession().data.user` or `auth().user`
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-        session.user.role = token.role;
+      if (token.role) {
+        session.user.role = token.role.toString();
       }
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          //     role: token.role,
-        },
-      };
+      session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+      return session;
     },
   },
+  secret: process.env.AUTH_SECRET,
   ...authConfig,
 });

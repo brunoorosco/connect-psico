@@ -4,6 +4,7 @@ import authConfig from "./auth.config";
 import { configRoutes } from "./config/routes";
 import { createRouteMatchers } from "./lib/route";
 import { getToken } from "next-auth/jwt";
+import { auth as midAuth } from "@/auth";
 
 const { auth } = NextAuth(authConfig);
 
@@ -16,26 +17,16 @@ export default auth(async (req) => {
     isStudentRoute,
     isSupervisorRoute,
   } = createRouteMatchers(configRoutes, req);
-  const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const token = await getToken({
-    req,
-    secret: process.env.AUTH_SECRET as string,
-    salt: "1d",
-  });
-  // console.log(`Public: ${isPublicRoute}`);
-  // console.log(`Protected: ${isProtectedRoute}`);
-  // console.log(`Api: ${isApiRoute}`);
-  // console.log(`Auth: ${isAuthRoute}`);
-  // console.log(`Student: ${isStudentRoute}`);
-  // console.log(`Supervisor: ${isSupervisorRoute}`);
-  // console.log(`Logged In: ${isLoggedIn}`);
 
-  const userRole = token?.role || "supervisor"; // Assumindo que o token tenha um campo `role`
+  const session = await midAuth();
 
+  const userRole = session?.user.role; // Assumindo que o token tenha um campo `role`
+  console.log(userRole);
   const hasAccess =
-    (userRole === "supervisor" && isSupervisorRoute) ||
-    (userRole === "student" && isStudentRoute);
+    (userRole === "SUPERVISOR" && isSupervisorRoute) ||
+    (userRole === "DEFAULT" && isStudentRoute) ||
+    userRole === "ADMIN";
 
   if (isProtectedRoute && isLoggedIn && !hasAccess) {
     return NextResponse.redirect(new URL("/auth/access-denied", req.url));
