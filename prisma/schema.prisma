@@ -11,7 +11,6 @@ enum UserRole {
   DEFAULT
   ADMIN
   SUPERVISOR
-  STUDENT
 }
 
 enum Status {
@@ -22,7 +21,7 @@ enum Status {
 
 model User {
   id                     String    @id @default(cuid())
-  name                   String?
+  name                   String
   email                  String    @unique
   emailVerified          DateTime?
   image                  String?
@@ -31,7 +30,6 @@ model User {
   password               String?
   isTwoFactorAuthEnabled Boolean   @default(false)
   twoFactorAuthVerified  DateTime?
-  accounts               Account[]
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
@@ -46,21 +44,23 @@ model User {
   @@map("users")
 }
 
-model Org {
-  id    String  @id @default(cuid())
-  name  String?
-  image String?
-  owner String
-}
+// model Org {
+//   id    String  @id @default(cuid())
+//   name  String?
+//   image String?
+//   owner String
+// }
 
 model Professional {
-  id            Int    @id @default(autoincrement())
-  crp           String
-  estado        String
-  publicoAlvo   String
-  especialidade String
-  abordagem     String
-  userId        String
+  id               Int    @id @default(autoincrement())
+  numConselho      String @map("num_conselho ")
+  ufConselho       String @map("uf_conselho")
+  publicoAlvo      String @map("publico_alvo")
+  especialidade    String
+  abordagem        String
+  bio              String
+  valorAtendimento String @map("valor_atendimento")
+  userId           String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -68,27 +68,27 @@ model Professional {
   @@map("professionals")
 }
 
-model Account {
-  userId            String  @map("user_id")
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  bio               String?
+// model Account {
+//   userId            String  @map("user_id")
+//   type              String
+//   provider          String
+//   providerAccountId String
+//   refresh_token     String?
+//   access_token      String?
+//   expires_at        Int?
+//   token_type        String?
+//   scope             String?
+//   id_token          String?
+//   session_state     String?
+//   bio               String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([provider, providerAccountId])
-}
+//   @@id([provider, providerAccountId])
+// }
 
 model VerificationToken {
   id      String   @id @default(cuid())
@@ -117,6 +117,7 @@ model ResetPasswordToken {
   @@unique([email, token])
 }
 
+//Agendamentos
 model Appointment {
   id              String   @id @default(uuid())
   professionalId  String   @map("professional_id")
@@ -131,6 +132,7 @@ model Appointment {
   @@map("appointments")
 }
 
+//Horario Disponivel
 model Availability {
   id             String   @id @default(uuid())
   professionalId String   @map("professional_id")
