@@ -22,7 +22,7 @@ export default auth(async (req) => {
   const session = await midAuth();
 
   const userRole = session?.user.role; // Assumindo que o token tenha um campo `role`
-  console.log(userRole);
+
   const hasAccess =
     (userRole === "SUPERVISOR" && isSupervisorRoute) ||
     (userRole === "DEFAULT" && isStudentRoute) ||
