@@ -5,7 +5,7 @@ import authConfig from "./auth.config";
 import { prisma } from "./lib/db";
 import { findUserbyEmail } from "./services";
 import { isTwoFactorAutenticationEnabled } from "./services/auth";
-import { findOrgByOwnerId } from "./services/onboarding/org";
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -36,7 +36,6 @@ export const {
     },
     async jwt({ token, user, trigger, session }) {
       if (trigger && trigger === "update" && session) {
-        token.orgId = session.user.orgId;
         return token;
       }
       if (user) {
@@ -46,12 +45,7 @@ export const {
             user?.id || ""
           );
           token.isTwoFactorEnabled = isTwoFactorEnabled;
-          const org = await findOrgByOwnerId(user.id);
-          token.orgId = org?.id || "";
           token.role = user.role || UserRole.DEFAULT;
-          if (org?.id) {
-            token.role = UserRole.ADMIN;
-          }
         }
       }
       return token;
@@ -62,7 +56,6 @@ export const {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-        session.user.orgId = token.orgId;
         session.user.role = token.role;
       }
       return {
