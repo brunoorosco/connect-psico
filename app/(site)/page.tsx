@@ -58,11 +58,10 @@ export default async function Home() {
           </div>
         </nav>
         <h1 className='md:text-6xl text-2xl font-bold mt-8 md:mt-16'>
-          Simplifique Seus Estudos{" "}
+          Simplifique Sua Busca{" "}
         </h1>
         <p className='text-gray-500 mt-4 text-sm md:text-xl max-w-3xl mx-auto'>
-          Deixe que nós fazemos a curadoria para você. Assine nossa plataforma e
-          receba todos os meses um ebook novo de programação.
+          Deixe nós te ajudar a encontrar um profissional.
         </p>
         <form className='md:mt-16 mt-10'>
           <div className='flex gap-2 justify-center'>

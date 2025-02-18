@@ -36,7 +36,7 @@ export const menus = [
   },
   {
     title: "Supervisores",
-    url: "/supervisors",
+    url: "/dashboard/professional",
     icon: Inbox,
     rules: ["ADMIN", "SUPERVISOR"],
   },
@@ -48,7 +48,7 @@ export const menus = [
   },
   {
     title: "Estudantes",
-    url: "/students",
+    url: "/dashboard/students",
     icon: GraduationCap,
     rules: ["ADMIN", "DEFAULT"],
   },

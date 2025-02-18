@@ -40,32 +40,42 @@ model User {
   receivedMessages         Message[]      @relation(name: "ReceivedMessages")
   Professional             Professional[]
   Message                  Message[]
+  Comentarios              Comentarios[]
 
   @@map("users")
 }
 
-// model Org {
-//   id    String  @id @default(cuid())
-//   name  String?
-//   image String?
-//   owner String
-// }
-
 model Professional {
-  id               Int    @id @default(autoincrement())
-  numConselho      String @map("num_conselho ")
-  ufConselho       String @map("uf_conselho")
-  publicoAlvo      String @map("publico_alvo")
-  especialidade    String
+  id               Int      @id @default(autoincrement())
+  numConselho      String?  @map("num_conselho") @db.VarChar(8)
+  ufConselho       String   @map("uf_conselho") @db.VarChar(2)
+  publicoAlvo      String?  @map("publico_alvo")
+  especialidade    String[]
   abordagem        String
+  education        String?
   bio              String
-  valorAtendimento String @map("valor_atendimento")
-  userId           String
+  valorAtendimento String   @map("valor_atendimento")
+  userId           String   @unique
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Comentarios Comentarios[]
 
   @@index([id])
   @@map("professionals")
+}
+
+model Comentarios {
+  id             Int    @id @default(autoincrement())
+  content        String
+  rating         String
+  userId         String
+  professionalId Int
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+  @@map("comentarios")
 }
 
 // model Account {
