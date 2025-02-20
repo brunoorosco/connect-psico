@@ -65,6 +65,7 @@ export const {
       if (token.role) {
         session.user.role = token.role.toString();
       }
+      session.user.id = token.sub as string;
       session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
       return session;
     },

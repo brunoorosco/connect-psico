@@ -13,7 +13,6 @@ const useDynamicMenus = async () => {
   const session = await auth();
 
   const userId = session?.user?.id;
-
   const updatedMenus = menus.map((menu) => {
     if (menu.url.endsWith("/1")) {
       return {
@@ -28,17 +27,31 @@ const useDynamicMenus = async () => {
 };
 
 export default useDynamicMenus;
+
 export const menus = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
+    rules: ["ADMIN"],
   },
   {
-    title: "Supervisores",
+    title: "Dashboard do Supervisores",
     url: "/dashboard/professional",
     icon: Inbox,
-    rules: ["ADMIN", "SUPERVISOR"],
+    rules: ["ADMIN"],
+  },
+  {
+    title: "Dashboard do Estudantes",
+    url: "/dashboard/students",
+    icon: GraduationCap,
+    rules: ["ADMIN"],
+  },
+  {
+    title: "Dashboard",
+    url: "/dashboard/professional",
+    icon: Inbox,
+    rules: ["SUPERVISOR"],
   },
   {
     title: "Salas",
@@ -47,27 +60,15 @@ export const menus = [
     rules: ["ADMIN"],
   },
   {
-    title: "Estudantes",
+    title: "Dashboard",
     url: "/dashboard/students",
     icon: GraduationCap,
-    rules: ["ADMIN", "DEFAULT"],
+    rules: ["DEFAULT"],
   },
   {
     title: "Settings",
     url: "#",
     icon: Settings,
-  },
-  {
-    title: "Visão Estudantes",
-    url: "/students/{userId}",
-    icon: GraduationCap,
-    rules: ["ADMIN", "DEFAULT"],
-  },
-  {
-    title: "Visão Supervisores",
-    url: "/supervisors/{userId}",
-    icon: User,
-    rules: ["ADMIN", "SUPERVISOR"],
   },
 ];
 

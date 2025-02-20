@@ -16,7 +16,7 @@ import { ScheduleModal } from "./ScheduleModal";
 import { MessageSheet } from "./MessageSheet";
 import { professionalById } from "@/actions/auth/professional";
 
-type TProfessional = {
+export type TProfessional = {
   Comentarios: TComentarios[];
   especialidade: string[];
   bio: string;
@@ -36,16 +36,19 @@ type TComentarios = {
 export type PsychologistProfileProps = {
   name: string;
   image: string;
-  Professional: TProfessional[];
+  professional: TProfessional;
   onBack?: () => void;
 };
 
-const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
+const PsychologistProfile = ({
+  name,
+  image,
+  professional,
+  onBack,
+}: PsychologistProfileProps) => {
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [messageSheetOpen, setMessageSheetOpen] = useState(false);
-  const professional = profile;
 
-  console.log(professional);
   return (
     <div className='min-h-screen  from-primary-light to-white p-4 md:p-8'>
       <div className='max-w-4xl mx-auto'>
@@ -70,7 +73,7 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
                 {"calcula a medias das qualificações"}
               </p>
               <p className='text-xs text-gray-600'>
-                {/* {profile.Professional[0].Comentarios.length} avaliações */}
+                {/* {professional.Comentarios.length} avaliações */}
               </p>
             </div>
           </Card>
@@ -82,7 +85,7 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
               </div>
               <h3 className='text-sm font-semibold mb-1'>Especialidade</h3>
               <p className='text-md font-medium text-primary-dark'>
-                {profile.Professional[0].especialidade[0]}
+                {professional.especialidade[0]}
               </p>
               <p className='text-xs text-gray-600'>Principal foco</p>
             </div>
@@ -95,7 +98,7 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
               </div>
               <h3 className='text-sm font-semibold mb-1'>Experiência</h3>
               <p className='text-md font-medium text-primary-dark'>
-                {profile.Professional[0].experience}
+                {professional.experience}
               </p>
               <p className='text-xs text-gray-600'>Tempo de atuação</p>
             </div>
@@ -108,7 +111,7 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
               </div>
               <h3 className='text-sm font-semibold mb-1'>Valor</h3>
               <p className='text-md font-medium text-primary-dark'>
-                {profile.Professional[0].price}
+                {professional.price}
               </p>
               <p className='text-xs text-gray-600'>Por sessão</p>
             </div>
@@ -121,22 +124,20 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
             <div className='flex flex-col md:flex-row items-center gap-6'>
               <div className='relative w-32 h-32 md:w-40 md:h-40'>
                 <img
-                  src={profile.image}
-                  alt={profile.name}
+                  src={image}
+                  alt={name}
                   className='rounded-full object-cover w-full h-full border-4 border-primary'
                 />
                 <Badge className='absolute -top-2 -right-2 bg-primary text-white'>
                   <Star className='w-4 h-4 mr-1' />
-                  {profile.Professional[0].Comentarios[0].rating}
+                  {professional.Comentarios[0].rating}
                 </Badge>
               </div>
               <div className='flex-1 text-center md:text-left'>
-                <h1 className='text-3xl font-semibold mb-2'>{profile.name}</h1>
-                <p className='text-gray-600 mb-4'>
-                  {profile.Professional[0].bio}
-                </p>
+                <h1 className='text-3xl font-semibold mb-2'>{name}</h1>
+                <p className='text-gray-600 mb-4'>{professional.bio}</p>
                 <div className='flex flex-wrap gap-2 justify-center md:justify-start'>
-                  {profile.Professional[0].especialidade.map((specialty) => (
+                  {professional.especialidade.map((specialty) => (
                     <Badge
                       key={specialty}
                       className='bg-accent text-primary-dark hover:bg-accent-dark'
@@ -175,21 +176,17 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
             <Card className='p-4 backdrop-blur-sm bg-card/90'>
               <Clock className='w-6 h-6 text-primary mb-2' />
               <h3 className='font-semibold mb-1'>Experiência</h3>
-              <p className='text-gray-600'>
-                {profile.Professional[0].experience}
-              </p>
+              <p className='text-gray-600'>{professional.experience}</p>
             </Card>
             <Card className='p-4 backdrop-blur-sm bg-card/90'>
               <Award className='w-6 h-6 text-primary mb-2' />
               <h3 className='font-semibold mb-1'>Formação</h3>
-              <p className='text-gray-600'>
-                {profile.Professional[0].education}
-              </p>
+              <p className='text-gray-600'>{professional.education}</p>
             </Card>
             <Card className='p-4 backdrop-blur-sm bg-card/90'>
               <Heart className='w-6 h-6 text-primary mb-2' />
               <h3 className='font-semibold mb-1'>Valor Consulta</h3>
-              <p className='text-gray-600'>{profile.Professional[0].price}</p>
+              <p className='text-gray-600'>{professional.price}</p>
             </Card>
           </div>
 
@@ -197,7 +194,7 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
           <Card className='p-6 backdrop-blur-sm bg-card/90'>
             <h2 className='text-2xl font-semibold mb-4'>Depoimentos</h2>
             <div className='space-y-4'>
-              {profile.Professional[0].Comentarios.map((review) => (
+              {professional.Comentarios.map((review) => (
                 <div
                   key={review.id}
                   className='border-b border-gray-100 last:border-0 pb-4 last:pb-0'
@@ -223,13 +220,13 @@ const PsychologistProfile = ({ profile }: PsychologistProfileProps) => {
         <ScheduleModal
           open={scheduleModalOpen}
           onOpenChange={setScheduleModalOpen}
-          psychologistName={profile.name}
+          psychologistName={name}
         />
 
         <MessageSheet
           open={messageSheetOpen}
           onOpenChange={setMessageSheetOpen}
-          psychologistName={profile.name}
+          psychologistName={name}
         />
       </div>
     </div>
