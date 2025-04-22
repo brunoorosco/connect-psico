@@ -3,11 +3,11 @@ services:
     container_name: psiconnect_db
     image: postgres
     environment:
-      - POSTGRES_USER=psico
-      - POSTGRES_PASSWORD=Orosc@0329
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=psiconnect
     ports:
       - 5432:5432
-
   mongo:
     image: mongo:latest
     container_name: mongo-container
