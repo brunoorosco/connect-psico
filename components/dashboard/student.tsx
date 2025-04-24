@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,108 +7,34 @@ import { Star, ExternalLink } from "lucide-react";
 import PsychologistProfile from "../PsychoProfile";
 
 const DashboardStudent = () => {
+    const [isPending, startTransition] = useTransition();
+    const [error, setError] = useState<string>("");
+    const [success, setSuccess] = useState<string>("");
+    const [session, setSession] = useState<any>(null)
   const [selectedPsychologist, setSelectedPsychologist] = useState<
     number | null
   >(null);
 
-  // Dados mockados para exemplo
-  const psychologists = [
-    {
-      id: 1,
-      name: "Dra. Maria Silva",
-      image:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-      bio: "Psicóloga clínica com mais de 10 anos de experiência em terapia cognitivo-comportamental, especializada em ansiedade e depressão.",
-      specialties: [
-        { id: 1, name: "Terapia Cognitivo-Comportamental" },
-        { id: 2, name: "Ansiedade" },
-        { id: 3, name: "Depressão" },
-        { id: 4, name: "Desenvolvimento Pessoal" },
-      ],
-      experience: "10+ anos de prática clínica",
-      education: "Mestrado em Psicologia Clínica - USP",
-      price: "R$ 200,00/sessão",
-      rating: 4.9,
-      reviews: [
-        {
-          id: 1,
-          author: "João P.",
-          content:
-            "Excelente profissional, muito atenciosa e competente. Me ajudou muito com questões de ansiedade.",
-          rating: 5,
-        },
-        {
-          id: 2,
-          author: "Ana M.",
-          content:
-            "Ótimas sessões, ambiente acolhedor e muito profissionalismo.",
-          rating: 5,
-        },
-        {
-          id: 3,
-          author: "Carlos R.",
-          content:
-            "Recomendo fortemente! Profissional extremamente capacitada.",
-          rating: 4,
-        },
-      ],
-    },
-    {
-      id: 1,
-      name: "Dra. Maria Silva",
-      image:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-      bio: "Psicóloga clínica com mais de 10 anos de experiência em terapia cognitivo-comportamental, especializada em ansiedade e depressão.",
-      specialties: [
-        { id: 1, name: "Terapia Cognitivo-Comportamental" },
-        { id: 2, name: "Ansiedade" },
-        { id: 3, name: "Depressão" },
-        { id: 4, name: "Desenvolvimento Pessoal" },
-      ],
-      experience: "10+ anos de prática clínica",
-      education: "Mestrado em Psicologia Clínica - USP",
-      price: "R$ 200,00/sessão",
-      rating: 4.9,
-      reviews: [
-        {
-          id: 2,
-          author: "João P.",
-          content:
-            "Excelente profissional, muito atenciosa e competente. Me ajudou muito com questões de ansiedade.",
-          rating: 5,
-        },
-        {
-          id: 2,
-          author: "Ana M.",
-          content:
-            "Ótimas sessões, ambiente acolhedor e muito profissionalismo.",
-          rating: 5,
-        },
-        {
-          id: 3,
-          author: "Carlos R.",
-          content:
-            "Recomendo fortemente! Profissional extremamente capacitada.",
-          rating: 4,
-        },
-      ],
-    },
-    // Adicione mais psicólogos aqui com a mesma estrutura
-  ];
-
-  if (selectedPsychologist !== null) {
-    const psychologist = psychologists.find(
-      (p) => p.id === selectedPsychologist
-    );
-    if (psychologist) {
-      return (
-        <PsychologistProfile
-          {...psychologist}
-          onBack={() => setSelectedPsychologist(null)}
-        />
-      );
-    }
+  const psychologists = (id: string) => {
+    startTransition(async () => {
+      const res = await fetch(`/api/session/${id}`)
+      const data = await res.json()
+      setSession(data)
+    })
   }
+  // if (selectedPsychologist !== null) {
+  //   const psychologist = psychologists.find(
+  //     (p) => p.id === selectedPsychologist
+  //   );
+  //   if (psychologist) {
+  //     return (
+  //       <PsychologistProfile
+  //         {...psychologist}
+  //         onBack={() => setSelectedPsychologist(null)}
+  //       />
+  //     );
+  //   }
+  // }
 
   return (
     <div className='min-h-screen from-primary-light to-white p-4 md:p-8'>
@@ -117,7 +43,8 @@ const DashboardStudent = () => {
           Encontre seu Psicólogo
         </h1>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-          {psychologists.map((psych) => (
+        {isPending && <p>Carregando...</p>}
+          {session && session.map((psych:any) => (
             <Card
               key={psych.id}
               className='p-6 backdrop-blur-sm bg-card/90 hover:shadow-lg transition-all duration-300 cursor-pointer group'
@@ -146,7 +73,7 @@ const DashboardStudent = () => {
                     {psych.bio}
                   </p>
                   <div className='flex flex-wrap gap-2'>
-                    {psych.specialties.slice(0, 2).map((specialty) => (
+                    {psych.specialties.slice(0, 2).map((specialty:any) => (
                       <Badge
                         key={specialty.id}
                         className='bg-accent text-primary-dark'
