@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "node prisma/seed/add-professional.js",
     "db:clear": "prisma migrate reset -f",
     "db:push": "prisma db push --force-reset --accept-data-loss",
     "docker:up": "docker-compose up -d",

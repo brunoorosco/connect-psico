@@ -13,7 +13,7 @@ import { Check, MenuIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
-import womanImg from "@/assets/woman.svg";
+import image1 from "@/assets/psiConnectPatient.png";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
@@ -61,7 +61,7 @@ export default async function Home() {
           Simplifique Sua Busca{" "}
         </h1>
         <p className='text-gray-500 mt-4 text-sm md:text-xl max-w-3xl mx-auto'>
-          Deixe nós te ajudar a encontrar um profissional.
+          Nos deixe te ajudar a encontrar um profissional.
         </p>
         <form className='md:mt-16 mt-10'>
           <div className='flex gap-2 justify-center'>
@@ -77,15 +77,15 @@ export default async function Home() {
           </p>
         </form>
       </section>
-      <section className='bg-white md:py-16 py-8' id='funcionamento'>
+      <section className='bg-white md:py-16 py-8 dark:text-gray-700' id='funcionamento'>
         <div className='container mx-auto'>
           <h2 className='text-2xl md:text-4xl font-bold text-center'>
             Como funciona?
           </h2>
           <div className='mx-24 xl:mx-80 flex flex-col md:flex-row items-center justify-between'>
             <Image
-              src={womanImg}
-              alt='Mulher carregando caixas'
+              src={image1}
+              alt='Paciente e Psicologo conectados'
               className='max-w-xs'
             />
             <ul className='md:text-2xl text-lg text-muted-foreground space-y-4 md:space-y-6 flex-shrink-0'>
