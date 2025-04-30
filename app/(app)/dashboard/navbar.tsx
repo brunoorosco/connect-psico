@@ -43,6 +43,19 @@ export default function Navbar({ userName }: { userName: string }) {
               Minha Assinatura
             </Button>
           </Link>
+          <Link
+            href='/dashboard/professional/xxxx/profile'
+            className='text-gray-700 hover:text-gray-900'
+          >
+            <Button
+              variant={"link"}
+              className={cn(
+                pathname === "/dashboard/professional/xxxx/profile" ? "underline" : ""
+              )}
+            >
+              Perfil
+            </Button>
+          </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

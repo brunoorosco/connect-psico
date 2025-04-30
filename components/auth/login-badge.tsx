@@ -45,7 +45,7 @@ const LoginBadge = ({ user }: Props) => {
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<LogoutButton>
-							<DropdownMenuItem className="p-0 m-0">
+							<DropdownMenuItem className="p-0 m-0 w-full">
 								<Button variant={"ghost"} className="flex flex-1 justify-around">
 									<LogOut /> Sair
 								</Button>

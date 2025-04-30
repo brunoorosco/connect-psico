@@ -64,9 +64,9 @@ export async function AppSidebar() {
           </div>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="w-full">
         <SidebarMenu>
-          <SidebarMenuItem className='hover:bg-primary-light cursor-pointer rounded-md'>
+          <SidebarMenuItem className='hover:bg-primary-light cursor-pointer rounded-md w-full'>
             <SidebarMenuButton asChild>
               <LogoutButton>
                 <Button

@@ -240,7 +240,7 @@ export default function LoginForm() {
         {!showOTPForm && (
           <div className='mt-4 text-center text-sm'>
             Não tem uma conta?{" "}
-            <Link href='/auth/register' className='underline'>
+            <Link href='/auth/signup' className='underline'>
               Cadastre-se
             </Link>
           </div>
