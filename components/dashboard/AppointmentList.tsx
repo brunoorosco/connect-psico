@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { isSameDay } from "date-fns";
 import { ButtonStartWrapper } from "./ButtonConsulta/server";
 import { Calendar } from "lucide-react";
-
+import { useSession } from "next-auth/react";
 interface Appointment {
   id: number;
   patientId: string;
@@ -32,7 +32,8 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
   onViewRecord 
 }) => {
   const isToday = isSameDay(selectedDate, new Date());
-  
+  const {data:session} = useSession();
+  console.log(session)
   // Filter appointments for the selected date
   const filteredAppointments = appointments.filter(appointment => {
     const appointmentDate = new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${appointment.time}`);
@@ -40,7 +41,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
   });
 
   const handleStartConsultation = (patientId: string) => {
-    window.location.href = `/dashboard/professional/xxxxx/consulta?patientId=${patientId}`;
+    window.location.href = `/dashboard/professional/${session?.user.id}/consulta?patientId=${patientId}`;
   };
 
   if (filteredAppointments.length === 0) {
