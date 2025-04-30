@@ -14,9 +14,11 @@ import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/auth/logout-button";
+import { useSession } from "next-auth/react";
 
 export default function Navbar({ userName }: { userName: string }) {
   const pathname = usePathname();
+  const { data:session} = useSession()
 
   return (
     <header className='bg-white shadow-sm'>
@@ -31,26 +33,26 @@ export default function Navbar({ userName }: { userName: string }) {
             </Button>
           </Link>
           <Link
-            href='/dashboard/minha-assinatura'
+            href={`/dashboard/professional/${session?.user.id}/minha-assinatura`}
             className='text-gray-700 hover:text-gray-900'
           >
             <Button
               variant={"link"}
               className={cn(
-                pathname === "/dashboard/minha-assinatura" ? "underline" : ""
+                pathname === `/dashboard/professional/${session?.user.id}/minha-assinatura` ? "underline" : ""
               )}
             >
               Minha Assinatura
             </Button>
           </Link>
           <Link
-            href='/dashboard/professional/xxxx/profile'
+            href={`/dashboard/professional/${session?.user.id}/profile`}
             className='text-gray-700 hover:text-gray-900'
           >
             <Button
               variant={"link"}
               className={cn(
-                pathname === "/dashboard/professional/xxxx/profile" ? "underline" : ""
+                pathname === `/dashboard/professional/${session?.user.id}/profile`? "underline" : ""
               )}
             >
               Perfil
