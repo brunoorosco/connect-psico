@@ -117,10 +117,10 @@ const Footer = () => {
         <div className="mt-12 border-t border-gray-700 pt-8">
           <p className="text-base text-gray-400">&copy; {`2025 ${env.applicationName}. Todos os direitos reservados.`}</p>
           <div className="mt-4 flex space-x-6">
-            <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white">
+            <Link href="/privacyPolicy" className="text-sm text-gray-400 hover:text-white">
               Política de Privacidade
             </Link>
-            <Link href="/terms-of-service" className="text-sm text-gray-400 hover:text-white">
+            <Link href="/termsOfService" className="text-sm text-gray-400 hover:text-white">
               Termos de Serviço
             </Link>
             <Link href="/cookies" className="text-sm text-gray-400 hover:text-white">
@@ -134,3 +134,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

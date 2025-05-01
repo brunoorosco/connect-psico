@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import LoginForm from "@/components/auth/login-form";
+import Navbar1 from "@/components/layout/Navbar";
 import { redirect } from "next/navigation";
 
 const Login = async () => {
@@ -8,9 +9,12 @@ const Login = async () => {
     redirect("/dashboard");
   }
   return (
-    <div className='flex flex-col w-full min-h-full items-center justify-center mt-20'>
-      <LoginForm />
-    </div>
+    <>
+      <Navbar1 />
+      <div className="mt-16"> 
+        <LoginForm/>
+      </div>
+    </>
   );
 };
 
