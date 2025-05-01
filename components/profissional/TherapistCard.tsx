@@ -1,11 +1,11 @@
-"use server"
+
 import { MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface TherapistCardProps {
   therapist: {
-    id: number;
+    id: string;
     name: string;
     specialty: string;
     image: string;
@@ -23,7 +23,7 @@ export const TherapistCard = ({ therapist, onSelect }: TherapistCardProps) => {
           <img
             src={therapist.image}
             alt={therapist.name}
-            className="w-16 h-16 rounded-full object-cover"
+            className="w-16 h-16 bg-slate-300 rounded-full object-cover"
           />
           <div>
             <h3 className="text-lg font-semibold">{therapist.name}</h3>

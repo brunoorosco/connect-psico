@@ -5,11 +5,11 @@ import { ptBR } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { isSameDay } from "date-fns";
-import { ButtonStartWrapper } from "./ButtonConsulta/server";
 import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
-interface Appointment {
-  id: number;
+
+type Appointment = {
+  id: string;
   patientId: string;
   patientName: string;
   time: string;

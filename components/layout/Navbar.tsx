@@ -1,8 +1,8 @@
-
 "use client"
 import { useState } from "react";
 import Link from "next/link";
 import Button from "../shared/Button";
+import { env } from "@/config/application";
 
 const Navbar1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,16 +17,16 @@ const Navbar1 = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-therapy-primary">Psiconnect</span>
+              <span className="text-2xl font-bold text-therapy-primary">{`${env.applicationName}`}</span>
             </Link>
           </div>
           
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/encontrar-profissional" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link href="/findProfissional" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
               Encontrar Terapeuta
             </Link>
-            <Link href="/how-it-works" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link href="/howItWorks" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
               Como Funciona
             </Link>
             <Link href="/resources" className="text-therapy-dark hover:text-therapy-primary transition-all-200">

@@ -1,4 +1,4 @@
-
+import {useSession } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 interface TherapistDetailsProps {
   open: boolean;
   onClose: () => void;
-  therapistId: number | null;
+  therapistId: string | null;
 }
 
 export const TherapistDetails = ({
@@ -22,10 +22,10 @@ export const TherapistDetails = ({
   therapistId,
 }: TherapistDetailsProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-
+  const {data:session, status} = useSession();
   // Mock data - this should come from your backend
   const therapist = {
-    id: 1,
+    id: "1",
     name: "Dra. Maria Silva",
     specialty: "Terapia Cognitivo-Comportamental",
     image: "/placeholder.svg",
@@ -80,11 +80,11 @@ export const TherapistDetails = ({
                 <p className="text-sm">{therapist.approach}</p>
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1">
+                <Button className="flex-1" disabled={status === "unauthenticated"}>
                   <Calendar className="w-4 h-4 mr-2" />
                   Agendar
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" disabled={status === "unauthenticated"}>
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Mensagem
                 </Button>

@@ -10,16 +10,16 @@ import { Separator } from "@/components/ui/separator";
 // Mock data for the patient dashboard
 const mockAppointments = [
   {
-    id: 1,
-    patientId: 1,
+    id: '1',
+    patientId: '1',
     patientName: "Dr. Roberto Mendes",
     time: "14:00",
     duration: 50,
     status: "scheduled" as const,
   },
   {
-    id: 2,
-    patientId: 1,
+    id: '2',
+    patientId: '1',
     patientName: "Dr. Roberto Mendes",
     time: "14:00",
     duration: 50,
@@ -27,8 +27,8 @@ const mockAppointments = [
     notes: "Continuação do trabalho com técnicas de mindfulness.",
   },
   {
-    id: 3,
-    patientId: 1,
+    id: '3',
+    patientId: '1',
     patientName: "Dr. Roberto Mendes",
     time: "14:00",
     duration: 50,
@@ -73,7 +73,10 @@ const PatientDashboard: React.FC = () => {
   const pastAppointments = mockAppointments.filter(app => app.status === "completed");
 
   // Filter future appointments
-  const futureAppointments = mockAppointments.filter(app => app.status === "scheduled");
+  const futureAppointments = mockAppointments.map(app => ({
+    ...app,
+    id: app.id
+  })).filter(app => app.status === "scheduled");
 
   return (
     <div className="space-y-6">
@@ -150,5 +153,4 @@ const PatientDashboard: React.FC = () => {
     </div>
   );
 };
-
 export default PatientDashboard;

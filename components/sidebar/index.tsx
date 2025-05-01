@@ -70,9 +70,9 @@ export async function AppSidebar() {
             <SidebarMenuButton asChild>
               <LogoutButton>
                 <Button
-                  variant={"destructive"}
-                  className='flex flex-1 justify-around'
-                >
+                 
+                  className='flex flex-1 w-full'
+                  >
                   <menusFooter.icon />
                   <span>{menusFooter.title}</span>
                 </Button>

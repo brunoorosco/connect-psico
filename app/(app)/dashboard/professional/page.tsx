@@ -1,16 +1,9 @@
-'use client'
-import { useState } from 'react'
-
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star, ExternalLink } from 'lucide-react'
-import PsychologistProfile from '@/components/PsychoProfile'
 import Link from 'next/link'
 
 const Index = () => {
-	const [selectedPsychologist, setSelectedPsychologist] = useState<
-		number | null
-	>(null)
 
 	return (
 		<div className="min-h-screen from-primary-light to-white p-4 md:p-8">
@@ -19,7 +12,7 @@ const Index = () => {
 					Encontre seu Psicólogo
 				</h1>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-					{psychologists.map(psych => (
+					{/* {psychologists.map(psych => (
 						<Link href={`./professional/${psych.id}`}>
 							<Card
 								key={psych.id}
@@ -79,7 +72,7 @@ const Index = () => {
 								</div>
 							</Card>
 						</Link>
-					))}
+					))} */}
 				</div>
 			</div>
 		</div>

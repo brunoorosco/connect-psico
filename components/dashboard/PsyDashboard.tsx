@@ -13,32 +13,32 @@ import { Calendar } from "lucide-react";
 // Mock data for the psychologist dashboard
 const mockAppointments = [
   {
-    id: 1,
-    patientId: 1,
+    id: "1",
+    patientId: "1",
     patientName: "Maria Silva",
     time: "09:00",
     duration: 50,
     status: "scheduled" as const,
   },
   {
-    id: 2,
-    patientId: 2,
+    id: "2",
+    patientId: "2",
     patientName: "João Oliveira",
     time: "10:30",
     duration: 50,
     status: "completed" as const,
   },
   {
-    id: 3,
-    patientId: 3,
+    id: "3",
+    patientId: "3",
     patientName: "Ana Santos",
     time: "14:00",
     duration: 50,
     status: "scheduled" as const,
   },
   {
-    id: 4,
-    patientId: 4,
+    id: "4",
+    patientId: "4",
     patientName: "Rafael Costa",
     time: "15:30",
     duration: 30,
@@ -74,7 +74,7 @@ const mockMessages = [
 
 const mockPatients = [
   {
-    id: 1,
+    id: "1",
     name: "Maria Silva",
     age: 35,
     gender: "Feminino",
@@ -87,7 +87,7 @@ const mockPatients = [
     ],
   },
   {
-    id: 2,
+    id: "2",
     name: "João Oliveira",
     age: 42,
     gender: "Masculino",
@@ -100,7 +100,7 @@ const mockPatients = [
     ],
   },
   {
-    id: 3,
+    id: "3",
     name: "Ana Santos",
     age: 28,
     gender: "Feminino",
@@ -117,13 +117,13 @@ const PsychologistDashboard: React.FC = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedPatient, setSelectedPatient] = useState<number | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
-  const handleViewRecord = (patientId: number) => {
+  const handleViewRecord = (patientId: string) => {
     setSelectedPatient(patientId);
   };
 
-  const handleStartConsultation = (patientId: number) => {
+  const handleStartConsultation = (patientId: string) => {
     router.push(`/consulta?patientId=${patientId}`);
   };
 

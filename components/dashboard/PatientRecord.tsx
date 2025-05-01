@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface PatientInfo {
-  id: number;
+  id: string;
   name: string;
   age: number;
   gender: string;

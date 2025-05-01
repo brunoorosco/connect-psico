@@ -1,7 +1,6 @@
+import type { Config } from 'tailwindcss'
 
-import type { Config } from "tailwindcss";
-
-export default {
+const config: Config = {
 	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
@@ -109,10 +108,10 @@ export default {
 				},
 				'pulse-slow': {
 					'0%, 100%': {
-						opacity: 1
+						opacity: "1"
 					},
 					'50%': {
-						opacity: 0.8
+						opacity: "0.8"
 					}
 				}
 			},
@@ -125,4 +124,5 @@ export default {
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} 
+export default config;
