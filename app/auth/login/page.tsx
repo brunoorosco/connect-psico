@@ -8,7 +8,7 @@ const Login = async () => {
     redirect("/dashboard");
   }
   return (
-    <div className='flex flex-col w-full min-h-full items-center justify-center'>
+    <div className='flex flex-col w-full min-h-full items-center justify-center mt-20'>
       <LoginForm />
     </div>
   );

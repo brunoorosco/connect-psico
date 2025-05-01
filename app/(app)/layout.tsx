@@ -14,7 +14,7 @@ export default async function DashboardLayout({
     return redirect("/");
   }
   return (
-    <div className='min-h-screen bg-gray-100 flex flex-col'>
+    <div className='min-h-screen w-full bg-slate-50 flex flex-col'>
       <SidebarProvider>
         <AppSidebar />
         <div className='flex-1'>

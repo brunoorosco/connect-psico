@@ -30,7 +30,7 @@ export default useDynamicMenus;
 
 export const menus = [
   {
-    title: "Dashboard",
+    title: "Home",
     url: "/dashboard",
     icon: Home,
     rules: ["ADMIN"],

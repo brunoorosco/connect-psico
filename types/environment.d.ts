@@ -12,6 +12,7 @@ declare global {
 			OTP_SUBJECT: string;
 			RESET_PASSWORD_URL: string;
 			RESET_PASSWORD_SUBJECT: string;
+			NEXT_APPLICATION_NAME:string
 		}
 	}
 }
