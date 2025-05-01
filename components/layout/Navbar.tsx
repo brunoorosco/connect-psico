@@ -91,10 +91,10 @@ const Navbar1 = () => {
       {/* Mobile menu */}
       <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
-          <Link href="/find-therapist" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link href="/findProfissional" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
             Encontrar Terapeuta
           </Link>
-          <Link href="/how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link href="/howItWorks" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
             Como Funciona
           </Link>
           <Link href="/resources" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
