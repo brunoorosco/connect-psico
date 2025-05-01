@@ -23,7 +23,7 @@ const Navbar1 = () => {
           
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/findProfissional" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link href="/professionals" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
               Encontrar Terapeuta
             </Link>
             <Link href="/howItWorks" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
@@ -39,7 +39,7 @@ const Navbar1 = () => {
               <Button variant="outline" size="sm">Entrar</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button variant="primary" size="sm">Cadastre-se</Button>
+              <Button variant="primary" size="sm">Registra-se</Button>
             </Link>
           </div>
           
@@ -91,7 +91,7 @@ const Navbar1 = () => {
       {/* Mobile menu */}
       <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
-          <Link href="/findProfissional" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link href="/professionals" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
             Encontrar Terapeuta
           </Link>
           <Link href="/howItWorks" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
@@ -109,7 +109,7 @@ const Navbar1 = () => {
                 <Button variant="outline" className="w-full">Entrar</Button>
               </Link>
               <Link href="/auth/signup" className="w-full">
-                <Button variant="primary" className="w-full">Cadastre-se</Button>
+                <Button variant="primary" className="w-full">Registre-se</Button>
               </Link>
             </div>
           </div>

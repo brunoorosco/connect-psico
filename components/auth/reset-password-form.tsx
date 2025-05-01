@@ -46,7 +46,7 @@ export const ResetPasswordForm = () => {
 	};
 
 	return (
-		<AuthCard title="Mudança de Senha" description="Digite o e-mail cadastrado">
+		<AuthCard title="Mudança de Senha" description="Digite o e-mail registrado">
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 					<div className="space-y-4">

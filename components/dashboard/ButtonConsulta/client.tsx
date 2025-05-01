@@ -16,7 +16,7 @@ export function ButtonStartClient({
   return (
     <Button
       size="sm"
-      className="bg-therapy-primary hover:bg-therapy-tertiary text-white"
+      className="bg-therapy-primary hover:bg-therapy-primary/60 text-white"
       onClick={() => handleStartConsultation(id)}
     >
       <Calendar className="h-4 w-4 mr-1" />

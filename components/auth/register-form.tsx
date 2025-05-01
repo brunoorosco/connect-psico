@@ -62,7 +62,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <AuthCard title='Registre-se' description='Seja bem-vindo'>
+    <AuthCard title='Registra-se' description='Seja bem-vindo'>
       <div className='space-y-4'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

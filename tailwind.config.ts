@@ -64,14 +64,27 @@ const config: Config = {
 				},
 				// Tema do mindful-web-therapy
 				therapy: {
-					'primary': '#4F46E5',     // Índigo para cor principal
-					'secondary': '#10B981',   // Esmeralda para cor secundária
-					'accent': '#F59E0B',      // Âmbar para acentos
+					'primary': '#9b87f5',     // Índigo para cor principal
+					'secondary': '#7E69AB',   // Esmeralda para cor secundária
+					'accent': '#1EAEDB',      // Âmbar para acentos
 					'light': '#F9FAFB',       // Cinza claro para fundo
 					'dark': '#111827',        // Cinza escuro para texto
 					'blue-calm': '#60A5FA',   // Azul tranquilo
 					'green-heal': '#34D399',  // Verde tranquilizante
 					'purple-wisdom': '#8B5CF6' // Roxo para sabedoria
+				},
+				psychology: {
+					primary: '#9b87f5',
+					secondary: '#7E69AB',
+					tertiary: '#6E59A5',
+					accent: '#1EAEDB',
+					light: '#E5DEFF',
+					dark: '#1A1F2C',
+					gray: {
+						light: '#F1F1F1',
+						medium: '#999',
+						dark: '#8E9196'
+					}
 				}
 			},
 			borderRadius: {

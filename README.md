@@ -86,7 +86,7 @@ docker compose down postgres
 
 ## Configuração de Envio de E-Mail
 
-É necessário se cadastrar no [RESEND](https://resend.com/) e criar uma chave de API para envios de email, incluindo verificação de usuário, autenticação de dois fatores e mudança de senha.
+É necessário se registrar no [RESEND](https://resend.com/) e criar uma chave de API para envios de email, incluindo verificação de usuário, autenticação de dois fatores e mudança de senha.
 
 ### RESEND API KEY
 Após logar na sua conta, siga as instruções na imagem abaixo:

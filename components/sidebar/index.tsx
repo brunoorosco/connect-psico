@@ -70,8 +70,7 @@ export async function AppSidebar() {
             <SidebarMenuButton asChild>
               <LogoutButton>
                 <Button
-                 
-                  className='flex flex-1 w-full'
+                  className='flex flex-1 w-full bg-therapy-primary hover:bg-therapy-primary/60 text-white'
                   >
                   <menusFooter.icon />
                   <span>{menusFooter.title}</span>
