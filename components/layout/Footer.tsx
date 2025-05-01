@@ -1,3 +1,4 @@
+import { env } from "@/config/application";
 import Link from "next/link";
 
 const Footer = () => {
@@ -38,7 +39,7 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Para Pacientes</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/find-therapist" className="text-gray-300 hover:text-white">
+                <Link href="/findProfissional" className="text-gray-300 hover:text-white">
                   Encontrar Terapeuta
                 </Link>
               </li>
@@ -69,7 +70,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/professional-resources" className="text-gray-300 hover:text-white">
+                <Link href="/resources" className="text-gray-300 hover:text-white">
                   Recursos
                 </Link>
               </li>
@@ -114,7 +115,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-12 border-t border-gray-700 pt-8">
-          <p className="text-base text-gray-400">&copy; 2025 Psiconnect. Todos os direitos reservados.</p>
+          <p className="text-base text-gray-400">&copy; {`2025 ${env.applicationName}. Todos os direitos reservados.`}</p>
           <div className="mt-4 flex space-x-6">
             <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white">
               Política de Privacidade

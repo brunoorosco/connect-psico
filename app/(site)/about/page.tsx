@@ -13,8 +13,8 @@ const About = () => {
   // Dados da equipe - podem ser substituídos por dados reais posteriormente
   const teamMembers = [
     {
-      name: "Dra. Maria Silva",
-      role: "Fundadora e Diretora Clínica",
+      name: "Dra. Magna Oliveira",
+      role: "Diretora Clínica",
       bio: "Psicóloga com mais de 15 anos de experiência em terapia cognitivo-comportamental e especialista em saúde mental digital.",
       imageUrl: "/placeholder.svg"
     },
@@ -31,9 +31,9 @@ const About = () => {
       imageUrl: "/placeholder.svg"
     },
     {
-      name: "Pedro Costa",
-      role: "Líder de Tecnologia",
-      bio: "Desenvolvedor com foco em tecnologias para saúde mental e experiência em criação de plataformas seguras para terapia online.",
+      name: "Eng. Bruno Orosco",
+      role: "CTO",
+      bio: "Engenheiro de Software com foco em tecnologias para saúde mental e experiência em criação de plataformas seguras para terapia online.",
       imageUrl: "/placeholder.svg"
     }
   ];
@@ -86,11 +86,11 @@ const About = () => {
               <div className="mb-16">
                 <h2 className="text-3xl font-semibold mb-6 text-center">Nossa Missão</h2>
                 <p className="text-lg text-therapy-dark/80">
-                  A MindfulTherapy nasceu com o propósito de democratizar o acesso a serviços de saúde mental de qualidade, 
+                  {`A ${env.applicationName} nasceu com o propósito de democratizar o acesso a serviços de saúde mental de qualidade, 
                   conectando pacientes a profissionais qualificados e oferecendo um espaço seguro para estudantes 
                   desenvolverem suas habilidades sob supervisão adequada. Acreditamos que a tecnologia pode 
                   ser uma poderosa aliada no cuidado psicológico, permitindo maior flexibilidade, 
-                  acessibilidade e continuidade no atendimento.
+                  acessibilidade e continuidade no atendimento.`}
                 </p>
               </div>
 
@@ -158,9 +158,9 @@ const About = () => {
             <h2 className="text-3xl font-semibold mb-6 text-center">Nossa História</h2>
             <div className="max-w-4xl mx-auto">
               <p className="text-lg text-therapy-dark/80 mb-6">
-                A MindfulTherapy foi fundada em 2023, quando um grupo de profissionais de psicologia e tecnologia 
+                {`A ${env.applicationName} foi fundada em 2024, quando um grupo de profissionais de psicologia e tecnologia 
                 identificou a necessidade de uma plataforma que facilitasse o acesso a serviços de saúde mental 
-                e que também pudesse apoiar estudantes em formação.
+                e que também pudesse apoiar estudantes em formação.`}
               </p>
               <p className="text-lg text-therapy-dark/80 mb-6">
                 Após meses de pesquisa e desenvolvimento, lançamos nossa plataforma com o objetivo de criar 
@@ -188,7 +188,7 @@ const About = () => {
                 href="mailto:contato@mindfultherapy.com.br" 
                 className="bg-therapy-primary text-white px-6 py-3 rounded-md font-medium hover:bg-therapy-primary/90 transition-colors"
               >
-                contato@mindfultherapy.com.br
+                orostec@gmail.com
               </a>
             </div>
           </div>
