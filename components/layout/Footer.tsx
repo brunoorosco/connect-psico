@@ -44,7 +44,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/how-it-works" className="text-gray-300 hover:text-white">
+                <Link href="/howItWorks" className="text-gray-300 hover:text-white">
                   Como Funciona
                 </Link>
               </li>
