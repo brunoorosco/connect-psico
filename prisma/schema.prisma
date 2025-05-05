@@ -25,6 +25,7 @@ model User {
   email                  String    @unique
   emailVerified          DateTime?
   image                  String?
+  active                 Boolean   @default(true)
   phone                  String?
   role                   UserRole  @default(DEFAULT)
   password               String?
