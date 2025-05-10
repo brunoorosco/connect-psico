@@ -1,40 +1,61 @@
-
 import { MessageCircle } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import Button from "../shared/Button";
 
-interface TherapistCardProps {
-  therapist: {
+
+interface ProfessionalCardProps {
+  professional: {
     id: string;
     name: string;
-    specialty: string;
     image: string;
-    bio: string;
-    price: string;
+    Professional: Professional[];
   };
   onSelect: () => void;
 }
+type Professional = {
+  especialidade: string;
+  abordagem: string;
+  bio: string;
+  valorAtendimento: string;
+  education: string;
+  publicoAlvo: string;
+  numConselho: string;
+  ufConselho: string;
+};
 
-export const TherapistCard = ({ therapist, onSelect }: TherapistCardProps) => {
+export const ProfessionalCard = ({ professional, onSelect }: ProfessionalCardProps) => {
+  console.log(professional);
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={onSelect}>
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col justify-between"
+      onClick={onSelect}
+    >
       <CardHeader>
         <div className="flex items-center gap-4">
           <img
-            src={therapist.image}
-            alt={therapist.name}
+            src={professional.image}
+            alt={professional.name}
             className="w-16 h-16 bg-slate-300 rounded-full object-cover"
           />
           <div>
-            <h3 className="text-lg font-semibold">{therapist.name}</h3>
-            <p className="text-sm text-muted-foreground">{therapist.specialty}</p>
+            <h3 className="text-lg font-semibold">{professional.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {professional?.Professional[0]?.publicoAlvo}
+            </p>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm mb-4">{therapist.bio}</p>
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">{therapist.price} / sessão</span>
+
+      <CardContent className="flex flex-col justify-between flex-grow">
+        <p className="text-sm mb-4">
+          {(professional.Professional[0]?.bio || "").slice(0, 120)}
+          {professional.Professional[0]?.bio?.length > 120 && "..."}
+        </p>
+
+        <div className="mt-auto flex items-center justify-between pt-3 border-t">
+          <span className="font-semibold">
+            {professional.Professional[0]?.valorAtendimento} / sessão
+          </span>
           <Button variant="outline" size="sm">
             <MessageCircle className="w-4 h-4 mr-2" />
             Conversar

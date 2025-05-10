@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import { TherapistFilter } from "@/components/profissional/TherapistFilter";
-import { TherapistCard } from "@/components/profissional/TherapistCard";
+import { ProfessionalCard } from "@/components/profissional/TherapistCard";
 import { TherapistDetails } from "@/components/profissional/TherapistDetails";
 import { useSession } from "next-auth/react";
 import { useProfessionalsFetcher } from "@/hooks/useProfissionals";
@@ -29,7 +29,7 @@ const FindTherapist = () => {
   }, [session, status]);
 
   const { professionals, total, loading, fetchProfessionals } = useProfessionalsFetcher();
-
+console.log(professionals);
   useEffect(() => {
     fetchProfessionals(1, 10);
   }, []);
@@ -70,9 +70,9 @@ const FindTherapist = () => {
             ? Array.from({ length: 6 }).map((_, index) => <TherapistCardSkeleton key={index} />)
             : Array.isArray(professionals) &&
               professionals.map((therapist: any) => (
-                <TherapistCard
+                <ProfessionalCard
                   key={therapist.id}
-                  therapist={therapist}
+                  professional={therapist}
                   onSelect={() => setSelectedTherapist(therapist.id)}
                 />
               ))}

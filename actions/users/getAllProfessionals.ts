@@ -12,9 +12,7 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
   const [users, total] = await Promise.all([
     prisma.user.findMany({
       where: {
-        Professional: {
-          some: {},
-        },
+        role: "SUPERVISOR",
       },
       skip,
       take: limit,
@@ -30,12 +28,11 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
     }),
     prisma.user.count({
       where: {
-        Professional: {
-          some: {},
-        },
+        role: "SUPERVISOR",
       },
     }),
   ]);
+  console.log(JSON.stringify(users, null, 2));
   return {
     data: users,
     total,
