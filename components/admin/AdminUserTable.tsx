@@ -39,46 +39,12 @@ const AdminUserTable = () => {
     try {
       startTransition(async () => {
         const data = await getAllUsers();
-
         if ("error" in data) {
           setError(data.error); // Se for um erro, salva no estado de erro
         } else if (data) {
           setUsers(data);
-          console.log(data[0]);
         }
       });
-      // Commented out actual implementation until database is set up
-      /*
-      // Get users from auth.users
-      const { data: authUsers, error: authError } = await supabase
-        .rpc("get_all_users");
-
-      if (authError) throw authError;
-
-      // Get user roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (rolesError) throw rolesError;
-
-      // Map roles to users
-      const usersWithRoles = authUsers.map((user: any) => {
-        const userRolesArray = userRoles
-          .filter((role: any) => role.user_id === user.id)
-          .map((role: any) => role.role);
-        
-        return {
-          id: user.id,
-          email: user.email,
-          created_at: user.created_at,
-          is_blocked: user.is_blocked || false,
-          roles: userRolesArray
-        };
-      });
-
-      setUsers(usersWithRoles);
-      */
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({

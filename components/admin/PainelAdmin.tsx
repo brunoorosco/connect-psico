@@ -16,47 +16,8 @@ const AdminPanel = () => {
   useEffect(() => {
     const checkAdminPermission = async () => {
       try {
-        //const { data: sessionData } = await supabase.auth.getSession()
-
-        // Skip authentication check for now, just allow access
         setIsAdmin(true);
         setLoading(false);
-
-        // Commented out actual implementation until database is set up
-        /*
-        if (!sessionData.session) {
-          toast({
-            title: "Acesso negado",
-            description: "Você precisa estar logado para acessar esta página",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
-
-        // Check if user has admin role
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", sessionData.session.user.id)
-          .eq("role", "admin");
-
-        if (error) throw error;
-
-        // Only allow access if user has admin role
-        if (!data || data.length === 0) {
-          toast({
-            title: "Acesso restrito",
-            description: "Você não tem permissão para acessar o painel de administração",
-            variant: "destructive",
-          });
-          navigate("/");
-          return;
-        }
-
-        setIsAdmin(true);
-        setLoading(false);
-        */
       } catch (error) {
         console.error("Error checking admin permissions:", error);
         toast({
