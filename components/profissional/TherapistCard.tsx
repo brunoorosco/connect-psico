@@ -2,7 +2,6 @@ import { MessageCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import Button from "../shared/Button";
 
-
 interface ProfessionalCardProps {
   professional: {
     id: string;
@@ -24,7 +23,6 @@ type Professional = {
 };
 
 export const ProfessionalCard = ({ professional, onSelect }: ProfessionalCardProps) => {
-  console.log(professional);
   return (
     <Card
       className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col justify-between"

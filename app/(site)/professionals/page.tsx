@@ -57,8 +57,7 @@ console.log(professionals);
       <Navbar />
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Encontre seu Terapeuta</h1>
-          <h1 className="text-3xl font-bold">{`Total: ${total}`}</h1>
+          <h1 className="text-3xl font-bold text-therapy-primary">Encontre seu Terapeuta</h1>
           <TherapistFilter
             selectedSpecialty={selectedSpecialty}
             onSpecialtyChange={setSelectedSpecialty}
