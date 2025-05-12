@@ -53,6 +53,7 @@ model Professional {
   especialidade    String[]
   abordagem        String
   education        String?
+  tipoAtendimento  String   @map("tipo_atendimento")
   bio              String
   valorAtendimento String   @map("valor_atendimento")
   userId           String   @unique

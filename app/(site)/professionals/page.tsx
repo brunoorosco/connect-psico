@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/layout/Navbar";
 import { TherapistFilter } from "@/components/profissional/TherapistFilter";
 import { ProfessionalCard } from "@/components/profissional/TherapistCard";
-import { TherapistDetails } from "@/components/profissional/TherapistDetails";
+import { ProfessionalDetailsModal } from "@/components/profissional/TherapistDetails";
 import { useSession } from "next-auth/react";
 import { useProfessionalsFetcher } from "@/hooks/useProfissionals";
 
@@ -76,10 +76,11 @@ const FindTherapist = () => {
               ))}
         </div>
 
-        <TherapistDetails
+        <ProfessionalDetailsModal
           open={selectedTherapist !== null}
-          onClose={() => setSelectedTherapist(null)}
-          therapist={selectedTherapist}
+          // onClose={() => setSelectedTherapist(null)}
+          onOpenChange={() => setSelectedTherapist(null)}
+          professional={selectedTherapist}
         />
       </div>
     </>

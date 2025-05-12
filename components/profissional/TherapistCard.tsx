@@ -1,27 +1,13 @@
 import { MessageCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import Button from "../shared/Button";
+import { ProfessionalModel } from "@/domain/model/professional";
 
 export type TProfessionalParams = {
   professional: ProfessionalModel;
   onSelect: () => void;
 };
-export type ProfessionalModel = {
-  id: string;
-  name: string;
-  image: string;
-  Professional: Professional[];
-};
-type Professional = {
-  especialidade: string[];
-  abordagem: string;
-  bio: string;
-  valorAtendimento: string;
-  education: string;
-  publicoAlvo: string;
-  numConselho: string;
-  ufConselho: string;
-};
+
 
 export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams) => {
   return (
