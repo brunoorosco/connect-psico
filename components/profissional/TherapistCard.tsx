@@ -2,17 +2,18 @@ import { MessageCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import Button from "../shared/Button";
 
-interface ProfessionalCardProps {
-  professional: {
-    id: string;
-    name: string;
-    image: string;
-    Professional: Professional[];
-  };
+export type TProfessionalParams = {
+  professional: ProfessionalModel;
   onSelect: () => void;
-}
+};
+export type ProfessionalModel = {
+  id: string;
+  name: string;
+  image: string;
+  Professional: Professional[];
+};
 type Professional = {
-  especialidade: string;
+  especialidade: string[];
   abordagem: string;
   bio: string;
   valorAtendimento: string;
@@ -22,7 +23,7 @@ type Professional = {
   ufConselho: string;
 };
 
-export const ProfessionalCard = ({ professional, onSelect }: ProfessionalCardProps) => {
+export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams) => {
   return (
     <Card
       className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col justify-between"
@@ -52,7 +53,7 @@ export const ProfessionalCard = ({ professional, onSelect }: ProfessionalCardPro
 
         <div className="mt-auto flex items-center justify-between pt-3 border-t">
           <span className="font-semibold">
-            {professional.Professional[0]?.valorAtendimento} / sessão
+            R$ {professional.Professional[0]?.valorAtendimento} / sessão
           </span>
           <Button variant="outline" size="sm">
             <MessageCircle className="w-4 h-4 mr-2" />

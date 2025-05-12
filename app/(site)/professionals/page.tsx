@@ -12,7 +12,7 @@ import { useProfessionalsFetcher } from "@/hooks/useProfissionals";
 
 const FindTherapist = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("");
-  const [selectedTherapist, setSelectedTherapist] = useState<string | null>(null);
+  const [selectedTherapist, setSelectedTherapist] = useState<any | null>(null);
   const [localSession, setLocalSession] = useState(null);
   const [allProfessionals, setProfessionals] = useState<any[]>([]);
 
@@ -29,7 +29,6 @@ const FindTherapist = () => {
   }, [session, status]);
 
   const { professionals, total, loading, fetchProfessionals } = useProfessionalsFetcher();
-console.log(professionals);
   useEffect(() => {
     fetchProfessionals(1, 10);
   }, []);
@@ -72,7 +71,7 @@ console.log(professionals);
                 <ProfessionalCard
                   key={therapist.id}
                   professional={therapist}
-                  onSelect={() => setSelectedTherapist(therapist.id)}
+                  onSelect={() => setSelectedTherapist(therapist)}
                 />
               ))}
         </div>
@@ -80,7 +79,7 @@ console.log(professionals);
         <TherapistDetails
           open={selectedTherapist !== null}
           onClose={() => setSelectedTherapist(null)}
-          therapistId={selectedTherapist}
+          therapist={selectedTherapist}
         />
       </div>
     </>
