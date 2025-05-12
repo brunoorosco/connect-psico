@@ -39,7 +39,7 @@ export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams
 
         <div className="mt-auto flex items-center justify-between pt-3 border-t">
           <span className="font-semibold">
-            R$ {professional.Professional[0]?.valorAtendimento} / sessão
+          {(Number(professional.Professional[0]?.valorAtendimento) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / sessão
           </span>
           <Button variant="outline" size="sm">
             <MessageCircle className="w-4 h-4 mr-2" />

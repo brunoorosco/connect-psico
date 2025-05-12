@@ -56,7 +56,7 @@ model Professional {
   education        String?
   tipoAtendimento  String   @map("tipo_atendimento") @default("ambos")
   bio              String
-  valorAtendimento String   @map("valor_atendimento")
+  valorAtendimento Int   @map("valor_atendimento") @default(0)
   userId           String   @unique
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
