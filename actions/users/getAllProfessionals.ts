@@ -32,7 +32,6 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
       },
     }),
   ]);
-  console.log(JSON.stringify(users, null, 2));
   return {
     data: users,
     total,

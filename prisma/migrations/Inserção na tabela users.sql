@@ -29,3 +29,17 @@ VALUES
   (5, 'As sessões familiares foram transformadoras para nossa dinâmica.', '4', 'user_7', 2),
   (6, 'Profissional muito acolhedora, me ajudou a entender melhor meus traumas.', '5', 'user_9', 3),
   (7, 'As sessões são intensas, mas muito enriquecedoras.', '4', 'user_10', 3);
+
+-- Disponibilidades (Availability)
+INSERT INTO availabilities (id, professional_id, day_of_week, start_time, end_time, is_available) VALUES
+  ('a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1', 'user_7', 1, '2025-05-13 09:00:00', '2025-05-13 12:00:00', true),
+  ('b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2', 'user_7', 3, '2025-05-15 14:00:00', '2025-05-15 17:00:00', true),
+  ('c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3', 'user_8', 2, '2025-05-14 10:00:00', '2025-05-14 13:00:00', true),
+  ('d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4', 'user_9', 4, '2025-05-16 15:00:00', '2025-05-16 18:00:00', true);
+
+-- Appointments (Consultas agendadas)
+INSERT INTO appointments (id, professional_id, patient_id, appointment_date, status, created_at) VALUES
+  ('e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5', 'user_7', 'user_2', '2025-05-13 10:30:00', 'CONFIRMED', NOW()),
+  ('f6f6f6f6-f6f6-f6f6-f6f6-f6f6f6f6f6f6', 'user_7', 'user_3', '2025-05-15 14:30:00', 'PENDING', NOW()),
+  ('g7g7g7g7-g7g7-g7g7-g7g7-g7g7g7g7g7g7', 'user_8', 'user_4', '2025-05-14 11:00:00', 'CANCELLED', NOW()),
+  ('h8h8h8h8-h8h8-h8h8-h8h8-h8h8h8h8h8h8', 'user_9', 'user_3', '2025-05-16 16:00:00', 'CONFIRMED', NOW());
