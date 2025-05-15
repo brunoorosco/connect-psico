@@ -21,28 +21,10 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
   if (currentStart < availability.end) {
     freeIntervals.push({ start: currentStart, end: availability.end });
   }
-  console.log(freeIntervals);
 
   return freeIntervals;
 }
 
-function splitIntervalsIntoSlots(
-  intervals: { start: Date; end: Date }[],
-  slotMinutes: number = 30
-) {
-  const slots: string[] = [];
-
-  for (const interval of intervals) {
-    let current = new Date(interval.start);
-
-    while (current < interval.end) {
-      slots.push(current.toISOString().substring(11, 16)); // Pega o "HH:mm"
-      current = new Date(current.getTime() + slotMinutes * 60 * 1000);
-    }
-  }
-
-  return slots;
-}
 export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const dayOfWeek = date.getDay(); // 0=domingo, 1=segunda, etc.
 
@@ -58,16 +40,16 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       professionalId: professional.userId,
       dayOfWeek,
       isAvailable: true,
+      startTime: {
+        gte: new Date(), // busca apenas horários futuros (>= agora)
+      },
     },
   });
-  console.log(availabilities);
 
   const startOfDay = new Date(date);
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999);
-
-  console.log(startOfDay, endOfDay);
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -79,7 +61,6 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       status: { not: "CANCELLED" }, // Ignorar cancelados se quiser
     },
   });
-  console.log(appointments);
 
   // Transformar appointments em Interval[]
   const appointmentIntervals = appointments.map((app) => {
@@ -97,7 +78,7 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
 
     return getFreeIntervals({ start, end }, appointmentIntervals);
   });
-  
+
   // Explodir em slots de 30 minutos
   const slots = freeIntervals.flatMap((interval) => {
     const slotsInInterval: { start: Date }[] = [];
@@ -108,10 +89,8 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       slotsInInterval.push({ start: new Date(current) });
       current = new Date(current.getTime() + 30 * 60 * 1000); // adiciona 30 min
     }
-
-    return slotsInInterval;
-  });
-
-  console.log("slots livres", slots);
-  return slots;
+   return slotsInInterval;
+    });
+  
+  return slots.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
 };

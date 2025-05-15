@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
@@ -8,21 +8,30 @@ import { toast } from "sonner";
 import { ProfessionalModel } from "@/domain/model/professional";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import useSWR from 'swr';
+import useSWR from "swr";
 import { fetchProfessionalSchedule } from "@/hooks/useProfissionals";
+import { stat } from "fs";
+import { createAppointment } from "@/actions/appointments";
 
 type ProfessionalProps = {
   professionalData: ProfessionalModel;
 };
 
 export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professionalData }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-  const { data: agendaProfissional, error, isLoading, mutate } = useSWR(
-    professionalData.id && selectedDate ? ['/professional-schedule', professionalData.id, selectedDate] : null,
+  const {
+    data: agendaProfissional,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(
+    professionalData.id && selectedDate
+      ? ["/professional-schedule", professionalData.id, selectedDate]
+      : null,
     () => fetchProfessionalSchedule(professionalData.id, selectedDate),
     { revalidateOnFocus: false }
   );
@@ -33,22 +42,49 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
       return;
     }
 
-    const slots: string[] = agendaProfissional.map((interval: any) => {
+    
+    const slots: string[] = agendaProfissional.map((interval: { start: Date }) => {
       const start = new Date(interval.start);
+      start.setHours(start.getHours() + 3);
       return format(start, "HH:mm");
     });
-
+    
     setAvailableSlots(slots);
   }, [selectedDate, agendaProfissional]);
+  
+  const combineDateAndTime = (date: Date, timeString: string): Date => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+
+    const combinedDate = new Date(date);
+    combinedDate.setHours(hours -3, minutes, 0, 0); // zera segundos e ms
+
+    return combinedDate;
+  };
 
   const handleScheduleAppointment = () => {
     if (!selectedDate || !selectedSlot || !agendaProfissional) return;
+  
+    startTransition(async () => {
+      const result = await createAppointment({
+        patientId: session?.user.id as string,
+        professionalId: professionalData.id,
+        appointmentDate: combineDateAndTime(selectedDate, selectedSlot),
+      });
+      console.log(result);
+      if (result.error) {
+        toast.error("Erro ao enviar mensagem", {
+          description: result.error,
+        });
+        return;
+      }
 
-    toast.success("Agendamento solicitado!", {
-      description: `Consulta com ${agendaProfissional.name} agendada para ${format(
-        selectedDate,
-        "dd/MM/yyyy"
-      )} às ${selectedSlot}.`,
+      toast.success("Agendamento solicitado!", {
+        description: `Consulta com ${professionalData.name} agendada para ${format(
+          selectedDate,
+          "dd/MM/yyyy"
+        )} às ${selectedSlot}.`,
+      });
+      mutate()
     });
   };
 
@@ -60,8 +96,8 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={(date: Date | undefined) => date && setSelectedDate(date)}
-            locale={ptBR}            
+            onSelect={(date: Date | undefined) => date && (setSelectedDate(date), setSelectedSlot(null))}
+            locale={ptBR}
             className={cn("rounded-md border", "pointer-events-auto")}
           />
         </div>
@@ -79,7 +115,9 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
                 <Button
                   key={slot}
                   variant={selectedSlot === slot ? "default" : "outline"}
-                  className={selectedSlot === slot ? "bg-therapy-primary hover:bg-therapy-tertiary" : ""}
+                  className={
+                    selectedSlot === slot ? "bg-therapy-primary hover:bg-therapy-tertiary" : ""
+                  }
                   onClick={() => setSelectedSlot(slot)}
                 >
                   {slot}
@@ -92,7 +130,7 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
             )}
           </div>
 
-          {selectedDate && selectedSlot && (
+          {selectedDate && selectedSlot && status === "authenticated" && (
             <div className="mt-6">
               <Button
                 className="w-full bg-therapy-primary hover:bg-therapy-tertiary"
