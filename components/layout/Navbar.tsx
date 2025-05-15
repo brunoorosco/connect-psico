@@ -1,8 +1,10 @@
-"use client"
+"use client";
 import { useState } from "react";
 import Link from "next/link";
 import Button from "../shared/Button";
 import { env } from "@/config/application";
+import { useSession } from "next-auth/react";
+import LogoutButton from "../auth/logout-button";
 
 const Navbar1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,6 +12,7 @@ const Navbar1 = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  const { data: session, status } = useSession();
 
   return (
     <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
@@ -20,29 +23,64 @@ const Navbar1 = () => {
               <span className="text-2xl font-bold text-therapy-primary">{`${env.applicationName}`}</span>
             </Link>
           </div>
-          
+
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/professionals" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link
+              href="/professionals"
+              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
+            >
               Encontrar Terapeuta
             </Link>
-            <Link href="/howItWorks" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link
+              href="/howItWorks"
+              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
+            >
               Como Funciona
             </Link>
-            <Link href="/resources" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link
+              href="/resources"
+              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
+            >
               Recursos
             </Link>
-            <Link href="/about" className="text-therapy-dark hover:text-therapy-primary transition-all-200">
+            <Link
+              href="/about"
+              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
+            >
               Sobre Nós
             </Link>
-            <Link href="/auth/login">
-              <Button variant="outline" size="sm">Entrar</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="primary" size="sm">Registra-se</Button>
-            </Link>
+            {status === "authenticated" && (
+              <>
+                <Button variant="outline" size="sm">
+                  <Link
+                    href="/dashboard"
+                    className="text-therapy-purple-primary hover:text-therapy-primary transition-all-200"
+                  >
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button variant="primary" size="sm">
+                  <LogoutButton>Sair</LogoutButton>
+                </Button>
+              </>
+            )}
+            {status === "unauthenticated" && (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="outline" size="sm">
+                    Entrar
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button variant="primary" size="sm">
+                    Registra-se
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
-          
+
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
@@ -53,7 +91,7 @@ const Navbar1 = () => {
               <span className="sr-only">Abrir menu principal</span>
               {/* Menu closed icon */}
               <svg
-                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                className={`${isMenuOpen ? "hidden" : "block"} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -69,7 +107,7 @@ const Navbar1 = () => {
               </svg>
               {/* Menu open icon */}
               <svg
-                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                className={`${isMenuOpen ? "block" : "hidden"} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -87,29 +125,45 @@ const Navbar1 = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+      <div className={`${isMenuOpen ? "block" : "hidden"} md:hidden`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
-          <Link href="/professionals" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link
+            href="/professionals"
+            className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light"
+          >
             Encontrar Terapeuta
           </Link>
-          <Link href="/howItWorks" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link
+            href="/howItWorks"
+            className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light"
+          >
             Como Funciona
           </Link>
-          <Link href="/resources" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link
+            href="/resources"
+            className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light"
+          >
             Recursos
           </Link>
-          <Link href="/about" className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light">
+          <Link
+            href="/about"
+            className="block px-3 py-2 rounded-md text-base font-medium text-therapy-dark hover:bg-therapy-light"
+          >
             Sobre Nós
           </Link>
           <div className="pt-4 pb-2 border-t border-gray-200">
             <div className="flex items-center px-3 space-x-3">
               <Link href="/auth/login" className="w-full">
-                <Button variant="outline" className="w-full">Entrar</Button>
+                <Button variant="outline" className="w-full">
+                  Entrar
+                </Button>
               </Link>
               <Link href="/auth/signup" className="w-full">
-                <Button variant="primary" className="w-full">Registre-se</Button>
+                <Button variant="primary" className="w-full">
+                  Registre-se
+                </Button>
               </Link>
             </div>
           </div>

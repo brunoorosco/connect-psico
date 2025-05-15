@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -54,8 +55,9 @@ model Professional {
   especialidade    String[]
   abordagem        String
   education        String?
+  tipoAtendimento  String   @map("tipo_atendimento") @default("ambos")
   bio              String
-  valorAtendimento String   @map("valor_atendimento")
+  valorAtendimento Int   @map("valor_atendimento") @default(0)
   userId           String   @unique
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -172,12 +174,3 @@ model Message {
 
   @@map("messages")
 }
-
-// model User {
-//   id                  String         @id @default(uuid())
-//   appointments        Appointment[]  @relation("Appointment_psychologistId")
-//   patientAppointments Appointment[]  @relation("Appointment_patientId")
-//   availabilities      Availability[]
-//   sentMessages        Message[]      @relation("Message_senderId")
-//   receivedMessages    Message[]      @relation("Message_receiverId")
-// }

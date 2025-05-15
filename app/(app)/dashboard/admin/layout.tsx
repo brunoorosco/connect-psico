@@ -1,10 +1,5 @@
-const DashboardPageAdmin = async ({children}: {children?: React.ReactNode}) => {
-  return (
-    <div>
-      <h1>ADMIN</h1>  
-      {children}
-    </div>
-  );
+const DashboardPageAdmin = async ({ children }: { children?: React.ReactNode }) => {
+  return <div>{children}</div>;
 };
 
 export default DashboardPageAdmin;

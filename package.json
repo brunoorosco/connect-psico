@@ -35,10 +35,11 @@
     "@radix-ui/react-select": "^2.2.2",
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slider": "^1.3.2",
-    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.1.9",
     "@radix-ui/react-toast": "^1.1.5",
+    "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -59,6 +60,7 @@
     "react-icons": "^5.1.0",
     "resend": "^3.2.0",
     "sonner": "^1.4.41",
+    "swr": "^2.3.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.1",
@@ -77,5 +79,8 @@
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "prettier": {
+    "printWidth": 100
   }
 }
