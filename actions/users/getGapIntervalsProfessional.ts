@@ -41,8 +41,8 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       dayOfWeek,
       isAvailable: true,
       startTime: {
-        gte: new Date(), // busca apenas horários futuros (>= agora)
-      },
+        gte: date, // pega horários >= agora
+      }, // busca apenas horários futuros (>= agora)
     },
   });
 

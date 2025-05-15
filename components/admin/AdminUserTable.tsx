@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getAllUsers } from "@/actions/users";
+import { ptBR } from "date-fns/locale";
 
 interface UserData {
   id: string;
@@ -147,7 +148,7 @@ const AdminUserTable = () => {
                 filteredUsers?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {/* {user.roles.map((role: any) => (

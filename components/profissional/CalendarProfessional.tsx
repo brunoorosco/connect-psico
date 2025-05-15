@@ -99,6 +99,11 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
             onSelect={(date: Date | undefined) => date && (setSelectedDate(date), setSelectedSlot(null))}
             locale={ptBR}
             className={cn("rounded-md border", "pointer-events-auto")}
+            disabled={(date) => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0); // zera horas para comparar só a data
+              return date < today || date.getDay() === 0; // bloqueia datas passadas e domingos
+            }}
           />
         </div>
 
