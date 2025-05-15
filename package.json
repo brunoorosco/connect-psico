@@ -9,7 +9,7 @@
     "lint": "next lint",
     "db:seed": "node prisma/seed/add-professional.js",
     "db:clear": "prisma migrate reset -f",
-    "db:push": "prisma db push --force-reset --accept-data-loss",
+    "db:push": "prisma db push",
     "docker:up": "docker-compose up -d",
     "studio": "prisma studio",
     "postinstall": "prisma generate",
