@@ -42,28 +42,27 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
       return;
     }
 
-    
     const slots: string[] = agendaProfissional.map((interval: { start: Date }) => {
       const start = new Date(interval.start);
       start.setHours(start.getHours() + 3);
       return format(start, "HH:mm");
     });
-    
+
     setAvailableSlots(slots);
   }, [selectedDate, agendaProfissional]);
-  
+
   const combineDateAndTime = (date: Date, timeString: string): Date => {
     const [hours, minutes] = timeString.split(":").map(Number);
 
     const combinedDate = new Date(date);
-    combinedDate.setHours(hours -3, minutes, 0, 0); // zera segundos e ms
+    combinedDate.setHours(hours - 3, minutes, 0, 0); // zera segundos e ms
 
     return combinedDate;
   };
 
   const handleScheduleAppointment = () => {
     if (!selectedDate || !selectedSlot || !agendaProfissional) return;
-  
+
     startTransition(async () => {
       const result = await createAppointment({
         patientId: session?.user.id as string,
@@ -84,7 +83,7 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
           "dd/MM/yyyy"
         )} às ${selectedSlot}.`,
       });
-      mutate()
+      mutate();
     });
   };
 
@@ -96,9 +95,13 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={(date: Date | undefined) => date && (setSelectedDate(date), setSelectedSlot(null))}
+            onSelect={(date: Date | undefined) =>
+              date && (setSelectedDate(date), setSelectedSlot(null))
+            }
             locale={ptBR}
-            className={cn("rounded-md border", "pointer-events-auto")}
+            className={cn(
+              "rounded-md border pointer-events-auto max-w-none w-full",
+            )}
             disabled={(date) => {
               const today = new Date();
               today.setHours(0, 0, 0, 0); // zera horas para comparar só a data
