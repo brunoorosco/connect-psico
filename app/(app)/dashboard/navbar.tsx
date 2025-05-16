@@ -32,7 +32,7 @@ export default function Navbar({ userName }: { userName: string }) {
     <header className='bg-white shadow-sm'>
       <div className='max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end'>
         {isMobile ? (
-          <MobileDrawer userRole={"admin"} />
+          <MobileDrawer userRole={session?.user.role as "admin" | "supervisor" | "default"} />
         ) : (
           <nav className='flex items-center space-x-4'>
             <Link
