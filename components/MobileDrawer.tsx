@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Menu, Home, Users, User, LogOut, Settings, Calendar } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 interface MobileDrawerProps {
   userRole: "admin" | "supervisor" | "default";
@@ -131,7 +132,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ userRole }) => {
             className="w-full justify-start text-red-500"
             onClick={() => console.log("Logout")}
           >
-            <LogOut className="mr-2 h-5 w-5" />
+            <LogOut className="mr-2 h-5 w-5" onClick={() => {signOut();}} />
             Sair
           </Button>
         </div>

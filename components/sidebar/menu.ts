@@ -49,7 +49,7 @@ export const menus = [
   },
   {
     title: "Dashboard",
-    url: "/dashboard/professional",
+    url: "/dashboard",
     icon: Inbox,
     rules: ["SUPERVISOR"],
   },
@@ -61,7 +61,7 @@ export const menus = [
   },
   {
     title: "Dashboard",
-    url: "/dashboard/students",
+    url: "/dashboard",
     icon: GraduationCap,
     rules: ["DEFAULT"],
   },
