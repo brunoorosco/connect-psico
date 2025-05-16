@@ -34,7 +34,6 @@ const FindTherapist = () => {
   }, []);
 
   allProfessionals.filter((t: any) => t.especialidade?.includes(selectedSpecialty));
-
   const handleChatClick = (therapistId: string) => {
     if (!session) {
       toast.info("É necessário fazer login para iniciar uma conversa");
@@ -55,15 +54,15 @@ const FindTherapist = () => {
     <>
       <Navbar />
       <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-therapy-primary">Encontre seu Terapeuta</h1>
+        <div className="flex justify-between mb-6 lg:flex-row flex-col">
+          <h1 className="text-3xl mb-5 font-bold text-therapy-primary">Encontre seu Terapeuta</h1>
           <TherapistFilter
             selectedSpecialty={selectedSpecialty}
             onSpecialtyChange={setSelectedSpecialty}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {loading
             ? Array.from({ length: 6 }).map((_, index) => <TherapistCardSkeleton key={index} />)
             : Array.isArray(professionals) &&

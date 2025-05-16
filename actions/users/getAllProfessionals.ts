@@ -17,7 +17,7 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
       skip,
       take: limit,
       include: {
-        Professional: true,
+        Professional: { omit: { id: true } },
       },
       omit: {
         password: true,
@@ -32,8 +32,21 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
       },
     }),
   ]);
+
+  const mappedUsers = users.map((user) => {
+    const { Professional, ...restUser } = user;
+
+    // Pega o primeiro professional, caso exista
+    const professionalData = Professional?.[0] ?? {};
+
+    return {
+      ...restUser,
+      ...professionalData,
+    };
+  });
+
   return {
-    data: users,
+    data: mappedUsers,
     total,
     page,
     lastPage: Math.ceil(total / limit),
