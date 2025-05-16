@@ -1,5 +1,5 @@
-import { useState, useEffect, startTransition } from "react";
-import { Check, Shield, Ban, User, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminUserTable from "@/components/admin/AdminUserTable";
@@ -11,7 +11,6 @@ const AdminPanel = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAdminPermission = async () => {
@@ -25,7 +24,6 @@ const AdminPanel = () => {
           description: "Ocorreu um erro ao verificar suas permissões",
           variant: "destructive",
         });
-        // Allow access anyway for now
         setIsAdmin(true);
         setLoading(false);
       }
@@ -45,16 +43,17 @@ const AdminPanel = () => {
   }
 
   if (!isAdmin) {
-    return null; // User will be redirected in the useEffect
+    return null;
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex-1 container py-8">
-        <h1 className="text-3xl font-bold mb-8">Painel de Administração</h1>
+      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Painel de Administração</h1>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList>
+          {/* TabsList com scroll horizontal em mobile */}
+          <TabsList className="overflow-x-auto whitespace-nowrap max-w-full flex">
             <TabsTrigger value="users">Gerenciar Usuários</TabsTrigger>
             <TabsTrigger value="roles">Gerenciar Permissões</TabsTrigger>
             <TabsTrigger value="payments">Status de Pagamentos</TabsTrigger>
@@ -69,12 +68,11 @@ const AdminPanel = () => {
           </TabsContent>
 
           <TabsContent value="payments" className="mt-6">
-            <h2 className="text-2xl font-semibold mb-4">Status de Pagamentos</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4">Status de Pagamentos</h2>
             <p className="text-muted-foreground">
               Visualize e gerencie o status de pagamento dos usuários.
             </p>
             <div className="mt-4">
-              {/* Payment status management will be implemented here */}
               <p className="text-muted-foreground">Funcionalidade em desenvolvimento.</p>
             </div>
           </TabsContent>
