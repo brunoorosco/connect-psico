@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "../shared/Button";
 import { env } from "@/config/application";
@@ -8,11 +8,12 @@ import LogoutButton from "../auth/logout-button";
 
 const Navbar1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const userLogged = status === 'authenticated';
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  const { data: session, status } = useSession();
 
   return (
     <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
@@ -50,7 +51,7 @@ const Navbar1 = () => {
             >
               Sobre Nós
             </Link>
-            {status === "authenticated" && (
+            {userLogged && (
               <>
                 <Button variant="outline" size="sm">
                   <Link
@@ -65,7 +66,7 @@ const Navbar1 = () => {
                 </Button>
               </>
             )}
-            {status === "unauthenticated" && (
+            {!userLogged && (
               <>
                 <Link href="/auth/login">
                   <Button variant="outline" size="sm">

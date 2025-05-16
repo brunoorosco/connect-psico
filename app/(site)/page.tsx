@@ -4,6 +4,7 @@ import Hero from "@/components/home/Hero";
 import FeatureSection from "@/components/home/FeatureSection";
 import HowItWorks from "@/components/home/HowItWorks";
 import TestimonialSection from "@/components/home/TestimonialSection";
+import { useSession } from "next-auth/react";
 
 const Index = () => {
   return (
