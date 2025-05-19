@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import useDynamicMenus, { menus, menusFooter } from "./menu";
+import { menus, menusFooter } from "./menu";
 import Link from "next/link";
 import Logo from "../logo";
 import { auth } from "@/auth";

@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { isSameDay } from "date-fns";
 import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { User } from "@/domain/model/user";
 
 type Appointment = {
   id: string;
   patientId: string;
-  patientName: string;
-  time: string;
+  patient: User;
+  appointmentDate: Date;
   duration: number;
   status: "scheduled" | "completed" | "canceled";
   notes?: string;
@@ -33,10 +34,11 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
 }) => {
   const isToday = isSameDay(selectedDate, new Date());
   const {data:session} = useSession();
-  console.log(session)
+console.log(appointments, selectedDate)
   // Filter appointments for the selected date
-  const filteredAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${appointment.time}`);
+  const filteredAppointments = appointments?.filter(appointment => {
+    const appointmentDate = new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${appointment.appointmentDate}`);
+    console.log(appointmentDate)
     return isSameDay(appointmentDate, selectedDate);
   });
 
@@ -44,7 +46,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
     window.location.href = `/dashboard/professional/${session?.user.id}/consulta?patientId=${patientId}`;
   };
 
-  if (filteredAppointments.length === 0) {
+  if (filteredAppointments?.length === 0) {
     return (
       <Card className="therapy-card">
         <CardContent className="p-6">
@@ -66,7 +68,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
 
   return (
     <div className="space-y-3">
-      {filteredAppointments.map((appointment) => (
+      {filteredAppointments?.map((appointment) => (
         <Card 
           key={appointment.id} 
           className={`therapy-card animate-in-subtle ${
@@ -81,12 +83,12 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="bg-therapy-light rounded-full p-2 text-therapy-tertiary">
-                  <span className="font-semibold text-sm">{appointment.time}</span>
+                  <span className="font-semibold text-sm">{appointment.time || 30}</span>
                 </div>
                 <div>
                   <h3 className="font-medium">
                     {userRole === "SUPERVISOR" 
-                      ? appointment.patientName 
+                      ? appointment.patient.name 
                       : "Consulta Psicológica"
                     }
                   </h3>
