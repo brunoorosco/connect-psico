@@ -20,165 +20,93 @@ type Props = {
 
 const AdminRoleManagement = ({ professionals }: Props) => {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<any[]>([]);
   const [processingUsers, setProcessingUsers] = useState<Record<string, string>>({});
 
-  // useEffect(() => {
-  // 	fetchUsers()
-  // }, [])
+  const updateUserRole = async (
+    userId: string,
+    role: "ADMIN" | "SUPERVISOR",
+    shouldHaveRole: boolean
+  ) => {
+    // Set the processing state for this user and role
+    setProcessingUsers((prev) => ({ ...prev, [userId + role]: role }));
+    console.log(processingUsers);
+    console.log(userId, role);
+    try {
+      // Mock update action for now
+      setUsers(
+        users.map((user) => {
+          if (user.id === userId) {
+            if (role === "ADMIN") {
+              return { ...user, is_admin: shouldHaveRole };
+            } else {
+              // supervisor
+              return { ...user, is_supervisor: shouldHaveRole };
+            }
+          }
+          return user;
+        })
+      );
 
-  // const fetchUsers = async () => {
-  // 	try {
-  // 		// Mock user data for now since we don't have the actual database tables set up yet
-  // 		const mockUsers = [
-  // 			{
-  // 				id: '1',
-  // 				email: 'admin@example.com',
-  // 				is_admin: true,
-  // 				is_supervisor: false,
-  // 			},
-  // 			{
-  // 				id: '2',
-  // 				email: 'user@example.com',
-  // 				is_admin: false,
-  // 				is_supervisor: false,
-  // 			},
-  // 			{
-  // 				id: '3',
-  // 				email: 'supervisor@example.com',
-  // 				is_admin: false,
-  // 				is_supervisor: true,
-  // 			},
-  // 		]
+      toast({
+        title: "Permissão atualizada",
+        description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${
+          role === "ADMIN" ? "administrador" : "supervisor"
+        }!`,
+      });
 
-  // 		setUsers(mockUsers)
+      // Commented out actual implementation until database is set up
+      /*
+      if (shouldHaveRole) {
+        // Add role
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role })
+          .select();
 
-  // 		// Commented out actual implementation until database is set up
-  // 		/*
-  //     // Get users from auth.users
-  //     const { data: authUsers, error: authError } = await supabase
-  //       .rpc("get_all_users");
+        if (error && error.code !== "23505") { // Ignore duplicate key errors
+          throw error;
+        }
+      } else {
+        // Remove role
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("role", role);
 
-  //     if (authError) throw authError;
+        if (error) throw error;
+      }
 
-  //     // Get user roles
-  //     const { data: userRoles, error: rolesError } = await supabase
-  //       .from("user_roles")
-  //       .select("user_id, role");
+      // Update local state
+      setUsers(users.map(user => {
+        if (user.id === userId) {
+          if (role === "admin") {
+            return { ...user, is_admin: shouldHaveRole };
+          } else { // supervisor
+            return { ...user, is_supervisor: shouldHaveRole };
+          }
+        }
+        return user;
+      }));
 
-  //     if (rolesError) throw rolesError;
-
-  //     // Map roles to users
-  //     const usersWithRoles = authUsers.map((user: any) => {
-  //       const roles = userRoles.filter((role: any) => role.user_id === user.id);
-  //       const isAdmin = roles.some((role: any) => role.role === "admin");
-  //       const isSupervisor = roles.some((role: any) => role.role === "supervisor");
-
-  //       return {
-  //         id: user.id,
-  //         email: user.email,
-  //         is_admin: isAdmin,
-  //         is_supervisor: isSupervisor
-  //       };
-  //     });
-
-  //     setUsers(usersWithRoles);
-  //     */
-  // 	} catch (error) {
-  // 		console.error('Error fetching users:', error)
-  // 		toast({
-  // 			title: 'Erro',
-  // 			description: 'Não foi possível carregar a lista de usuários',
-  // 			variant: 'destructive',
-  // 		})
-  // 	} finally {
-  // 		setLoading(false)
-  // 	}
-  // }
-
-  // const updateUserRole = async (
-  //   userId: string,
-  //   role: "admin" | "supervisor",
-  //   shouldHaveRole: boolean
-  // ) => {
-  //   // Set the processing state for this user and role
-  //   setProcessingUsers((prev) => ({ ...prev, [userId + role]: role }));
-
-  //   try {
-  //     // Mock update action for now
-  //     setUsers(
-  //       users.map((user) => {
-  //         if (user.id === userId) {
-  //           if (role === "admin") {
-  //             return { ...user, is_admin: shouldHaveRole };
-  //           } else {
-  //             // supervisor
-  //             return { ...user, is_supervisor: shouldHaveRole };
-  //           }
-  //         }
-  //         return user;
-  //       })
-  //     );
-
-  //     toast({
-  //       title: "Permissão atualizada",
-  //       description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${
-  //         role === "admin" ? "administrador" : "supervisor"
-  //       }!`,
-  //     });
-
-  //     // Commented out actual implementation until database is set up
-  //     /*
-  //     if (shouldHaveRole) {
-  //       // Add role
-  //       const { error } = await supabase
-  //         .from("user_roles")
-  //         .insert({ user_id: userId, role })
-  //         .select();
-
-  //       if (error && error.code !== "23505") { // Ignore duplicate key errors
-  //         throw error;
-  //       }
-  //     } else {
-  //       // Remove role
-  //       const { error } = await supabase
-  //         .from("user_roles")
-  //         .delete()
-  //         .eq("user_id", userId)
-  //         .eq("role", role);
-
-  //       if (error) throw error;
-  //     }
-
-  //     // Update local state
-  //     setUsers(users.map(user => {
-  //       if (user.id === userId) {
-  //         if (role === "admin") {
-  //           return { ...user, is_admin: shouldHaveRole };
-  //         } else { // supervisor
-  //           return { ...user, is_supervisor: shouldHaveRole };
-  //         }
-  //       }
-  //       return user;
-  //     }));
-
-  //     toast({
-  //       title: "Permissão atualizada",
-  //       description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${role === "admin" ? "administrador" : "supervisor"}!`,
-  //     });
-  //     */
-  //   } catch (error) {
-  //     console.error(`Error updating user role to ${role}:`, error);
-  //     toast({
-  //       title: "Erro",
-  //       description: "Não foi possível atualizar as permissões do usuário",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setProcessingUsers((prev) => ({ ...prev, [userId + role]: "" }));
-  //   }
-  // };
+      toast({
+        title: "Permissão atualizada",
+        description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${role === "admin" ? "administrador" : "supervisor"}!`,
+      });
+      */
+    } catch (error) {
+      console.error(`Error updating user role to ${role}:`, error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar as permissões do usuário",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingUsers((prev) => ({ ...prev, [userId + role]: "" }));
+    }
+  };
 
   // Filter users based on search query
   const filteredUsers = professionals?.filter((user: ProfessionalModel) =>
@@ -199,7 +127,7 @@ const AdminRoleManagement = ({ professionals }: Props) => {
         </div>
       </div>
 
-      {loading ? (
+      {!filteredUsers ? (
         <div className="flex justify-center my-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -232,12 +160,12 @@ const AdminRoleManagement = ({ professionals }: Props) => {
                       <Button
                         variant={user.role === "SUPERVISOR" ? "destructive" : "outline"}
                         size="sm"
-                        // onClick={() =>
-                        //   updateUserRole(user.id, "supervisor", user.role !== "SUPERVISOR")
-                        // }
+                        onClick={() =>
+                          updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")
+                        }
                         disabled={!!processingUsers[user.id + "supervisor"]}
                       >
-                        {processingUsers[user.id + "supervisor"] ? (
+                        {processingUsers[user.id + "SUPERVISOR"] ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : user.role === "SUPERVISOR" ? (
                           <>
@@ -254,10 +182,10 @@ const AdminRoleManagement = ({ professionals }: Props) => {
                       <Button
                         variant={user.role === "ADMIN" ? "destructive" : "outline"}
                         size="sm"
-                        onClick={() => updateUserRole(user.id, "admin", user.role !== "ADMIN")}
-                        disabled={!!processingUsers[user.id + "admin"]}
+                        onClick={() => updateUserRole(user.id, "ADMIN", user.role !== "ADMIN")}
+                        disabled={!!processingUsers[user.id + "ADMIN"]}
                       >
-                        {processingUsers[user.id + "admin"] ? (
+                        {processingUsers[user.id + "ADMIN"] ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : user.role === "ADMIN" ? (
                           <>

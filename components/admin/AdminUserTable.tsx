@@ -21,37 +21,10 @@ type Props = {
 const AdminUserTable = ({ professional }: Props) => {
   const { toast } = useToast();
   const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   fetchUsers();
-  // }, []);
-
-  console.log(professional);
-  // const fetchUsers = async () => {
-  //   try {
-  //     startTransition(async () => {
-  //       const data = await getAllUsers();
-  //       if ("error" in data) {
-  //         setError(data.error); // Se for um erro, salva no estado de erro
-  //       } else if (data) {
-  //         setUsers(data);
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-  //     toast({
-  //       title: "Erro",
-  //       description: "Não foi possível carregar a lista de usuários",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const toggleUserBlock = async (userId: string, currentBlockStatus: boolean) => {
     setProcessingUsers((prev) => ({ ...prev, [userId]: true }));
@@ -122,7 +95,7 @@ const AdminUserTable = ({ professional }: Props) => {
         </div>
       </div>
 
-      {loading ? (
+      {!filteredUsers ? (
         <div className="flex justify-center my-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -139,8 +112,8 @@ const AdminUserTable = ({ professional }: Props) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {professional ? (
-                professional?.map((user) => (
+              {filteredUsers ? (
+                filteredUsers?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>

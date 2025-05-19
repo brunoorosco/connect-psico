@@ -12,44 +12,6 @@ type Props = {
 };
 
 const AdminPanel = ({ professional }: Props) => {
-  const navigate = useRouter();
-  const { toast } = useToast();
-  // const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdminPermission = async () => {
-      try {
-        setIsAdmin(true);
-        // setLoading(false);
-      } catch (error) {
-        console.error("Error checking admin permissions:", error);
-        toast({
-          title: "Erro",
-          description: "Ocorreu um erro ao verificar suas permissões",
-          variant: "destructive",
-        });
-        setIsAdmin(true);
-        // setLoading(false);
-      }
-    };
-
-    checkAdminPermission();
-  }, [navigate, toast]);
-
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col">
-  //       <div className="flex-1 flex items-center justify-center">
-  //         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // if (!isAdmin) {
-  //   return null;
-  // }
 
   return (
     <div className="min-h-screen flex flex-col">
