@@ -1,5 +1,4 @@
 import { useState, useEffect, startTransition } from "react";
-// import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Ban, Shield, Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -13,18 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { getAllUsers } from "@/actions/users";
-import { ptBR } from "date-fns/locale";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-interface UserData {
-  id: string;
-  email: string;
-  created_at: string;
-  is_blocked: boolean;
-  roles: string[];
-}
+type Props = {
+  professional: ProfessionalModel[];
+};
 
-const AdminUserTable = () => {
+const AdminUserTable = ({ professional }: Props) => {
   const { toast } = useToast();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,31 +26,32 @@ const AdminUserTable = () => {
   const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, []);
 
-  const fetchUsers = async () => {
-    try {
-      startTransition(async () => {
-        const data = await getAllUsers();
-        if ("error" in data) {
-          setError(data.error); // Se for um erro, salva no estado de erro
-        } else if (data) {
-          setUsers(data);
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar a lista de usuários",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  console.log(professional);
+  // const fetchUsers = async () => {
+  //   try {
+  //     startTransition(async () => {
+  //       const data = await getAllUsers();
+  //       if ("error" in data) {
+  //         setError(data.error); // Se for um erro, salva no estado de erro
+  //       } else if (data) {
+  //         setUsers(data);
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //     toast({
+  //       title: "Erro",
+  //       description: "Não foi possível carregar a lista de usuários",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const toggleUserBlock = async (userId: string, currentBlockStatus: boolean) => {
     setProcessingUsers((prev) => ({ ...prev, [userId]: true }));
@@ -110,8 +105,8 @@ const AdminUserTable = () => {
   // Filter users based on search query
 
   const filteredUsers =
-    users.length > 0 &&
-    users.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()));
+    professional.length > 0 &&
+    professional.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div>
@@ -144,8 +139,8 @@ const AdminUserTable = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers ? (
-                filteredUsers?.map((user) => (
+              {professional ? (
+                professional?.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
@@ -167,20 +162,20 @@ const AdminUserTable = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.is_blocked ? "destructive" : "default"}>
-                        {user.is_blocked ? "Bloqueado" : "Ativo"}
+                      <Badge variant={user.isActive ? "destructive" : "default"}>
+                        {user.isActive ? "Bloqueado" : "Ativo"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Button
-                        variant={user.is_blocked ? "outline" : "destructive"}
+                        variant={user.isActive ? "outline" : "destructive"}
                         size="sm"
-                        onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                        onClick={() => toggleUserBlock(user.id, user.isActive)}
                         disabled={processingUsers[user.id]}
                       >
                         {processingUsers[user.id] ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : user.is_blocked ? (
+                        ) : user.isActive ? (
                           <>
                             <Check className="mr-1 h-4 w-4" /> Desbloquear
                           </>

@@ -1,22 +1,27 @@
+"use client";
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminUserTable from "@/components/admin/AdminUserTable";
 import AdminRoleManagement from "@/components/admin/AdminRoleManagement";
 import { useRouter } from "next/navigation";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-const AdminPanel = () => {
+type Props = {
+  professional: ProfessionalModel[];
+};
+
+const AdminPanel = ({ professional }: Props) => {
   const navigate = useRouter();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAdminPermission = async () => {
       try {
         setIsAdmin(true);
-        setLoading(false);
+        // setLoading(false);
       } catch (error) {
         console.error("Error checking admin permissions:", error);
         toast({
@@ -25,26 +30,26 @@ const AdminPanel = () => {
           variant: "destructive",
         });
         setIsAdmin(true);
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
     checkAdminPermission();
   }, [navigate, toast]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col">
+  //       <div className="flex-1 flex items-center justify-center">
+  //         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  if (!isAdmin) {
-    return null;
-  }
+  // if (!isAdmin) {
+  //   return null;
+  // }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -60,11 +65,11 @@ const AdminPanel = () => {
           </TabsList>
 
           <TabsContent value="users" className="mt-6">
-            <AdminUserTable />
+            <AdminUserTable professional={professional} />
           </TabsContent>
 
           <TabsContent value="roles" className="mt-6">
-            <AdminRoleManagement />
+            <AdminRoleManagement professionals={professional} />
           </TabsContent>
 
           <TabsContent value="payments" className="mt-6">
