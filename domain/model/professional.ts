@@ -13,6 +13,7 @@ type Professional = {
   bio: string;
   valorAtendimento: string;
   education: string;
+  tempoSessao: number
   publicoAlvo: string;
   numConselho: string;
   ufConselho: string;
