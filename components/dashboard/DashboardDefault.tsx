@@ -117,7 +117,7 @@ const PatientDashboard: React.FC = () => {
                         <p className="text-sm text-gray-500">{appointment.professional.tempoSessao || 'duração'} minutos</p>
                       </div>
                       <div className="text-sm text-gray-600">
-                        {appointment.time}
+                        {appointment.duration}
                       </div>
                     </div>
                     {appointment.notes && (
