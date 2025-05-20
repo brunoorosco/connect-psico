@@ -10,6 +10,7 @@ export type User = {
   name: string;
   email: string;
   image: string;
+  telefone?: string
   role: UserRole;
   isActive: boolean;
   isTwoFactorAuthEnabled: boolean;

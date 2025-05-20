@@ -43,12 +43,18 @@ export const menus = [
   },
   {
     title: "Dashboard do Estudantes",
-    url: "/dashboard/students",
+    url: "/dashboard/professional/{userId}/pacientes",
     icon: GraduationCap,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard",
+    url: "/dashboard",
+    icon: Inbox,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Pacientes",
     url: "/dashboard",
     icon: Inbox,
     rules: ["SUPERVISOR"],
