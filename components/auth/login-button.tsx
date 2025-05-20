@@ -12,7 +12,7 @@ const LoginButton = ({ children }: Props) => {
     // biome-ignore lint: reason
     <div
       onClick={async () => {
-        signIn(), { redirectTo: "/dashboard" };
+        signIn("credentials", { redirectTo: "/dashboard" });
       }}
     >
       {children}
