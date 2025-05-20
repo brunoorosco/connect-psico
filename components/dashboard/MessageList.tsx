@@ -62,7 +62,7 @@ const MessagesList: React.FC<MessagesListProps> = ({ messages }) => {
                     Responder
                   </Button>
                   {!message.read && (
-                    <div className="ml-2 px-2 py-0.5 text-xs bg-therapy-primary text-white rounded-full">
+                    <div className="ml-2 px-2 py-2 text-xs bg-therapy-primary text-white rounded-full">
                       Novo
                     </div>
                   )}

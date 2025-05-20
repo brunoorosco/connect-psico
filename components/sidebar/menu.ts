@@ -7,6 +7,8 @@ import {
   LogOut,
   GraduationCap,
   User,
+  MessageCircle,
+  CalendarDaysIcon
 } from "lucide-react";
 
 const useDynamicMenus = async () => {
@@ -14,13 +16,11 @@ const useDynamicMenus = async () => {
 
   const userId = session?.user?.id;
   const updatedMenus = menus.map((menu) => {
-    if (menu.url.endsWith("/1")) {
+    console.log(menu.url);
       return {
         ...menu,
-        url: menu.url.replace("/1", `/${userId}`),
+        url: menu.url.replace(/userId/g,`${userId}`),
       };
-    }
-    return menu;
   });
 
   return updatedMenus;
@@ -43,7 +43,7 @@ export const menus = [
   },
   {
     title: "Dashboard do Estudantes",
-    url: "/dashboard/students",
+    url: "/dashboard/professional/{userId}/pacientes",
     icon: GraduationCap,
     rules: ["ADMIN"],
   },
@@ -51,6 +51,24 @@ export const menus = [
     title: "Dashboard",
     url: "/dashboard",
     icon: Inbox,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Pacientes",
+    url: "/dashboard",
+    icon: Inbox,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Chat",
+    url: `/dashboard/professional/{userId}/chat`,
+    icon: MessageCircle,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Agendamentos",
+    url: `/dashboard/professional/{userId}/agendamentos`,
+    icon: CalendarDaysIcon,
     rules: ["SUPERVISOR"],
   },
   {

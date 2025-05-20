@@ -1,141 +1,63 @@
-import { useState, useEffect } from 'react'
-// import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Shield, ShieldX } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
+import { useState, useEffect } from "react";
+import { Loader2, Shield, ShieldX } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-interface UserRole {
-	id: string
-	email: string
-	is_admin: boolean
-	is_supervisor: boolean
-}
+type Props = {
+  professionals: ProfessionalModel[];
+};
 
-const AdminRoleManagement = () => {
-	const { toast } = useToast()
-	const [users, setUsers] = useState<UserRole[]>([])
-	const [loading, setLoading] = useState(true)
-	const [searchQuery, setSearchQuery] = useState('')
-	const [processingUsers, setProcessingUsers] = useState<
-		Record<string, string>
-	>({})
+const AdminRoleManagement = ({ professionals }: Props) => {
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<any[]>([]);
+  const [processingUsers, setProcessingUsers] = useState<Record<string, string>>({});
 
-	useEffect(() => {
-		fetchUsers()
-	}, [])
+  const updateUserRole = async (
+    userId: string,
+    role: "ADMIN" | "SUPERVISOR",
+    shouldHaveRole: boolean
+  ) => {
+    // Set the processing state for this user and role
+    setProcessingUsers((prev) => ({ ...prev, [userId + role]: role }));
+    console.log(processingUsers);
+    console.log(userId, role);
+    try {
+      // Mock update action for now
+      setUsers(
+        users.map((user) => {
+          if (user.id === userId) {
+            if (role === "ADMIN") {
+              return { ...user, is_admin: shouldHaveRole };
+            } else {
+              // supervisor
+              return { ...user, is_supervisor: shouldHaveRole };
+            }
+          }
+          return user;
+        })
+      );
 
-	const fetchUsers = async () => {
-		try {
-			// Mock user data for now since we don't have the actual database tables set up yet
-			const mockUsers = [
-				{
-					id: '1',
-					email: 'admin@example.com',
-					is_admin: true,
-					is_supervisor: false,
-				},
-				{
-					id: '2',
-					email: 'user@example.com',
-					is_admin: false,
-					is_supervisor: false,
-				},
-				{
-					id: '3',
-					email: 'supervisor@example.com',
-					is_admin: false,
-					is_supervisor: true,
-				},
-			]
-
-			setUsers(mockUsers)
-
-			// Commented out actual implementation until database is set up
-			/*
-      // Get users from auth.users
-      const { data: authUsers, error: authError } = await supabase
-        .rpc("get_all_users");
-
-      if (authError) throw authError;
-
-      // Get user roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (rolesError) throw rolesError;
-
-      // Map roles to users
-      const usersWithRoles = authUsers.map((user: any) => {
-        const roles = userRoles.filter((role: any) => role.user_id === user.id);
-        const isAdmin = roles.some((role: any) => role.role === "admin");
-        const isSupervisor = roles.some((role: any) => role.role === "supervisor");
-        
-        return {
-          id: user.id,
-          email: user.email,
-          is_admin: isAdmin,
-          is_supervisor: isSupervisor
-        };
+      toast({
+        title: "Permissão atualizada",
+        description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${
+          role === "ADMIN" ? "administrador" : "supervisor"
+        }!`,
       });
 
-      setUsers(usersWithRoles);
-      */
-		} catch (error) {
-			console.error('Error fetching users:', error)
-			toast({
-				title: 'Erro',
-				description: 'Não foi possível carregar a lista de usuários',
-				variant: 'destructive',
-			})
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	const updateUserRole = async (
-		userId: string,
-		role: 'admin' | 'supervisor',
-		shouldHaveRole: boolean
-	) => {
-		// Set the processing state for this user and role
-		setProcessingUsers(prev => ({ ...prev, [userId + role]: role }))
-
-		try {
-			// Mock update action for now
-			setUsers(
-				users.map(user => {
-					if (user.id === userId) {
-						if (role === 'admin') {
-							return { ...user, is_admin: shouldHaveRole }
-						} else {
-							// supervisor
-							return { ...user, is_supervisor: shouldHaveRole }
-						}
-					}
-					return user
-				})
-			)
-
-			toast({
-				title: 'Permissão atualizada',
-				description: `Usuário ${
-					shouldHaveRole ? 'promovido a' : 'removido de'
-				} ${role === 'admin' ? 'administrador' : 'supervisor'}!`,
-			})
-
-			// Commented out actual implementation until database is set up
-			/*
+      // Commented out actual implementation until database is set up
+      /*
       if (shouldHaveRole) {
         // Add role
         const { error } = await supabase
@@ -174,133 +96,123 @@ const AdminRoleManagement = () => {
         description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${role === "admin" ? "administrador" : "supervisor"}!`,
       });
       */
-		} catch (error) {
-			console.error(`Error updating user role to ${role}:`, error)
-			toast({
-				title: 'Erro',
-				description: 'Não foi possível atualizar as permissões do usuário',
-				variant: 'destructive',
-			})
-		} finally {
-			setProcessingUsers(prev => ({ ...prev, [userId + role]: '' }))
-		}
-	}
+    } catch (error) {
+      console.error(`Error updating user role to ${role}:`, error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar as permissões do usuário",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingUsers((prev) => ({ ...prev, [userId + role]: "" }));
+    }
+  };
 
-	// Filter users based on search query
-	const filteredUsers = users.filter(user =>
-		user.email.toLowerCase().includes(searchQuery.toLowerCase())
-	)
+  // Filter users based on search query
+  const filteredUsers = professionals?.filter((user: ProfessionalModel) =>
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-	return (
-		<div>
-			<div className="flex justify-between items-center mb-6">
-				<h2 className="text-2xl font-semibold">Gerenciar Permissões</h2>
-				<div className="w-1/3">
-					<Input
-						placeholder="Buscar por email..."
-						value={searchQuery}
-						onChange={e => setSearchQuery(e.target.value)}
-						className="w-full"
-					/>
-				</div>
-			</div>
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Gerenciar Permissões</h2>
+        <div className="w-1/3">
+          <Input
+            placeholder="Buscar por email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      </div>
 
-			{loading ? (
-				<div className="flex justify-center my-8">
-					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-				</div>
-			) : (
-				<div className="rounded-md border">
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Email</TableHead>
-								<TableHead>Permissões Atuais</TableHead>
-								<TableHead>Gerenciar Supervisor</TableHead>
-								<TableHead>Gerenciar Administrador</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{filteredUsers.length > 0 ? (
-								filteredUsers.map(user => (
-									<TableRow key={user.id}>
-										<TableCell>{user.email}</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												{user.is_admin && (
-													<Badge variant="destructive">Admin</Badge>
-												)}
-												{user.is_supervisor && (
-													<Badge variant="secondary">Supervisor</Badge>
-												)}
-												{!user.is_admin && !user.is_supervisor && (
-													<Badge variant="outline">Usuário</Badge>
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<Button
-												variant={user.is_supervisor ? 'destructive' : 'outline'}
-												size="sm"
-												onClick={() =>
-													updateUserRole(
-														user.id,
-														'supervisor',
-														!user.is_supervisor
-													)
-												}
-												disabled={!!processingUsers[user.id + 'supervisor']}
-											>
-												{processingUsers[user.id + 'supervisor'] ? (
-													<Loader2 className="h-4 w-4 animate-spin" />
-												) : user.is_supervisor ? (
-													<>
-														<ShieldX className="mr-1 h-4 w-4" /> Remover
-													</>
-												) : (
-													<>
-														<Shield className="mr-1 h-4 w-4" /> Promover
-													</>
-												)}
-											</Button>
-										</TableCell>
-										<TableCell>
-											<Button
-												variant={user.is_admin ? 'destructive' : 'outline'}
-												size="sm"
-												onClick={() =>
-													updateUserRole(user.id, 'admin', !user.is_admin)
-												}
-												disabled={!!processingUsers[user.id + 'admin']}
-											>
-												{processingUsers[user.id + 'admin'] ? (
-													<Loader2 className="h-4 w-4 animate-spin" />
-												) : user.is_admin ? (
-													<>
-														<ShieldX className="mr-1 h-4 w-4" /> Remover
-													</>
-												) : (
-													<>
-														<Shield className="mr-1 h-4 w-4" /> Promover
-													</>
-												)}
-											</Button>
-										</TableCell>
-									</TableRow>
-								))
-							) : (
-								<TableRow>
-									<TableCell colSpan={4} className="h-24 text-center">
-										Nenhum usuário encontrado.
-									</TableCell>
-								</TableRow>
-							)}
-						</TableBody>
-					</Table>
-				</div>
-			)}
-		</div>
-	)
-}
+      {!filteredUsers ? (
+        <div className="flex justify-center my-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Permissões Atuais</TableHead>
+                <TableHead>Gerenciar Supervisor</TableHead>
+                <TableHead>Gerenciar Administrador</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers && filteredUsers.length > 0 ? (
+                filteredUsers.map((user: ProfessionalModel) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {user.role === "ADMIN" && <Badge variant="destructive">Admin</Badge>}
+                        {user.role === "SUPERVISOR" && (
+                          <Badge variant="secondary">Supervisor</Badge>
+                        )}
+                        {user.role === "DEFAULT" && <Badge variant="outline">Usuário</Badge>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant={user.role === "SUPERVISOR" ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() =>
+                          updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")
+                        }
+                        disabled={!!processingUsers[user.id + "supervisor"]}
+                      >
+                        {processingUsers[user.id + "SUPERVISOR"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : user.role === "SUPERVISOR" ? (
+                          <>
+                            <ShieldX className="mr-1 h-4 w-4" /> Remover
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="mr-1 h-4 w-4" /> Promover
+                          </>
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant={user.role === "ADMIN" ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() => updateUserRole(user.id, "ADMIN", user.role !== "ADMIN")}
+                        disabled={!!processingUsers[user.id + "ADMIN"]}
+                      >
+                        {processingUsers[user.id + "ADMIN"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : user.role === "ADMIN" ? (
+                          <>
+                            <ShieldX className="mr-1 h-4 w-4" /> Remover
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="mr-1 h-4 w-4" /> Promover
+                          </>
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    Nenhum usuário encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+};
 
-export default AdminRoleManagement
+export default AdminRoleManagement;

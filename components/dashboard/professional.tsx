@@ -1,5 +1,5 @@
 'use server'
-import PsychologistDashboard from "@/components/dashboard/PsyDashboard";
+import PsychologistDashboard from "@/components/dashboard/ProfissionalDashboard";
 
 const Dashboard = () => {
   return (

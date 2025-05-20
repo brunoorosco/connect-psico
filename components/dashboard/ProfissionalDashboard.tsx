@@ -1,76 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "./DashboardHeader";
 import CalendarNavigation from "./CalendarNavigation";
 import AppointmentsList from "./AppointmentList";
 import PatientRecord from "./PatientRecord";
-import MessagesList from "./MessageList";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
-
-// Mock data for the psychologist dashboard
-const mockAppointments = [
-  {
-    id: "1",
-    patientId: "1",
-    patientName: "Maria Silva",
-    time: "09:00",
-    duration: 50,
-    status: "scheduled" as const,
-  },
-  {
-    id: "2",
-    patientId: "2",
-    patientName: "João Oliveira",
-    time: "10:30",
-    duration: 50,
-    status: "completed" as const,
-  },
-  {
-    id: "3",
-    patientId: "3",
-    patientName: "Ana Santos",
-    time: "14:00",
-    duration: 50,
-    status: "scheduled" as const,
-  },
-  {
-    id: "4",
-    patientId: "4",
-    patientName: "Rafael Costa",
-    time: "15:30",
-    duration: 30,
-    status: "canceled" as const,
-  },
-];
-
-const mockMessages = [
-  {
-    id: 1,
-    sender: "Maria Silva",
-    content:
-      "Olá, preciso remarcar minha consulta de amanhã para a próxima semana, seria possível?",
-    timestamp: "10:30",
-    read: false,
-  },
-  {
-    id: 2,
-    sender: "João Oliveira",
-    content: "Confirmo minha presença na consulta de hoje às 10:30.",
-    timestamp: "08:45",
-    read: true,
-  },
-  {
-    id: 3,
-    sender: "Ana Santos",
-    content:
-      "Gostaria de enviar o resultado dos exames que o senhor solicitou na última consulta.",
-    timestamp: "Ontem",
-    read: true,
-  },
-];
+import { useAppointments } from "@/hooks/useAppointments";
 
 const mockPatients = [
   {
@@ -118,6 +54,10 @@ const PsychologistDashboard: React.FC = () => {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const { appointments, total, loading, fetchAppointments } = useAppointments();
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   const handleViewRecord = (patientId: string) => {
     setSelectedPatient(patientId);
@@ -150,7 +90,7 @@ const PsychologistDashboard: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Agenda do Dia
             </h2>
-            {selectedPatient && (
+            {/* {selectedPatient && (
               <Button
                 onClick={() => handleStartConsultation(selectedPatient)}
                 className="bg-therapy-primary hover:bg-therapy-tertiary text-white"
@@ -159,17 +99,17 @@ const PsychologistDashboard: React.FC = () => {
                 <Calendar className="h-4 w-4 mr-2" />
                 Iniciar Consulta
               </Button>
-            )}
+            )} */}
           </div>
           <AppointmentsList
-            appointments={mockAppointments}
+            appointments={appointments}
             selectedDate={selectedDate}
             userRole="SUPERVISOR"
             onViewRecord={handleViewRecord}
           />
         </div>
 
-        <div className="lg:col-span-3  col-span-12 space-y-6">
+        <div className="lg:col-span-6  col-span-12 space-y-6">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Prontuário
@@ -177,14 +117,14 @@ const PsychologistDashboard: React.FC = () => {
             {currentPatient && <PatientRecord patient={currentPatient} />}
           </div>
         </div>
-        <div className="lg:col-span-3 col-span-12 space-y-6">
+        {/* <div className="lg:col-span-3 col-span-12 space-y-6">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Mensagens
             </h2>
             <MessagesList messages={mockMessages} />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

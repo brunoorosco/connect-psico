@@ -69,7 +69,6 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
         professionalId: professionalData.id,
         appointmentDate: combineDateAndTime(selectedDate, selectedSlot),
       });
-      console.log(result);
       if (result.error) {
         toast.error("Erro ao enviar mensagem", {
           description: result.error,

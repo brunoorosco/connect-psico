@@ -37,7 +37,7 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
     const { Professional, ...restUser } = user;
 
     // Pega o primeiro professional, caso exista
-    const professionalData = Professional?.[0] ?? {};
+    const professionalData = Professional ?? {};
 
     return {
       ...restUser,

@@ -1,11 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DashboardHeader from "./DashboardHeader";
 import CalendarNavigation from "./CalendarNavigation";
 import AppointmentsList from "./AppointmentList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useAppointments, useAppointmentsByPatient } from "@/hooks/useAppointments";
+import { Appointment } from "@/domain/model/appointment";
 
 // Mock data for the patient dashboard
 const mockAppointments = [
@@ -68,15 +70,20 @@ const mockProgressNotes: ProgressNote[] = [
 const PatientDashboard: React.FC = () => {
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient();
+    useEffect(() => {
+      fetchAppointments();
+    }, []);
   
   // Filter past appointments
-  const pastAppointments = mockAppointments.filter(app => app.status === "completed");
+  // @ts-ignore
+  const pastAppointments = appointments?.filter((app:Appointment) => app.status === "COMPLETED");
 
   // Filter future appointments
-  const futureAppointments = mockAppointments.map(app => ({
+  const futureAppointments = appointments?.map((app:Appointment) => ({
     ...app,
     id: app.id
-  })).filter(app => app.status === "scheduled");
+  })).filter((app:Appointment) => app.status === "PENDING");
 
   return (
     <div className="space-y-6">
@@ -90,27 +97,27 @@ const PatientDashboard: React.FC = () => {
         <div className="lg:col-span-2 space-y-8">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximas Consultas</h2>
-            <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
+            {/* <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
             <AppointmentsList 
               appointments={futureAppointments}
               selectedDate={selectedDate}
               userRole="DEFAULT"
-            />
+            /> */}
           </div>
           
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
             <div className="space-y-3">
-              {pastAppointments.map((appointment) => (
+              {pastAppointments?.map((appointment:Appointment) => (
                 <Card key={appointment.id} className="therapy-card border-l-4 border-l-green-400">
                   <CardContent className="p-4">
                     <div className="flex justify-between">
                       <div>
-                        <h3 className="font-medium">Consulta com {appointment.patientName}</h3>
-                        <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
+                        <h3 className="font-medium">Consulta com {appointment.professional.name || 'Nome do Médico'}</h3>
+                        <p className="text-sm text-gray-500">{appointment.professional.tempoSessao || 'duração'} minutos</p>
                       </div>
                       <div className="text-sm text-gray-600">
-                        {appointment.time}
+                        {appointment.duration}
                       </div>
                     </div>
                     {appointment.notes && (

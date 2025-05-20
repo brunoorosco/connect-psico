@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -7,16 +7,17 @@ import { Button } from "@/components/ui/button";
 import { isSameDay } from "date-fns";
 import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { User } from "@/domain/model/user";
 
 type Appointment = {
   id: string;
   patientId: string;
-  patientName: string;
-  time: string;
+  patient: User;
+  appointmentDate: Date;
   duration: number;
-  status: "scheduled" | "completed" | "canceled";
+  status: "CONFIRMED" | "COMPLETED" | "CANCELLED" | "PENDING";
   notes?: string;
-}
+};
 
 interface AppointmentsListProps {
   appointments: Appointment[];
@@ -25,38 +26,39 @@ interface AppointmentsListProps {
   onViewRecord?: (patientId: string) => void;
 }
 
-const AppointmentsList: React.FC<AppointmentsListProps> = ({ 
-  appointments, 
+const AppointmentsList: React.FC<AppointmentsListProps> = ({
+  appointments,
   selectedDate,
   userRole,
-  onViewRecord 
+  onViewRecord,
 }) => {
   const isToday = isSameDay(selectedDate, new Date());
-  const {data:session} = useSession();
-  console.log(session)
+  const { data: session } = useSession();
   // Filter appointments for the selected date
-  const filteredAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${appointment.time}`);
-    return isSameDay(appointmentDate, selectedDate);
+  const filteredAppointments = appointments?.filter((appointment) => {
+    return isSameDay(appointment.appointmentDate, selectedDate);
   });
 
   const handleStartConsultation = (patientId: string) => {
     window.location.href = `/dashboard/professional/${session?.user.id}/consulta?patientId=${patientId}`;
   };
 
-  if (filteredAppointments.length === 0) {
+  if (filteredAppointments?.length === 0) {
     return (
       <Card className="therapy-card">
         <CardContent className="p-6">
           <div className="text-center py-8">
             <h3 className="text-lg font-medium text-gray-600 mb-2">
-              {isToday 
-                ? "Não há consultas agendadas para hoje" 
-                : `Não há consultas agendadas para ${format(selectedDate, "d 'de' MMMM", { locale: ptBR })}`
-              }
+              {isToday
+                ? "Não há consultas agendadas para hoje"
+                : `Não há consultas agendadas para ${format(selectedDate, "d 'de' MMMM", {
+                    locale: ptBR,
+                  })}`}
             </h3>
             {userRole === "SUPERVISOR" && (
-              <p className="text-gray-500">Você pode adicionar novas consultas pelo menu de agendamento</p>
+              <p className="text-gray-500">
+                Você pode adicionar novas consultas pelo menu de agendamento
+              </p>
             )}
           </div>
         </CardContent>
@@ -66,13 +68,13 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
 
   return (
     <div className="space-y-3">
-      {filteredAppointments.map((appointment) => (
-        <Card 
-          key={appointment.id} 
+      {filteredAppointments?.map((appointment) => (
+        <Card
+          key={appointment.id}
           className={`therapy-card animate-in-subtle ${
-            appointment.status === "completed" 
-              ? "border-l-4 border-l-green-400" 
-              : appointment.status === "canceled"
+            appointment.status === "COMPLETED"
+              ? "border-l-4 border-l-green-400"
+              : appointment.status === "CANCELLED"
               ? "border-l-4 border-l-gray-300 opacity-70"
               : "border-l-4 border-l-therapy-primary"
           }`}
@@ -81,31 +83,28 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="bg-therapy-light rounded-full p-2 text-therapy-tertiary">
-                  <span className="font-semibold text-sm">{appointment.time}</span>
+                  <span className="font-semibold text-sm">{appointment?.duration || 30}</span>
                 </div>
                 <div>
                   <h3 className="font-medium">
-                    {userRole === "SUPERVISOR" 
-                      ? appointment.patientName 
-                      : "Consulta Psicológica"
-                    }
+                    {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                   </h3>
                   <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {userRole === "SUPERVISOR" && appointment.status !== "canceled" && (
+                {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
                   <>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
                       className="text-therapy-tertiary hover:text-therapy-primary hover:bg-therapy-light/50"
                     >
                       Ver prontuário
                     </Button>
-                    {appointment.status === "scheduled" && isToday && (
-                      <Button 
+                    {appointment.status === "CONFIRMED" && isToday && (
+                      <Button
                         size="sm"
                         className="bg-therapy-primary hover:bg-therapy-tertiary text-white"
                         onClick={() => handleStartConsultation(appointment.patientId)}
@@ -117,15 +116,20 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                     )}
                   </>
                 )}
-                <div className={`text-xs px-2 py-1 rounded-full ${
-                  appointment.status === "completed" 
-                    ? "bg-green-100 text-green-800" 
-                    : appointment.status === "canceled"
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-therapy-light text-therapy-tertiary"
-                }`}>
-                  {appointment.status === "scheduled" ? "Agendado" : 
-                   appointment.status === "completed" ? "Concluído" : "Cancelado"}
+                <div
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    appointment.status === "COMPLETED"
+                      ? "bg-green-100 text-green-800"
+                      : appointment.status === "CANCELLED"
+                      ? "bg-gray-100 text-gray-800"
+                      : "bg-therapy-light text-therapy-tertiary"
+                  }`}
+                >
+                  {appointment.status === "CONFIRMED"
+                    ? "Agendado"
+                    : appointment.status === "COMPLETED"
+                    ? "Concluído"
+                    : "Cancelado"}
                 </div>
               </div>
             </div>
@@ -137,5 +141,3 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
 };
 
 export default AppointmentsList;
-
-
