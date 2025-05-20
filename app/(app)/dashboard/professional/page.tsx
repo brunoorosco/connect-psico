@@ -1,8 +1,3 @@
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Star, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
-
 const Index = () => {
 
 	return (

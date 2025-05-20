@@ -1,23 +1,23 @@
 "use client";
 
-import { getProfessionalUsers } from "@/actions/users";
+import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
 import { useState, useTransition } from "react";
 
 export function usePatientsFetcher() {
-  const [professionals, setProfessionals] = useState<any>([]);
+  const [userDefault, setUserDefault] = useState<any>([]);
   const [total, setTotal] = useState(0);
   const [loading, startTransition] = useTransition();
 
   const fetchProfessionals = async (page = 1, limit = 10) => {
     startTransition(async () => {
-      const res = await getProfessionalUsers({ page, limit });
-      setProfessionals(res);
+      const res = await getPatientUsers({ page, limit });
+      setUserDefault(res);
       setTotal(res.total);
     });
   };
-  return { professionals: professionals.data, total, loading, fetchProfessionals };
+  return { professionals: userDefault.data, total, loading, fetchProfessionals };
 }
 
 export function useProfessionalsAvaliabilitiesFetcher() {
