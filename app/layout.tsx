@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import AuthProvider from "@/components/auth/auth-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,19 +22,19 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   return (
-    <html lang='pt-BR'>
+    <html lang="pt-BR">
       <body className={inter.className} suppressHydrationWarning>
-        <SessionProvider session={session}>
-        <Toaster />
+        <AuthProvider>
+          <Toaster />
           <ThemeProvider
-            attribute='class'
-            defaultTheme='light'
+            attribute="class"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >
             {children}
           </ThemeProvider>
-        </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );
