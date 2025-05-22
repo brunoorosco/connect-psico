@@ -20,6 +20,7 @@ type Professional = {
   tipoAtendimento: "remote" | "presential" | "both";
   createdAt: Date;
   udpatedAt: Date;
+  phone: string
 };
 
 export type ProfessionalModel = Professional & User;

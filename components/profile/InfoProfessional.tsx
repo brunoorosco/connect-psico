@@ -18,9 +18,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { specialties, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { especialidades, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-export const ProfessionalInfoForm: React.FC = () => {
+type Props = {
+  profile: ProfessionalModel;
+}
+
+export const ProfessionalInfoForm = ({ profile }: Props) => {
   const { control } = useFormContext<ProfileFormValues>();
 
   return (
@@ -38,7 +43,7 @@ export const ProfessionalInfoForm: React.FC = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={control}
-            name="professionalId"
+            name="numConselho"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>CRP (Registro Profissional)</FormLabel>
@@ -90,8 +95,8 @@ export const ProfessionalInfoForm: React.FC = () => {
 
         <FormField
           control={control}
-          name="specialties"
-          render={() => (
+          name="especialidade"
+          render={({ field }) => (
             <FormItem>
               <div className="mb-4">
                 <FormLabel className="text-base">Especialidades</FormLabel>
@@ -100,38 +105,29 @@ export const ProfessionalInfoForm: React.FC = () => {
                 </FormDescription>
               </div>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                {specialties.map((specialty) => (
-                  <FormField
+                {especialidades.map((specialty) => (
+                  <FormItem
                     key={specialty}
-                    control={control}
-                    name="specialties"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={specialty}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(specialty)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, specialty])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== specialty
-                                      )
-                                    )
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {specialty}
-                          </FormLabel>
-                        </FormItem>
-                      )
-                    }}
-                  />
+                    className="flex flex-row items-start space-x-3 space-y-0"
+                  >
+                    <FormControl>
+                      <Checkbox
+                        checked={(field.value ?? []).includes(specialty)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...(field.value ?? []), specialty])
+                          } else {
+                            field.onChange(
+                              (field.value ?? []).filter((v) => v !== specialty)
+                            )
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      {specialty}
+                    </FormLabel>
+                  </FormItem>
                 ))}
               </div>
               <FormMessage />

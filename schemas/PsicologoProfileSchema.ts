@@ -12,23 +12,26 @@ export const profileSchema = z.object({
   phone: z.string().min(10, { message: "Telefone inválido" }),
   profilePhoto: z.string().optional(),
   bio: z.string().min(10, { message: "Biografia é obrigatória" }).max(500),
-
+  numConselho: z.string().min(3, { message: "Número do conselho é obrigatório" }),
+  ufConselho: z.string().min(2, { message: "UF do conselho é obrigatória" }),
   professionalId: z.string().min(3, { message: "Registro profissional é obrigatório" }),
-  specialties: z.array(z.string()).min(1, { message: "Selecione pelo menos uma especialidade" }),
+  especialidade: z.array(z.string()).min(1, { message: "Selecione pelo menos uma especialidade" }),
   education: z.string().min(5, { message: "Formação é obrigatória" }),
   experience: z.number().min(0, { message: "Experiência inválida" }),
-  targetAudience: z.array(z.string()).min(1, { message: "Selecione pelo menos um público" }),
-  
+  publicoAlvo: z.array(z.string()).min(1, { message: "Selecione pelo menos um público" }),
+
   sessionDuration: z.number().min(30, { message: "Duração mínima é de 30 minutos" }).max(120),
-  sessionPrice: z.number().min(50, { message: "Valor mínimo é de R$50" }),
-  appointmentType: z.enum(["remote", "presential", "both"], { 
-    message: "Selecione o tipo de atendimento"
+  valorAtendimento: z.number().min(50, { message: "Valor mínimo é de R$50" }),
+  appointmentType: z.enum(["remote", "presential", "both"], {
+    message: "Selecione o tipo de atendimento",
   }),
-  
+
   availableDays: z.array(z.string()).min(1, { message: "Selecione pelo menos um dia disponível" }),
-  
+
   // Changed from a single interval to an array of intervals
-  availableHours: z.array(timeIntervalSchema).min(1, { message: "Adicione pelo menos um intervalo de horário" }),
+  availableHours: z
+    .array(timeIntervalSchema)
+    .min(1, { message: "Adicione pelo menos um intervalo de horário" }),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -39,12 +42,14 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
   email: "",
   phone: "",
   bio: "",
+  numConselho: "",
+  ufConselho: "",
   professionalId: "",
-  specialties: [],
+  especialidade: [],
   education: "",
   experience: 0,
   sessionDuration: 50,
-  sessionPrice: 150,
+  valorAtendimento: 150,
   appointmentType: "both",
   availableDays: [],
   availableHours: [
@@ -55,12 +60,12 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
     {
       startTime: "15:00",
       endTime: "18:00",
-    }
+    },
   ],
-  targetAudience: [],
+  publicoAlvo: [],
 };
 
-export const specialties = [
+export const especialidades = [
   "Terapia Cognitivo-Comportamental",
   "Psicanálise",
   "Psicologia Humanista",
@@ -73,7 +78,7 @@ export const specialties = [
   "Psicologia Educacional",
 ];
 
-export const audiences = [
+export const publicoAlvo = [
   "Crianças",
   "Adolescentes",
   "Adultos",
