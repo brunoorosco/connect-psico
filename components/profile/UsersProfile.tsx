@@ -44,10 +44,10 @@ const UserProfileForm: React.FC = () => {
     <div className="container mx-auto py-6 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1>
       <p className="text-muted-foreground mb-8">Preencha seu perfil.</p>
-      <pre>{JSON.stringify(user)}</pre>
+      {/* <pre>{JSON.stringify(user)}</pre> */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <PersonalInfoForm />
+          {/* <PersonalInfoForm /> */}
           <div className="flex justify-end gap-4">
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
