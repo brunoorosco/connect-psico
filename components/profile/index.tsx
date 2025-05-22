@@ -12,6 +12,8 @@ import { PersonalInfoForm } from "@/components/profile/InfoPersonal";
 import { ProfessionalInfoForm } from "@/components/profile/InfoProfessional";
 import { TargetAudienceForm } from "@/components/profile/TargetAudienceForm";
 import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails";
+import { useSession } from "next-auth/react";
+import { useGetProfessionalById } from "@/hooks/useProfissionals";
 
 
 const ProfileProfessionalForm: React.FC = () => {
@@ -19,7 +21,9 @@ const ProfileProfessionalForm: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   });
-
+   const { data: session } = useSession();
+   const { user, loading, error } = useGetProfessionalById(session?.user.id);
+  
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
     
@@ -34,7 +38,7 @@ const ProfileProfessionalForm: React.FC = () => {
       <p className="text-muted-foreground mb-8">
         Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho e especialidades.
       </p>
-
+      <pre>{JSON.stringify(user,null,2)}</pre>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <PersonalInfoForm />

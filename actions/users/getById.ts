@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/db";
 
 export const getUserById = async (id: string): Promise<any> => {
+  console.log("chegou")
   const user = await prisma.user.findUnique({
     where: { id },
     omit: {
@@ -14,6 +15,7 @@ export const getUserById = async (id: string): Promise<any> => {
   if (!user) {
     return { error: "Usuário não encontrado" };
   }
+  console.log("", user.id);
 
   return user;
 };
