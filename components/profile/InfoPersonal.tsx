@@ -1,13 +1,7 @@
 import React from "react";
 import { User } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   FormField,
   FormItem,
@@ -19,8 +13,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-export const PersonalInfoForm: React.FC = () => {
+type Props = {
+  profile: ProfessionalModel;
+}
+
+export const PersonalInfoForm = ({ profile }: Props) => {
   const { control } = useFormContext<ProfileFormValues>();
 
   return (
@@ -53,15 +52,14 @@ export const PersonalInfoForm: React.FC = () => {
           <FormField
             control={control}
             name="email"
+            disabled
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input placeholder="joao.silva@exemplo.com" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Email para contato profissional
-                </FormDescription>
+                <FormDescription>Email para contato profissional</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -88,13 +86,27 @@ export const PersonalInfoForm: React.FC = () => {
               <FormItem>
                 <FormLabel>Foto de perfil</FormLabel>
                 <FormControl>
-                  <Input type="file" accept="image/*" onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }} />
+                  <div className="flex items-center gap-4">
+                    {typeof field.value === "string" && field.value && (
+                      <img
+                        src={field.value}
+                        alt="Foto de perfil"
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          field.onChange(file);
+                        }
+                      }}
+                    />
+                  </div>
                 </FormControl>
-                <FormDescription>
-                  Recomendado: 400x400px
-                </FormDescription>
+                <FormDescription>Recomendado: 400x400px</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -108,7 +120,7 @@ export const PersonalInfoForm: React.FC = () => {
             <FormItem>
               <FormLabel>Biografia</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Fale um pouco sobre você, sua abordagem e experiência..."
                   className="min-h-24"
                   {...field}

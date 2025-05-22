@@ -1,5 +1,5 @@
-"use client"
-import React from "react";
+"use client";
+import React, { use, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -7,49 +7,72 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 
-import { defaultProfileValues, ProfileFormValues, profileSchema } from "@/schemas/PsicologoProfileSchema";
+import {
+  defaultProfileValues,
+  ProfileFormValues,
+  profileSchema,
+} from "@/schemas/PsicologoProfileSchema";
 import { PersonalInfoForm } from "@/components/profile/InfoPersonal";
 import { ProfessionalInfoForm } from "@/components/profile/InfoProfessional";
 import { TargetAudienceForm } from "@/components/profile/TargetAudienceForm";
 import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails";
-
+import { useSession } from "next-auth/react";
+import { useGetProfessionalById } from "@/hooks/useProfissionals";
 
 const ProfileProfessionalForm: React.FC = () => {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   });
+  const { data: session } = useSession();
+  const { user, loading, error } = useGetProfessionalById(session?.user.id);
 
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
-    
+
     toast.success("Perfil atualizado com sucesso!", {
       description: "Suas informações foram salvas.",
     });
   }
 
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        profilePhoto: user.image,
+        bio: user.bio,
+        numConselho: user.numConselho,
+        ufConselho: user.ufConselho,
+        education: user.education,
+        experience: user.experience || 0,
+        especialidade: user.especialidade || [],
+        valorAtendimento:user.valorAtendimento || 0,
+      });
+    }
+  }, [user, form]);
+
   return (
     <div className="container mx-auto py-6 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1>
       <p className="text-muted-foreground mb-8">
-        Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho e especialidades.
+        Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho
+        e especialidades.
       </p>
-
+      <pre>{JSON.stringify(user, null, 2)}</pre>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <PersonalInfoForm />
-          <ProfessionalInfoForm />
-          <TargetAudienceForm />
-          <AppointmentDetailsForm />
+          <PersonalInfoForm profile={user} />
+          <ProfessionalInfoForm profile={user} />
+          <TargetAudienceForm profile={user} />
+          <AppointmentDetailsForm profile={user} />
 
           <div className="flex justify-end gap-4">
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
-              className="bg-therapy-primary hover:bg-therapy-tertiary"
-            >
+            <Button type="submit" className="bg-therapy-primary hover:bg-therapy-tertiary">
               Salvar perfil
             </Button>
           </div>

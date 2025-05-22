@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Users } from "lucide-react";
 import { useFormContext } from "react-hook-form";
@@ -17,9 +16,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { audiences, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { publicoAlvo, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { ProfessionalModel } from "@/domain/model/professional";
 
-export const TargetAudienceForm: React.FC = () => {
+type Props = {
+  profile: ProfessionalModel;
+}
+export const TargetAudienceForm = ({profile}:Props) => {
   const { control } = useFormContext<ProfileFormValues>();
 
   return (
@@ -36,42 +39,33 @@ export const TargetAudienceForm: React.FC = () => {
       <CardContent>
         <FormField
           control={control}
-          name="targetAudience"
-          render={() => (
+          name="publicoAlvo"
+          render={({ field }) => (
             <FormItem>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                {audiences.map((audience) => (
-                  <FormField
+                {publicoAlvo.map((audience) => (
+                  <FormItem
                     key={audience}
-                    control={control}
-                    name="targetAudience"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={audience}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(audience)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, audience])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== audience
-                                      )
-                                    )
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {audience}
-                          </FormLabel>
-                        </FormItem>
-                      )
-                    }}
-                  />
+                    className="flex flex-row items-start space-x-3 space-y-0"
+                  >
+                    <FormControl>
+                      <Checkbox
+                        checked={(field.value ?? []).includes(audience)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            field.onChange([...(field.value ?? []), audience])
+                          } else {
+                            field.onChange(
+                              (field.value ?? []).filter((v) => v !== audience)
+                            )
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      {audience}
+                    </FormLabel>
+                  </FormItem>
                 ))}
               </div>
               <FormMessage />
