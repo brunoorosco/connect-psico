@@ -11,8 +11,9 @@ export type User = {
   email: string;
   image: string;
   telefone?: string
+  password: string;
   role: UserRole;
-  isActive: boolean;
+  active: boolean;
   isTwoFactorAuthEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
