@@ -24,13 +24,26 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
   };
 
   const [users, total] = await Promise.all([
-    prisma.appointment.findMany({
+    await prisma.appointment.findMany({
       where: {
         professionalId: session.user.id,
+        professional: {
+          role: "SUPERVISOR",
+        },
       },
-      include: {
-        patient: omitData,
-        professional: omitData,
+      select: {
+        id: true,
+        appointmentDate: true,
+        professional: {
+          select: {
+            name: true,
+          },
+        },
+        patient: {
+          select: {
+            name: true,
+          },
+        },
       },
       skip,
       take: limit,
@@ -38,6 +51,9 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     prisma.appointment.count({
       where: {
         professionalId: session.user.id,
+         professional: {
+          role: "SUPERVISOR",
+        },
       },
     }),
   ]);

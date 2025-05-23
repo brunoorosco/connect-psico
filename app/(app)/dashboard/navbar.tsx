@@ -29,44 +29,112 @@ export default function Navbar({ userName }: { userName: string }) {
   }, []);
 
   return (
-    <header className='bg-white shadow-sm'>
-      <div className='max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end'>
+    <header className="bg-white shadow-sm">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
         {isMobile ? (
-          <MobileDrawer userRole={session?.user.role as "admin" | "supervisor" | "default"} />
+          <MobileDrawer
+            userRole={session?.user.role.toLowerCase() as "admin" | "supervisor" | "default"}
+          />
         ) : (
-          <nav className='flex items-center space-x-4'>
-            <Link
-              href={`/dashboard/professional/${session?.user.id}/minha-assinatura`}
-              className='text-gray-700 hover:text-gray-900'
-            >
-              <Button
-                variant={"link"}
-                className={cn(
-                  pathname ===
-                    `/dashboard/professional/${session?.user.id}/minha-assinatura`
-                    ? "underline"
-                    : ""
-                )}
-              >
-                Minha Assinatura
-              </Button>
-            </Link>
-            <Link
-              href={`/dashboard/professional/${session?.user.id}/profile`}
-              className='text-gray-700 hover:text-gray-900'
-            >
-              <Button
-                variant={"link"}
-                className={cn(
-                  pathname ===
-                    `/dashboard/professional/${session?.user.id}/profile`
-                    ? "underline"
-                    : ""
-                )}
-              >
-                Perfil
-              </Button>
-            </Link>
+          <nav className="flex items-center space-x-4">
+            {session?.user.role === "SUPERVISOR" && (
+              <>
+                <Link
+                  href={`/dashboard/professional/${session?.user.id}/minha-assinatura`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/professional/${session?.user.id}/minha-assinatura`
+                        ? "underline"
+                        : ""
+                    )}
+                  >
+                    Minha Assinatura
+                  </Button>
+                </Link>
+                <Link
+                  href={`/dashboard/professional/${session?.user.id}/profile`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/professional/${session?.user.id}/profile`
+                        ? "underline"
+                        : ""
+                    )}
+                  >
+                    Perfil
+                  </Button>
+                </Link>
+              </>
+            )}
+            {session?.user.role === "DEFAULT" && (
+              <>
+                <Link
+                  href={`/dashboard/users/${session?.user.id}/minha-assinatura`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/users/${session?.user.id}/minha-assinatura`
+                        ? "underline"
+                        : ""
+                    )}
+                  >
+                    Minha Assinatura
+                  </Button>
+                </Link>
+                <Link
+                  href={`/dashboard/users/${session?.user.id}/profile`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/users/${session?.user.id}/profile` ? "underline" : ""
+                    )}
+                  >
+                    Perfil
+                  </Button>
+                </Link>
+              </>
+            )}
+              {session?.user.role === "ADMIN" && (
+              <>
+                <Link
+                  href={`/dashboard/admin/${session?.user.id}/minha-assinatura`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/admin/${session?.user.id}/minha-assinatura`
+                        ? "underline"
+                        : ""
+                    )}
+                  >
+                    Minha Assinatura
+                  </Button>
+                </Link>
+                <Link
+                  href={`/dashboard/admin/${session?.user.id}/profile`}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <Button
+                    variant={"link"}
+                    className={cn(
+                      pathname === `/dashboard/admin/${session?.user.id}/profile` ? "underline" : ""
+                    )}
+                  >
+                    Perfil
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         )}
       </div>
