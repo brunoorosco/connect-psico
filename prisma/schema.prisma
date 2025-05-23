@@ -10,6 +10,7 @@ datasource db {
 
 model User {
   id                       String         @id @default(cuid())
+  index                    Int            @default(autoincrement())
   name                     String
   email                    String         @unique
   emailVerified            DateTime?
@@ -30,7 +31,10 @@ model User {
   sentMessages             Message[]      @relation("SentMessages")
   Message                  Message[]
   Professional             Professional?
+  patientProntuario        Prontuario[]   @relation("PatientProntuario")
+  professionalProntuario   Prontuario[]   @relation("ProfessionalProntuario")
 
+  @@index([id])
   @@map("users")
 }
 
@@ -38,16 +42,20 @@ model Professional {
   id               Int           @id @default(autoincrement())
   numConselho      String?       @map("num_conselho") @db.VarChar(8)
   ufConselho       String        @map("uf_conselho") @db.VarChar(2)
-  publicoAlvo      String?       @map("publico_alvo")
+  publicoAlvo      String[]      @map("publico_alvo")
   especialidade    String[]
   abordagem        String
+  tituloAcademico  String?       @map("(titulo_academico)")
   education        String?
   tipoAtendimento  String        @default("ambos") @map("tipo_atendimento")
   bio              String
   valorAtendimento Int           @default(0) @map("valor_atendimento")
+  tempoConsulta    Int           @default(60) @map("tempo_consulta")
   userId           String        @unique
   Comentarios      Comentarios[]
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@index([id])
   @@map("professionals")
@@ -133,6 +141,21 @@ model Message {
   @@map("messages")
 }
 
+model Prontuario {
+  id             String   @id @default(uuid())
+  index          Int      @default(autoincrement())
+  professionalId String   @map("professional_id")
+  patientId      String   @map("patient_id")
+  content        String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  patient        User     @relation("PatientProntuario", fields: [patientId], references: [id])
+  professional   User     @relation("ProfessionalProntuario", fields: [professionalId], references: [id])
+
+  @@index([id])
+  @@map("prontuarios")
+}
+
 enum UserRole {
   DEFAULT
   ADMIN
@@ -143,4 +166,5 @@ enum Status {
   PENDING
   CONFIRMED
   CANCELLED
+  CONCLUDED
 }
