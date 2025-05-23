@@ -294,17 +294,17 @@ const AppointmentCalendar: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">{renderCalendarContent()}</div>
 
-        <div className="md:col-span-1">
+        {/* <div className="md:col-span-1">
           <AppointmentList
             appointments={appointments}
             selectedDate={selectedDate}
             onEditAppointment={handleEditAppointment}
             view={view}
           />
-        </div>
+        </div> */}
       </div>
 
-      <AppointmentModal
+      {/* <AppointmentModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
@@ -313,7 +313,7 @@ const AppointmentCalendar: React.FC = () => {
         onSave={handleSaveAppointment}
         selectedDate={selectedDate}
         editingAppointment={editingAppointment}
-      />
+      /> */}
     </div>
   );
 };
