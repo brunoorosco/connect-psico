@@ -57,22 +57,22 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={control}
-            name="sessionDuration"
+            name="tempoConsulta"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Duração da consulta (minutos)</FormLabel>
+                <FormLabel>Duração aproximada das consultas em minutos</FormLabel>
                 <FormControl>
                   <div className="space-y-3">
                     <Slider
                       min={30}
                       max={120}
-                      step={5}
+                      step={10}
                       value={[field.value]}
                       onValueChange={(vals) => field.onChange(vals[0])}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>30 min</span>
-                      <span>{field.value} min</span>
+                      <span className="text-base font-semibold text-black">{field.value} min</span>
                       <span>120 min</span>
                     </div>
                   </div>
@@ -109,7 +109,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
 
         <FormField
           control={control}
-          name="appointmentType"
+          name="tipoAtendimento"
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel>Tipo de atendimento</FormLabel>
@@ -178,7 +178,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
                               className="flex flex-row items-start space-x-3 space-y-0"
                             >
                               <FormControl>
-                                <Checkbox
+                                {/* <Checkbox
                                   checked={field.value?.includes(day.value)}
                                   onCheckedChange={(checked) => {
                                     return checked
@@ -187,7 +187,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
                                           field.value?.filter((value) => value !== day.value)
                                         );
                                   }}
-                                />
+                                /> */}
                               </FormControl>
                               <FormLabel className="font-normal">{day.label}</FormLabel>
                             </FormItem>
