@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AppointmentList from "./AppointmentList";
 import CalendarHeader from "./CalendarHeader";
 import AppointmentModal from "./AppointmentModal";
@@ -22,21 +22,25 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Appointment, CalendarViewType } from "@/domain/model/appointment";
-import { mockAppointments } from "./mockData";
 import CalendarNavigation from "@/components/dashboard/CalendarNavigation";
+import { useAppointmentsByPatient } from "@/hooks/useAppointments";
 
 const AppointmentCalendar: React.FC = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<CalendarViewType>("daily");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
 
+   const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient();
+    useEffect(() => {
+      fetchAppointments();
+    }, []);
+    
   const handleSaveAppointment = (appointment: Appointment) => {
     if (editingAppointment) {
       // Update existing appointment
-      setAppointments(appointments.map((apt) => (apt.id === appointment.id ? appointment : apt)));
+      // setAppointments(appointments.map((apt) => (apt.id === appointment.id ? appointment : apt)));
 
       toast({
         title: "Consulta atualizada",
@@ -44,7 +48,7 @@ const AppointmentCalendar: React.FC = () => {
       });
     } else {
       // Add new appointment
-      setAppointments([...appointments, appointment]);
+      // setAppointments([...appointments, appointment]);
 
       toast({
         title: "Consulta agendada",
@@ -102,7 +106,7 @@ const AppointmentCalendar: React.FC = () => {
                   const hour = i + 8; // Start from 8 AM
                   const timeStr = `${hour.toString().padStart(2, "0")}:00`;
                   const appointmentsAtTime = appointments.filter(
-                    (apt) =>
+                    (apt:any) =>
                       //@ts-ignore
                       apt.date === format(selectedDate, "yyyy-MM-dd") &&
                       //@ts-ignore
@@ -115,7 +119,7 @@ const AppointmentCalendar: React.FC = () => {
                       <div className="flex-1 min-h-[50px]">
                         {appointmentsAtTime.length > 0 ? (
                           <div className="space-y-1">
-                            {appointmentsAtTime.map((apt) => (
+                            {appointmentsAtTime.map((apt:any) => (
                               <div
                                 key={apt.id}
                                 className="bg-medical-light border-l-4 border-medical p-2 rounded cursor-pointer"
@@ -189,7 +193,7 @@ const AppointmentCalendar: React.FC = () => {
                     </div>
 
                     <div className="flex-1 space-y-1">
-                      {getAppointmentsForDate(day).map((apt) => (
+                      {getAppointmentsForDate(day).map((apt:any) => (
                         <div
                           key={apt.id}
                           className="bg-medical-light border-l-2 border-medical p-1 rounded text-xs"

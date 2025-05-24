@@ -10,35 +10,6 @@ import { useAppointments, useAppointmentsByPatient } from "@/hooks/useAppointmen
 import { Appointment } from "@/domain/model/appointment";
 
 // Mock data for the patient dashboard
-const mockAppointments = [
-  {
-    id: '1',
-    patientId: '1',
-    patientName: "Dr. Roberto Mendes",
-    time: "14:00",
-    duration: 50,
-    status: "scheduled" as const,
-  },
-  {
-    id: '2',
-    patientId: '1',
-    patientName: "Dr. Roberto Mendes",
-    time: "14:00",
-    duration: 50,
-    status: "completed" as const,
-    notes: "Continuação do trabalho com técnicas de mindfulness.",
-  },
-  {
-    id: '3',
-    patientId: '1',
-    patientName: "Dr. Roberto Mendes",
-    time: "14:00",
-    duration: 50,
-    status: "completed" as const,
-    notes: "Discussão sobre estratégias para lidar com situações de estresse no trabalho.",
-  },
-];
-
 interface ProgressNote {
   id: number;
   date: string;
@@ -51,44 +22,51 @@ const mockProgressNotes: ProgressNote[] = [
     id: 1,
     date: "12/04/2023",
     title: "Avanço nas técnicas de relaxamento",
-    content: "Você tem praticado regularmente as técnicas de respiração e relatou melhora significativa nos momentos de ansiedade."
+    content:
+      "Você tem praticado regularmente as técnicas de respiração e relatou melhora significativa nos momentos de ansiedade.",
   },
   {
     id: 2,
     date: "05/04/2023",
     title: "Reconhecimento de padrões",
-    content: "Começamos a identificar gatilhos emocionais específicos relacionados ao ambiente de trabalho."
+    content:
+      "Começamos a identificar gatilhos emocionais específicos relacionados ao ambiente de trabalho.",
   },
   {
     id: 3,
     date: "29/03/2023",
     title: "Estabelecimento de metas",
-    content: "Definimos objetivos claros para as próximas semanas, focando em pequenas mudanças diárias."
-  }
+    content:
+      "Definimos objetivos claros para as próximas semanas, focando em pequenas mudanças diárias.",
+  },
 ];
 
 const PatientDashboard: React.FC = () => {
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient();
-    useEffect(() => {
-      fetchAppointments();
-    }, []);
-  
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
   // Filter past appointments
   // @ts-ignore
-  const pastAppointments = appointments?.filter((app:Appointment) => app.status === "COMPLETED");
+  const pastAppointments = appointments?.filter(
+    (app: Appointment) => app.appointmentDate < new Date()
+  );
 
   // Filter future appointments
-  const futureAppointments = appointments?.map((app:Appointment) => ({
-    ...app,
-    id: app.id
-  })).filter((app:Appointment) => app.status === "PENDING");
+  const futureAppointments = appointments
+    ?.map((app: Appointment) => ({
+      ...app,
+      id: app.id,
+    }))
+    .filter((app: Appointment) => app.status === "PENDING");
 
   return (
     <div className="space-y-6">
-      <DashboardHeader 
-        title="Meu Acompanhamento" 
+      <DashboardHeader
+        title="Meu Acompanhamento"
         subtitle="Histórico e agenda de consultas"
         userRole="DEFAULT"
       />
@@ -97,33 +75,77 @@ const PatientDashboard: React.FC = () => {
         <div className="lg:col-span-2 space-y-8">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximas Consultas</h2>
-            {/* <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
-            <AppointmentsList 
+            {/* <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} /> */}
+            {/* <AppointmentsList 
               appointments={futureAppointments}
               selectedDate={selectedDate}
               userRole="DEFAULT"
             /> */}
+            {appointments &&
+              appointments.map((consulta: any) => (
+                <Card key={consulta.id} className="therapy-card border-l-4 border-l-green-400 mb-2">
+                  <CardContent className="p-2 pl-4">
+                    <div className="flex justify-between items-start text-sm">
+                      {/* Lado esquerdo: Nome + Local ou Link */}
+                      <div className="flex flex-col">
+                        <div className="font-medium">Consulta com: <b>{consulta.professional.name}</b></div>
+                        {consulta.tipo === "local" ? (
+                          <p className="text-green-600 font-medium">Local: {consulta.endereco}</p>
+                        ) : (
+                          <a
+                            href={consulta.link || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline font-medium"
+                          >
+                            Link para consulta
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Lado direito: Data e Horário */}
+                      <div className="text-right font-sm">
+                        <div className="">
+                          <label className="text-sm text-muted-foreground mr-1">Data:</label>
+                          <label className="text-gray-600 font-semibold">
+                            {String(consulta.appointmentDate.getUTCDate()).padStart(2, "0")}/
+                            {String(consulta.appointmentDate.getUTCMonth() + 1).padStart(2, "0")}/
+                            {consulta.appointmentDate.getUTCFullYear()}
+                          </label>
+                        </div>
+                        <div className="">
+                          <label className="text-sm text-muted-foreground mr-1">Horário:</label>
+                          <label className="text-gray-600 font-semibold">
+                            {String(consulta.appointmentDate.getUTCHours()).padStart(2, "0")}h
+                            {String(consulta.appointmentDate.getUTCMinutes()).padStart(2, "0")}m
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
-          
+
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
             <div className="space-y-3">
-              {pastAppointments?.map((appointment:Appointment) => (
-                <Card key={appointment.id} className="therapy-card border-l-4 border-l-green-400">
+              {pastAppointments?.map((appointment: Appointment) => (
+                <Card key={appointment.id} className="therapy-card border-l-4 border-l-slate-400">
                   <CardContent className="p-4">
                     <div className="flex justify-between">
                       <div>
-                        <h3 className="font-medium">Consulta com {appointment.professional.name || 'Nome do Médico'}</h3>
-                        <p className="text-sm text-gray-500">{appointment.professional.tempoSessao || 'duração'} minutos</p>
+                        <h3 className="font-medium">
+                          Consulta com {appointment.professional.name || "Nome do Médico"}
+                        </h3>
                       </div>
-                      <div className="text-sm text-gray-600">
-                        {appointment.duration}
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <label className="">Duração da Consulta</label>
+                        <label className="">{appointment.duration}</label>
                       </div>
                     </div>
                     {appointment.notes && (
-                      <div className="mt-2 text-sm bg-gray-50 p-2 rounded">
-                        {appointment.notes}
-                      </div>
+                      <div className="mt-2 text-sm bg-gray-50 p-2 rounded">{appointment.notes}</div>
                     )}
                   </CardContent>
                 </Card>

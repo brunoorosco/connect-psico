@@ -90,7 +90,7 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
     <TabsContent value="schedule" className="pt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h4 className="text-sm font-medium mb-2">Selecione uma data:</h4>
+          <h4 className="text-sm">Selecione uma data:</h4>
           <Calendar
             mode="single"
             selected={selectedDate}

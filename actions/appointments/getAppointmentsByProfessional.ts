@@ -14,21 +14,12 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     throw new Error("User not found");
   }
 
-  const omitData = {
-    omit: {
-      password: true,
-      emailVerified: true,
-      isTwoFactorAuthEnabled: true,
-      twoFactorAuthVerified: true,
-    },
-  };
-
   const [users, total] = await Promise.all([
-    await prisma.appointment.findMany({
+   await prisma.appointment.findMany({
       where: {
-        professionalId: session.user.id,
-        professional: {
-          role: "SUPERVISOR",
+        patientId: session.user.id,
+        patient: {
+          role: "DEFAULT",
         },
       },
       select: {
@@ -51,12 +42,10 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     prisma.appointment.count({
       where: {
         professionalId: session.user.id,
-         professional: {
-          role: "SUPERVISOR",
-        },
       },
     }),
   ]);
+  console.log(users);
 
   return {
     data: users,
