@@ -25,7 +25,7 @@ export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams
           <div>
             <h3 className="text-lg font-semibold">{professional.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {professional?.publicoAlvo}
+              {professional?.publicoAlvo?.join(", ")}
             </p>
           </div>
         </div>

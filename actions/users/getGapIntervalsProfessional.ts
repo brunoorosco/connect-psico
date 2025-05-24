@@ -47,9 +47,9 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   });
 
   const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
+  startOfDay.setHours(-3, 0, 0, 0);
   const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
+  endOfDay.setHours(20, 59, 59, 999);
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -61,6 +61,10 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       status: { not: "CANCELLED" }, // Ignorar cancelados se quiser
     },
   });
+
+  if (appointments.length === 0) {
+    return [];
+  }
 
   // Transformar appointments em Interval[]
   const appointmentIntervals = appointments.map((app) => {
@@ -89,8 +93,7 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       slotsInInterval.push({ start: new Date(current) });
       current = new Date(current.getTime() + 30 * 60 * 1000); // adiciona 30 min
     }
-   return slotsInInterval;
-    });
-  
+    return slotsInInterval;
+  });
   return slots.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
 };

@@ -13,8 +13,8 @@ type Professional = {
   bio: string;
   valorAtendimento: string;
   education: string;
-  tempoSessao: number
-  publicoAlvo: string;
+  tempoConsulta: number
+  publicoAlvo: string[];
   numConselho: string;
   ufConselho: string;
   tipoAtendimento: "remote" | "presential" | "both";

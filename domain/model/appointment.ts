@@ -5,15 +5,15 @@ import { User } from "./user";
 export type Appointment = {
   id: string;
   patientId: string;
-  professionalId: string   
-  appointmentDate: Date 
+  professionalId: string;
+  appointmentDate: Date;
   notes?: string;
-  status: Status
-  duration: number   
+  status: Status;
+  duration: number;
   isLinkedToMedicalRecord: boolean;
-  createdAt?: Date
-  patient: User
-  professional: ProfessionalModel;
+  createdAt?: Date;
+  patient: { id: string; name: string; telefone: string; email: string };
+  professional: { id: string; name: string; telefone: string; email: string };
 };
 
-export type CalendarViewType = 'daily' | 'weekly' | 'monthly';
+export type CalendarViewType = "daily" | "weekly" | "monthly";

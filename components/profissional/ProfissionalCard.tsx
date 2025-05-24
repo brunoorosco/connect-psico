@@ -44,7 +44,7 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-therapy-primary" />
             <p className="text-sm text-gray-600">
-              <span className="font-medium">{45}</span> minutos
+              <span className="font-medium">{professional.tempoConsulta || 60}</span> minutos
             </p>
           </div>
 

@@ -24,13 +24,26 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
   };
 
   const [users, total] = await Promise.all([
-    prisma.appointment.findMany({
+   await prisma.appointment.findMany({
       where: {
         patientId: session.user.id,
+        patient: {
+          role: "DEFAULT",
+        },
       },
-      include: {
-        patient: omitData,
-        professional: omitData,
+      select: {
+        id: true,
+        appointmentDate: true,
+        professional: {
+          select: {
+            name: true,
+          },
+        },
+        patient: {
+          select: {
+            name: true,
+          },
+        },
       },
       skip,
       take: limit,
@@ -41,6 +54,7 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
       },
     }),
   ]);
+  console.log(users);
 
   return {
     data: users,

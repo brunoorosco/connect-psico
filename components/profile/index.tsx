@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect } from "react";
+import React, { startTransition, use, useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -18,8 +18,11 @@ import { TargetAudienceForm } from "@/components/profile/TargetAudienceForm";
 import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails";
 import { useSession } from "next-auth/react";
 import { useGetProfessionalById } from "@/hooks/useProfissionals";
+import { updateProfessionalProfile } from "@/actions/users/udpateProfileProfessional";
+import { ca } from "date-fns/locale";
 
 const ProfileProfessionalForm: React.FC = () => {
+  const [isPending, startTransition] = useTransition();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
@@ -27,14 +30,25 @@ const ProfileProfessionalForm: React.FC = () => {
   const { data: session } = useSession();
   const { user, loading, error } = useGetProfessionalById(session?.user.id);
 
-  function onSubmit(data: ProfileFormValues) {
-    console.log(data);
+  async function onSubmit(data: ProfileFormValues) {
+    startTransition(async () => {
+      try {
+        if (!session?.user?.id) {
+          toast.error("Usuário não autenticado.");
+          return;
+        }
 
-    toast.success("Perfil atualizado com sucesso!", {
-      description: "Suas informações foram salvas.",
+        const result = await updateProfessionalProfile(session.user.id, data);
+
+        toast.success(result.success!, {
+          description: "Suas informações foram salvas.",
+        });
+      } catch (error) {
+        toast.error("Erro ao atualizar perfil.");
+        console.error(error);
+      }
     });
   }
-
   useEffect(() => {
     if (user) {
       form.reset({
@@ -48,19 +62,20 @@ const ProfileProfessionalForm: React.FC = () => {
         education: user.education,
         experience: user.experience || 0,
         especialidade: user.especialidade || [],
-        valorAtendimento:user.valorAtendimento || 0,
+        valorAtendimento: user.valorAtendimento || 0,
+        tempoConsulta: user.tempoConsulta,
+        publicoAlvo: user.publicoAlvo || [],
       });
     }
   }, [user, form]);
 
   return (
     <div className="container mx-auto py-6 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1>
-      <p className="text-muted-foreground mb-8">
+      {/* <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1> */}
+      <p className="text-muted-foreground mb-4">
         Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho
         e especialidades.
       </p>
-      <pre>{JSON.stringify(user, null, 2)}</pre>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <PersonalInfoForm profile={user} />
@@ -72,7 +87,7 @@ const ProfileProfessionalForm: React.FC = () => {
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-therapy-primary hover:bg-therapy-tertiary">
+            <Button  disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary">
               Salvar perfil
             </Button>
           </div>
@@ -81,5 +96,4 @@ const ProfileProfessionalForm: React.FC = () => {
     </div>
   );
 };
-
 export default ProfileProfessionalForm;

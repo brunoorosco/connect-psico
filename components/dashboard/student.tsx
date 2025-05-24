@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, ExternalLink } from "lucide-react";
-import PsychologistProfile from "../PsychoProfile";
 
 const DashboardStudent = () => {
     const [isPending, startTransition] = useTransition();

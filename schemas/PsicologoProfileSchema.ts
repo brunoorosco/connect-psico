@@ -20,18 +20,18 @@ export const profileSchema = z.object({
   experience: z.number().min(0, { message: "Experiência inválida" }),
   publicoAlvo: z.array(z.string()).min(1, { message: "Selecione pelo menos um público" }),
 
-  sessionDuration: z.number().min(30, { message: "Duração mínima é de 30 minutos" }).max(120),
+  tempoConsulta: z.number().min(30, { message: "Duração mínima é de 30 minutos" }).max(120),
   valorAtendimento: z.number().min(50, { message: "Valor mínimo é de R$50" }),
-  appointmentType: z.enum(["remote", "presential", "both"], {
+  tipoAtendimento: z.enum(["remote", "presential", "both"], {
     message: "Selecione o tipo de atendimento",
   }),
 
-  availableDays: z.array(z.string()).min(1, { message: "Selecione pelo menos um dia disponível" }),
+  availableDays: z.array(z.string()).min(1, { message: "Selecione pelo menos um dia disponível" }).optional(),
 
   // Changed from a single interval to an array of intervals
   availableHours: z
     .array(timeIntervalSchema)
-    .min(1, { message: "Adicione pelo menos um intervalo de horário" }),
+    .min(1, { message: "Adicione pelo menos um intervalo de horário" }).optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -48,9 +48,9 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
   especialidade: [],
   education: "",
   experience: 0,
-  sessionDuration: 50,
+  tempoConsulta: 50,
   valorAtendimento: 150,
-  appointmentType: "both",
+  tipoAtendimento: "both",
   availableDays: [],
   availableHours: [
     {

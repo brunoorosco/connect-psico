@@ -33,7 +33,7 @@ export const PersonalInfoForm = ({ profile }: Props) => {
           Informações básicas sobre você que serão exibidas no seu perfil
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-2">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={control}
@@ -52,14 +52,13 @@ export const PersonalInfoForm = ({ profile }: Props) => {
           <FormField
             control={control}
             name="email"
-            disabled
+            // disabled
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="joao.silva@exemplo.com" {...field} />
+                  <Input placeholder="seu.email@exemplo.com" {...field} />
                 </FormControl>
-                <FormDescription>Email para contato profissional</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

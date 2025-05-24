@@ -135,20 +135,20 @@ const AdminUserTable = ({ professional }: Props) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.isActive ? "destructive" : "default"}>
-                        {user.isActive ? "Bloqueado" : "Ativo"}
+                      <Badge variant={user.active ? "destructive" : "default"}>
+                        {user.active ? "Bloqueado" : "Ativo"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Button
-                        variant={user.isActive ? "outline" : "destructive"}
+                        variant={user.active ? "outline" : "destructive"}
                         size="sm"
-                        onClick={() => toggleUserBlock(user.id, user.isActive)}
+                        onClick={() => toggleUserBlock(user.id, user.active)}
                         disabled={processingUsers[user.id]}
                       >
                         {processingUsers[user.id] ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : user.isActive ? (
+                        ) : user.active ? (
                           <>
                             <Check className="mr-1 h-4 w-4" /> Desbloquear
                           </>

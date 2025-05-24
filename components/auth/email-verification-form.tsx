@@ -1,7 +1,7 @@
 "use client";
 import { verifyToken } from "@/actions/auth";
-import { useSearchParams } from "next/navigation";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useState } from "react";
 import AuthCard from "./auth-card";
 import AuthFormMessage from "./auth-form-message";
 
@@ -9,6 +9,7 @@ const EmailVerificationForm = () => {
 	const [error, setError] = useState<string | undefined>(undefined);
 	const [success, setSuccess] = useState<string | undefined>(undefined);
 	const searchParam = useSearchParams();
+	const router = useRouter();
 	const token = searchParam.get("token");
 
 	const automaticSubmission = useCallback(() => {
@@ -21,8 +22,12 @@ const EmailVerificationForm = () => {
 
 		verifyToken(token)
 			.then((data) => {
-				setSuccess(data.success);
-				setError(data.error);
+				if (data.success) {
+					setSuccess(data.success);
+					setError(undefined);
+				} else {
+					setError(data.error);
+				}
 			})
 			.catch(() => {
 				setError("Algo deu errado");
@@ -32,6 +37,18 @@ const EmailVerificationForm = () => {
 	useEffect(() => {
 		automaticSubmission();
 	}, [automaticSubmission]);
+
+	// Redirecionamento após sucesso
+	useEffect(() => {
+		if (success) {
+			const timer = setTimeout(() => {
+				router.push("/dashboard");
+			}, 2000); // Aguarda 2 segundos antes de redirecionar
+
+			return () => clearTimeout(timer);
+		}
+	}, [success, router]);
+
 	return (
 		<div className="flex flex-1 justify-center items-center">
 			<AuthCard title="Verifique seu E-mail">
