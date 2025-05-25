@@ -82,7 +82,6 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
 
     return getFreeIntervals({ start, end }, appointmentIntervals);
   });
-
   // Explodir em slots de 30 minutos
   const slots = freeIntervals.flatMap((interval) => {
     const slotsInInterval: { start: Date }[] = [];
@@ -95,5 +94,9 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
     }
     return slotsInInterval;
   });
-  return slots.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
+  const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map(
+    (start) => ({ start: new Date(start) })
+  );
+
+  return slotsUnique.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
 };

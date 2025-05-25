@@ -25,7 +25,7 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     const availability = await prisma.availability.findFirst({
       where: {
         professionalId,
-        dayOfWeek,
+        // dayOfWeek,
         isAvailable: true,
         startTime: { lte: appointmentDate },
         endTime: { gte: appointmentDate },
@@ -47,7 +47,6 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     if (existingAppointment) {
       return { error: "Já existe um agendamento neste horário" };
     }
-
     // 3. Criar agendamento
     const appointment = await prisma.appointment.create({
       data: { professionalId, patientId, appointmentDate },
