@@ -70,7 +70,7 @@ const ProfileProfessionalForm: React.FC = () => {
   }, [user, form]);
 
   return (
-    <div className="container mx-auto py-6 max-w-5xl">
+    <div className="lg:container mx-auto py-6 max-w-5xl">
       {/* <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1> */}
       <p className="text-muted-foreground mb-4">
         Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho

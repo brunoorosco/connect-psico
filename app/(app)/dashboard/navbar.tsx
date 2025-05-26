@@ -5,8 +5,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import MobileDrawer from "@/components/MobileDrawer";
+import MobileDrawer from "@/components/sidebar/MobileDrawer";
 import { useEffect, useState } from "react";
+import { se } from "date-fns/locale";
 
 export default function Navbar({ userName }: { userName: string }) {
   const pathname = usePathname();
@@ -31,10 +32,9 @@ export default function Navbar({ userName }: { userName: string }) {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
-        {isMobile ? (
-          <MobileDrawer
-            userRole={session?.user.role.toLowerCase() as "admin" | "supervisor" | "default"}
-          />
+        {isMobile && session?.user ? (
+          // @ts-ignore
+          <MobileDrawer user={session?.user} />
         ) : (
           <nav className="flex items-center space-x-4">
             {session?.user.role === "SUPERVISOR" && (
@@ -103,7 +103,7 @@ export default function Navbar({ userName }: { userName: string }) {
                 </Link>
               </>
             )}
-              {session?.user.role === "ADMIN" && (
+            {session?.user.role === "ADMIN" && (
               <>
                 <Link
                   href={`/dashboard/admin/${session?.user.id}/minha-assinatura`}
