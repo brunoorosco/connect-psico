@@ -38,7 +38,8 @@ export default function RegisterForm() {
       name: "",
       email: "",
       password: "",
-      crp: "",
+      numConselho: "",
+      ufConselho: "",
       especialidade: "",
       professional: isProfessional,
       phone: "",
@@ -62,39 +63,34 @@ export default function RegisterForm() {
   };
 
   return (
-    <AuthCard title='Registra-se' description='Seja bem-vindo'>
-      <div className='space-y-4'>
+    <AuthCard title="Registra-se" description="Seja bem-vindo">
+      <div className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className='space-y-3'>
+            <div className="space-y-3">
               <FormField
                 control={form.control}
-                name='professional'
+                name="professional"
                 render={({ field }) => (
-                  <FormItem className='flex flex-row items-center rounded-lg p-3 shadow-sm'>
+                  <FormItem className="flex flex-row items-center rounded-lg p-3 shadow-sm">
                     <FormControl>
-                      <Switch
-                        checked={isProfessional}
-                        onCheckedChange={setIsProfessional}
-                      />
+                      <Switch checked={isProfessional} onCheckedChange={setIsProfessional} />
                     </FormControl>
-                    <FormLabel className='h-5 ml-2'>
-                      Registro Profissonal
-                    </FormLabel>
+                    <FormLabel className="h-5 ml-2">Registro Profissonal</FormLabel>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name='name'
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
                       <Input
-                        autoComplete='off'
-                        type='name'
-                        placeholder='Jose da Silva'
+                        autoComplete="off"
+                        type="name"
+                        placeholder="Jose da Silva"
                         required
                         {...field}
                         disabled={isPending}
@@ -106,14 +102,14 @@ export default function RegisterForm() {
               />
               <FormField
                 control={form.control}
-                name='email'
+                name="email"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
                     <FormControl>
                       <Input
-                        type='email'
-                        placeholder='voce@provedor.com.br'
+                        type="email"
+                        placeholder="voce@provedor.com.br"
                         required
                         {...field}
                         disabled={isPending}
@@ -125,17 +121,12 @@ export default function RegisterForm() {
               />
               <FormField
                 control={form.control}
-                name='phone'
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <Input
-                        type='type'
-                        placeholder='(00) 0000-00000'
-                        required
-                        {...field}
-                      />
+                      <Input type="type" placeholder="(00) 0000-00000" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -143,14 +134,14 @@ export default function RegisterForm() {
               />
               <FormField
                 control={form.control}
-                name='password'
+                name="password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <Input
-                        type='password'
-                        placeholder='******'
+                        type="password"
+                        placeholder="******"
                         required
                         {...field}
                         disabled={isPending}
@@ -162,53 +153,52 @@ export default function RegisterForm() {
               />
 
               {isProfessional && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name='crp'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CRP</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder='123456-UF'
-                            {...field}
-                            disabled={isPending}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
+                <div className="flex gap-2">
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="numConselho"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>CRP</FormLabel>
+                          <FormControl>
+                            <Input placeholder="1234AB" {...field} disabled={isPending} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="w-1/3 lowercase">
+                    <FormField
+                      control={form.control}
+                      name="ufConselho"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>UF</FormLabel>
+                          <FormControl>
+                            <Input placeholder="UF" {...field} disabled={isPending} maxLength={2}/>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               )}
-              {error && (
-                <AuthFormMessage type='error' message={error} title='Erro' />
-              )}
-              {success && (
-                <AuthFormMessage
-                  type='success'
-                  message={success}
-                  title='Sucesso'
-                />
-              )}
-              <Button
-                variant={"default"}
-                className='w-full'
-                disabled={isPending}
-              >
-                <LoaderIcon
-                  className={!isPending ? "hidden" : "animate-spin mr-2"}
-                />
+              {error && <AuthFormMessage type="error" message={error} title="Erro" />}
+              {success && <AuthFormMessage type="success" message={success} title="Sucesso" />}
+              <Button variant={"default"} className="w-full" disabled={isPending}>
+                <LoaderIcon className={!isPending ? "hidden" : "animate-spin mr-2"} />
                 <span>Registrar</span>
               </Button>
             </div>
           </form>
         </Form>
 
-        <div className='mt-4 text-center text-sm'>
+        <div className="mt-4 text-center text-sm">
           Já tem uma conta?{" "}
-          <Link href='/auth/login' className='underline'>
+          <Link href="/auth/login" className="underline">
             Efetue Login
           </Link>
         </div>

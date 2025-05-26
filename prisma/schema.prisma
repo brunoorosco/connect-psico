@@ -41,16 +41,16 @@ model User {
 model Professional {
   id               Int           @id @default(autoincrement())
   numConselho      String?       @map("num_conselho") @db.VarChar(8)
-  ufConselho       String        @map("uf_conselho") @db.VarChar(2)
+  ufConselho       String?        @map("uf_conselho") @db.VarChar(2)
   publicoAlvo      String[]      @map("publico_alvo")
   especialidade    String[]
-  abordagem        String
+  abordagem        String?
   tituloAcademico  String?       @map("(titulo_academico)")
   education        String?
-  tipoAtendimento  String        @default("ambos") @map("tipo_atendimento")
-  bio              String
-  valorAtendimento Int           @default(0) @map("valor_atendimento")
-  tempoConsulta    Int           @default(60) @map("tempo_consulta")
+  tipoAtendimento  String?        @default("ambos") @map("tipo_atendimento")
+  bio              String?
+  valorAtendimento Int?           @default(0) @map("valor_atendimento")
+  tempoConsulta    Int?           @default(60) @map("tempo_consulta")
   userId           String        @unique
   Comentarios      Comentarios[]
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -16,6 +16,7 @@ import { sendAccountVerificationEmail } from '../email-verification'
  */
 export const register = async (user: z.infer<typeof RegisterSchema>) => {
 	const valid = await RegisterSchema.safeParse(user)
+	console.log(valid)
 
 	if (!valid.success) {
 		return {
@@ -36,6 +37,17 @@ export const register = async (user: z.infer<typeof RegisterSchema>) => {
 					user.professional === true ? UserRole.SUPERVISOR : UserRole.DEFAULT,
 			},
 		})
+		if (user.professional) {
+			console.log(createdUser)
+			const teste = await prisma.professional.create({
+				data: {
+					numConselho: user.numConselho,
+					ufConselho:user.ufConselho,
+					userId: createdUser.id, // assumindo que a tabela tem userId como FK
+				},
+			})
+			console.log(teste)
+		}
 		//Account verification flow with e-mail
 		const verificationToken = await createVerificationToken(email)
 		await sendAccountVerificationEmail(createdUser, verificationToken.token)
