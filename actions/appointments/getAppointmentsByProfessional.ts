@@ -19,7 +19,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
       where: {
         patientId: session.user.id,
         patient: {
-          role: "DEFAULT",
+          role: "SUPERVISOR",
         },
       },
       select: {
@@ -45,7 +45,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
       },
     }),
   ]);
-  console.log(users);
+  console.log("123456",users);
 
   return {
     data: users,

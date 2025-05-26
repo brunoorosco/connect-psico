@@ -16,7 +16,6 @@ const useDynamicMenus = async () => {
 
   const userId = session?.user?.id;
   const updatedMenus = menus.map((menu) => {
-    console.log(menu.url);
       return {
         ...menu,
         url: menu.url.replace(/userId/g,`${userId}`),

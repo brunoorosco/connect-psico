@@ -12,6 +12,7 @@ const CreateAvailabilitySchema = z.object({
 })
 
 export const createAvailability = async (data: z.infer<typeof CreateAvailabilitySchema>) => {
+  console.log("aqui")
   const valid = await CreateAvailabilitySchema.safeParseAsync(data)
 
   if (!valid.success) {

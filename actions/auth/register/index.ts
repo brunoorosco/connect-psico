@@ -15,7 +15,6 @@ import { sendAccountVerificationEmail } from '../email-verification'
  * @returns {Promise<{error?: string, success?: string}>} The result of the password change request.
  */
 export const register = async (user: z.infer<typeof RegisterSchema>) => {
-	console.log(user)
 	const valid = await RegisterSchema.safeParse(user)
 
 	if (!valid.success) {
