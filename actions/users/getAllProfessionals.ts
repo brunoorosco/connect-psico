@@ -38,7 +38,6 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
       },
     }),
   ]);
-  console.log(users);
   const mappedUsers = users.map((user) => {
     const { Professional, ...restUser } = user;
 
