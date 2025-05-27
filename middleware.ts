@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import authConfig from "./auth.config";
 import { configRoutes } from "./config/routes";
 import { createRouteMatchers } from "./lib/route";
-import { getToken } from "next-auth/jwt";
 import { auth as midAuth } from "@/auth";
 
 const { auth } = NextAuth(authConfig);
@@ -40,7 +39,6 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  // ✅ Nova regra: se não completou o perfil, redireciona para o preenchimento
   if (
     isLoggedIn &&
     !isProfileCompleted &&
@@ -50,8 +48,6 @@ export default auth(async (req) => {
       new URL(`/app/professional/${userId}/profile`, req.url)
     );
   }
-
-  // console.log(`Middleware: ${req.nextUrl.pathname}`);
 });
 
 export const config = {

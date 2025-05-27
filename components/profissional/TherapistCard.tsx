@@ -18,7 +18,7 @@ export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams
       <CardHeader>
         <div className="flex items-center gap-4">
           <img
-            src={professional.image}
+            src={professional.image as string}
             alt={professional.name}
             className="w-18 h-18 bg-slate-300 rounded-full object-cover"
           />

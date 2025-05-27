@@ -4,7 +4,7 @@ import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import { prisma } from "./lib/db";
 import { findUserbyEmail } from "./services";
-import { isTwoFactorAutenticationEnabled } from "./services/auth";
+import { isProfileCompleteDb, isTwoFactorAutenticationEnabled } from "./services/auth";
 
 export const {
   handlers: { GET, POST },
@@ -33,10 +33,7 @@ export const {
   },
   callbacks: {
     async signIn({ user, email, account, profile }) {
-      if (
-        account &&
-        (account.provider === "google" || account.provider === "github")
-      ) {
+      if (account && (account.provider === "google" || account.provider === "apple")) {
         return true;
       }
       if (user.email) {
@@ -52,10 +49,12 @@ export const {
       if (user) {
         // User is available during sign-in
         if (user.id) {
-          const isTwoFactorEnabled = await isTwoFactorAutenticationEnabled(
-            user.id
-          );
+          const [isTwoFactorEnabled, isProfileComplete] = await Promise.all([
+            isTwoFactorAutenticationEnabled(user.id),
+            isProfileCompleteDb(user.id),
+          ]);
           token.isTwoFactorEnabled = isTwoFactorEnabled;
+          token.isProfileCompleted = isProfileComplete;
           token.role = user.role || UserRole.DEFAULT;
         }
       }
@@ -67,6 +66,7 @@ export const {
       }
       session.user.id = token.sub as string;
       session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+      session.user.isProfileCompleted = token.isProfileCompleted;
       return session;
     },
   },

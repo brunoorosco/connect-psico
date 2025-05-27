@@ -6,11 +6,12 @@ export type AvailableSlot = {
 };
 
 type Professional = {
-  id: string;
+  id: number;
   especialidade: string[];
   experiencia?: string;
   abordagem: string;
   bio: string;
+  isProfileCompleted: boolean
   valorAtendimento: string;
   education: string;
   tempoConsulta: number

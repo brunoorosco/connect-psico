@@ -57,6 +57,7 @@ model Professional {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   isProfileCompleted Boolean       @default(false) @map("is_profile_completed")
+  experiencia        Int           @default(0) @map("experiencia")
 
   @@index([id])
   @@map("professionals")

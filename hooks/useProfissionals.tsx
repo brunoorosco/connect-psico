@@ -4,6 +4,7 @@ import { getProfessionalUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
 import { getProfessioanlById } from "@/actions/users/getProfessionalById";
+import { ProfessionalModel } from "@/domain/model/professional";
 import { useState, useTransition } from "react";
 import useSWR from 'swr';
 
@@ -50,7 +51,7 @@ export function useGetProfessionalById(userId?: string) {
   );
 
   return {
-    user: data,
+    user: data as ProfessionalModel,
     loading: isLoading,
     error,
     refresh: mutate

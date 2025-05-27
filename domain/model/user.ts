@@ -9,7 +9,7 @@ export type User = {
   id?: string;
   name: string;
   email: string;
-  image: string;
+  image: File | string | null;
   telefone?: string
   password: string;
   role: UserRole;
