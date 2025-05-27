@@ -42,7 +42,7 @@ const EmailVerificationForm = () => {
 	useEffect(() => {
 		if (success) {
 			const timer = setTimeout(() => {
-				router.push("/dashboard");
+				router.push("/app");
 			}, 2000); // Aguarda 2 segundos antes de redirecionar
 
 			return () => clearTimeout(timer);

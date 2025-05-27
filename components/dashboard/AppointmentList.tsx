@@ -40,7 +40,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
   });
 
   const handleStartConsultation = (patientId: string) => {
-    window.location.href = `/dashboard/professional/${session?.user.id}/consulta?patientId=${patientId}`;
+    window.location.href = `/app/professional/${session?.user.id}/consulta?patientId=${patientId}`;
   };
 
   if (filteredAppointments?.length === 0) {

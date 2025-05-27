@@ -17,11 +17,15 @@ export default auth(async (req) => {
     isStudentRoute,
     isSupervisorRoute,
   } = createRouteMatchers(configRoutes, req);
+
   const isLoggedIn = !!req.auth;
 
   const session = await midAuth();
 
-  const userRole = session?.user.role; // Assumindo que o token tenha um campo `role`
+  const userRole = session?.user.role; 
+  const userId = session?.user.id;
+  // @ts-ignore
+  const isProfileCompleted = session?.user.isProfileCompleted;
 
   const hasAccess =
     (userRole === "SUPERVISOR" && isSupervisorRoute) ||
@@ -36,8 +40,20 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
+  // ✅ Nova regra: se não completou o perfil, redireciona para o preenchimento
+  if (
+    isLoggedIn &&
+    !isProfileCompleted &&
+    !req.nextUrl.pathname.startsWith(`/app/professional/${userId}/profile`)
+  ) {
+    return NextResponse.redirect(
+      new URL(`/app/professional/${userId}/profile`, req.url)
+    );
+  }
+
   // console.log(`Middleware: ${req.nextUrl.pathname}`);
 });
+
 export const config = {
   /*
    * Match all request paths except for the ones starting with:

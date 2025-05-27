@@ -8,7 +8,7 @@ const DashboardPage = async () => {
 
   return (
     <>
-      {session?.user.role === "ADMIN" && redirect("/dashboard/admin")}
+      {session?.user.role === "ADMIN" && redirect("/app/admin")}
       {session?.user.role === "SUPERVISOR" ? <DashboardProfessional /> : <DashboardDefault />}
     </>
   );

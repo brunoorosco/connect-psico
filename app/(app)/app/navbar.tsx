@@ -40,13 +40,13 @@ export default function Navbar({ userName }: { userName: string }) {
             {session?.user.role === "SUPERVISOR" && (
               <>
                 <Link
-                  href={`/dashboard/professional/${session?.user.id}/minha-assinatura`}
+                  href={`/app/professional/${session?.user.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/professional/${session?.user.id}/minha-assinatura`
+                      pathname === `/app/professional/${session?.user.id}/minha-assinatura`
                         ? "underline"
                         : ""
                     )}
@@ -55,13 +55,13 @@ export default function Navbar({ userName }: { userName: string }) {
                   </Button>
                 </Link>
                 <Link
-                  href={`/dashboard/professional/${session?.user.id}/profile`}
+                  href={`/app/professional/${session?.user.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/professional/${session?.user.id}/profile`
+                      pathname === `/app/professional/${session?.user.id}/profile`
                         ? "underline"
                         : ""
                     )}
@@ -74,13 +74,13 @@ export default function Navbar({ userName }: { userName: string }) {
             {session?.user.role === "DEFAULT" && (
               <>
                 <Link
-                  href={`/dashboard/users/${session?.user.id}/minha-assinatura`}
+                  href={`/app/users/${session?.user.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/users/${session?.user.id}/minha-assinatura`
+                      pathname === `/app/users/${session?.user.id}/minha-assinatura`
                         ? "underline"
                         : ""
                     )}
@@ -89,13 +89,13 @@ export default function Navbar({ userName }: { userName: string }) {
                   </Button>
                 </Link>
                 <Link
-                  href={`/dashboard/users/${session?.user.id}/profile`}
+                  href={`/app/users/${session?.user.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/users/${session?.user.id}/profile` ? "underline" : ""
+                      pathname === `/app/users/${session?.user.id}/profile` ? "underline" : ""
                     )}
                   >
                     Perfil
@@ -106,13 +106,13 @@ export default function Navbar({ userName }: { userName: string }) {
             {session?.user.role === "ADMIN" && (
               <>
                 <Link
-                  href={`/dashboard/admin/${session?.user.id}/minha-assinatura`}
+                  href={`/app/admin/${session?.user.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/admin/${session?.user.id}/minha-assinatura`
+                      pathname === `/app/admin/${session?.user.id}/minha-assinatura`
                         ? "underline"
                         : ""
                     )}
@@ -121,13 +121,13 @@ export default function Navbar({ userName }: { userName: string }) {
                   </Button>
                 </Link>
                 <Link
-                  href={`/dashboard/admin/${session?.user.id}/profile`}
+                  href={`/app/admin/${session?.user.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/dashboard/admin/${session?.user.id}/profile` ? "underline" : ""
+                      pathname === `/app/admin/${session?.user.id}/profile` ? "underline" : ""
                     )}
                   >
                     Perfil
