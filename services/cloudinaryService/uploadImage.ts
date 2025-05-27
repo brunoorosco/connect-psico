@@ -1,3 +1,4 @@
+import { uploadImageAction } from "@/actions/uploadImage";
 import { env } from "@/config/application";
 import axios from "axios";
 import crypto from "crypto";
@@ -37,6 +38,16 @@ export async function uploadImageToCloudinary(file: File, userId: string): Promi
   formData.append("signature", signature);
   formData.append("api_key", env.cloudinaryApiKey as string);
   formData.append("timestamp", timestamp);
+
+
+   const response = await uploadImageAction(formData);
+     if (response.result) {
+    // @ts-ignore
+    return response.result.secure_url as string;
+  } else {
+    console.error(response.error);
+    throw new Error(response.error || 'Erro no upload');
+  }
 
   const res = await axios.post(
     `https://api.cloudinary.com/v1_1/${env.cloudinaryCloudName}/image/upload`,
