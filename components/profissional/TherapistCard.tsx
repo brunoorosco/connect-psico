@@ -20,7 +20,7 @@ export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams
           <img
             src={professional.image as string}
             alt={professional.name}
-            className="w-18 h-18 bg-slate-300 rounded-full object-cover"
+            className="w-20 h-20 bg-slate-300 rounded-full object-cover"
           />
           <div>
             <h3 className="text-lg font-semibold">{professional.name}</h3>

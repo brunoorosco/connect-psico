@@ -13,6 +13,9 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
     prisma.user.findMany({
       where: {
         role: "SUPERVISOR",
+        Professional: {
+          isProfileCompleted: true,
+        },
       },
       skip,
       take: limit,
@@ -29,10 +32,13 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
     prisma.user.count({
       where: {
         role: "SUPERVISOR",
+        Professional: {
+          isProfileCompleted: true,
+        },
       },
     }),
   ]);
-
+  console.log(users);
   const mappedUsers = users.map((user) => {
     const { Professional, ...restUser } = user;
 
