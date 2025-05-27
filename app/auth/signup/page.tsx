@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 const Login = async () => {
   const session = await auth();
   if (session) {
-    redirect("/dashboard");
+    redirect("/app");
   }
   return (
     <>

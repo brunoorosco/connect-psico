@@ -81,7 +81,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ user }) => {
             <>
               <Button
                 variant={"ghost"}
-                onClick={() => navigate.push(`/dashboard/professional/${user.id}/minha-assinatura`)}
+                onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
                 className={"w-full justify-start"}
               >
                 Minha Assinatura
@@ -90,7 +90,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ user }) => {
               <Button
                 variant={"ghost"}
                 className={"w-full justify-start"}
-                onClick={() => navigate.push(`/dashboard/professional/${user.id}/profile`)}
+                onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
               >
                 Perfil
               </Button>

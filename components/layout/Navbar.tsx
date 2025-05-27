@@ -58,7 +58,7 @@ const Navbar1 = () => {
               <>
                 <Button variant="outline" size="sm">
                   <Link
-                    href="/dashboard"
+                    href="/app"
                     className="text-therapy-purple-primary hover:text-therapy-primary transition-all-200"
                   >
                     Dashboard
@@ -150,7 +150,7 @@ const Navbar1 = () => {
               <span className="text-sm text-gray-400">Carregando...</span>
             ) : isLogged ? (
               <>
-                <Link href="/dashboard" className="w-full">
+                <Link href="/app" className="w-full">
                   <Button variant="outline" className="w-full">
                     Dashboard
                   </Button>

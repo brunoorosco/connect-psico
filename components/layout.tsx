@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import Navbar from "@/app/(app)/dashboard/navbar";
+import Navbar from "@/app/(app)/app/navbar";
 
 export default async function DashboardLayout({
   children,

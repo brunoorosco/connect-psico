@@ -1,17 +1,11 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { CreditCard, XCircle } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, XCircle } from "lucide-react";
 
 export default async function MySubscription() {
   return (
     <>
       <h1 className="text-3xl font-bold mb-6">Minha Assinatura</h1>
-      <div className="flex gap-10">
+      <div className="flex flex-col md:flex-row gap-6">
         <PlanCard />
         <ActionCard />
       </div>
@@ -21,7 +15,7 @@ export default async function MySubscription() {
 
 function PlanCard() {
   return (
-    <Card className="max-w-md w-full">
+    <Card className="w-full md:max-w-md">
       <CardHeader>
         <CardTitle>Detalhes da Assinatura</CardTitle>
         <CardDescription>Informações sobre seu plano atual</CardDescription>
@@ -56,7 +50,7 @@ function PlanCard() {
 
 function ActionCard() {
   return (
-    <Card className="w-full max-w-sm h-full">
+    <Card className="w-full md:max-w-sm">
       <CardHeader>
         <CardTitle>Ações</CardTitle>
         <CardDescription>Gerencie sua assinatura</CardDescription>

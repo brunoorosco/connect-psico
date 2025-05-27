@@ -154,22 +154,7 @@ export default function RegisterForm() {
 
               {isProfessional && (
                 <div className="flex gap-2">
-                  <div className="w-full">
-                    <FormField
-                      control={form.control}
-                      name="numConselho"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CRP</FormLabel>
-                          <FormControl>
-                            <Input placeholder="1234AB" {...field} disabled={isPending} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="w-1/3 lowercase">
+                  <div className="w-1/3">
                     <FormField
                       control={form.control}
                       name="ufConselho"
@@ -177,7 +162,29 @@ export default function RegisterForm() {
                         <FormItem>
                           <FormLabel>UF</FormLabel>
                           <FormControl>
-                            <Input placeholder="UF" {...field} disabled={isPending} maxLength={2}/>
+                            <Input
+                              placeholder="UF"
+                              {...field}
+                              disabled={isPending}
+                              maxLength={2}
+                              className="uppercase"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="numConselho"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nº de Registro</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123412" {...field} disabled={isPending} maxLength={6} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
