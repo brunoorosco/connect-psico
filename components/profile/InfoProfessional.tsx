@@ -1,13 +1,7 @@
 import React from "react";
 import { GraduationCap } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   FormField,
   FormItem,
@@ -23,7 +17,7 @@ import { ProfessionalModel } from "@/domain/model/professional";
 
 type Props = {
   profile: ProfessionalModel;
-}
+};
 
 export const ProfessionalInfoForm = ({ profile }: Props) => {
   const { control } = useFormContext<ProfileFormValues>();
@@ -48,7 +42,12 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
               <FormItem>
                 <FormLabel>CRP (Registro Profissional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="CRP 01/12345" {...field} />
+                  <Input
+                    placeholder="CRP SP/12345"
+                    {...field}
+                    disabled
+                    value={`${control._formValues.ufConselho}/${control._formValues.numConselho}`}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -62,10 +61,7 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
               <FormItem>
                 <FormLabel>Formação Acadêmica</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="Psicologia - Universidade Federal" 
-                    {...field}
-                  />
+                  <Input placeholder="Psicologia - Universidade Federal" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -74,17 +70,17 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
 
           <FormField
             control={control}
-            name="experience"
+            name="experiencia"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Anos de experiência</FormLabel>
                 <FormControl>
-                  <Input 
+                  <Input
                     type="number"
                     min="0"
                     max="70"
                     {...field}
-                    onChange={e => field.onChange(Number(e.target.value))}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -115,18 +111,14 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
                         checked={(field.value ?? []).includes(specialty)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            field.onChange([...(field.value ?? []), specialty])
+                            field.onChange([...(field.value ?? []), specialty]);
                           } else {
-                            field.onChange(
-                              (field.value ?? []).filter((v) => v !== specialty)
-                            )
+                            field.onChange((field.value ?? []).filter((v) => v !== specialty));
                           }
                         }}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">
-                      {specialty}
-                    </FormLabel>
+                    <FormLabel className="font-normal">{specialty}</FormLabel>
                   </FormItem>
                 ))}
               </div>

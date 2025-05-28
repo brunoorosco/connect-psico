@@ -12,7 +12,6 @@ const CreateAppointmentSchema = z.object({
 
 export const createAppointment = async (data: z.infer<typeof CreateAppointmentSchema>) => {
   const valid = await CreateAppointmentSchema.safeParseAsync(data);
-  console.log(data);
   if (!valid.success) {
     return { error: "Dados inválidos" };
   }

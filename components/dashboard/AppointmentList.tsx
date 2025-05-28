@@ -14,7 +14,7 @@ type Appointment = {
   patientId: string;
   patient: User;
   appointmentDate: Date;
-  duration: number;
+  tempoConsulta: number;
   status: "CONFIRMED" | "COMPLETED" | "CANCELLED" | "PENDING";
   notes?: string;
 };
@@ -40,7 +40,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
   });
 
   const handleStartConsultation = (patientId: string) => {
-    window.location.href = `/dashboard/professional/${session?.user.id}/consulta?patientId=${patientId}`;
+    window.location.href = `/app/professional/${session?.user.id}/consulta?patientId=${patientId}`;
   };
 
   if (filteredAppointments?.length === 0) {
@@ -76,20 +76,24 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
               ? "border-l-4 border-l-green-400"
               : appointment.status === "CANCELLED"
               ? "border-l-4 border-l-gray-300 opacity-70"
+              : appointment.status === "PENDING"
+              ? "border-l-4 border-l-orange-400"
               : "border-l-4 border-l-therapy-primary"
           }`}
         >
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="bg-therapy-light rounded-full p-2 text-therapy-tertiary">
-                  <span className="font-semibold text-sm">{appointment?.duration || 30}</span>
+                <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
+                  <span className="font-semibold text-sm">
+                    {appointment?.appointmentDate.toISOString().substring(11, 16)}
+                  </span>
                 </div>
                 <div>
                   <h3 className="font-medium">
                     {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                   </h3>
-                  <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
+                  <p className="text-sm text-gray-500">{appointment.tempoConsulta} minutos</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -122,6 +126,8 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                       ? "bg-green-100 text-green-800"
                       : appointment.status === "CANCELLED"
                       ? "bg-gray-100 text-gray-800"
+                      : appointment.status === "PENDING"
+                      ? "bg-gray-100 text-gray-800"
                       : "bg-therapy-light text-therapy-tertiary"
                   }`}
                 >
@@ -129,6 +135,8 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                     ? "Agendado"
                     : appointment.status === "COMPLETED"
                     ? "Concluído"
+                    : appointment.status === "PENDING"
+                    ? "Aguardando Confirmação"
                     : "Cancelado"}
                 </div>
               </div>

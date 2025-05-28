@@ -15,19 +15,25 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
   }
 
   const [users, total] = await Promise.all([
-   await prisma.appointment.findMany({
+    await prisma.appointment.findMany({
       where: {
-        patientId: session.user.id,
-        patient: {
-          role: "DEFAULT",
+        professionalId: session.user.id,
+        professional: {
+          role: "SUPERVISOR",
         },
       },
       select: {
         id: true,
         appointmentDate: true,
+        status: true,
         professional: {
           select: {
             name: true,
+            Professional: {
+              select: {
+                tempoConsulta: true,
+              },
+            },
           },
         },
         patient: {
@@ -45,10 +51,22 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
       },
     }),
   ]);
-  console.log(users);
 
+  const mappedUsers = users.map((user) => {
+    const { professional, ...restUser } = user;
+    const { Professional, ...restProfessional } = professional;
+
+    // Pega o primeiro professional, caso exista
+    const professionalData = Professional ?? {};
+
+    return {
+      ...restUser,
+      ...professionalData,
+      professional: { ...restProfessional },
+    };
+  });
   return {
-    data: users,
+    data: mappedUsers,
     total,
     page,
     lastPage: Math.ceil(total / limit),

@@ -3,7 +3,7 @@
 
 # Pronto para Autenticar Seu Novo Projeto
 
-Este Starter Kit foi desenvolvido para poupar seu tempo, oferecendo tudo o que você precisa para começar a desenvolver seu projeto com segurança.
+<!-- Este Starter Kit foi desenvolvido para poupar seu tempo, oferecendo tudo o que você precisa para começar a desenvolver seu projeto com segurança.
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/devdeck101/authjs-prisma-template) ![GitHub forks](https://img.shields.io/github/forks/devdeck101/authjs-prisma-template) ![GitHub Repo stars](https://img.shields.io/github/stars/devdeck101/authjs-prisma-template) ![GitHub watchers](https://img.shields.io/github/watchers/devdeck101/authjs-prisma-template) 
 
@@ -14,13 +14,7 @@ Este Starter Kit foi desenvolvido para poupar seu tempo, oferecendo tudo o que v
 <img src="assets/dois_fatores_page.jpg" alt="drawing" width="400"/>
 <img src="assets/forget_password_page.jpg" alt="drawing" width="400"/>
 <img src="assets/light_landing_page.jpg" alt="drawing" width="400"/>
-</div>
-
-
-## <img src="assets/wave.gif" alt="drawing" width="20"/> Detalhes Explicados no Meu Canal
-[![Youtube Badge](https://img.shields.io/badge/-@developerdeck101-cc181e?style=flat-square&logo=youtube&logoColor=white&link=https://www.youtube.com/developerdeck101)](https://www.youtube.com/developerdeck101)
-![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCj75B_51OXb9qH15wiHs-Hw?style=social)
-![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCj75B_51OXb9qH15wiHs-Hw)
+</div> -->
 
 
 

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import authConfig from "./auth.config";
 import { configRoutes } from "./config/routes";
 import { createRouteMatchers } from "./lib/route";
-import { getToken } from "next-auth/jwt";
 import { auth as midAuth } from "@/auth";
 
 const { auth } = NextAuth(authConfig);
@@ -17,11 +16,15 @@ export default auth(async (req) => {
     isStudentRoute,
     isSupervisorRoute,
   } = createRouteMatchers(configRoutes, req);
+
   const isLoggedIn = !!req.auth;
 
   const session = await midAuth();
 
-  const userRole = session?.user.role; // Assumindo que o token tenha um campo `role`
+  const userRole = session?.user.role; 
+  const userId = session?.user.id;
+  // @ts-ignore
+  const isProfileCompleted = session?.user.isProfileCompleted;
 
   const hasAccess =
     (userRole === "SUPERVISOR" && isSupervisorRoute) ||
@@ -36,8 +39,17 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  // console.log(`Middleware: ${req.nextUrl.pathname}`);
+  if (
+    isLoggedIn &&
+    !isProfileCompleted &&
+    !req.nextUrl.pathname.startsWith(`/app/professional/${userId}/profile`)
+  ) {
+    return NextResponse.redirect(
+      new URL(`/app/professional/${userId}/profile`, req.url)
+    );
+  }
 });
+
 export const config = {
   /*
    * Match all request paths except for the ones starting with:

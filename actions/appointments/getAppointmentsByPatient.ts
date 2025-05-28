@@ -54,7 +54,6 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
       },
     }),
   ]);
-  console.log(users);
 
   return {
     data: users,

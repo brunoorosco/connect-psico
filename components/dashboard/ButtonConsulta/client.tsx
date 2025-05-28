@@ -10,7 +10,7 @@ export function ButtonStartClient({
   userId: string;
 }) {
   const handleStartConsultation = (patientId: string) => {
-    window.location.href = `/dashboard/professional/${userId}/consulta?patientId=${patientId}`;
+    window.location.href = `/app/professional/${userId}/consulta?patientId=${patientId}`;
   };
 
   return (

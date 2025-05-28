@@ -3,10 +3,8 @@ import React, { startTransition, use, useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-
 import {
   defaultProfileValues,
   ProfileFormValues,
@@ -19,7 +17,6 @@ import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails"
 import { useSession } from "next-auth/react";
 import { useGetProfessionalById } from "@/hooks/useProfissionals";
 import { updateProfessionalProfile } from "@/actions/users/udpateProfileProfessional";
-import { ca } from "date-fns/locale";
 
 const ProfileProfessionalForm: React.FC = () => {
   const [isPending, startTransition] = useTransition();
@@ -37,8 +34,12 @@ const ProfileProfessionalForm: React.FC = () => {
           toast.error("Usuário não autenticado.");
           return;
         }
+        const payload = {
+          ...data,
+          isProfileCompleted: true,
+        };
 
-        const result = await updateProfessionalProfile(session.user.id, data);
+        const result = await updateProfessionalProfile(session.user.id, payload);
 
         toast.success(result.success!, {
           description: "Suas informações foram salvas.",
@@ -60,17 +61,18 @@ const ProfileProfessionalForm: React.FC = () => {
         numConselho: user.numConselho,
         ufConselho: user.ufConselho,
         education: user.education,
-        experience: user.experience || 0,
+        experiencia: Number(user.experiencia) || 0,
         especialidade: user.especialidade || [],
-        valorAtendimento: user.valorAtendimento || 0,
+        valorAtendimento: Number(user.valorAtendimento) || 0,
         tempoConsulta: user.tempoConsulta,
         publicoAlvo: user.publicoAlvo || [],
+        professionalId: user.id,
       });
     }
   }, [user, form]);
 
   return (
-    <div className="container mx-auto py-6 max-w-5xl">
+    <div className="lg:container mx-auto py-6 max-w-5xl">
       {/* <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1> */}
       <p className="text-muted-foreground mb-4">
         Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho
@@ -87,7 +89,7 @@ const ProfileProfessionalForm: React.FC = () => {
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
             </Button>
-            <Button  disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary">
+            <Button disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary">
               Salvar perfil
             </Button>
           </div>

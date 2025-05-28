@@ -8,7 +8,8 @@ import {
   GraduationCap,
   User,
   MessageCircle,
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  GroupIcon,
 } from "lucide-react";
 
 const useDynamicMenus = async () => {
@@ -16,11 +17,10 @@ const useDynamicMenus = async () => {
 
   const userId = session?.user?.id;
   const updatedMenus = menus.map((menu) => {
-    console.log(menu.url);
-      return {
-        ...menu,
-        url: menu.url.replace(/userId/g,`${userId}`),
-      };
+    return {
+      ...menu,
+      url: menu.url.replace(/userId/g, `${userId}`),
+    };
   });
 
   return updatedMenus;
@@ -31,43 +31,43 @@ export default useDynamicMenus;
 export const menus = [
   {
     title: "Home",
-    url: "/dashboard",
+    url: "/app",
     icon: Home,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard do Supervisores",
-    url: "/dashboard/professional",
+    url: "/app/professional",
     icon: Inbox,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard do Estudantes",
-    url: "/dashboard/professional/{userId}/pacientes",
+    url: "/app/professional/{userId}/pacientes",
     icon: GraduationCap,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/app",
     icon: Inbox,
     rules: ["SUPERVISOR"],
   },
   {
     title: "Pacientes",
-    url: "/dashboard",
-    icon: Inbox,
+    url: "/app/professional/{userId}/pacientes",
+    icon: GroupIcon,
     rules: ["SUPERVISOR"],
   },
   {
     title: "Chat",
-    url: `/dashboard/professional/{userId}/chat`,
+    url: `/app/professional/{userId}/chat`,
     icon: MessageCircle,
     rules: ["SUPERVISOR"],
   },
   {
     title: "Agendamentos",
-    url: `/dashboard/professional/{userId}/agendamentos`,
+    url: `/app/professional/{userId}/agendamentos`,
     icon: CalendarDaysIcon,
     rules: ["SUPERVISOR"],
   },
@@ -79,7 +79,7 @@ export const menus = [
   },
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/app",
     icon: GraduationCap,
     rules: ["DEFAULT"],
   },
