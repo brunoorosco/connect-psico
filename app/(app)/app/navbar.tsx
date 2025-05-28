@@ -32,7 +32,9 @@ export default function Navbar() {
   return (
     <header className="bg-white shadow-sm h-14">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
-        {isMobile && session && (
+        {isMobile && 
+        // session && 
+        (
           // @ts-ignore
           <MobileDrawer user={session} />
         )
