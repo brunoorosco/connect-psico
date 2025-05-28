@@ -7,11 +7,83 @@ import { env } from "@/config/application";
 import LogoutButton from "../auth/logout-button";
 import { useState } from "react";
 
-const Navbar1 = () => {
-  const { data: session, status } = useSession();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
+  const linkClass = isMobile
+    ? "block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
+    : "text-therapy-dark hover:text-therapy-primary transition-all-200";
 
+  return (
+    <>
+      <Link href="/professionals" className={linkClass}>
+        Encontrar Terapeuta
+      </Link>
+      <Link href="/howItWorks" className={linkClass}>
+        Como Funciona
+      </Link>
+      <Link href="/resources" className={linkClass}>
+        Recursos
+      </Link>
+      <Link href="/about" className={linkClass}>
+        Sobre Nós
+      </Link>
+    </>
+  );
+};
+
+const AuthButtons = ({ isMobile = false }: { isMobile?: boolean }) => {
+  const { data: session, status } = useSession();
   const isLogged = status === "authenticated";
+
+  if (status === "loading") {
+    return <span className="text-sm text-gray-400">Carregando...</span>;
+  }
+
+  if (isLogged) {
+    return (
+      <>
+        <Link href="/app" className={isMobile ? "w-full" : ""}>
+          <Button variant="outline" className={isMobile ? "w-full" : ""}>
+            Dashboard
+          </Button>
+        </Link>
+        <LogoutButton>
+          <Button variant="primary" className={isMobile ? "w-full" : ""}>
+            Sair
+          </Button>
+        </LogoutButton>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Link href="/auth/login" className={isMobile ? "w-full" : ""}>
+        <Button variant="outline" className={isMobile ? "w-full" : ""}>
+          Entrar
+        </Button>
+      </Link>
+      <Link href="/auth/signup" className={isMobile ? "w-full" : ""}>
+        <Button variant="primary" className={isMobile ? "w-full" : ""}>
+          Registre-se
+        </Button>
+      </Link>
+    </>
+  );
+};
+
+const MobileMenu = ({ isOpen }: { isOpen: boolean }) => (
+  <div className={`${isOpen ? "block" : "hidden"} md:hidden`}>
+    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
+      <NavLinks isMobile />
+      <div className="pt-4 pb-2 border-t border-gray-200 flex flex-col gap-2 px-2">
+        <AuthButtons isMobile />
+      </div>
+    </div>
+  </div>
+);
+
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -27,61 +99,8 @@ const Navbar1 = () => {
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/professionals"
-              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
-            >
-              Encontrar Terapeuta
-            </Link>
-            <Link
-              href="/howItWorks"
-              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
-            >
-              Como Funciona
-            </Link>
-            <Link
-              href="/resources"
-              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
-            >
-              Recursos
-            </Link>
-            <Link
-              href="/about"
-              className="text-therapy-dark hover:text-therapy-primary transition-all-200"
-            >
-              Sobre Nós
-            </Link>
-
-            {status === "loading" ? (
-              <span className="text-sm text-gray-400">Carregando...</span>
-            ) : isLogged ? (
-              <>
-                <Button variant="outline" size="sm">
-                  <Link
-                    href="/app"
-                    className="text-therapy-purple-primary hover:text-therapy-primary transition-all-200"
-                  >
-                    Dashboard
-                  </Link>
-                </Button>
-                <Button variant="primary" size="sm">
-                  <LogoutButton>Sair</LogoutButton>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login">
-                  <Button variant="outline" size="sm">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link href="/auth/signup">
-                  <Button variant="primary" size="sm">
-                    Registre-se
-                  </Button>
-                </Link>
-              </>
-            )}
+            <NavLinks />
+            <AuthButtons />
           </div>
 
           {/* Mobile menu toggle button */}
@@ -117,69 +136,9 @@ const Navbar1 = () => {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isMenuOpen ? "block" : "hidden"} md:hidden`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-md">
-          {/* Mesmos links do menu desktop */}
-          <Link
-            href="/professionals"
-            className="block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-          >
-            Encontrar Terapeuta
-          </Link>
-          <Link
-            href="/howItWorks"
-            className="block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-          >
-            Como Funciona
-          </Link>
-          <Link
-            href="/resources"
-            className="block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-          >
-            Recursos
-          </Link>
-          <Link
-            href="/about"
-            className="block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-          >
-            Sobre Nós
-          </Link>
-
-          <div className="pt-4 pb-2 border-t border-gray-200 flex gap-2 px-2">
-            {status === "loading" ? (
-              <span className="text-sm text-gray-400">Carregando...</span>
-            ) : isLogged ? (
-              <>
-                <Link href="/app" className="w-full">
-                  <Button variant="outline" className="w-full">
-                    Dashboard
-                  </Button>
-                </Link>
-                <LogoutButton>
-                  <Button variant="primary" className="w-full">
-                    Sair
-                  </Button>
-                </LogoutButton>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login" className="w-full">
-                  <Button variant="outline" className="w-full">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link href="/auth/signup" className="w-full">
-                  <Button variant="primary" className="w-full">
-                    Registre-se
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      <MobileMenu isOpen={isMenuOpen} />
     </nav>
   );
 };
 
-export default Navbar1;
+export default Navbar;
