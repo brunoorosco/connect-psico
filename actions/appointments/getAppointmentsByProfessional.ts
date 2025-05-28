@@ -61,11 +61,10 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
 
     return {
       ...restUser,
-      ...professionalData ,
+      ...professionalData,
       professional: { ...restProfessional },
     };
   });
-  console.log(mappedUsers)
   return {
     data: mappedUsers,
     total,

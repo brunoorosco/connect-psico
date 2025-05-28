@@ -9,19 +9,28 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { menus, menusFooter } from "./menu";
+import { menus } from "./menu";
 import Link from "next/link";
 import Logo from "../logo";
 import { auth } from "@/auth";
 import LogoutButton from "../auth/logout-button";
-import { Button } from "../ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export async function AppSidebar() {
   const session = await auth();
+  const urlBase = session?.user.role === "SUPERVISOR" ? "/app/professional" : "/app/users";
+  const urlProfile = `${urlBase}/${session?.user.id}/profile`;
+  const urlMinhaConta = `${urlBase}/${session?.user.id}/minha-assinatura`;
+  const urlMeusPagamentos = `${urlBase}/${session?.user.id}/pagamentos`;
   const getInitials = (name: string) => {
-    const nameParts = name.split(' ');
+    const nameParts = name.split(" ");
     if (nameParts.length > 1) {
       return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
     }
@@ -34,10 +43,7 @@ export async function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center">
-              <Link
-                href="/"
-                //  className='text-gray-700 hover:text-gray-900 h-4 pb-3 dark:text-gray-100'
-              >
+              <Link href="/">
                 <Logo />
               </Link>
             </div>
@@ -47,7 +53,6 @@ export async function AppSidebar() {
               <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
               <SidebarMenu>
                 {menus.map((item) => {
-                  // Verifica se o item deve ser exibido
                   const hasPermission =
                     !item.rules ||
                     item.rules.length === 0 ||
@@ -62,36 +67,56 @@ export async function AppSidebar() {
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  ) : null; // Não renderiza o item se o usuário não tiver permissão
+                  ) : null;
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
           </div>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter className="p-4 border-t mt-auto">
-        <div className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-3">
-            <Avatar>
-              <AvatarImage src={session?.user?.image as string} />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {getInitials(session?.user.name as string)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">{session?.user.name}</span>
-              <span className="text-xs text-muted-foreground">{session?.user.email}</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center space-x-3 cursor-pointer">
+              <Avatar>
+                <AvatarImage src={session?.user?.image as string} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {getInitials(session?.user.name as string)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">{session?.user.name}</span>
+                <span className="text-xs text-muted-foreground">{session?.user.email}</span>
+              </div>
             </div>
-          </div>
-          <LogoutButton >
-            <Button
-              variant="ghost"
-              className="justify-start w-full text-red-500 hover:text-red-600 hover:bg-red-100">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          </LogoutButton>
-        </div>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent side="top" align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link href={urlProfile}>
+                <User className="w-4 h-4 mr-2" /> Perfil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={urlMeusPagamentos}>
+                <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos
+              </Link>
+            </DropdownMenuItem>
+            {session?.user.role === "SUPERVISOR" && (
+              <DropdownMenuItem asChild>
+                <Link href={urlMinhaConta}>
+                  <Settings className="w-4 h-4 mr-2" /> Minha Assinatura
+                </Link>
+              </DropdownMenuItem>
+            )}
+            <LogoutButton>
+              <DropdownMenuItem className="text-red-500">
+                <LogOut className="w-4 h-4 mr-2" /> Sair
+              </DropdownMenuItem>
+            </LogoutButton>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );

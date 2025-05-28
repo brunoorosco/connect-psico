@@ -4,15 +4,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import MobileDrawer from "@/components/sidebar/MobileDrawer";
 import { useEffect, useState } from "react";
-import { se } from "date-fns/locale";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
-export default function Navbar({ userName }: { userName: string }) {
+export default function Navbar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const session = useCurrentUser();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -32,23 +30,23 @@ export default function Navbar({ userName }: { userName: string }) {
 
   const user = useCurrentUser();
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white shadow-sm h-14">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
-        {isMobile && session?.user ? (
+        {isMobile && session ? (
           // @ts-ignore
-          <MobileDrawer user={session?.user} />
+          <MobileDrawer user={session} />
         ) : (
           <nav className="flex items-center space-x-4">
             {user?.role === "SUPERVISOR" && (
               <>
                 <Link
-                  href={`/app/professional/${session?.user.id}/minha-assinatura`}
+                  href={`/app/professional/${session?.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/professional/${session?.user.id}/minha-assinatura`
+                      pathname === `/app/professional/${session?.id}/minha-assinatura`
                         ? "underline"
                         : ""
                     )}
@@ -57,15 +55,13 @@ export default function Navbar({ userName }: { userName: string }) {
                   </Button>
                 </Link>
                 <Link
-                  href={`/app/professional/${session?.user.id}/profile`}
+                  href={`/app/professional/${session?.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/professional/${session?.user.id}/profile`
-                        ? "underline"
-                        : ""
+                      pathname === `/app/professional/${session?.id}/profile` ? "underline" : ""
                     )}
                   >
                     Perfil
@@ -76,28 +72,26 @@ export default function Navbar({ userName }: { userName: string }) {
             {user?.role === "DEFAULT" && (
               <>
                 <Link
-                  href={`/app/users/${session?.user.id}/minha-assinatura`}
+                  href={`/app/users/${session?.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/users/${session?.user.id}/minha-assinatura`
-                        ? "underline"
-                        : ""
+                      pathname === `/app/users/${session?.id}/minha-assinatura` ? "underline" : ""
                     )}
                   >
                     Minha Assinatura
                   </Button>
                 </Link>
                 <Link
-                  href={`/app/users/${session?.user.id}/profile`}
+                  href={`/app/users/${session?.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/users/${session?.user.id}/profile` ? "underline" : ""
+                      pathname === `/app/users/${session?.id}/profile` ? "underline" : ""
                     )}
                   >
                     Perfil
@@ -108,28 +102,26 @@ export default function Navbar({ userName }: { userName: string }) {
             {user?.role === "ADMIN" && (
               <>
                 <Link
-                  href={`/app/admin/${session?.user.id}/minha-assinatura`}
+                  href={`/app/admin/${session?.id}/minha-assinatura`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/admin/${session?.user.id}/minha-assinatura`
-                        ? "underline"
-                        : ""
+                      pathname === `/app/admin/${session?.id}/minha-assinatura` ? "underline" : ""
                     )}
                   >
                     Minha Assinatura
                   </Button>
                 </Link>
                 <Link
-                  href={`/app/admin/${session?.user.id}/profile`}
+                  href={`/app/admin/${session?.id}/profile`}
                   className="text-gray-700 hover:text-gray-900"
                 >
                   <Button
                     variant={"link"}
                     className={cn(
-                      pathname === `/app/admin/${session?.user.id}/profile` ? "underline" : ""
+                      pathname === `/app/admin/${session?.id}/profile` ? "underline" : ""
                     )}
                   >
                     Perfil

@@ -21,8 +21,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
-// import { useSession } from "@supabase/auth-helpers-react";
-// import { supabase } from "@/integrations/supabase/client";
 
 interface AppointmentData {
   id: string;
@@ -120,13 +118,13 @@ const PatientPayment = () => {
     navigate.push("/appointments");
   };
 
-  if (loading) {
-    return <div className="text-center">Carregando informações de pagamento...</div>;
-  }
+  // if (loading) {
+  //   return <div className="text-center">Carregando informações de pagamento...</div>;
+  // }
 
-  if (!appointmentData) {
-    return <div className="text-center">Detalhes da consulta não encontrados.</div>;
-  }
+  // if (!appointmentData) {
+  //   return <div className="text-center">Detalhes da consulta não encontrados.</div>;
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -141,25 +139,25 @@ const PatientPayment = () => {
             <div className="text-muted-foreground">
               <p>
                 <Calendar className="mr-2 inline-block h-4 w-4 align-middle" />
-                Data: {new Date(appointmentData.appointment_date).toLocaleDateString()}
+                Data: {/* {new Date(appointmentData?.appointment_date).toLocaleDateString()} */}
               </p>
               <p>
                 <Calendar className="mr-2 inline-block h-4 w-4 align-middle" />
-                Horário: {appointmentData.start_time} - {appointmentData.end_time}
+                Horário: {appointmentData?.start_time} - {appointmentData?.end_time}
               </p>
               <p>
                 <User className="mr-2 inline-block h-4 w-4 align-middle" />
-                Terapeuta: {appointmentData.therapist?.name || "Terapeuta"}
+                Terapeuta: {appointmentData?.therapist?.name || "Terapeuta"}
               </p>
               <p>
                 <Mail className="mr-2 inline-block h-4 w-4 align-middle" />
-                Email do Terapeuta: {appointmentData.therapist?.email || ""}
+                Email do Terapeuta: {appointmentData?.therapist?.email || ""}
               </p>
               <p>
                 <DollarSign className="mr-2 inline-block h-4 w-4 align-middle" />
-                Valor da Consulta: R$ {appointmentData.appointment_type.price}
+                Valor da Consulta: R$ {appointmentData?.appointment_type.price}
               </p>
-              <Badge variant="secondary">Status: {appointmentData.status}</Badge>
+              <Badge variant="secondary">Status: {appointmentData?.status}</Badge>
             </div>
           </div>
 

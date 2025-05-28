@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { UserRole } from "@prisma/client";
-import axios from 'axios';
+import axios from "axios";
 
 export async function GET(request: Request) {
   try {
-   // validarCRP('SP', '123456', '6');
+    // validarCRP('SP', '123456', '6');
     const mockData = {
       name: "John Doe",
       email: `john${Math.floor(Math.random() * 1000)}@example.com`,
@@ -33,7 +33,6 @@ export async function GET(request: Request) {
         // especialidade: ["psicologia clínica"],
         //abordagem: "Cognitivo-comportamental",
       };
-      console.log("", data);
       const createdProfessional = await tx.professional.create({
         data,
       });
@@ -48,20 +47,17 @@ export async function GET(request: Request) {
   }
 }
 
-
 async function validarCRP(uf: string, numero: string, digito: string) {
   try {
-    const response = await axios.post('https://cadastro.cfp.org.br/api/consulta-profissional', {
+    const response = await axios.post("https://cadastro.cfp.org.br/api/consulta-profissional", {
       uf,
       numero,
-      digito
+      digito,
     });
 
-    console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao validar CRP:', error);
+    console.error("Erro ao validar CRP:", error);
     return null;
   }
 }
-

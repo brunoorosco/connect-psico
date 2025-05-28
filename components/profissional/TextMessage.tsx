@@ -25,7 +25,6 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
         receiverId: professional.id, // <-- ID do profissional destino
         content: message.trim(),
       });
-      console.log(result)
       if (result.error) {
         toast.error("Erro ao enviar mensagem", {
           description: result.error,
@@ -55,7 +54,7 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
         <Button
           className="bg-therapy-primary hover:bg-therapy-tertiary"
           onClick={handleSendMessage}
-          disabled={!message || (message.trim() === "" || status !== "authenticated")}
+          disabled={!message || message.trim() === "" || status !== "authenticated"}
         >
           <MessageCircle className="h-4 w-4 mr-2" />
           Enviar mensagem

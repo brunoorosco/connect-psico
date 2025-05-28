@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -23,11 +18,7 @@ const availableSlots = {
   "2024-03-22": ["09:00", "10:00", "15:00", "16:00"],
 };
 
-export function ScheduleModal({
-  open,
-  onOpenChange,
-  psychologistName,
-}: ScheduleModalProps) {
+export function ScheduleModal({ open, onOpenChange, psychologistName }: ScheduleModalProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -43,40 +34,35 @@ export function ScheduleModal({
 
   const handleSchedule = () => {
     if (selectedDate && selectedTime) {
-      console.log("Agendamento:", {
-        date: selectedDate,
-        time: selectedTime,
-        psychologist: psychologistName,
-      });
       onOpenChange(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Agendar Consulta com {psychologistName}</DialogTitle>
         </DialogHeader>
-        <div className='grid gap-4 py-4'>
+        <div className="grid gap-4 py-4">
           <Calendar
-            mode='single'
+            mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            className='rounded-md border'
+            className="rounded-md border"
           />
           {selectedDate && (
-            <div className='space-y-4'>
-              <h4 className='font-medium'>Horários Disponíveis</h4>
-              <div className='grid grid-cols-2 gap-2'>
+            <div className="space-y-4">
+              <h4 className="font-medium">Horários Disponíveis</h4>
+              <div className="grid grid-cols-2 gap-2">
                 {getAvailableTimesForDate(selectedDate).map((time) => (
                   <Button
                     key={time}
                     variant={selectedTime === time ? "default" : "outline"}
-                    className='flex items-center gap-2'
+                    className="flex items-center gap-2"
                     onClick={() => setSelectedTime(time)}
                   >
-                    <Clock className='w-4 h-4' />
+                    <Clock className="w-4 h-4" />
                     {time}
                   </Button>
                 ))}
@@ -86,7 +72,7 @@ export function ScheduleModal({
           <Button
             onClick={handleSchedule}
             disabled={!selectedDate || !selectedTime}
-            className='mt-4'
+            className="mt-4"
           >
             Confirmar Agendamento
           </Button>
