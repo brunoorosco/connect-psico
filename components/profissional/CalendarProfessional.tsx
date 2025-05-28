@@ -1,4 +1,4 @@
-import React, { useState, useEffect, startTransition } from "react";
+import React, { useState, useEffect, startTransition, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
@@ -10,7 +10,6 @@ import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import useSWR from "swr";
 import { fetchProfessionalSchedule } from "@/hooks/useProfissionals";
-import { stat } from "fs";
 import { createAppointment } from "@/actions/appointments";
 
 type ProfessionalProps = {
@@ -22,6 +21,7 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [availableDatesSet, setAvailableDatesSet] = useState<Set<string>>(new Set());
 
   const {
     data: agendaProfissional,
@@ -37,26 +37,33 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
   );
 
   useEffect(() => {
-    if (!selectedDate || !agendaProfissional || agendaProfissional.length === 0) {
+    if (!agendaProfissional || agendaProfissional.length === 0) {
       setAvailableSlots([]);
+      setAvailableDatesSet(new Set());
       return;
     }
 
+    // Slots para horários
     const slots: string[] = agendaProfissional.map((interval: { start: Date }) => {
       const start = new Date(interval.start);
       start.setHours(start.getHours() + 3);
       return format(start, "HH:mm");
     });
-
     setAvailableSlots(slots);
-  }, [selectedDate, agendaProfissional]);
+
+    // Datas disponíveis (sem duplicatas) para o calendário
+    const dates = new Set(
+      agendaProfissional.map((interval: { start: Date }) =>
+        format(new Date(interval.start), "yyyy-MM-dd")
+      )
+    );
+    setAvailableDatesSet(dates);
+  }, [agendaProfissional]);
 
   const combineDateAndTime = (date: Date, timeString: string): Date => {
     const [hours, minutes] = timeString.split(":").map(Number);
-
     const combinedDate = new Date(date);
-    combinedDate.setHours(hours - 3, minutes, 0, 0); // zera segundos e ms
-
+    combinedDate.setHours(hours - 3, minutes, 0, 0);
     return combinedDate;
   };
 
@@ -98,13 +105,13 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
               date && (setSelectedDate(date), setSelectedSlot(null))
             }
             locale={ptBR}
-            className={cn(
-              "rounded-md border pointer-events-auto max-w-none w-full",
-            )}
+            className={cn("rounded-md border pointer-events-auto max-w-none w-full")}
             disabled={(date) => {
               const today = new Date();
-              today.setHours(0, 0, 0, 0); // zera horas para comparar só a data
-              return date < today || date.getDay() === 0; // bloqueia datas passadas e domingos
+              today.setHours(0, 0, 0, 0);
+              const dateStr = format(date, "yyyy-MM-dd");
+
+              return date < today || date.getDay() === 0 || !availableDatesSet.has(dateStr);
             }}
           />
         </div>
