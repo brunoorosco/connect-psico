@@ -8,7 +8,8 @@ import {
   GraduationCap,
   User,
   MessageCircle,
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  GroupIcon,
 } from "lucide-react";
 
 const useDynamicMenus = async () => {
@@ -16,10 +17,10 @@ const useDynamicMenus = async () => {
 
   const userId = session?.user?.id;
   const updatedMenus = menus.map((menu) => {
-      return {
-        ...menu,
-        url: menu.url.replace(/userId/g,`${userId}`),
-      };
+    return {
+      ...menu,
+      url: menu.url.replace(/userId/g, `${userId}`),
+    };
   });
 
   return updatedMenus;
@@ -54,8 +55,8 @@ export const menus = [
   },
   {
     title: "Pacientes",
-    url: "/app",
-    icon: Inbox,
+    url: "/app/professional/{userId}/pacientes",
+    icon: GroupIcon,
     rules: ["SUPERVISOR"],
   },
   {

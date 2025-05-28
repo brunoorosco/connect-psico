@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import MobileDrawer from "@/components/sidebar/MobileDrawer";
 import { useEffect, useState } from "react";
 import { se } from "date-fns/locale";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export default function Navbar({ userName }: { userName: string }) {
   const pathname = usePathname();
@@ -29,6 +30,7 @@ export default function Navbar({ userName }: { userName: string }) {
     };
   }, []);
 
+  const user = useCurrentUser();
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
@@ -37,7 +39,7 @@ export default function Navbar({ userName }: { userName: string }) {
           <MobileDrawer user={session?.user} />
         ) : (
           <nav className="flex items-center space-x-4">
-            {session?.user.role === "SUPERVISOR" && (
+            {user?.role === "SUPERVISOR" && (
               <>
                 <Link
                   href={`/app/professional/${session?.user.id}/minha-assinatura`}
@@ -71,7 +73,7 @@ export default function Navbar({ userName }: { userName: string }) {
                 </Link>
               </>
             )}
-            {session?.user.role === "DEFAULT" && (
+            {user?.role === "DEFAULT" && (
               <>
                 <Link
                   href={`/app/users/${session?.user.id}/minha-assinatura`}
@@ -103,7 +105,7 @@ export default function Navbar({ userName }: { userName: string }) {
                 </Link>
               </>
             )}
-            {session?.user.role === "ADMIN" && (
+            {user?.role === "ADMIN" && (
               <>
                 <Link
                   href={`/app/admin/${session?.user.id}/minha-assinatura`}
