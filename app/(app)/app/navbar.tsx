@@ -30,11 +30,15 @@ export default function Navbar() {
 
   const user = useCurrentUser();
   return (
-    <header className="bg-white shadow-sm h-14">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
+    <header className="bg-white shadow-sm">
+      <div>
         {isMobile && session ? (
-          // @ts-ignore
-          <MobileDrawer user={session} />
+          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
+            <MobileDrawer
+              // @ts-ignore
+              user={session}
+            />
+          </div>
         ) : (
           <></>
           // <nav className="flex items-center space-x-4">
