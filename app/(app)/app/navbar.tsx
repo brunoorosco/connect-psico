@@ -32,105 +32,107 @@ export default function Navbar() {
   return (
     <header className="bg-white shadow-sm h-14">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
-        {isMobile && session ? (
+        {isMobile && session && (
           // @ts-ignore
           <MobileDrawer user={session} />
-        ) : (
-          <nav className="flex items-center space-x-4">
-            {user?.role === "SUPERVISOR" && (
-              <>
-                <Link
-                  href={`/app/professional/${session?.id}/minha-assinatura`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/professional/${session?.id}/minha-assinatura`
-                        ? "underline"
-                        : ""
-                    )}
-                  >
-                    Minha Assinatura
-                  </Button>
-                </Link>
-                <Link
-                  href={`/app/professional/${session?.id}/profile`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/professional/${session?.id}/profile` ? "underline" : ""
-                    )}
-                  >
-                    Perfil
-                  </Button>
-                </Link>
-              </>
-            )}
-            {user?.role === "DEFAULT" && (
-              <>
-                <Link
-                  href={`/app/users/${session?.id}/minha-assinatura`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/users/${session?.id}/minha-assinatura` ? "underline" : ""
-                    )}
-                  >
-                    Minha Assinatura
-                  </Button>
-                </Link>
-                <Link
-                  href={`/app/users/${session?.id}/profile`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/users/${session?.id}/profile` ? "underline" : ""
-                    )}
-                  >
-                    Perfil
-                  </Button>
-                </Link>
-              </>
-            )}
-            {user?.role === "ADMIN" && (
-              <>
-                <Link
-                  href={`/app/admin/${session?.id}/minha-assinatura`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/admin/${session?.id}/minha-assinatura` ? "underline" : ""
-                    )}
-                  >
-                    Minha Assinatura
-                  </Button>
-                </Link>
-                <Link
-                  href={`/app/admin/${session?.id}/profile`}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <Button
-                    variant={"link"}
-                    className={cn(
-                      pathname === `/app/admin/${session?.id}/profile` ? "underline" : ""
-                    )}
-                  >
-                    Perfil
-                  </Button>
-                </Link>
-              </>
-            )}
-          </nav>
-        )}
+        )
+        //  : (
+        //   <nav className="flex items-center space-x-4">
+        //     {user?.role === "SUPERVISOR" && (
+        //       <>
+        //         <Link
+        //           href={`/app/professional/${session?.id}/minha-assinatura`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/professional/${session?.id}/minha-assinatura`
+        //                 ? "underline"
+        //                 : ""
+        //             )}
+        //           >
+        //             Minha Assinatura
+        //           </Button>
+        //         </Link>
+        //         <Link
+        //           href={`/app/professional/${session?.id}/profile`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/professional/${session?.id}/profile` ? "underline" : ""
+        //             )}
+        //           >
+        //             Perfil
+        //           </Button>
+        //         </Link>
+        //       </>
+        //     )}
+        //     {user?.role === "DEFAULT" && (
+        //       <>
+        //         <Link
+        //           href={`/app/users/${session?.id}/minha-assinatura`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/users/${session?.id}/minha-assinatura` ? "underline" : ""
+        //             )}
+        //           >
+        //             Minha Assinatura
+        //           </Button>
+        //         </Link>
+        //         <Link
+        //           href={`/app/users/${session?.id}/profile`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/users/${session?.id}/profile` ? "underline" : ""
+        //             )}
+        //           >
+        //             Perfil
+        //           </Button>
+        //         </Link>
+        //       </>
+        //     )}
+        //     {user?.role === "ADMIN" && (
+        //       <>
+        //         <Link
+        //           href={`/app/admin/${session?.id}/minha-assinatura`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/admin/${session?.id}/minha-assinatura` ? "underline" : ""
+        //             )}
+        //           >
+        //             Minha Assinatura
+        //           </Button>
+        //         </Link>
+        //         <Link
+        //           href={`/app/admin/${session?.id}/profile`}
+        //           className="text-gray-700 hover:text-gray-900"
+        //         >
+        //           <Button
+        //             variant={"link"}
+        //             className={cn(
+        //               pathname === `/app/admin/${session?.id}/profile` ? "underline" : ""
+        //             )}
+        //           >
+        //             Perfil
+        //           </Button>
+        //         </Link>
+        //       </>
+        //     )}
+        //   </nav>
+        // )
+        }
       </div>
     </header>
   );
