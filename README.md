@@ -17,12 +17,6 @@ Este Starter Kit foi desenvolvido para poupar seu tempo, oferecendo tudo o que v
 </div>
 
 
-## <img src="assets/wave.gif" alt="drawing" width="20"/> Detalhes Explicados no Meu Canal
-[![Youtube Badge](https://img.shields.io/badge/-@developerdeck101-cc181e?style=flat-square&logo=youtube&logoColor=white&link=https://www.youtube.com/developerdeck101)](https://www.youtube.com/developerdeck101)
-![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCj75B_51OXb9qH15wiHs-Hw?style=social)
-![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCj75B_51OXb9qH15wiHs-Hw)
-
-
 
 Este é um template de projeto de autenticação e autorização implementado em [Next.js](https://nextjs.org/) e [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 Foi incluído a inicialização com [Shadcn-ui](https://ui.shadcn.com/), prisma [Prisma](https://www.prisma.io/), Authjs | Next-Auth [Authjs](https://authjs.dev/) utilizando banco de dados [PostgreSQL](https://www.postgresql.org/)
