@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import MobileDrawer from "@/components/sidebar/MobileDrawer";
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-
+import { update} from"@/auth";
 export default function Navbar() {
   const pathname = usePathname();
   const session = useCurrentUser();

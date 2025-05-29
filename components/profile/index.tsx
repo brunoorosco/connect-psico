@@ -24,7 +24,7 @@ const ProfileProfessionalForm: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   });
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const { user, loading, error } = useGetProfessionalById(session?.user.id);
 
   async function onSubmit(data: ProfileFormValues) {
@@ -40,6 +40,15 @@ const ProfileProfessionalForm: React.FC = () => {
         };
 
         const result = await updateProfessionalProfile(session.user.id, payload);
+        update({session:{
+          user: {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            image: data.profilePhoto,
+            isProfileCompleted: true,
+          },
+        }});
 
         toast.success(result.success!, {
           description: "Suas informações foram salvas.",
@@ -67,6 +76,7 @@ const ProfileProfessionalForm: React.FC = () => {
         tempoConsulta: user.tempoConsulta,
         publicoAlvo: user.publicoAlvo || [],
         professionalId: user.id,
+        tipoAtendimento: user.tipoAtendimento,
       });
     }
   }, [user, form]);

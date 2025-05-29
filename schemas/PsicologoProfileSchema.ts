@@ -22,7 +22,7 @@ export const profileSchema = z.object({
   publicoAlvo: z.array(z.string()).min(1, { message: "Selecione pelo menos um público" }),
   tempoConsulta: z.number().min(30, { message: "Duração mínima é de 30 minutos" }).max(120),
   valorAtendimento: z.number().min(50, { message: "Valor mínimo é de R$50" }),
-  tipoAtendimento: z.enum(["remote", "presential", "both"], {
+  tipoAtendimento: z.enum(["remoto", "presencial", "ambos"], {
     message: "Selecione o tipo de atendimento",
   }),
   availableDays: z.array(z.string()).min(1, { message: "Selecione pelo menos um dia disponível" }).optional(),
@@ -51,7 +51,7 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
   experiencia: 0,
   tempoConsulta: 50,
   valorAtendimento: 150,
-  tipoAtendimento: "both",
+  tipoAtendimento: "ambos",
   availableDays: [],
   availableHours: [
     {

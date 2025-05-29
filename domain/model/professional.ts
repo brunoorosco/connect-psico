@@ -18,7 +18,7 @@ type Professional = {
   publicoAlvo: string[];
   numConselho: string;
   ufConselho: string;
-  tipoAtendimento: "remote" | "presential" | "both";
+  tipoAtendimento: "remoto" | "presencial" | "ambos";
   createdAt: Date;
   udpatedAt: Date;
   phone: string

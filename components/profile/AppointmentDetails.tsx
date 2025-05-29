@@ -106,7 +106,6 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
             )}
           />
         </div>
-
         <FormField
           control={control}
           name="tipoAtendimento"
@@ -120,20 +119,20 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
                   className="flex flex-col space-y-1"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="remote" id="remote" />
-                    <FormLabel htmlFor="remote" className="font-normal flex items-center gap-1">
+                    <RadioGroupItem value="remoto" id="remoto" />
+                    <FormLabel htmlFor="remoto" className="font-normal flex items-center gap-1">
                       <Video className="h-4 w-4" /> Somente Remoto
                     </FormLabel>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="presential" id="presential" />
-                    <FormLabel htmlFor="presential" className="font-normal flex items-center gap-1">
+                    <RadioGroupItem value="presencial" id="presencial" />
+                    <FormLabel htmlFor="presencial" className="font-normal flex items-center gap-1">
                       <MapPin className="h-4 w-4" /> Somente Presencial
                     </FormLabel>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="both" id="both" />
-                    <FormLabel htmlFor="both" className="font-normal flex items-center gap-1">
+                    <RadioGroupItem value="ambos" id="ambos" />
+                    <FormLabel htmlFor="ambos" className="font-normal flex items-center gap-1">
                       <Globe className="h-4 w-4" /> Ambos
                     </FormLabel>
                   </div>
