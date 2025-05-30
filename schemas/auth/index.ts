@@ -10,12 +10,30 @@ export const RegisterSchema = z.object({
   name: z.string().min(5),
   email: z.string().email(),
   password: z.string().min(6),
-  numConselho: z.optional(z.string()),
-  ufConselho: z.optional(z.string().length(2)),
-  especialidade: z.optional(z.string()),
-  publico: z.optional(z.string()),
+  numConselho: z.string().optional(),
+  ufConselho: z.string().optional(),
+  especialidade: z.string().optional(),
+  publico: z.string().optional(),
   professional: z.boolean(),
   phone: z.string(),
+})
+.superRefine((data, ctx) => {
+  if (data.professional) {
+    if (!data.ufConselho || data.ufConselho.length !== 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "UF do conselho é obrigatório e deve ter 2 caracteres.",
+        path: ["ufConselho"],
+      });
+    }
+    if (!data.numConselho || data.numConselho.length < 4) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Número do conselho é obrigatório e deve ter pelo menos 4 dígitos.",
+        path: ["numConselho"],
+      });
+    }
+  }
 });
 // .refine(
 //   (values) => {
