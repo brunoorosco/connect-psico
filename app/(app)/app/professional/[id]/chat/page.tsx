@@ -1,10 +1,8 @@
 import MessagesList from "@/components/dashboard/MessageList";
 import { getMessages } from "@/actions/messages";
-import { auth } from "@/auth";
 
 const Messages = async () => {
-  const session = await auth();
-  const result = await getMessages(session?.user.id as string);
+  const result = await getMessages();
 
   if ("error" in result) {
     return <div>Erro: {result.error}</div>;
