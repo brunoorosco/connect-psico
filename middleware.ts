@@ -21,7 +21,7 @@ export default auth(async (req) => {
 
   const session = await midAuth();
 
-  const userRole = session?.user.role; 
+  const userRole = session?.user.role;
   const userId = session?.user.id;
   // @ts-ignore
   const isProfileCompleted = session?.user.isProfileCompleted;
@@ -39,14 +39,8 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  if (
-    isLoggedIn &&
-    !isProfileCompleted &&
-    !req.nextUrl.pathname.startsWith(`/app/professional/${userId}/profile`)
-  ) {
-    return NextResponse.redirect(
-      new URL(`/app/professional/${userId}/profile`, req.url)
-    );
+  if (isLoggedIn && !isProfileCompleted && userRole === "SUPERVISOR") {
+    return NextResponse.redirect(new URL(`/app/professional/${userId}/profile`, req.url));
   }
 });
 
