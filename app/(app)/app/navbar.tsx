@@ -1,16 +1,10 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import MobileDrawer from "@/components/sidebar/MobileDrawer";
 import { useEffect, useState } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { update} from"@/auth";
+import { update } from "@/auth";
 export default function Navbar() {
   const pathname = usePathname();
-  const session = useCurrentUser();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -28,16 +22,12 @@ export default function Navbar() {
     };
   }, []);
 
-  const user = useCurrentUser();
   return (
     <header className="bg-white shadow-sm">
       <div>
-        {isMobile && session ? (
+        {isMobile ? (
           <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
-            <MobileDrawer
-              // @ts-ignore
-              user={session}
-            />
+            <MobileDrawer />
           </div>
         ) : (
           <></>

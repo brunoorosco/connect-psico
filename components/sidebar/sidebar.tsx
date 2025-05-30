@@ -29,6 +29,7 @@ export async function AppSidebar() {
   const urlProfile = `${urlBase}/${session?.user.id}/profile`;
   const urlMinhaConta = `${urlBase}/${session?.user.id}/minha-assinatura`;
   const urlMeusPagamentos = `${urlBase}/${session?.user.id}/pagamentos`;
+
   const getInitials = (name: string) => {
     const nameParts = name.split(" ");
     if (nameParts.length > 1) {

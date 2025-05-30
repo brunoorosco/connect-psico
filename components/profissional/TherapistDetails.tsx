@@ -69,9 +69,9 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                   <MapPin className="h-4 w-4 text-therapy-primary" />
                   <span className="text-sm">
                     Atendimento:{" "}
-                    {professional.tipoAtendimento === "remote"
+                    {professional.tipoAtendimento === "remoto"
                       ? "Online"
-                      : professional.tipoAtendimento === "presential"
+                      : professional.tipoAtendimento === "presencial"
                       ? "Presencial"
                       : "Online e Presencial"}
                   </span>
@@ -85,10 +85,10 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-therapy-primary" />
                   <span className="text-sm">
-                    {(Number(professional?.valorAtendimento) / 100).toLocaleString(
-                      "pt-BR",
-                      { style: "currency", currency: "BRL" }
-                    )}{" "}
+                    {(Number(professional?.valorAtendimento) / 100).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}{" "}
                     / sessão
                   </span>
                 </div>
