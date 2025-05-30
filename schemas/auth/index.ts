@@ -14,7 +14,7 @@ export const RegisterSchema = z.object({
   ufConselho: z.string().optional(),
   especialidade: z.string().optional(),
   publico: z.string().optional(),
-  professional: z.boolean(),
+  professional: z.coerce.boolean(),
   phone: z.string(),
 })
 .superRefine((data, ctx) => {
@@ -22,14 +22,14 @@ export const RegisterSchema = z.object({
     if (!data.ufConselho || data.ufConselho.length !== 2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "UF do conselho é obrigatório e deve ter 2 caracteres.",
+        message: "Deve ter 2 caracteres.",
         path: ["ufConselho"],
       });
     }
     if (!data.numConselho || data.numConselho.length < 4) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Número do conselho é obrigatório e deve ter pelo menos 4 dígitos.",
+        message: "Deve ter pelo menos 4 dígitos.",
         path: ["numConselho"],
       });
     }

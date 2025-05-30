@@ -28,7 +28,6 @@ import AuthFormMessage from "./auth-form-message";
 export default function RegisterForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isProfessional, setIsProfessional] = useState(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
@@ -41,7 +40,7 @@ export default function RegisterForm() {
       numConselho: "",
       ufConselho: "",
       especialidade: "",
-      professional: isProfessional,
+      professional: false,
       phone: "",
     },
   });
@@ -49,7 +48,6 @@ export default function RegisterForm() {
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     startTransition(async () => {
       try {
-        values.professional = isProfessional;
         const { success, error } = await register(values);
         if (error) setError(error);
         setSuccess(success || "");
@@ -74,9 +72,12 @@ export default function RegisterForm() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center rounded-lg p-3 shadow-sm">
                     <FormControl>
-                      <Switch checked={isProfessional} onCheckedChange={setIsProfessional} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(checked) => form.setValue("professional", checked)}
+                      />
                     </FormControl>
-                    <FormLabel className="h-5 ml-2">Registro Profissonal</FormLabel>
+                    <FormLabel className="h-5 ml-2">Registro Profissional</FormLabel>
                   </FormItem>
                 )}
               />
@@ -152,7 +153,7 @@ export default function RegisterForm() {
                 )}
               />
 
-              {isProfessional && (
+              {form.watch("professional") && (
                 <div className="flex gap-2">
                   <div className="w-1/3">
                     <FormField
@@ -184,7 +185,12 @@ export default function RegisterForm() {
                         <FormItem>
                           <FormLabel>Nº de Registro</FormLabel>
                           <FormControl>
-                            <Input placeholder="123412" {...field} disabled={isPending} maxLength={6} />
+                            <Input
+                              placeholder="123412"
+                              {...field}
+                              disabled={isPending}
+                              maxLength={6}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
