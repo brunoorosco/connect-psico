@@ -30,3 +30,5 @@ export const createMessage = async (data: z.infer<typeof CreateMessageSchema>) =
     throw error
   }
 }
+
+export default createMessage

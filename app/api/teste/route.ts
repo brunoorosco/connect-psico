@@ -1,8 +1,10 @@
-import { getMessages } from "@/actions/messages";
+import { getMessages } from "@/actions/messages/getMessages";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async(req: NextRequest) => {
-    const resp = await getMessages("user_1");
+    
+    // const email = await sendEmail({})
+    const resp = await getMessages();
     console.log(resp)
     return NextResponse.json({
             resp

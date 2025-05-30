@@ -1,5 +1,5 @@
+import { getMessages } from "@/actions/messages/getMessages";
 import MessagesList from "@/components/dashboard/MessageList";
-import { getMessages } from "@/actions/messages";
 
 const Messages = async () => {
   const result = await getMessages();
