@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { createMessage } from "@/actions/messages";
+import { useSession } from "next-auth/react";
 
 type MessageModel = {
   id?: string;
@@ -29,12 +30,37 @@ const formatMessageTime = (dateInput: Date | string) => {
   return isToday ? time : `${formattedDate} - ${time}`;
 };
 
+type MessageItemProps = {
+  message: MessageModel;
+  currentUserId: string;
+};
+
+const MessageItem = ({ message, currentUserId }: MessageItemProps) => {
+  const isCurrentUser = message.senderId === currentUserId;
+
+  return (
+    <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`max-w-xs p-2 rounded-lg ${
+          isCurrentUser
+            ? "bg-blue-500 text-white rounded-br-none"
+            : "bg-gray-200 text-gray-800 rounded-bl-none"
+        }`}
+      >
+        <div className="text-sm">{message.content}</div>
+        <div className="text-xs mt-1 opacity-70">{formatMessageTime(message.createdAt)}</div>
+      </div>
+    </div>
+  );
+};
+
 const MessagesList = ({ messages }: MessagesListProps) => {
-  const [selectedMessage, setSelectedMessage] = useState<MessageModel | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<MessageModel[] | null>(null);
+  const [selectedUserConversation, setSelectedUserConversation] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState<string>("");
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const { data: session } = useSession();
 
-  console.log("MessagesList rendered", messages);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -44,18 +70,21 @@ const MessagesList = ({ messages }: MessagesListProps) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleSelectConversation = (message: MessageModel) => {
-    console.log("Message selected:", message);
-    setSelectedMessage(message);
+  const handleSelectConversation = (messages: MessageModel[], userConversation: string) => {
+    setSelectedMessage(messages);
+    setSelectedUserConversation(userConversation);
     setReplyContent("");
   };
 
   const handleReplySend = () => {
-    if (!selectedMessage || !replyContent.trim()) return;
+    if (!selectedMessage || !replyContent.trim() || !session?.user.id) return;
+
+    const lastMessage = selectedMessage[selectedMessage.length - 1];
 
     const { senderId, receiverId } = {
-      senderId: selectedMessage.receiverId,
-      receiverId: selectedMessage.senderId,
+      senderId: session.user.id,
+      receiverId:
+        lastMessage.senderId === session.user.id ? lastMessage.receiverId : lastMessage.senderId,
     };
 
     startTransition(async () => {
@@ -68,7 +97,9 @@ const MessagesList = ({ messages }: MessagesListProps) => {
       if (result.error) {
         toast.error("Erro ao enviar mensagem", { description: result.error });
       } else {
-        toast.success("Mensagem enviada!", { description: "Sua mensagem foi enviada com sucesso!" });
+        toast.success("Mensagem enviada!", {
+          description: "Sua mensagem foi enviada com sucesso!",
+        });
         setReplyContent("");
       }
     });
@@ -78,50 +109,68 @@ const MessagesList = ({ messages }: MessagesListProps) => {
     setSelectedMessage(null);
   };
 
-  const lastMessages = messages.map((conversation:any) => {
-  const key = Object.keys(conversation)[0];
-  const messages = conversation[key];
-  const lastMessage = messages[messages.length - 1];
-  
-  return { conversationId: key, lastMessage };
-});
+  const messagesUsers = messages.map((conversation: any) => {
+    const key = Object.keys(conversation)[0];
+    const conversationId = conversation[key];
+    const messageBySort = conversation.messages.sort(
+      (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const lastMessageUserId = conversationId.split("-")[1];
+    const nameUser =
+      lastMessageUserId === messageBySort[0].senderId
+        ? messageBySort[0].sender.name
+        : messageBySort[0].receiver.name;
 
-console.log("lastMessages:", lastMessages);
+    return {
+      conversationId,
+      lastMessage: messageBySort[0],
+      name: nameUser,
+      messages: conversation.messages,
+    };
+  });
 
-  const renderConversation = (message: MessageModel) => (
-    <Card className="therapy-card">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">
-          Conversa com {message.sender.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="p-2 rounded-md border bg-white">
-          <div className="text-sm text-gray-700">{message.content}</div>
-          <div className="text-xs text-gray-500">{formatMessageTime(message.createdAt)}</div>
-        </div>
+  function renderMessages(messages: MessageModel[], currentUserId: string) {
+    return messages.map((message, index) => (
+      <MessageItem key={index} message={message} currentUserId={currentUserId} />
+    ));
+  }
 
-        <Textarea
-          value={replyContent}
-          onChange={(e) => setReplyContent(e.target.value)}
-          placeholder={`Responder para ${message.sender.name}`}
-          className="w-full text-sm"
-          rows={3}
-        />
-        <div className="flex justify-end">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleReplySend}
-            disabled={!replyContent.trim()}
-            className="text-xs"
-          >
-            Enviar
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  function renderConversation(messages: MessageModel[], currentUserId?: string) {
+    return (
+      <Card className="therapy-card">
+        <CardHeader className="p-2">
+          <CardTitle className="text-lg text-therapy-tertiary">
+            Conversa com {selectedUserConversation}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 p-2">
+          <div className="flex flex-col space-y-2">
+            {currentUserId && renderMessages(messages.reverse(), currentUserId)}
+          </div>
+          <div className="mt-4">
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Digite sua mensagem..."
+              className="w-full text-sm"
+              rows={3}
+            />
+            <div className="flex justify-end mt-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleReplySend}
+                disabled={!replyContent.trim()}
+                className="text-xs"
+              >
+                Enviar
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isMobile && selectedMessage) {
     return (
@@ -129,7 +178,7 @@ console.log("lastMessages:", lastMessages);
         <Button variant="outline" size="sm" onClick={handleBackToList}>
           Voltar
         </Button>
-        {renderConversation(selectedMessage)}
+        {renderConversation(selectedMessage, session?.user.id)}
       </div>
     );
   }
@@ -142,31 +191,32 @@ console.log("lastMessages:", lastMessages);
           <CardTitle className="text-lg text-therapy-tertiary">Conversas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 p-2">
-          {messages.length === 0 ? (
+          {messagesUsers.length === 0 ? (
             <p className="text-gray-500 text-sm">Não há mensagens recentes</p>
           ) : (
-            messages
+            messagesUsers
               .sort(
                 (a, b) =>
-                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                  new Date(b.lastMessage.createdAt).getTime() -
+                  new Date(a.lastMessage.createdAt).getTime()
               )
               .map((message) => (
                 <div
-                  key={message.id}
+                  key={message.conversationId}
                   className={`p-2 rounded-md border cursor-pointer ${
-                    selectedMessage?.id === message.id
+                    selectedMessage?.[0]?.id === message.conversationId
                       ? "bg-therapy-light/50"
                       : "bg-white"
                   }`}
-                  onClick={() => handleSelectConversation(message)}
+                  onClick={() => handleSelectConversation(message.messages, message.name)}
                 >
                   <div className="flex justify-between items-center">
-                    <div className="font-medium">{message.sender.name}</div>
+                    <div className="font-medium">{message.name || ""}</div>
                     <div className="text-xs text-gray-500">
-                      {formatMessageTime(message.createdAt)}
+                      {formatMessageTime(message.lastMessage.createdAt)}
                     </div>
                   </div>
-                  <p className="text-gray-700 line-clamp-2">{message.content}</p>
+                  <p className="text-gray-700 line-clamp-2">{message.lastMessage.content}</p>
                 </div>
               ))
           )}
@@ -176,7 +226,7 @@ console.log("lastMessages:", lastMessages);
       {/* Conversa completa */}
       <div>
         {selectedMessage ? (
-          renderConversation(selectedMessage)
+          renderConversation(selectedMessage, session?.user.id)
         ) : (
           <p className="text-gray-500">Selecione uma conversa para visualizar</p>
         )}
