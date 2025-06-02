@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const ReplyBox = ({ replyContent, onChange, onSend }: Props) => (
-  <div className="mt-4">
+  <div className="mt-4 border-t">
     <Textarea
       value={replyContent}
       onChange={(e) => onChange(e.target.value)}
