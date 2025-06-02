@@ -16,6 +16,7 @@ export const updateProfessionalProfile = async (
   data: z.infer<typeof profileSchema>
 ) => {
   const valid = await profileSchema.safeParseAsync(data)
+  console.log(data)
 
   if (!valid.success) {
     return {
@@ -43,6 +44,7 @@ export const updateProfessionalProfile = async (
             valorAtendimento: data.valorAtendimento,
             tempoConsulta: data.tempoConsulta,
             publicoAlvo: data.publicoAlvo,
+            tipoAtendimento: data.tipoAtendimento,
           },
         }
       },
