@@ -1,4 +1,4 @@
-import AppointmentCalendar from "@/components/profissional/agedamentos";
+import AppointmentCalendar from "@/components/agenda/AppointmentCalender";
 
 export default function Page() {
   return <AppointmentCalendar />;
