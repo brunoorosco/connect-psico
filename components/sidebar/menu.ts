@@ -6,10 +6,10 @@ import {
   Settings,
   LogOut,
   GraduationCap,
-  User,
+  HomeIcon,
   MessageCircle,
   CalendarDaysIcon,
-  GroupIcon,
+  Users,
 } from "lucide-react";
 
 const useDynamicMenus = async () => {
@@ -38,25 +38,25 @@ export const menus = [
   {
     title: "Dashboard do Supervisores",
     url: "/app/professional",
-    icon: Inbox,
+    icon: Home,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard do Estudantes",
     url: "/app/professional/{userId}/pacientes",
-    icon: GraduationCap,
+    icon: Users,
     rules: ["ADMIN"],
   },
   {
     title: "Dashboard",
     url: "/app",
-    icon: Inbox,
+    icon: Home,
     rules: ["SUPERVISOR"],
   },
   {
     title: "Pacientes",
     url: "/app/professional/{userId}/pacientes",
-    icon: GroupIcon,
+    icon: Users,
     rules: ["SUPERVISOR"],
   },
   {
