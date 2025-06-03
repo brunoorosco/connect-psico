@@ -7,7 +7,7 @@ import AppointmentsList from "./AppointmentList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAppointments, useAppointmentsByPatient } from "@/hooks/useAppointments";
-import { Appointment } from "@/domain/model/appointment";
+import { AppointmentModel } from "@/domain/model/appointment";
 
 // Mock data for the patient dashboard
 interface ProgressNote {
@@ -52,16 +52,16 @@ const PatientDashboard: React.FC = () => {
   // Filter past appointments
   // @ts-ignore
   const pastAppointments = appointments?.filter(
-    (app: Appointment) => app.appointmentDate < new Date()
+    (app: AppointmentModel) => app.appointmentDate < new Date()
   );
 
   // Filter future appointments
   const futureAppointments = appointments
-    ?.map((app: Appointment) => ({
+    ?.map((app: AppointmentModel) => ({
       ...app,
       id: app.id,
     }))
-    .filter((app: Appointment) => app.status === "PENDING");
+    .filter((app: AppointmentModel) => app.status === "PENDING");
 
   return (
     <div className="space-y-6">
@@ -130,7 +130,7 @@ const PatientDashboard: React.FC = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
             <div className="space-y-3">
-              {pastAppointments?.map((appointment: Appointment) => (
+              {pastAppointments?.map((appointment: AppointmentModel) => (
                 <Card key={appointment.id} className="therapy-card border-l-4 border-l-slate-400">
                   <CardContent className="p-4">
                     <div className="flex justify-between">

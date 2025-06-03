@@ -1,13 +1,24 @@
 "use server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
+import { AppointmentModel } from "@/domain/model/appointment";
 
-interface PaginationParams {
+type PaginationParams = {
   page?: number;
   limit?: number;
-}
+};
 
-export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationParams) => {
+type Response = {
+  data?: AppointmentModel[];
+  total: number;
+  page: number;
+  lastPage: number;
+};
+
+export const getAppointmentsUsers = async ({
+  page = 1,
+  limit = 10,
+}: PaginationParams): Promise<Response>  => {
   const skip = (page - 1) * limit;
   const session = await auth();
   if (!session) {
@@ -26,6 +37,8 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
         id: true,
         appointmentDate: true,
         status: true,
+        professionalId: true,
+        patientId: true,
         professional: {
           select: {
             name: true,
@@ -66,7 +79,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     };
   });
   return {
-    data: mappedUsers,
+    data: mappedUsers as AppointmentModel[],
     total,
     page,
     lastPage: Math.ceil(total / limit),

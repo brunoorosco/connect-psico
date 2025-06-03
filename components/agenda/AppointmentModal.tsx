@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Appointment, Patient } from '@/types/appointment';
+import { Patient } from '@/types/appointment';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
+import { AppointmentModel } from '@/domain/model/appointment';
 
 const TIME_REGEX = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -47,9 +48,9 @@ type AppointmentFormValues = z.infer<typeof appointmentSchema>;
 interface AppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (appointment: Appointment) => void;
+  onSave: (appointment: AppointmentModel) => void;
   selectedDate: Date;
-  editingAppointment: Appointment | null;
+  editingAppointment: AppointmentModel | null;
 }
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -77,10 +78,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   useEffect(() => {
     if (editingAppointment) {
       form.reset({
-        patientId: editingAppointment.patientId,
-        date: editingAppointment.date || format(new Date(editingAppointment.appointmentDate), 'yyyy-MM-dd'),
-        startTime: editingAppointment.startTime || format(new Date(editingAppointment.appointmentDate), 'HH:mm'),
-        endTime: editingAppointment.endTime || format(new Date(editingAppointment.appointmentDate), 'HH:mm'),
+        patientId: editingAppointment.patient.id,
+        date: format(new Date(editingAppointment.appointmentDate), 'yyyy-MM-dd'),
+        startTime: format(new Date(editingAppointment.appointmentDate), 'HH:mm'),
+        endTime: editingAppointment.duration 
+          ? format(new Date(new Date(editingAppointment.appointmentDate).getTime() + editingAppointment.duration * 60000), 'HH:mm') 
+          : '09:30',
         notes: editingAppointment.notes || '',
       });
     } else {
@@ -106,24 +109,37 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       return;
     }
 
-    // Create appointmentDate from date and startTime
-    const appointmentDateTime = new Date(`${values.date}T${values.startTime}:00`);
+    // Criar appointmentDate combinando date e startTime
+    const appointmentDate = new Date(`${values.date}T${values.startTime}:00`);
 
-    const newAppointment: Appointment = {
+    // Calcular duração em minutos
+    const [startHour, startMinute] = values.startTime.split(':').map(Number);
+    const [endHour, endMinute] = values.endTime.split(':').map(Number);
+
+    const duration = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+
+    const newAppointment: AppointmentModel = {
       id: editingAppointment?.id || `a${Date.now()}`,
-      professionalId: "prof1", // Default professional for now
+      professionalId: "prof1",
+      professional: {
+        id: "prof1",
+        name: "Dr. Fulano",
+        telefone: "00000000",
+        email: "dr@clinic.com"
+      },
       patientId: selectedPatient.id,
-      appointmentDate: appointmentDateTime.toISOString(),
+      patient: {
+        id: selectedPatient.id,
+        name: selectedPatient.name,
+        telefone: selectedPatient.phoneNumber || '1111111111' ,
+        email: selectedPatient.email || 'teste@TestTube.com'
+      },
+      appointmentDate,
       status: "PENDING",
-      createdAt: new Date().toISOString(),
-      patient: selectedPatient,
-      // Legacy fields for compatibility
-      date: values.date,
-      startTime: values.startTime,
-      endTime: values.endTime,
+      createdAt: new Date(),
       notes: values.notes,
-      patientName: selectedPatient.name,
-      isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId,
+      duration,
+      isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId
     };
 
     onSave(newAppointment);
@@ -164,9 +180,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                           )}
                         >
                           {field.value
-                            ? patients.find(
-                                (patient) => patient.id === field.value
-                              )?.name
+                            ? patients.find(p => p.id === field.value)?.name
                             : "Selecione um paciente"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
