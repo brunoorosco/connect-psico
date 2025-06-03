@@ -2,26 +2,17 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
 
-interface PaginationParams {
+interface PaginationParams1 {
   page?: number;
   limit?: number;
 }
 
-export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: PaginationParams) => {
+export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: PaginationParams1) => {
   const skip = (page - 1) * limit;
   const session = await auth();
   if (!session) {
     throw new Error("User not found");
   }
-
-  const omitData = {
-    omit: {
-      password: true,
-      emailVerified: true,
-      isTwoFactorAuthEnabled: true,
-      twoFactorAuthVerified: true,
-    },
-  };
 
   const [users, total] = await Promise.all([
    await prisma.appointment.findMany({

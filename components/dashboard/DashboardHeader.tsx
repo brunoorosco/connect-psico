@@ -18,7 +18,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const today = new Date();
   
   return (
-    <div className="mb-6">
+    <div className="mb-5">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{title}</h1>
@@ -29,10 +29,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
           </div>
         </div>
-      </div>
-      <div className="mt-4 flex items-center">
-        <div className="w-2 h-2 rounded-full bg-therapy-primary mr-2"></div>
-        <span className="text-sm text-gray-500 capitalize">{userRole === "SUPERVISOR" ? "Visão de Psicólogo" : "Visão de Paciente"}</span>
       </div>
     </div>
   );
