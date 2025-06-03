@@ -1,16 +1,16 @@
 import React from 'react';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { Appointment } from '@/types/appointment';
+import { AppointmentModel } from '@/domain/model/appointment';
 
 interface MonthlyViewProps {
   selectedDate: Date;
-  appointments: Appointment[];
+  appointments: AppointmentModel[];
   onAddAppointment: (date: Date) => void;
   onDateSelect: (date: Date | undefined) => void;
 }
@@ -22,8 +22,7 @@ const MonthlyView: React.FC<MonthlyViewProps> = ({
   onDateSelect
 }) => {
   const getAppointmentsForDate = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return appointments.filter(apt => apt.date === dateStr);
+    return appointments.filter(apt => isSameDay(apt.appointmentDate, date));
   };
 
   return (
@@ -51,9 +50,9 @@ const MonthlyView: React.FC<MonthlyViewProps> = ({
               day_selected: "bg-medical !text-white hover:bg-medical focus:bg-medical",
             }}
             components={{
-              DayContent: ({ date, displayMonth }) => {
+              DayContent: ({ date }) => {
                 const dayAppointments = getAppointmentsForDate(date);
-                const isSelected = selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+                const isSelected = selectedDate && isSameDay(selectedDate, date);
                 
                 return (
                   <div className="flex flex-col items-center w-full h-full">

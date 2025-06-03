@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Appointment, CalendarViewType } from "@/domain/model/appointment";
+import { AppointmentModel, CalendarViewType } from "@/domain/model/appointment";
 import CalendarNavigation from "@/components/dashboard/CalendarNavigation";
 import { useAppointmentsByPatient } from "@/hooks/useAppointments";
 
@@ -29,7 +29,7 @@ const AppointmentCalendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<CalendarViewType>("daily");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [editingAppointment, setEditingAppointment] = useState<AppointmentModel | null>(null);
   const { toast } = useToast();
 
    const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient();
@@ -37,7 +37,7 @@ const AppointmentCalendar: React.FC = () => {
       fetchAppointments();
     }, []);
     
-  const handleSaveAppointment = (appointment: Appointment) => {
+  const handleSaveAppointment = (appointment: AppointmentModel) => {
     if (editingAppointment) {
       // Update existing appointment
       // setAppointments(appointments.map((apt) => (apt.id === appointment.id ? appointment : apt)));
@@ -66,7 +66,7 @@ const AppointmentCalendar: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditAppointment = (appointment: Appointment) => {
+  const handleEditAppointment = (appointment: AppointmentModel) => {
     setEditingAppointment(appointment);
     // setSelectedDate(parseISO(appointment.createdAt));
     setIsModalOpen(true);

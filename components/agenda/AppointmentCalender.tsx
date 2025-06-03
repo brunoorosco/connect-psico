@@ -1,42 +1,50 @@
 'use client'
-import React, { useState } from 'react';
-import { Appointment, CalendarViewType } from '@/types/appointment';
+import React, { useEffect, useState } from 'react';
+import { CalendarViewType } from '@/types/appointment';
 import AppointmentList from './AppointmentList';
 import CalendarHeader from './CalendarHeader';
 import AppointmentModal from './AppointmentModal';
 import DailyView from './DailyView';
 import WeeklyView from './WeeklyView';
 import MonthlyView from './MonthlyView';
-import { parseISO } from 'date-fns';
-import { mockAppointments } from './mockData';
 import { useToast } from '@/components/ui/use-toast';
+import { AppointmentModel } from '@/domain/model/appointment';
 
-const AppointmentCalendar: React.FC = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
+type Props = {
+  appointments: AppointmentModel[]
+};
+
+const AppointmentCalendar = ({appointments}: Props)=> {
+  // const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [view, setView] = useState<CalendarViewType>('daily');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [editingAppointment, setEditingAppointment] = useState<AppointmentModel | null>(null);
   const { toast } = useToast();
 
-  const handleSaveAppointment = (appointment: Appointment) => {
+  useEffect(() => {
+    // Fetch appointments from the server
+    // setAppointments(fetchedAppointments);
+  }, []);
+
+  const handleSaveAppointment = (appointment: AppointmentModel) => {
     if (editingAppointment) {
       // Update existing appointment
-      setAppointments(appointments.map(apt => 
-        apt.id === appointment.id ? appointment : apt
-      ));
+      // setAppointments(appointments.map(apt => 
+      //   apt.id === appointment.id ? appointment : apt
+      // ));
       
       toast({
         title: "Consulta atualizada",
-        description: `A consulta de ${appointment.patientName} foi atualizada com sucesso.`
+        description: `A consulta de ${appointment.patient.name} foi atualizada com sucesso.`
       });
     } else {
       // Add new appointment
-      setAppointments([...appointments, appointment]);
+      // setAppointments([...appointments, appointment]);
       
       toast({
         title: "Consulta agendada",
-        description: `Nova consulta para ${appointment.patientName} agendada com sucesso.`
+        description: `Nova consulta para ${appointment.patient.name} agendada com sucesso.`
       });
     }
     
@@ -50,9 +58,9 @@ const AppointmentCalendar: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditAppointment = (appointment: Appointment) => {
+  const handleEditAppointment = (appointment: AppointmentModel) => {
     setEditingAppointment(appointment);
-    setSelectedDate(parseISO(appointment.date as string))
+    setSelectedDate(appointment.appointmentDate)
     setIsModalOpen(true);
   };
 

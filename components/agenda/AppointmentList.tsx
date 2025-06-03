@@ -1,78 +1,60 @@
-import React from 'react';
-import { Appointment } from '@/types/appointment';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Clock, Edit } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { format, isSameDay, isSameWeek, isSameMonth } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Clock, Edit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AppointmentModel } from "@/domain/model/appointment";
 
 interface AppointmentListProps {
-  appointments: Appointment[];
+  appointments: AppointmentModel[];
   selectedDate: Date;
-  onEditAppointment: (appointment: Appointment) => void;
-  view: 'daily' | 'weekly' | 'monthly';
+  onEditAppointment: (appointment: AppointmentModel) => void;
+  view: "daily" | "weekly" | "monthly";
 }
 
 const AppointmentList: React.FC<AppointmentListProps> = ({
   appointments,
   selectedDate,
   onEditAppointment,
-  view
+  view,
 }) => {
   // Filter appointments based on view and selected date
   const filteredAppointments = React.useMemo(() => {
-    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
-    
-    if (view === 'daily') {
-      return appointments.filter(apt => apt.date === selectedDateStr);
-    } 
-    
-    if (view === 'weekly') {
-      const startOfWeek = new Date(selectedDate);
-      startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
-      
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      
-      return appointments.filter(apt => {
-        const aptDate = parseISO(apt.date as string);
-        return aptDate >= startOfWeek && aptDate <= endOfWeek;
-      });
-    }
-    
-    // Monthly view
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    
-    return appointments.filter(apt => {
-      const aptDate = parseISO(apt.date as string);
-      return aptDate.getFullYear() === year && aptDate.getMonth() === month;
+    return appointments.filter((apt) => {
+      if (view === "daily") {
+        return isSameDay(apt.appointmentDate, selectedDate);
+      }
+      if (view === "weekly") {
+        return isSameWeek(apt.appointmentDate, selectedDate, { weekStartsOn: 0 }); // semana começando no domingo
+      }
+      // Monthly
+      return isSameMonth(apt.appointmentDate, selectedDate);
     });
   }, [appointments, selectedDate, view]);
 
   // Sort appointments by date and time
-  const sortedAppointments = [...filteredAppointments].sort((a, b) => {
-    if (a.date !== b.date) {
-      return a.date.localeCompare(b.date);
-    }
-    return a.startTime.localeCompare(b.startTime);
-  });
+  const sortedAppointments = React.useMemo(() => {
+    return [...filteredAppointments].sort((a, b) => {
+      if (a.appointmentDate.getTime() !== b.appointmentDate.getTime()) {
+        return a.appointmentDate.getTime() - b.appointmentDate.getTime();
+      }
+      return a.createdAt && b.createdAt ? a.createdAt.getTime() - b.createdAt.getTime() : 0;
+    });
+  }, [filteredAppointments]);
 
-  // Group appointments by date
-  const appointmentsByDate = sortedAppointments.reduce((acc, apt) => {
-    if (!acc[apt.date]) {
-      acc[apt.date] = [];
-    }
-    acc[apt.date].push(apt);
-    return acc;
-  }, {} as Record<string, Appointment[]>);
+  // Group appointments by date string
+  const appointmentsByDate = React.useMemo(() => {
+    return sortedAppointments.reduce((acc, apt) => {
+      const dateKey = format(apt.appointmentDate, "yyyy-MM-dd");
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(apt);
+      return acc;
+    }, {} as Record<string, AppointmentModel[]>);
+  }, [sortedAppointments]);
 
   if (sortedAppointments.length === 0) {
     return (
@@ -80,11 +62,11 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
         <CardHeader>
           <CardTitle>Consultas</CardTitle>
           <CardDescription>
-            {view === 'daily' 
-              ? 'Nenhuma consulta agendada para hoje'
-              : view === 'weekly'
-                ? 'Nenhuma consulta agendada para esta semana'
-                : 'Nenhuma consulta agendada para este mês'}
+            {view === "daily"
+              ? "Nenhuma consulta agendada para hoje"
+              : view === "weekly"
+              ? "Nenhuma consulta agendada para esta semana"
+              : "Nenhuma consulta agendada para este mês"}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -97,33 +79,31 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
         <CardHeader>
           <CardTitle>Consultas</CardTitle>
           <CardDescription>
-            {filteredAppointments.length} 
-            {filteredAppointments.length === 1 
-              ? ' consulta agendada' 
-              : ' consultas agendadas'}
+            {filteredAppointments.length}
+            {filteredAppointments.length === 1 ? " consulta agendada" : " consultas agendadas"}
           </CardDescription>
         </CardHeader>
         <CardContent className="max-h-[60vh] overflow-y-auto">
           {Object.entries(appointmentsByDate).map(([date, appointments]) => (
             <div key={date} className="mb-6">
-              {view !== 'daily' && (
+              {view !== "daily" && (
                 <h3 className="text-md font-medium mb-2 text-gray-700 border-b pb-1">
-                  {format(parseISO(date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  {format(new Date(date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </h3>
               )}
               <div className="space-y-3">
                 {appointments.map((appointment) => (
-                  <div 
-                    key={appointment.id} 
+                  <div
+                    key={appointment.id}
                     className="flex items-center justify-between p-3 bg-white rounded-md border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col justify-center h-full">
                         <span className="text-xs text-gray-500 flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          {appointment.startTime} - {appointment.endTime}
+                        { appointment.appointmentDate.toISOString().substring(11, 16)}
                         </span>
-                        <span className="font-medium">{appointment.patientName}</span>
+                        <span className="font-medium">{appointment.patient.name}</span>
                         {appointment.notes && (
                           <span className="text-xs text-gray-500 mt-1">{appointment.notes}</span>
                         )}
@@ -131,13 +111,16 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                       {appointment.isLinkedToMedicalRecord && (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200"
+                        >
                           Prontuário vinculado
                         </Badge>
                       )}
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onEditAppointment(appointment)}
                       >
                         <Edit className="h-4 w-4" />

@@ -3,6 +3,7 @@ import {
   eachDayOfInterval, 
   endOfWeek, 
   format, 
+  isSameDay, 
   isToday, 
   startOfWeek
 } from 'date-fns';
@@ -11,13 +12,13 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Appointment } from '@/types/appointment';
+import { AppointmentModel } from '@/domain/model/appointment';
 
 interface WeeklyViewProps {
   selectedDate: Date;
-  appointments: Appointment[];
+  appointments: AppointmentModel[];
   onAddAppointment: (date: Date) => void;
-  onEditAppointment: (appointment: Appointment) => void;
+  onEditAppointment: (appointment: AppointmentModel) => void;
   onDateSelect: (date: Date) => void;
 }
 
@@ -33,8 +34,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
   const getAppointmentsForDate = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return appointments.filter(apt => apt.date === dateStr);
+    return appointments.filter(apt => isSameDay(apt.appointmentDate, date));
   };
 
   return (
@@ -83,8 +83,10 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
                         onEditAppointment(apt);
                       }}
                     >
-                      <div className="font-medium truncate">{apt.patientName}</div>
-                      <div className="text-gray-500">{apt.startTime}</div>
+                      <div className="font-medium truncate">{apt.patient.name}</div>
+                      <div className="text-gray-500">
+                        {format(apt.appointmentDate, 'HH:mm')}
+                      </div>
                     </div>
                   ))}
                 </div>
