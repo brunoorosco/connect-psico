@@ -30,7 +30,7 @@ export async function sendVerificationEmail(
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
     </div>
   `;
-
+  console.log(env.apiKeyBabyMail);
   try {
     const { data } = await axios.post(
       "https://api.mailbaby.net/mail/send",
