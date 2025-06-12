@@ -1,3 +1,4 @@
+import { env } from "@/config/application";
 import nodemailer from "nodemailer";
 
 interface SendEmailParams {
@@ -8,13 +9,14 @@ interface SendEmailParams {
   html?: string;
 }
 
-export async function sendEmail({ from, to, subject, text, html }: SendEmailParams): Promise<void> {
+export const sendEmail = async ({ from, to, subject, text, html }: SendEmailParams) => {
+ 
   const transporter = nodemailer.createTransport({
-    host: "relay.mailbaby.net",
-    port: 465,
+    host: env.nodemailerHost,
+    port: env.nodemailerPort,
     auth: {
-      user: "mb78416",
-      pass: "GEjU5gT9ewUgv6rSHCdZ",
+      user: env.nodemailerUser,
+      pass: env.nodemailerPassword,
     },
   });
 
@@ -23,14 +25,15 @@ export async function sendEmail({ from, to, subject, text, html }: SendEmailPara
     to,
     subject,
     text,
-    html
+    html,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
     console.log("E-mail enviado:", info.messageId);
+    return info;
   } catch (error) {
     console.error("Erro ao enviar e-mail:", error);
-    throw error;
+    return { error };
   }
-}
+};
