@@ -34,10 +34,11 @@ export async function sendVerificationEmail(
       from: '"Psiconnect" <noreply@orostec.online>',
       subject: VERIFICATION_SUBJECT,
       to: emailTo,
-      text: "Verificação de Código OTP",
+      text: "Validação de E-mail",
       html: htmlContent,
     });
-
+console.log(data);
+console.log(verificationUrl);
     return { success: true, data };
   } catch (err) {
     return {
