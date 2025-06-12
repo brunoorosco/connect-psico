@@ -29,6 +29,7 @@ export async function sendVerificationEmail(
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
     </div>
   `;
+  console.log(verificationUrl);
   try {
     const data = await sendEmail({
       from: '"Psiconnect" <noreply@orostec.online>',
@@ -37,8 +38,7 @@ export async function sendVerificationEmail(
       text: "Validação de E-mail",
       html: htmlContent,
     });
-console.log(data);
-console.log(verificationUrl);
+    console.log(data);
     return { success: true, data };
   } catch (err) {
     return {
