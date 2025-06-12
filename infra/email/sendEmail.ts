@@ -19,7 +19,7 @@ export async function sendEmail({ from, to, subject, text, html }: SendEmailPara
   });
 
   const mailOptions = {
-    from: '"Bruno Orosco" <contato@orostec.online>',
+    from,
     to,
     subject,
     text,
