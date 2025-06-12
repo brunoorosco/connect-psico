@@ -1,5 +1,4 @@
-import axios, { AxiosError } from "axios";
-import { env } from "@/config/application";
+import { sendEmail } from "./sendEmail";
 
 type SendEmailResponse = {
   success: boolean;
@@ -8,7 +7,7 @@ type SendEmailResponse = {
 };
 
 export async function sendVerificationEmail(
-  email: string,
+  emailTo: string,
   verificationUrl: string
 ): Promise<SendEmailResponse> {
   const VERIFICATION_SUBJECT = "Confirme seu e-mail - Psiconnect";
@@ -30,33 +29,21 @@ export async function sendVerificationEmail(
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
     </div>
   `;
-  console.log(env.apiKeyBabyMail);
   try {
-    const { data } = await axios.post(
-      "https://api.mailbaby.net/mail/send",
-      {
-        from: "onboarding@orostec.online",
-        to: email,
-        subject: VERIFICATION_SUBJECT,
-        body: htmlContent,
-      },
-      {
-        headers: {
-          "X-API-KEY": env.apiKeyBabyMail || "",
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const data = await sendEmail({
+      from: '"Psiconnect" <noreply@orostec.online>',
+      subject: VERIFICATION_SUBJECT,
+      to: emailTo,
+      text: "Verificação de Código OTP",
+      html: htmlContent,
+    });
 
     return { success: true, data };
   } catch (err) {
-    const error = err as AxiosError;
-
     return {
       success: false,
-      error: error.response?.data
-        ? JSON.stringify(error.response.data)
-        : error.message || "Erro desconhecido ao enviar o e-mail.",
+      //@ts-ignore
+      error: err?.message || "Erro desconhecido ao enviar o e-mail.",
     };
   }
 }
