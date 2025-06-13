@@ -24,7 +24,7 @@ export async function sendVerificationEmail(
         </a>
       </p>
       <p>Ou copie e cole este link no navegador:</p>
-      <p style="word-break: break-all; color: #555;">${url}</p>
+      <p style="word-break: break-all; color: #555;">${verificationUrl}</p>
       <hr style="margin: 20px 0;" />
       <p style="font-size: 12px; color: #999;">Se você não solicitou este e-mail, pode ignorá-lo.</p>
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
