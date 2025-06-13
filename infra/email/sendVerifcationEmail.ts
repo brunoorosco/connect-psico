@@ -24,7 +24,16 @@ export async function sendVerificationEmail(
         </a>
       </p>
       <p>Ou copie e cole este link no navegador:</p>
-      <p style="word-break: break-all; color: #555;">${verificationUrl}</p>
+     <div style="display: flex; align-items: center; gap: 8px; max-width: 400px;">
+      <p id="link-text" title=${url}
+        style="margin: 0; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+        ${url}
+      </p>
+
+      <button onclick="copyLink()" style="border: none; background: transparent; cursor: pointer;" title="Copiar">
+        📋
+      </button>
+    </div>
       <hr style="margin: 20px 0;" />
       <p style="font-size: 12px; color: #999;">Se você não solicitou este e-mail, pode ignorá-lo.</p>
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
