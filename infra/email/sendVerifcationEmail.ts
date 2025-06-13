@@ -11,7 +11,8 @@ export async function sendVerificationEmail(
   verificationUrl: string
 ): Promise<SendEmailResponse> {
   const VERIFICATION_SUBJECT = "Confirme seu e-mail - Psiconnect";
-  const url = "https://api.orostec.online/redirect/" + verificationUrl.replace("https://", "");
+  const url = "https://api.orostec.online/psiconnect/" + verificationUrl.replace("https://", "");
+  console.log(url);
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
       <h2 style="color: #333;">Confirmação de E-mail</h2>
@@ -29,7 +30,6 @@ export async function sendVerificationEmail(
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
     </div>
   `;
-  console.log(url);
   try {
     const data = await sendEmail({
       from: '"Psiconnect" <noreply@orostec.online>',
