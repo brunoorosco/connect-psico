@@ -1,5 +1,4 @@
-import axios, { AxiosError } from "axios";
-import { env } from "@/config/application";
+import { sendEmail } from "./sendEmail";
 
 type SendEmailResponse = {
   success: boolean;
@@ -8,7 +7,7 @@ type SendEmailResponse = {
 };
 
 export async function sendPasswordResetEmail(
-  email: string,
+  emailTo: string,
   resetUrl: string
 ): Promise<SendEmailResponse> {
   const RESET_SUBJECT = "Redefinição de Senha - Psiconnect";
@@ -32,31 +31,21 @@ export async function sendPasswordResetEmail(
   `;
 
   try {
-    const { data } = await axios.post(
-      "https://api.mailbaby.net/mail/send",
-      {
-        from: "noreply@orostec.online",
-        to: email,
+    const data = await sendEmail({
+        from: '"Psiconnect" <noreply@orostec.online>',
         subject: RESET_SUBJECT,
-        body: htmlContent,
-      },
-      {
-        headers: {
-          "X-API-KEY": env.apiKeyBabyMail || "",
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return { success: true, data };
-  } catch (err) {
-    const error = err as AxiosError;
-
-    return {
-      success: false,
-      error: error.response?.data
-        ? JSON.stringify(error.response.data)
-        : error.message || "Erro desconhecido ao enviar e-mail de redefinição.",
+        to: emailTo,
+        text: "Verificação de Código OTP",
+        html: htmlContent,
+      });
+    
+        return { success: true, data };
+      } catch (err) {
+        
+        return {
+          success: false,
+        //@ts-ignore
+          error: err?.message || "Erro desconhecido ao enviar e-mail de redefinição.",
     };
   }
 }
