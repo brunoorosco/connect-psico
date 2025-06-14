@@ -10,7 +10,6 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Switch } from "@/components/ui/switch";
-import InputMask from "react-input-mask";
 
 import { register } from "@/actions/auth";
 import {
@@ -128,28 +127,12 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <InputMask
-                        mask="(99) 9 9999-9999"
-                        maskChar={null}
-                        value={field.value}
-                        onChange={field.onChange}
-                      >
-                        {(inputProps) => (
-                          <Input
-                            {...inputProps}
-                            type="tel"
-                            placeholder="(00) 9 1234-5678"
-                            required
-                            disabled={isPending}
-                          />
-                        )}
-                      </InputMask>
+                      <Input type="type" placeholder="(00) 00000-0000" required {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="password"
@@ -172,13 +155,13 @@ export default function RegisterForm() {
 
               {form.watch("professional") && (
                 <div className="flex gap-2">
-                  <div className="w-1/3">
+                  <div className="w-2/3">
                     <FormField
                       control={form.control}
                       name="ufConselho"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Conselho Regional (UF)</FormLabel>
+                          <FormLabel>UF</FormLabel>
                           <FormControl>
                             <select
                               {...field}
