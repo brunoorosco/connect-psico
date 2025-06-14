@@ -10,6 +10,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Switch } from "@/components/ui/switch";
+import InputMask from "react-input-mask";
 
 import { register } from "@/actions/auth";
 import {
@@ -127,12 +128,28 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <Input type="type" placeholder="(00) 0000-00000" required {...field} />
+                      <InputMask
+                        mask="(99) 9 9999-9999"
+                        maskChar={null}
+                        value={field.value}
+                        onChange={field.onChange}
+                      >
+                        {(inputProps) => (
+                          <Input
+                            {...inputProps}
+                            type="tel"
+                            placeholder="(00) 9 1234-5678"
+                            required
+                            disabled={isPending}
+                          />
+                        )}
+                      </InputMask>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="password"

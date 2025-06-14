@@ -6,35 +6,39 @@ export const CredentialsSchema = z.object({
   code: z.optional(z.string()),
 });
 
-export const RegisterSchema = z.object({
-  name: z.string().min(5),
-  email: z.string().email(),
-  password: z.string().min(6),
-  numConselho: z.string().optional(),
-  ufConselho: z.string().optional(),
-  especialidade: z.string().optional(),
-  publico: z.string().optional(),
-  professional: z.coerce.boolean(),
-  phone: z.string(),
-})
-.superRefine((data, ctx) => {
-  if (data.professional) {
-    if (!data.ufConselho || data.ufConselho.length !== 2) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Deve ter 2 caracteres.",
-        path: ["ufConselho"],
-      });
+export const RegisterSchema = z
+  .object({
+    name: z.string().min(5),
+    email: z.string().email(),
+    password: z.string().min(6),
+    numConselho: z.string().optional(),
+    ufConselho: z.string().optional(),
+    especialidade: z.string().optional(),
+    publico: z.string().optional(),
+    professional: z.coerce.boolean(),
+    phone: z
+      .string()
+      .min(14, "Número muito curto")
+      .regex(/^\(\d{2}\) 9 \d{4}-\d{4}$/, "Número inválido"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.professional) {
+      if (!data.ufConselho || data.ufConselho.length !== 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Deve ter 2 caracteres.",
+          path: ["ufConselho"],
+        });
+      }
+      if (!data.numConselho || data.numConselho.length < 4) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Deve ter pelo menos 4 dígitos.",
+          path: ["numConselho"],
+        });
+      }
     }
-    if (!data.numConselho || data.numConselho.length < 4) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Deve ter pelo menos 4 dígitos.",
-        path: ["numConselho"],
-      });
-    }
-  }
-});
+  });
 // .refine(
 //   (values) => {
 //     console.log(`Values ${JSON.stringify(values)}`);
