@@ -60,8 +60,6 @@ const PsychologistDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchAppointments();
-    if (!session?.user.isProfileCompleted)
-      router.push(`/app/professional/${session?.user.id}/profile`);
   }, []);
 
   const handleViewRecord = (patientId: string) => {
