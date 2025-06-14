@@ -19,7 +19,7 @@ export const RegisterSchema = z
     phone: z
       .string()
       .min(14, "Número muito curto")
-      .regex(/^\(\d{2}\) 9 \d{4}-\d{4}$/, "Número inválido"),
+      // .regex(/^\(\d{2}\) 9\d{4}-\d{4}$/, "Número inválido"),
   })
   .superRefine((data, ctx) => {
     if (data.professional) {
