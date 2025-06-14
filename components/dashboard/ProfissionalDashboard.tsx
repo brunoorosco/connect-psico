@@ -7,6 +7,7 @@ import CalendarNavigation from "./CalendarNavigation";
 import AppointmentsList from "./AppointmentList";
 import PatientRecord from "./PatientRecord";
 import { useAppointments } from "@/hooks/useAppointments";
+import { useSession } from "next-auth/react";
 
 const mockPatients = [
   {
@@ -55,9 +56,15 @@ const PsychologistDashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const { appointments, total, loading, fetchAppointments } = useAppointments();
+  const { data: session } = useSession();
+
   useEffect(() => {
     fetchAppointments();
+    if (!session?.user.isProfileCompleted)
+      router.push(`/app/professional/${session?.user.id}/profile`);
   }, []);
+
+  console.log(session?.user);
 
   const handleViewRecord = (patientId: string) => {
     setSelectedPatient(patientId);
@@ -79,17 +86,12 @@ const PsychologistDashboard: React.FC = () => {
         userRole="SUPERVISOR"
       />
 
-      <CalendarNavigation
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-      />
+      <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-6 space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Agenda do Dia
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">Agenda do Dia</h2>
             {/* {selectedPatient && (
               <Button
                 onClick={() => handleStartConsultation(selectedPatient)}
@@ -111,9 +113,7 @@ const PsychologistDashboard: React.FC = () => {
 
         <div className="lg:col-span-6  col-span-12 space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Prontuário
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Prontuário</h2>
             {currentPatient && <PatientRecord patient={currentPatient} />}
           </div>
         </div>
