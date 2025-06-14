@@ -161,15 +161,45 @@ export default function RegisterForm() {
                       name="ufConselho"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>UF</FormLabel>
+                          <FormLabel>Conselho Regional (UF)</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="UF"
+                            <select
                               {...field}
                               disabled={isPending}
-                              maxLength={2}
-                              className="uppercase"
-                            />
+                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none"
+                            >
+                              <option value="">Selecione a UF</option>
+                              {[
+                                "AC/RO",
+                                "AL",
+                                "AM/RR",
+                                "BA",
+                                "CE",
+                                "DF",
+                                "ES",
+                                "GO",
+                                "MA",
+                                "MT",
+                                "MS",
+                                "MG",
+                                "PA/AP",
+                                "PB",
+                                "PR",
+                                "PE",
+                                "PI",
+                                "RJ",
+                                "RN",
+                                "RS",
+                                "SC",
+                                "SP",
+                                "SE",
+                                "TO",
+                              ].map((uf) => (
+                                <option key={uf} value={uf}>
+                                  CRP - {uf}
+                                </option>
+                              ))}
+                            </select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
