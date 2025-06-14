@@ -38,6 +38,7 @@ export default auth(async (req) => {
   if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
+  console.log(isLoggedIn, isProfileCompleted, userRole);
 
   if (isLoggedIn && !isProfileCompleted && userRole === "SUPERVISOR") {
     return NextResponse.redirect(new URL(`/app/professional/${userId}/profile`, req.url));
