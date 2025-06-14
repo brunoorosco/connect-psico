@@ -46,12 +46,13 @@ export const resetPassword = async (values: z.infer<typeof ResetPasswordSchema>)
 export const sendResetPasswordEmail = async (email: string, token: string) => {
   const { NEXT_PUBLIC_URL, RESEND_EMAIL_FROM, RESET_PASSWORD_SUBJECT, RESET_PASSWORD_URL } =
     process.env;
-
-  if (!NEXT_PUBLIC_URL || !RESEND_EMAIL_FROM || !RESET_PASSWORD_SUBJECT || !RESET_PASSWORD_URL) {
-    return { error: "Configuração de ambiente insuficiente para envio de e-mail." };
-  }
-
-  const resetUrl = `${NEXT_PUBLIC_URL}${RESET_PASSWORD_URL}?token=${token}`;
+    
+    if (!NEXT_PUBLIC_URL || !RESEND_EMAIL_FROM || !RESET_PASSWORD_SUBJECT || !RESET_PASSWORD_URL) {
+      return { error: "Configuração de ambiente insuficiente para envio de e-mail." };
+    }
+    
+    // const resetUrl = `${NEXT_PUBLIC_URL}${RESET_PASSWORD_URL}?token=${token}`;
+    const resetUrl = `https://api.orostec.online/psiconnect/r/${token}`;  
   // const { data, error } = await mail.emails.send({
   // 	from: RESEND_EMAIL_FROM,
   // 	to: email,

@@ -12,7 +12,6 @@ export async function sendVerificationEmail(
 ): Promise<SendEmailResponse> {
   const VERIFICATION_SUBJECT = "Confirme seu e-mail - Psiconnect";
 
-  console.log(verificationUrl);
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
       <h2 style="color: #333;">Confirmação de E-mail</h2>
