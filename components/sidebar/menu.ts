@@ -82,12 +82,7 @@ export const menus = [
     url: "/app",
     icon: GraduationCap,
     rules: ["DEFAULT"],
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
+  }
 ];
 
 export const menusFooter = {
