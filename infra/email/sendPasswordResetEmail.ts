@@ -18,12 +18,11 @@ export async function sendPasswordResetEmail(
       <p>Olá,</p>
       <p>Recebemos uma solicitação para redefinir sua senha. Para continuar, clique no botão abaixo:</p>
       <p style="text-align: center;">
-        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #fff; text-decoration: none; border-radius: 5px;">
+        <a href="${resetUrl}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #fff; text-decoration: none; border-radius: 5px;">
           Redefinir Senha
         </a>
       </p>
       <p>Se você não solicitou essa alteração, ignore este e-mail.</p>
-      <p style="word-break: break-all; color: #555;">${resetUrl}</p>
       <hr style="margin: 20px 0;" />
       <p style="font-size: 12px; color: #999;">Este link expira em 1 hora por motivos de segurança.</p>
       <p style="font-size: 12px; color: #999;">Orostec - Todos os direitos reservados.</p>
