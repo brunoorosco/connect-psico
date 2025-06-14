@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   if (session.user.role === "SUPERVISOR") {
-    return redirect("/app/professional");
+    return redirect(`/app/professional/${session.user.id}`);
   }
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col">

@@ -64,8 +64,6 @@ const PsychologistDashboard: React.FC = () => {
       router.push(`/app/professional/${session?.user.id}/profile`);
   }, []);
 
-  console.log(session?.user);
-
   const handleViewRecord = (patientId: string) => {
     setSelectedPatient(patientId);
   };
