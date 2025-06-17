@@ -1,7 +1,6 @@
 "use server";
 
 import { sendPasswordResetEmail } from "@/infra/email";
-import mail from "@/lib/mail";
 import { NewPasswordSchema, ResetPasswordSchema } from "@/schemas/auth";
 import { findUserbyEmail } from "@/services";
 import {
@@ -38,27 +37,22 @@ export const resetPassword = async (values: z.infer<typeof ResetPasswordSchema>)
 };
 
 /**
- * This method uses Resend to send an e-mail to change the user's password
+ * This method uses nodemailer to send an e-mail to change the user's password
  * @param {string} email - The user's email.
  * @param {string} token - The reset password token.
  * @returns {Promise<{error?: string, success?: string}>} The result of the email sending request.
  */
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const { NEXT_PUBLIC_URL, RESEND_EMAIL_FROM, RESET_PASSWORD_SUBJECT, RESET_PASSWORD_URL } =
+  const { NEXT_PUBLIC_URL, RESET_PASSWORD_SUBJECT, RESET_PASSWORD_URL } =
     process.env;
-    
-    if (!NEXT_PUBLIC_URL || !RESEND_EMAIL_FROM || !RESET_PASSWORD_SUBJECT || !RESET_PASSWORD_URL) {
-      return { error: "Configuração de ambiente insuficiente para envio de e-mail." };
-    }
-    
-    // const resetUrl = `${NEXT_PUBLIC_URL}${RESET_PASSWORD_URL}?token=${token}`;
-    const resetUrl = `https://api.orostec.online/psiconnect/r/${token}`;  
-  // const { data, error } = await mail.emails.send({
-  // 	from: RESEND_EMAIL_FROM,
-  // 	to: email,
-  // 	subject: RESET_PASSWORD_SUBJECT,
-  // 	html: `<p>Clique <a href="${resetUrl}">aqui</a> para modificar sua senha.</p>`,
-  // });
+
+  if (!NEXT_PUBLIC_URL || !RESET_PASSWORD_SUBJECT || !RESET_PASSWORD_URL) {
+    return { error: "Configuração de ambiente insuficiente para envio de e-mail." };
+  }
+
+  // const resetUrl = `${NEXT_PUBLIC_URL}${RESET_PASSWORD_URL}?token=${token}`;
+  const resetUrl = `https://api.orostec.online/psiconnect/r/${token}`;
+
   const { success, data, error } = await sendPasswordResetEmail(email, resetUrl);
 
   if (!success)
