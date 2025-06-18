@@ -51,7 +51,7 @@ const Patients = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
+      <header className="border-b">
         <div className="container mx-auto py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-medical">Gerenciamento de Pacientes</h1>
