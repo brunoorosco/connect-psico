@@ -40,6 +40,11 @@ export default function LoginForm() {
   const [success, setSuccess] = useState<string>("");
   const [showOTPForm, setShowOTP] = useState<boolean>(false);
   const searchParams = useSearchParams();
+
+  if (!searchParams || searchParams.get("error") === null) {
+    console.error(searchParams?.get("error"));
+    throw new Error("Token não encontrado");
+  }
   const callbackError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "E-mail em uso com provedor diferente"
@@ -98,100 +103,78 @@ export default function LoginForm() {
   };
 
   return (
-    <AuthCard title='Conecte-se' description='Seja bem-vindo novamente'>
-      <div className='space-y-4'>
+    <AuthCard title="Conecte-se" description="Seja bem-vindo novamente">
+      <div className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {!showOTPForm && (
-              <div className='space-y-4'>
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name='email'
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>E-mail</FormLabel>
                       <FormControl>
                         <Input
-                          type='email'
-                          placeholder='voce@provedor.com.br'
+                          type="email"
+                          placeholder="voce@provedor.com.br"
                           required
                           {...field}
                           disabled={isPending}
                         />
                       </FormControl>
-                      <FormDescription className='hidden'>
-                        Seu e-mail.
-                      </FormDescription>
+                      <FormDescription className="hidden">Seu e-mail.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name='password'
+                  name="password"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Senha</FormLabel>
                       <FormControl>
                         <div>
                           <Input
-                            type='password'
-                            placeholder='******'
+                            type="password"
+                            placeholder="******"
                             required
                             {...field}
                             disabled={isPending}
                           />
-                          <div className='flex items-center'>
+                          <div className="flex items-center">
                             <Link
-                              href='/auth/reset-password'
-                              className='ml-auto inline-block text-sm text-secondary-foreground underline'
+                              href="/auth/reset-password"
+                              className="ml-auto inline-block text-sm text-secondary-foreground underline"
                             >
                               Esqueceu a senha?
                             </Link>
                           </div>
                         </div>
                       </FormControl>
-                      <FormDescription className='hidden'>
-                        Seu e-mail.
-                      </FormDescription>
+                      <FormDescription className="hidden">Seu e-mail.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 {callbackError && (
-                  <AuthFormMessage
-                    type='error'
-                    message={callbackError}
-                    title='Erro'
-                  />
+                  <AuthFormMessage type="error" message={callbackError} title="Erro" />
                 )}
-                {error && (
-                  <AuthFormMessage type='error' message={error} title='Erro' />
-                )}
-                {success && (
-                  <AuthFormMessage
-                    type='success'
-                    message={success}
-                    title='Sucesso'
-                  />
-                )}
-                <Button
-                  variant={"default"}
-                  className='w-full'
-                  disabled={isPending}
-                >
-                  <LoaderIcon
-                    className={!isPending ? "hidden" : "animate-spin mr-2"}
-                  />
+                {error && <AuthFormMessage type="error" message={error} title="Erro" />}
+                {success && <AuthFormMessage type="success" message={success} title="Sucesso" />}
+                <Button variant={"default"} className="w-full" disabled={isPending}>
+                  <LoaderIcon className={!isPending ? "hidden" : "animate-spin mr-2"} />
                   <span>Conectar</span>
                 </Button>
               </div>
             )}
             {showOTPForm && (
-              <div className='space-y-4'>
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name='code'
+                  name="code"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Código</FormLabel>
@@ -209,24 +192,14 @@ export default function LoginForm() {
                           </InputOTPGroup>
                         </InputOTP>
                       </FormControl>
-                      <FormDescription>
-                        Favor entrar com o códio enviado por e-mail
-                      </FormDescription>
+                      <FormDescription>Favor entrar com o códio enviado por e-mail</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {error && (
-                  <AuthFormMessage type='error' message={error} title='Erro' />
-                )}
-                <Button
-                  variant={"default"}
-                  className='w-full'
-                  disabled={isPending}
-                >
-                  <LoaderIcon
-                    className={!isPending ? "hidden" : "animate-spin mr-2"}
-                  />
+                {error && <AuthFormMessage type="error" message={error} title="Erro" />}
+                <Button variant={"default"} className="w-full" disabled={isPending}>
+                  <LoaderIcon className={!isPending ? "hidden" : "animate-spin mr-2"} />
                   <span>Validar</span>
                 </Button>
               </div>
@@ -238,17 +211,17 @@ export default function LoginForm() {
         <SocialLogin />
 
         {!showOTPForm && (
-          <div className='mt-4 text-center text-sm'>
+          <div className="mt-4 text-center text-sm">
             Não tem uma conta?{" "}
-            <Link href='/auth/signup' className='underline'>
+            <Link href="/auth/signup" className="underline">
               Cadastre-se
             </Link>
           </div>
         )}
         {showOTPForm && (
-          <div className='mt-4 text-center text-sm'>
+          <div className="mt-4 text-center text-sm">
             Conectar agora?{" "}
-            <Link href='/auth/login' className='underline'>
+            <Link href="/auth/login" className="underline">
               Conectar
             </Link>
           </div>

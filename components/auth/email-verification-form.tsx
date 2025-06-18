@@ -10,6 +10,10 @@ const EmailVerificationForm = () => {
 	const [success, setSuccess] = useState<string | undefined>(undefined);
 	const searchParam = useSearchParams();
 	const router = useRouter();
+	if (!searchParam || searchParam.get("token") === null) {
+		console.error(searchParam?.get("token"));
+		throw new Error("Token não encontrado");
+	  }
 	const token = searchParam.get("token");
 
 	const automaticSubmission = useCallback(() => {

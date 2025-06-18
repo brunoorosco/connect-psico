@@ -60,7 +60,7 @@ const mockPatientsData = [
 const ConsultationStart: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const patientId = parseInt(searchParams.get("patientId") || "1");
+  const patientId = parseInt(searchParams?.get("patientId") ?? "1");
   
   const [patient, setPatient] = useState(mockPatientsData[0]);
   const [consultationDate, setConsultationDate] = useState(new Date());
@@ -258,5 +258,4 @@ const ConsultationStart: React.FC = () => {
     </div>
   );
 };
-
 export default ConsultationStart;
