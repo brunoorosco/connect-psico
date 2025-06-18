@@ -1,3 +1,3 @@
 export * from './createAppointment'
-export * from './getAppointmentsByProfessional'
 export * from './getAppointmentsByPatient'
+export * from './getAppointmentsByProfessional'

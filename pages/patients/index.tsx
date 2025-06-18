@@ -1,12 +1,14 @@
+'use client'
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import PatientList from '@/components/Patients/PatientList';
-import PatientForm from '@/components/Patients/PatientForm';
-import PatientDetails from '@/components/Patients/PatientDetails';
+import PatientList from '@/components/patients/PatientList';
+import PatientForm from '@/components/patients/PatientForm';
+import PatientDetails from '@/components/patients/PatientDetails';
 import { Patient } from '@/types/appointment';
-import { mockPatients } from '@/data/mockData';
+import { mockPatients } from './mockdata';
+
 
 const Patients = () => {
   const [patients, setPatients] = useState<Patient[]>(mockPatients);
