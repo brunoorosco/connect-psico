@@ -47,7 +47,8 @@ const PatientPayment = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [appointmentData, setAppointmentData] = useState<AppointmentData | null>(null);
   const [loading, setLoading] = useState(true);
-  const { appointmentId } = useParams<{ appointmentId: string }>();
+  const params = useParams<{ appointmentId: string }>();
+  const appointmentId = params?.appointmentId;
   const { toast } = useToast();
   const navigate = useRouter();
   // const session = useSession();
@@ -251,5 +252,4 @@ const PatientPayment = () => {
     </div>
   );
 };
-
 export default PatientPayment;
