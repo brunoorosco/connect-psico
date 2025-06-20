@@ -9,6 +9,12 @@ export const getAvailableDaysWithStatus = async (
   month: number,
   durationPerSlotMinutes: number = 60
 ) => {
+  console.log("getAvailableDaysWithStatus called with:", {
+    professionalId,
+    year,
+    month,
+    durationPerSlotMinutes,
+  });
   try {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
@@ -58,10 +64,11 @@ export const getAvailableDaysWithStatus = async (
     ORDER BY
       av.date, av.start_time;
   `;
+  console.log(result);
     return result;
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
-      return { error: "Erro ao criar disponibilidade" };
+      return { error: "Erro ao buscar disponibilidades" };
     }
 
     throw error;
