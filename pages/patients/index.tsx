@@ -1,14 +1,13 @@
-'use client'
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import PatientList from '@/components/patients/PatientList';
-import PatientForm from '@/components/patients/PatientForm';
-import PatientDetails from '@/components/patients/PatientDetails';
-import { Patient } from '@/types/appointment';
-import { mockPatients } from './mockdata';
-
+"use client";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import PatientList from "@/components/patients/PatientList";
+import PatientForm from "@/components/patients/PatientForm";
+import PatientDetails from "@/components/patients/PatientDetails";
+import { Patient } from "@/types/appointment";
+import { mockPatients } from "./mockdata";
 
 const Patients = () => {
   const [patients, setPatients] = useState<Patient[]>(mockPatients);
@@ -16,7 +15,7 @@ const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
 
-  const handleAddPatient = (patientData: Omit<Patient, 'id'>) => {
+  const handleAddPatient = (patientData: Omit<Patient, "id">) => {
     const newPatient: Patient = {
       ...patientData,
       id: Math.random().toString(36).substr(2, 9),
@@ -25,9 +24,9 @@ const Patients = () => {
     setShowForm(false);
   };
 
-  const handleEditPatient = (patientData: Omit<Patient, 'id'>) => {
+  const handleEditPatient = (patientData: Omit<Patient, "id">) => {
     if (editingPatient) {
-      const updatedPatients = patients.map(p => 
+      const updatedPatients = patients.map((p) =>
         p.id === editingPatient.id ? { ...patientData, id: editingPatient.id } : p
       );
       setPatients(updatedPatients);
@@ -37,7 +36,7 @@ const Patients = () => {
   };
 
   const handleDeletePatient = (patientId: string) => {
-    setPatients(patients.filter(p => p.id !== patientId));
+    setPatients(patients.filter((p) => p.id !== patientId));
   };
 
   const handleViewPatient = (patient: Patient) => {
@@ -50,26 +49,22 @@ const Patients = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b">
-        <div className="container mx-auto py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-medical">Gerenciamento de Pacientes</h1>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Paciente
-            </Button>
-          </div>
+    <div className="container-full bg-gray-50">
+      <div className="mx-auto py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-medical">Gerenciamento de Pacientes</h1>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Paciente
+          </Button>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto py-6">
+      <main className="mx-auto py-6">
         {showForm ? (
           <Card>
             <CardHeader>
-              <CardTitle>
-                {editingPatient ? 'Editar Paciente' : 'Novo Paciente'}
-              </CardTitle>
+              <CardTitle>{editingPatient ? "Editar Paciente" : "Novo Paciente"}</CardTitle>
             </CardHeader>
             <CardContent>
               <PatientForm

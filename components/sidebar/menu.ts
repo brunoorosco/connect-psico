@@ -72,6 +72,12 @@ export const menus = [
     rules: ["SUPERVISOR"],
   },
   {
+    title: "Disponibilidade",
+    url: `/app/professional/{userId}/disponibilidade`,
+    icon: CalendarDaysIcon,
+    rules: ["SUPERVISOR"],
+  },
+  {
     title: "Salas",
     url: "/rooms",
     icon: Calendar,

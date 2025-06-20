@@ -1,4 +1,6 @@
-import React, { useState, useEffect, startTransition, useMemo } from "react";
+"use client";
+
+import React, { useState, useEffect, startTransition, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,9 +21,8 @@ type ProfessionalProps = {
 export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professionalData }) => {
   const { data: session, status } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [availableDatesSet, setAvailableDatesSet] = useState<Set<string>>(new Set());
+  const [availableSlots, setAvailableSlots] = useState<{ start: Date }[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null);
 
   const {
     data: agendaProfissional,
@@ -35,87 +36,92 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
     () => fetchProfessionalSchedule(professionalData.id, selectedDate),
     { revalidateOnFocus: false }
   );
+  const availableDatesSet = useMemo(() => {
+    const unique = new Set<string>();
+    for (const slot of availableSlots) {
+      const dateStr = format(slot.start, "yyyy-MM-dd");
+      unique.add(dateStr);
+    }
+    return unique;
+  }, [availableSlots]);
+
+  const isDayDisabled = useCallback(
+    (date: Date) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dateStr = format(date, "yyyy-MM-dd");
+
+      return date < today || !availableDatesSet.has(dateStr);
+    },
+    [availableDatesSet]
+  );
 
   useEffect(() => {
     if (!agendaProfissional || agendaProfissional.length === 0) {
       setAvailableSlots([]);
-      setAvailableDatesSet(new Set());
       return;
     }
 
-    // Slots para horários
-    const slots: string[] = agendaProfissional.map((interval: { start: Date }) => {
+    const slots = agendaProfissional.map((interval: { start: string | Date }) => {
       const start = new Date(interval.start);
-      start.setHours(start.getHours() + 3);
-      return format(start, "HH:mm");
+      start.setHours(start.getHours() + 3); // ajuste para fuso se necessário
+      return { start };
     });
+
     setAvailableSlots(slots);
-
-    // Datas disponíveis (sem duplicatas) para o calendário
-    const dates = new Set(
-      agendaProfissional.map((interval: { start: Date }) =>
-        format(new Date(interval.start), "yyyy-MM-dd")
-      )
-    );
-    setAvailableDatesSet(dates);
   }, [agendaProfissional]);
-
-  const combineDateAndTime = (date: Date, timeString: string): Date => {
-    const [hours, minutes] = timeString.split(":").map(Number);
-    const combinedDate = new Date(date);
-    combinedDate.setHours(hours - 3, minutes, 0, 0);
-    return combinedDate;
-  };
-
+  console.log("agendaProfissional", agendaProfissional);
   const handleScheduleAppointment = () => {
-    if (!selectedDate || !selectedSlot || !agendaProfissional) return;
+    if (!selectedSlot || !session?.user?.id) return;
 
     startTransition(async () => {
       const result = await createAppointment({
         patientId: session?.user.id as string,
         professionalId: professionalData.id,
-        appointmentDate: combineDateAndTime(selectedDate, selectedSlot),
+        appointmentDate: selectedSlot.start,
       });
+
       if (result.error) {
-        toast.error("Erro ao enviar mensagem", {
-          description: result.error,
-        });
+        toast.error("Erro ao agendar", { description: result.error });
         return;
       }
 
       toast.success("Agendamento solicitado!", {
         description: `Consulta com ${professionalData.name} agendada para ${format(
-          selectedDate,
+          selectedSlot.start,
           "dd/MM/yyyy"
-        )} às ${selectedSlot}.`,
+        )} às ${format(selectedSlot.start, "HH:mm")}.`,
       });
+
       mutate();
     });
   };
+  const slotsForSelectedDate = availableSlots.filter(
+    ({ start }) => format(start, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+  );
 
   return (
     <TabsContent value="schedule" className="pt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Calendário */}
         <div>
           <h4 className="text-sm">Selecione uma data:</h4>
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={(date: Date | undefined) =>
-              date && (setSelectedDate(date), setSelectedSlot(null))
-            }
+            onSelect={(date: Date | undefined) => {
+              if (date) {
+                setSelectedDate(date);
+                setSelectedSlot(null);
+              }
+            }}
             locale={ptBR}
             className={cn("rounded-md border pointer-events-auto max-w-none w-full")}
-            disabled={(date) => {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const dateStr = format(date, "yyyy-MM-dd");
-
-              return date < today || date.getDay() === 0 || !availableDatesSet.has(dateStr);
-            }}
+            disabled={isDayDisabled}
           />
         </div>
 
+        {/* Horários disponíveis */}
         <div>
           <h4 className="text-sm font-medium mb-2">Horários disponíveis:</h4>
 
@@ -124,19 +130,27 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
               <p className="text-muted-foreground col-span-3">Carregando horários...</p>
             ) : error ? (
               <p className="text-muted-foreground col-span-3">Erro ao carregar agenda.</p>
-            ) : availableSlots.length > 0 ? (
-              availableSlots.map((slot) => (
-                <Button
-                  key={slot}
-                  variant={selectedSlot === slot ? "default" : "outline"}
-                  className={
-                    selectedSlot === slot ? "bg-therapy-primary hover:bg-therapy-tertiary" : ""
-                  }
-                  onClick={() => setSelectedSlot(slot)}
-                >
-                  {slot}
-                </Button>
-              ))
+            ) : slotsForSelectedDate.length > 0 ? (
+              slotsForSelectedDate.map((slot) => {
+                const formatted = format(slot.start, "HH:mm");
+
+                return (
+                  <Button
+                    key={slot.start.toISOString()}
+                    variant={
+                      selectedSlot?.start.getTime() === slot.start.getTime() ? "default" : "outline"
+                    }
+                    className={
+                      selectedSlot?.start.getTime() === slot.start.getTime()
+                        ? "bg-therapy-primary hover:bg-therapy-tertiary"
+                        : ""
+                    }
+                    onClick={() => setSelectedSlot(slot)}
+                  >
+                    {formatted}
+                  </Button>
+                );
+              })
             ) : (
               <p className="text-muted-foreground col-span-3">
                 Não há horários disponíveis para esta data.
@@ -144,7 +158,7 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
             )}
           </div>
 
-          {selectedDate && selectedSlot && status === "authenticated" && (
+          {selectedSlot && status === "authenticated" && (
             <div className="mt-6">
               <Button
                 className="w-full bg-therapy-primary hover:bg-therapy-tertiary"
@@ -153,7 +167,8 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
                 Agendar consulta
               </Button>
               <p className="text-xs text-center mt-2 text-muted-foreground">
-                {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })} às {selectedSlot}
+                {format(selectedSlot.start, "dd 'de' MMMM", { locale: ptBR })} às{" "}
+                {format(selectedSlot.start, "HH:mm")}
               </p>
             </div>
           )}
