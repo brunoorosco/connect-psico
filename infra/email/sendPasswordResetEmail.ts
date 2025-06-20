@@ -10,7 +10,7 @@ export async function sendPasswordResetEmail(
   emailTo: string,
   resetUrl: string
 ): Promise<SendEmailResponse> {
-  const RESET_SUBJECT = "Redefinição de Senha - Psiconnect";
+  const RESET_SUBJECT = "Redefinição de Senha - PsicoMais";
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
@@ -31,7 +31,7 @@ export async function sendPasswordResetEmail(
 
   try {
     const data = await sendEmail({
-        from: '"Psiconnect" <noreply@orostec.online>',
+        from: '"PsicoMais" <noreply@orostec.online>',
         subject: RESET_SUBJECT,
         to: emailTo,
         text: "Verificação de Código OTP",

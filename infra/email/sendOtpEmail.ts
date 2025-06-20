@@ -7,7 +7,7 @@ type SendEmailResponse = {
 };
 
 export async function sendOtpEmail(emailTo: string, otpCode: string): Promise<SendEmailResponse> {
-  const OTP_SUBJECT = "Seu código de verificação - Psiconnect";
+  const OTP_SUBJECT = "Seu código de verificação - PsicoMais";
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 8px;">
@@ -27,7 +27,7 @@ export async function sendOtpEmail(emailTo: string, otpCode: string): Promise<Se
   try {
       
  const data = await sendEmail({
-    from: '"Psiconnect" <noreply@orostec.online>',
+    from: '"PsicoMais" <noreply@orostec.online>',
     subject: OTP_SUBJECT,
     to: emailTo,
     text: "Verificação de Código OTP",
