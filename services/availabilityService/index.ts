@@ -1,4 +1,4 @@
-import { WeeklySchedule, TimeSlot } from '@/pages/availability';
+import { WeeklySchedule, TimeSlot } from '@/presentation/pages/availability';
 
 type AvailabilityPayload = {
   professionalId: string;

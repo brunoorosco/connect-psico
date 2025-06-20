@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Calendar } from "lucide-react";
-import { WeeklySchedule, TimeSlot } from "@/pages/availability";
+import { WeeklySchedule, TimeSlot } from "@/presentation/pages/availability";
 import { generateAvailabilityList } from "@/services/availabilityService";
 import { useSession } from "next-auth/react";
 import { createAvailabilityBulk } from "@/actions/availability/createManyAvailabity";

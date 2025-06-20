@@ -1,4 +1,4 @@
-import AvailabilityPage from "@/pages/availability"
+import AvailabilityPage from "@/presentation/pages/availability"
 
 const Availability = () => {
   return (

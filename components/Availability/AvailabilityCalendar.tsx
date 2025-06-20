@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { format, isSameDay, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { WeeklySchedule, DayAvailability } from '@/pages/availability';
+import { WeeklySchedule, DayAvailability } from '@/presentation/pages/availability';
 import DayScheduleModal from './DayScheduleModal';
 import { Clock, Edit } from 'lucide-react';
 

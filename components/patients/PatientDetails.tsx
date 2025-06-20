@@ -14,7 +14,7 @@ import { ArrowLeft, Edit, MessageSquare, Calendar, FileText } from 'lucide-react
 import { Patient, Appointment } from '@/types/appointment';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { mockAppointments } from '@/pages/patients/mockdata';
+import { mockAppointments } from '@/presentation/pages/patients/mockdata';
 
 interface PatientDetailsProps {
   patient: Patient;
