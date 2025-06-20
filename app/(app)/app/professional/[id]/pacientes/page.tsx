@@ -1,4 +1,4 @@
-import PatientsPage from "@/pages/patients"
+import PatientsPage from "@/presentation/pages/patients"
 
 const Patients = () => {
   return (

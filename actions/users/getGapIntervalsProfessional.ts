@@ -27,7 +27,6 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
 
 export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const dayOfWeek = date.getDay(); // 0=domingo, 1=segunda, etc.
-
   const professional = await prisma.professional.findUnique({
     where: { userId },
     select: { id: true, userId: true },
@@ -38,10 +37,10 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const availabilities = await prisma.availability.findMany({
     where: {
       professionalId: professional.userId,
-      dayOfWeek,
+      // dayOfWeek,
       isAvailable: true,
       startTime: {
-        gte: date, // pega horários >= agora
+        gte: new Date(), // pega horários >= agora
       }, // busca apenas horários futuros (>= agora)
     },
   });
@@ -62,7 +61,7 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
     },
   });
 
-  if (appointments.length === 0) {
+  if (availabilities.length === 0) {
     return [];
   }
 
@@ -75,13 +74,18 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
 
   // Gerar buracos de horários livres
   const freeIntervals = availabilities.flatMap((av) => {
-    const start = new Date(date);
-    start.setHours(av.startTime.getHours(), av.startTime.getMinutes(), 0, 0);
-    const end = new Date(date);
-    end.setHours(av.endTime.getHours(), av.endTime.getMinutes(), 0, 0);
+    const startTime = new Date(av.startTime);
+    const endTime = new Date(av.endTime);
+
+    const start = new Date(av.startTime);
+    start.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0);
+
+    const end = new Date(av.startTime);
+    end.setHours(endTime.getHours(), endTime.getMinutes(), 0, 0);
 
     return getFreeIntervals({ start, end }, appointmentIntervals);
   });
+
   // Explodir em slots de 30 minutos
   const slots = freeIntervals.flatMap((interval) => {
     const slotsInInterval: { start: Date }[] = [];
@@ -97,6 +101,5 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map(
     (start) => ({ start: new Date(start) })
   );
-
   return slotsUnique.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
 };
