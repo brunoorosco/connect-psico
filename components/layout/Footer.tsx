@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-white">Psiconnect</span>
+              <span className="text-2xl font-bold text-white">PsicoMais</span>
             </Link>
             <p className="mt-4 text-sm text-gray-300">
               Conectando pacientes e profissionais de psicologia para promover saúde mental e bem-estar.

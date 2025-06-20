@@ -10,7 +10,7 @@ export async function sendVerificationEmail(
   emailTo: string,
   verificationUrl: string
 ): Promise<SendEmailResponse> {
-  const VERIFICATION_SUBJECT = "Confirme seu e-mail - Psiconnect";
+  const VERIFICATION_SUBJECT = "Confirme seu e-mail - PsicoMais";
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
@@ -29,7 +29,7 @@ export async function sendVerificationEmail(
   `;
   try {
     const data = await sendEmail({
-      from: '"Psiconnect" <noreply@orostec.online>',
+      from: '"PsicoMais" <noreply@orostec.online>',
       subject: VERIFICATION_SUBJECT,
       to: emailTo,
       text: "Validação de E-mail",

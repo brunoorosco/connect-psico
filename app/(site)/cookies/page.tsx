@@ -83,7 +83,7 @@ const CookiePolicy = () => {
               Se você tiver alguma dúvida sobre nosso uso de cookies, entre em contato conosco em:
             </p>
             <p className="mt-2">
-              <strong>E-mail:</strong> privacidade@psiconnect.com.br<br />
+              <strong>E-mail:</strong> privacidade@psicomais.com.br<br />
               <strong>Endereço:</strong> Av. Paulista, 1000, São Paulo - SP, CEP 01310-100
             </p>
           </div>
