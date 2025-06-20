@@ -41,10 +41,7 @@ export default function LoginForm() {
   const [showOTPForm, setShowOTP] = useState<boolean>(false);
   const searchParams = useSearchParams();
 
-  if (!searchParams || searchParams.get("error") === null) {
-    console.error(searchParams?.get("error"));
-    throw new Error("Token não encontrado");
-  }
+
   const callbackError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "E-mail em uso com provedor diferente"
