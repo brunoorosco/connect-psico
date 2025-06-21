@@ -24,6 +24,7 @@ import {
 import { RegisterSchema } from "@/schemas/auth";
 import AuthCard from "./auth-card";
 import AuthFormMessage from "./auth-form-message";
+import SocialLogin from "./social-login";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -239,6 +240,9 @@ export default function RegisterForm() {
           </form>
         </Form>
 
+        <div className="mt-4 text-center text-sm">
+          <SocialLogin />
+        </div>
         <div className="mt-4 text-center text-sm">
           Já tem uma conta?{" "}
           <Link href="/auth/login" className="underline">
