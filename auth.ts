@@ -61,13 +61,23 @@ export const {
       return token;
     },
     async session({ session, token }) {
-      if (token.role) {
-        session.user.role = token.role.toString();
-      }
-      session.user.id = token.sub as string;
-      session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
-      session.user.isProfileCompleted = token.isProfileCompleted;
-      return session;
+      // if (token.role) {
+      //   session.user.role = token.role.toString();
+      // }
+      // session.user.id = token.sub as string;
+      // session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+      // session.user.isProfileCompleted = token.isProfileCompleted;
+      // return session;
+    return {
+      ...session,
+      user: {
+        ...session.user,
+        id: token.sub as string,
+        role: token.role as UserRole,
+        isTwoFactorEnabled: token.isTwoFactorEnabled,
+        isProfileCompleted: token.isProfileCompleted,
+      },
+    }
     },
   },
   secret: process.env.AUTH_SECRET,
