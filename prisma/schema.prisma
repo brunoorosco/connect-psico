@@ -33,6 +33,9 @@ model User {
   Professional             Professional?
   patientProntuario        Prontuario[]   @relation("PatientProntuario")
   professionalProntuario   Prontuario[]   @relation("ProfessionalProntuario")
+  patientUser              Pacientes[]    @relation("PatientUser")
+  patientProfessional      Pacientes[]    @relation("PatientProfessional")
+  Session                  Session[]
 
   @@index([id])
   @@map("users")
@@ -63,6 +66,16 @@ model Professional {
   @@map("professionals")
 }
 
+model Pacientes {
+  id             Int    @id @default(autoincrement())
+  professionalId String @map("professional_id")
+  patientId      String @map("patient_id")
+  patient        User   @relation("PatientUser", fields: [patientId], references: [id])
+  professional   User   @relation("PatientProfessional", fields: [professionalId], references: [id])
+
+  @@map("patients")
+}
+
 model Comentarios {
   id             Int          @id @default(autoincrement())
   content        String
@@ -83,6 +96,16 @@ model VerificationToken {
   expires DateTime
 
   @@unique([email, token])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TwoFactorToken {
