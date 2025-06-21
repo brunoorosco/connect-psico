@@ -3,7 +3,7 @@ import React from "react";
 import LoginSocialButton from "./login-social-button";
 
 const SocialLogin = () => {
-  const callbackUrl = `${process.env.NEXT_PUBLIC_URL}`;
+  const callbackUrl = `${process.env.NEXT_PUBLIC_URL}/${process.env.AUTH_LOGIN_REDIRECT}`;
   return (
     <div className="flex w-ful justify-center items-center p-2 space-x-2 ">
       <LoginSocialButton provider="google" callbackUrl={callbackUrl}>
