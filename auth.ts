@@ -39,19 +39,16 @@ export const {
           where: {
             email: user.email as string,
           },
-          include: {
-            Account:{
-              select:{
-                isNewProfile:true
-              }
-            }
-          }
+
+          select: {
+            isNewProfile: true,
+          },
         });
         console.log("isNewUser", isNewUser);
-        if (isNewUser && !isNewUser?.Account[0].isNewProfile) {        
+        if (isNewUser && !isNewUser?.isNewProfile) {
           return `/onboarding/${user.id}`;
         }
-        return true
+        return true;
       }
       if (user.email) {
         const registeredUser = await findUserbyEmail(user?.email);

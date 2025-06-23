@@ -38,22 +38,20 @@ export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) 
       });
     }
     console.log("updateProvider", updateProvider);
-    if (updateProvider) {
-      return { error: "Já existe uma disponibilidade que conflita com este horário" };
+    if (isProfessional) {
+     await prisma.user.update({
+        where: { id: userId },
+        data: {
+          role: "SUPERVISOR",
+        },
+      });
+      // Criar Profissional
+      await prisma.professional.create({
+        data: { userId },
+      });
     }
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        role: "SUPERVISOR",
-      },
-    });
-    // Criar disponibilidade
-    const professional = await prisma.professional.create({
-      data: { userId },
-    });
-
-    return { success: "Com sucesso", data: professional };
+    return { success: "Com sucesso", data: account };
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       return { error: "Erro ao criar disponibilidade" };
