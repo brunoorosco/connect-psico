@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 
 export const professionalById = async (id: string): Promise<any> => {
 	const professional = await prisma.user.findFirst({
-		where: { id: 'cm7ay7v7800010dl881sy8dv5' },
+		where: { id },
 		omit: {
 			password: true,
 			emailVerified: true,

@@ -27,7 +27,7 @@ export async function sendOtpEmail(emailTo: string, otpCode: string): Promise<Se
   try {
       
  const data = await sendEmail({
-    from: '"PsicoMais" <noreply@orostec.online>',
+    from: '"PsicoMais" <noreply@psicomais.com>',
     subject: OTP_SUBJECT,
     to: emailTo,
     text: "Verificação de Código OTP",

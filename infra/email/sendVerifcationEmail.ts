@@ -29,7 +29,7 @@ export async function sendVerificationEmail(
   `;
   try {
     const data = await sendEmail({
-      from: '"PsicoMais" <noreply@orostec.online>',
+      from: '"PsicoMais" <noreply@psicomais.com>',
       subject: VERIFICATION_SUBJECT,
       to: emailTo,
       text: "Validação de E-mail",
