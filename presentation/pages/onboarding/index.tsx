@@ -62,6 +62,7 @@ const Onboarding = () => {
           const { success, error } = await updateProvider({ userId: id, ...data });
           if (error) setError(error);
           setSuccess(success || "");
+         
         } catch (error) {
           setError("Algo deu errado.");
         }

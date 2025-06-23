@@ -10,6 +10,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     return redirect("/");
   }
 
+  if (session.user.isNewProfile === false) {
+    return redirect(`/onboarding/${session.user.id}`);
+  }
+
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col">
       <SidebarProvider>
