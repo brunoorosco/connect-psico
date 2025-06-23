@@ -35,10 +35,17 @@ const Onboarding = () => {
     setCurrentStep(2);
   };
 
-  const handleProfessionalInfo = (data: { professionalRegistration: string; state: string }) => {
-    setOnboardingData((prev) => ({ ...prev, ...data }));
+  const handleProfessionalInfo = (data: { numberConselho: string; ufConselho: string }) => {
+    const professionalData = {
+      professionalRegistration: data.numberConselho,
+      state: data.ufConselho,
+    };
+  
+    const updatedData = { ...onboardingData, ...professionalData };
+  
+    setOnboardingData(updatedData);
     setCurrentStep(3);
-    submitOnboardingData({ ...onboardingData, ...data });
+    submitOnboardingData(updatedData);
   };
 
   const handleNonProfessionalComplete = () => {
