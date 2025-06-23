@@ -33,8 +33,25 @@ export const {
   },
   callbacks: {
     async signIn({ user, email, account, profile }) {
+      console.log("signIn", user);
       if (account && (account.provider === "google" || account.provider === "apple")) {
-        return true;
+        const isNewUser = await prisma.user.findUnique({
+          where: {
+            email: user.email as string,
+          },
+          include: {
+            Account:{
+              select:{
+                isNewProfile:true
+              }
+            }
+          }
+        });
+        console.log("isNewUser", isNewUser);
+        if (isNewUser && !isNewUser?.Account[0].isNewProfile) {        
+          return `/onboarding/${user.id}`;
+        }
+        return true
       }
       if (user.email) {
         const registeredUser = await findUserbyEmail(user?.email);
@@ -68,16 +85,16 @@ export const {
       // session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
       // session.user.isProfileCompleted = token.isProfileCompleted;
       // return session;
-    return {
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub as string,
-        role: token.role as UserRole,
-        isTwoFactorEnabled: token.isTwoFactorEnabled,
-        isProfileCompleted: token.isProfileCompleted,
-      },
-    }
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub as string,
+          role: token.role as UserRole,
+          isTwoFactorEnabled: token.isTwoFactorEnabled,
+          isProfileCompleted: token.isProfileCompleted,
+        },
+      };
     },
   },
   secret: process.env.AUTH_SECRET,
