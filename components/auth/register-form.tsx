@@ -25,6 +25,7 @@ import { RegisterSchema } from "@/schemas/auth";
 import AuthCard from "./auth-card";
 import AuthFormMessage from "./auth-form-message";
 import SocialLogin from "./social-login";
+import { ufCRP } from "@/utils/ufCRP";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -170,32 +171,7 @@ export default function RegisterForm() {
                               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none"
                             >
                               <option value="">Selecione a UF</option>
-                              {[
-                                "AC/RO",
-                                "AL",
-                                "AM/RR",
-                                "BA",
-                                "CE",
-                                "DF",
-                                "ES",
-                                "GO",
-                                "MA",
-                                "MT",
-                                "MS",
-                                "MG",
-                                "PA/AP",
-                                "PB",
-                                "PR",
-                                "PE",
-                                "PI",
-                                "RJ",
-                                "RN",
-                                "RS",
-                                "SC",
-                                "SP",
-                                "SE",
-                                "TO",
-                              ].map((uf) => (
+                              {ufCRP.map((uf) => (
                                 <option key={uf} value={uf}>
                                   CRP - {uf}
                                 </option>

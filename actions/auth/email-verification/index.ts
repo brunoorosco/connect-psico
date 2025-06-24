@@ -22,8 +22,8 @@ export const sendAccountVerificationEmail = async (user: User, token: string) =>
     };
   }
 
-  // const verificationUrl = `${NEXT_PUBLIC_URL}${VERIFICATION_URL}?token=${token}`;
-  const verificationUrl = `https://api.orostec.online/psiconnect/p/${token}`;
+  const verificationUrl = `${NEXT_PUBLIC_URL}${VERIFICATION_URL}?token=${token}`;
+  // const verificationUrl = `https://api.orostec.online/psiconnect/p/${token}`;
   const { email } = user;
   try {
     const { data, error, success } = await sendVerificationEmail(email, verificationUrl);

@@ -21,6 +21,7 @@ model User {
   password                 String?
   isTwoFactorAuthEnabled   Boolean        @default(false)
   twoFactorAuthVerified    DateTime?
+  isNewProfile             Boolean        @default(false)
   createdAt                DateTime       @default(now())
   updatedAt                DateTime       @updatedAt
   patientAppointments      Appointment[]  @relation("PatientAppointments")

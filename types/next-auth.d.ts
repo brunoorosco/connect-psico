@@ -8,6 +8,7 @@ declare module "next-auth" {
       role: string;
       isTwoFactorEnabled?: boolean;
       isProfileCompleted?: boolean;
+      isNewProfile?: boolean;
     } & DefaultSession["user"];
   }
   interface User extends DefaultUser {

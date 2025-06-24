@@ -33,7 +33,9 @@ export const {
   },
   callbacks: {
     async signIn({ user, email, account, profile }) {
+      console.log("signIn", user);
       if (account && (account.provider === "google" || account.provider === "apple")) {
+    
         return true;
       }
       if (user.email) {
@@ -43,41 +45,38 @@ export const {
       return true;
     },
     async jwt({ token, user, trigger, session }) {
-      if (trigger && trigger === "update" && session) {
-        return token;
-      }
       if (user) {
-        // User is available during sign-in
-        if (user.id) {
-          const [isTwoFactorEnabled, isProfileComplete] = await Promise.all([
-            isTwoFactorAutenticationEnabled(user.id),
-            isProfileCompleteDb(user.id),
-          ]);
-          token.isTwoFactorEnabled = isTwoFactorEnabled;
-          token.isProfileCompleted = isProfileComplete;
-          token.role = user.role || UserRole.DEFAULT;
-        }
+        const [isTwoFactorEnabled, isProfileComplete] = await Promise.all([
+          isTwoFactorAutenticationEnabled(user.id as string),
+          isProfileCompleteDb(user.id as string),
+        ]);
+    
+        const userDb = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true, isNewProfile: true },
+        });
+    
+        token.id = user.id;
+        token.role = userDb?.role || UserRole.DEFAULT;
+        token.isProfileCompleted = isProfileComplete;
+        token.isTwoFactorEnabled = isTwoFactorEnabled;
+        token.isNewProfile = userDb?.isNewProfile ?? false;
       }
+    
       return token;
     },
     async session({ session, token }) {
-      // if (token.role) {
-      //   session.user.role = token.role.toString();
-      // }
-      // session.user.id = token.sub as string;
-      // session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
-      // session.user.isProfileCompleted = token.isProfileCompleted;
-      // return session;
-    return {
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub as string,
-        role: token.role as UserRole,
-        isTwoFactorEnabled: token.isTwoFactorEnabled,
-        isProfileCompleted: token.isProfileCompleted,
-      },
-    }
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub as string,
+          role: token.role as UserRole,
+          isTwoFactorEnabled: token.isTwoFactorEnabled,
+          isProfileCompleted: token.isProfileCompleted,
+          isNewProfile: token.isNewProfile,
+        },
+      };
     },
   },
   secret: process.env.AUTH_SECRET,

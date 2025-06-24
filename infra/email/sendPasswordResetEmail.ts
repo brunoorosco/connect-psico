@@ -31,7 +31,7 @@ export async function sendPasswordResetEmail(
 
   try {
     const data = await sendEmail({
-        from: '"PsicoMais" <noreply@orostec.online>',
+        from: '"PsicoMais" <noreply@psicomais.com>',
         subject: RESET_SUBJECT,
         to: emailTo,
         text: "Verificação de Código OTP",
