@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     return redirect("/");
   }
 
-  if (session.user.isNewProfile === false) {
+  if (session.user.isNewProfile === true) {
     return redirect(`/onboarding/${session.user.id}`);
   }
 
