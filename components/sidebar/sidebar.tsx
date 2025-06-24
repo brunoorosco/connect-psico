@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { env } from "@/config/application";
 
 export async function AppSidebar() {
   const session = await auth();
@@ -44,8 +45,12 @@ export async function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center">
-              <Link href="/">
-                <Logo />
+              <Link href="/" className="flex items-center">
+                {/* <Logo /> */}
+
+                <span className="text-2xl font-bold text-therapy-primary">
+                  {env.applicationName}
+                </span>
               </Link>
             </div>
           </SidebarGroupLabel>
