@@ -31,6 +31,7 @@ export const register = async (user: z.infer<typeof RegisterSchema>) => {
         name,
         email,
         password: hashedPassword,
+        isNewProfile: false,
         phone: user.phone,
         role: user.professional === true ? UserRole.SUPERVISOR : UserRole.DEFAULT,
       },
