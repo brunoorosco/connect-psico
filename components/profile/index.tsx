@@ -17,6 +17,7 @@ import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails"
 import { useSession } from "next-auth/react";
 import { useGetProfessionalById } from "@/hooks/useProfissionals";
 import { updateProfessionalProfile } from "@/actions/users/udpateProfileProfessional";
+import { useParams } from "next/navigation";
 
 const ProfileProfessionalForm: React.FC = () => {
   const [isPending, startTransition] = useTransition();
@@ -24,8 +25,10 @@ const ProfileProfessionalForm: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   });
+  const params = useParams();
+  const id = params.id as string;
   const { data: session, update } = useSession();
-  const { user, loading, error } = useGetProfessionalById(session?.user.id);
+  const { user, loading, error } = useGetProfessionalById(id);
 
   async function onSubmit(data: ProfileFormValues) {
     startTransition(async () => {
@@ -40,15 +43,17 @@ const ProfileProfessionalForm: React.FC = () => {
         };
 
         const result = await updateProfessionalProfile(session.user.id, payload);
-        update({session:{
-          user: {
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            image: data.profilePhoto,
-            isProfileCompleted: true,
+        update({
+          session: {
+            user: {
+              name: data.name,
+              email: data.email,
+              phone: data.phone,
+              image: data.profilePhoto,
+              isProfileCompleted: true,
+            },
           },
-        }});
+        });
 
         toast.success(result.success!, {
           description: "Suas informações foram salvas.",

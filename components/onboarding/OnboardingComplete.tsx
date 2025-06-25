@@ -13,7 +13,12 @@ const OnboardingComplete: React.FC<OnboardingCompleteProps> = ({ isProfessional,
   // const navigate = useNavigate();
   const router = useRouter();
   const handleContinue = async () => {
-    await fetch("/api/auth/session?update");
+    console.log("fsdfdsdfsfs");
+    try {
+      await fetch("/api/auth/session?update");
+    } catch (error) {
+      console.error("Erro ao atualizar sessão", error);
+    }
     router.push("/app");
   };
 

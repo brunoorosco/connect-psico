@@ -1,6 +1,5 @@
 "use client";
 import React, { startTransition, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle } from "lucide-react";
@@ -12,8 +11,8 @@ import { updateProvider } from "@/actions/onboarding/updateProvider";
 
 export interface OnboardingData {
   isProfessional: boolean;
-  professionalRegistration?: string;
-  state?: string;
+  numberConselho?: string;
+  ufConselho?: string;
 }
 
 const Onboarding = () => {
@@ -40,9 +39,9 @@ const Onboarding = () => {
       professionalRegistration: data.numberConselho,
       state: data.ufConselho,
     };
-  
+
     const updatedData = { ...onboardingData, ...professionalData };
-  
+
     setOnboardingData(updatedData);
     setCurrentStep(3);
     submitOnboardingData(updatedData);
@@ -56,13 +55,11 @@ const Onboarding = () => {
   const submitOnboardingData = async (data: OnboardingData) => {
     setIsLoading(true);
     try {
-      console.log("Dados enviados para API:", { userId: id, ...data });
       startTransition(async () => {
         try {
           const { success, error } = await updateProvider({ userId: id, ...data });
           if (error) setError(error);
           setSuccess(success || "");
-         
         } catch (error) {
           setError("Algo deu errado.");
         }
