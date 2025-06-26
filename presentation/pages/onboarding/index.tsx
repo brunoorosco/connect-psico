@@ -8,6 +8,7 @@ import ProfessionalInfo from "@/components/onboarding/ProfessionalInfo";
 import OnboardingComplete from "@/components/onboarding/OnboardingComplete";
 import { useParams, useRouter } from "next/navigation";
 import { updateProvider } from "@/actions/onboarding/updateProvider";
+import { useSession } from "next-auth/react";
 
 export interface OnboardingData {
   isProfessional: boolean;
@@ -22,9 +23,9 @@ const Onboarding = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const params = useParams();
   const id = params.id as string;
+  const { update, data: session } = useSession();
 
   const totalSteps = onboardingData.isProfessional ? 3 : 2;
   const progress = (currentStep / totalSteps) * 100;
@@ -53,16 +54,25 @@ const Onboarding = () => {
   };
 
   const submitOnboardingData = async (data: OnboardingData) => {
-    setIsLoading(true);
     try {
       startTransition(async () => {
         try {
-          const { success, error } = await updateProvider({ userId: id, ...data });
+          const { error } = await updateProvider({
+            id,
+            isProfessional: true,
+            state: data.ufConselho,
+            professionalRegistration: data.numberConselho,
+          });
           if (error) setError(error);
-          setSuccess(success || "");
         } catch (error) {
           setError("Algo deu errado.");
         }
+      });
+      ("use server");
+      await update({
+        ...session!.user,
+        isNewProfile: false,
+        role: onboardingData.isProfessional ? "SUPERVISOR" : "DEFAULT",
       });
 
       router.push("/app");

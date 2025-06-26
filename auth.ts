@@ -33,9 +33,8 @@ export const {
   },
   callbacks: {
     async signIn({ user, email, account, profile }) {
-      console.log("signIn", user);
       if (account && (account.provider === "google" || account.provider === "apple")) {
-    
+
         return true;
       }
       if (user.email) {
@@ -45,24 +44,39 @@ export const {
       return true;
     },
     async jwt({ token, user, trigger, session }) {
+      console.log("trigger", trigger);
+      console.log("session", session);
+      if (trigger === "update") {
+        return {
+          ...token,
+          ...session,
+          session: {
+            role: session.role ?? token.role,
+            isTwoFactorEnabled: session.isTwoFactorEnabled ?? token.isTwoFactorEnabled,
+            isProfileCompleted: session.isProfileCompleted ?? token.isProfileCompleted,
+            isNewProfile: session.isNewProfile ?? token.isNewProfile,
+          }
+        }
+      }
+
       if (user) {
         const [isTwoFactorEnabled, isProfileComplete] = await Promise.all([
           isTwoFactorAutenticationEnabled(user.id as string),
           isProfileCompleteDb(user.id as string),
         ]);
-    
+
         const userDb = await prisma.user.findUnique({
           where: { id: user.id },
           select: { role: true, isNewProfile: true },
         });
-    
+
         token.id = user.id;
         token.role = userDb?.role || UserRole.DEFAULT;
         token.isProfileCompleted = isProfileComplete;
         token.isTwoFactorEnabled = isTwoFactorEnabled;
         token.isNewProfile = userDb?.isNewProfile ?? false;
       }
-    
+
       return token;
     },
     async session({ session, token }) {

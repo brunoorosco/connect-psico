@@ -1,8 +1,9 @@
-"use client";
-import React from "react";
+import React, { startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { updateProvider } from "@/actions/onboarding/updateProvider";
+import { toast } from "sonner";
 
 interface OnboardingCompleteProps {
   isProfessional: boolean;
@@ -10,16 +11,31 @@ interface OnboardingCompleteProps {
 }
 
 const OnboardingComplete: React.FC<OnboardingCompleteProps> = ({ isProfessional, isLoading }) => {
-  // const navigate = useNavigate();
-  const router = useRouter();
+  const { update, data: session } = useSession();
+
   const handleContinue = async () => {
-    console.log("fsdfdsdfsfs");
     try {
-      await fetch("/api/auth/session?update");
+      startTransition(async () => {
+        if (!session?.user?.id) {
+          toast.error("Usuário não autenticado.");
+          return;
+        }
+        await updateProvider({
+          id: session.user.id,
+          isProfessional: false,
+        });
+      });
+
+      ("use server");
+      await update({
+        ...session!.user,
+        isNewProfile: false,
+      });
     } catch (error) {
       console.error("Erro ao atualizar sessão", error);
     }
-    router.push("/app");
+
+    window.location.href = "/app";
   };
 
   if (isLoading) {
