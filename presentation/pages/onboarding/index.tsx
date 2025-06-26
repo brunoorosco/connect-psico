@@ -9,6 +9,7 @@ import OnboardingComplete from "@/components/onboarding/OnboardingComplete";
 import { useParams, useRouter } from "next/navigation";
 import { updateProvider } from "@/actions/onboarding/updateProvider";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export interface OnboardingData {
   isProfessional: boolean;
@@ -57,14 +58,18 @@ const Onboarding = () => {
     try {
       startTransition(async () => {
         try {
-          const { error } = await updateProvider({
+          if (!session?.user?.id) {
+            toast.error("Usuário não autenticado.");
+            return;
+          }
+          await updateProvider({
             id,
             isProfessional: true,
             state: data.ufConselho,
             professionalRegistration: data.numberConselho,
           });
-          if (error) setError(error);
         } catch (error) {
+          console.error("Erro ao atualizar sessão", error);
           setError("Algo deu errado.");
         }
       });
@@ -75,7 +80,7 @@ const Onboarding = () => {
         role: onboardingData.isProfessional ? "SUPERVISOR" : "DEFAULT",
       });
 
-      router.push("/app");
+      window.location.href = "/app";
     } catch (error) {
       console.error("Erro ao enviar dados:", error);
     } finally {
