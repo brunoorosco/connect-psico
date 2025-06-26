@@ -44,8 +44,6 @@ export const {
       return true;
     },
     async jwt({ token, user, trigger, session }) {
-      console.log("trigger", trigger);
-      console.log("session", session);
       if (trigger === "update") {
         return {
           ...token,
