@@ -93,7 +93,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
                     value={new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    }).format((field.value || 0) / 100)} // <-- divide por 100 para mostrar
+                    }).format((field.value || 5000) / 100)} // <-- divide por 100 para mostrar
                     onChange={(e) => {
                       const rawValue = e.target.value.replace(/\D/g, ""); // remove tudo que não for número
                       const numericValue = Number(rawValue); // inteiro em centavos
@@ -142,129 +142,6 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
             </FormItem>
           )}
         />
-
-        <Collapsible className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold">Configuração de disponibilidade</h4>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm">
-                Configurar horários
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className="space-y-4">
-            <FormField
-              control={control}
-              name="availableDays"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel className="text-base">Dias disponíveis</FormLabel>
-                    <CardDescription>
-                      Selecione os dias em que você está disponível para atendimento
-                    </CardDescription>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {weekdays.map((day) => (
-                      <FormField
-                        key={day.value}
-                        control={control}
-                        name="availableDays"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={day.value}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                {/* <Checkbox
-                                  checked={field.value?.includes(day.value)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([...field.value, day.value])
-                                      : field.onChange(
-                                          field.value?.filter((value) => value !== day.value)
-                                        );
-                                  }}
-                                /> */}
-                              </FormControl>
-                              <FormLabel className="font-normal">{day.label}</FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <FormLabel className="text-base">Intervalos de horários</FormLabel>
-                <Button type="button" variant="outline" size="sm" onClick={addTimeInterval}>
-                  <Plus className="h-4 w-4 mr-1" /> Adicionar intervalo
-                </Button>
-              </div>
-              <CardDescription className="mb-4">
-                Configure os intervalos de horários em que você estará disponível para atendimento
-              </CardDescription>
-
-              {availableHours.map((_, index) => (
-                <div key={index} className="border rounded-md p-4 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-sm font-medium">Intervalo {index + 1}</h4>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeTimeInterval(index)}
-                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={control}
-                      name={`availableHours.${index}.startTime`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Horário inicial</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input type="time" className="pl-9" {...field} />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={control}
-                      name={`availableHours.${index}.endTime`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Horário final</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input type="time" className="pl-9" {...field} />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
       </CardContent>
     </Card>
   );
