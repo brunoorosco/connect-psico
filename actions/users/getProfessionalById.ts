@@ -3,10 +3,10 @@ import { prisma } from "@/lib/db";
 
 export const getProfessioanlById = async (id: string): Promise<any> => {
   const user = await prisma.user.findUnique({
-    where: { id },
+    where: { id, active: true },
     include: {
-        Professional: true,
-      },
+      Professional: true,
+    },
     omit: {
       password: true,
       emailVerified: true,
@@ -18,13 +18,11 @@ export const getProfessioanlById = async (id: string): Promise<any> => {
     return { error: "Usuário não encontrado" };
   }
   const { Professional, ...restUser } = user;
-    // Pega o primeiro professional, caso exista
-    const professionalData = Professional ?? {};
+  // Pega o primeiro professional, caso exista
+  const professionalData = Professional ?? {};
 
-    return {
-      ...restUser,
-      ...professionalData,
-    };
- 
-
+  return {
+    ...restUser,
+    ...professionalData,
+  };
 };
