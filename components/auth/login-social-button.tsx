@@ -12,12 +12,12 @@ type Props = {
 };
 
 const LoginSocialButton = ({ children, provider, callbackUrl }: Props) => {
-  console.log(callbackUrl);
   return (
     // biome-ignore lint: TODO: Need to implement key stroke shortcuts
     <Button
       variant={"outline"}
       size={"default"}
+      className=" rounded-lg"
       onClick={async () => {
         signIn(provider, { redirectTo: callbackUrl });
         // signIn(provider, { redirect: true, callbackUrl, redirectTo: });
