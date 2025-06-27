@@ -21,7 +21,7 @@ export const profileSchema = z.object({
   experiencia: z.number().min(0, { message: "Experiência inválida" }),
   publicoAlvo: z.array(z.string()).min(1, { message: "Selecione pelo menos um público" }),
   tempoConsulta: z.number().min(30, { message: "Duração mínima é de 30 minutos" }).max(120),
-  valorAtendimento: z.number().min(50, { message: "Valor mínimo é de R$50" }),
+  valorAtendimento: z.number().min(49, { message: "Valor mínimo é de R$50" }),
   tipoAtendimento: z.enum(["remoto", "presencial", "ambos"], {
     message: "Selecione o tipo de atendimento",
   }),
