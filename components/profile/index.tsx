@@ -43,17 +43,6 @@ const ProfileProfessionalForm: React.FC = () => {
         };
 
         const result = await updateProfessionalProfile(session.user.id, payload);
-        update({
-          session: {
-            user: {
-              name: data.name,
-              email: data.email,
-              phone: data.phone,
-              image: data.profilePhoto,
-              isProfileCompleted: true,
-            },
-          },
-        });
 
         toast.success(result.success!, {
           description: "Suas informações foram salvas.",
@@ -63,6 +52,16 @@ const ProfileProfessionalForm: React.FC = () => {
         console.error(error);
       }
     });
+    ("use server");
+    await update({
+      ...session!.user,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      image: data.profilePhoto,
+      isProfileCompleted: true,
+    });
+   // window.location.href = `/app/professional/${session?.user.id}/profile`;
   }
   useEffect(() => {
     if (user) {

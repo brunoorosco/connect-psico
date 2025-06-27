@@ -1,10 +1,10 @@
-"use server";
+'use client'
 import PsychologistDashboard from "@/components/dashboard/ProfissionalDashboard";
 import { AlertTriangle } from "lucide-react";
-import { auth } from "@/auth";
+import { useSession } from "next-auth/react";
 
-const Dashboard = async () => {
-  const session = await auth();
+const Dashboard = () => {
+  const { data: session } = useSession();
   const alert = session?.user.role === "SUPERVISOR" && !session?.user.isProfileCompleted;
 
   return (
@@ -22,7 +22,7 @@ const Dashboard = async () => {
                   Clique Aqui!
                 </a>
                 {"  "}Após a atualização é necessário relogar pra que as alterações sejam refletidas{" "}
-                 {/* <a className="font-semibold" href={`/auth/logout`}>
+                {/* <a className="font-semibold" href={`/auth/logout`}>
                   Clique p/ Sair!
                 </a> */}
               </p>
