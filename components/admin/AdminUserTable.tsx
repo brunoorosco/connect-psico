@@ -135,7 +135,10 @@ const AdminUserTable = ({ professional }: Props) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.active ? "destructive" : "default"}>
+                      <Badge
+                        variant={user.active ? "default" : "destructive"}
+                        className={user.active ? "bg-green-600" : ""}
+                      >
                         {user.active ? "Ativo" : "Bloqueado"}
                       </Badge>
                     </TableCell>
