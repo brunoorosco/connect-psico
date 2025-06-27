@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import type { ReactNode } from "react";
+// import { signIn } from "@/auth";
 
 type Props = {
   provider: "google" | "apple";
@@ -11,13 +12,15 @@ type Props = {
 };
 
 const LoginSocialButton = ({ children, provider, callbackUrl }: Props) => {
+  console.log(callbackUrl);
   return (
     // biome-ignore lint: TODO: Need to implement key stroke shortcuts
     <Button
       variant={"outline"}
       size={"default"}
       onClick={async () => {
-        signIn(provider, { redirect: true, callbackUrl });
+        signIn(provider, { redirectTo: callbackUrl });
+        // signIn(provider, { redirect: true, callbackUrl, redirectTo: });
       }}
     >
       {children}
