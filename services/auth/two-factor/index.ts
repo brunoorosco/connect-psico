@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import { generateOTP } from "@/lib/utils";
-import { se } from "date-fns/locale";
 
 export const findTwoFactorAuthTokenByEmail = async (email: string) => {
   const token = await prisma.twoFactorToken.findUnique({
@@ -35,7 +34,6 @@ export const isProfileCompleteDb = async (id: string) => {
       },
     },
   });
-  console.log(user?.Professional?.isProfileCompleted);
   return user?.Professional?.isProfileCompleted;
 };
 

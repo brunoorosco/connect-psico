@@ -62,7 +62,6 @@ const Onboarding = () => {
             toast.error("Usuário não autenticado.");
             return;
           }
-          console.log("data", data);
           await updateProvider({
             id,
             isProfessional: true,
