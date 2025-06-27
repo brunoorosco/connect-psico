@@ -150,11 +150,11 @@ const AdminUserTable = ({ professional }: Props) => {
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : user.active ? (
                           <>
-                            <Check className="mr-1 h-4 w-4" /> Desbloquear
+                            <Check className="mr-1 h-4 w-4" /> Bloquear
                           </>
                         ) : (
                           <>
-                            <Ban className="mr-1 h-4 w-4" /> Bloquear
+                            <Ban className="mr-1 h-4 w-4" /> Desbloquear
                           </>
                         )}
                       </Button>
