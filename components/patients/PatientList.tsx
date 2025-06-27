@@ -33,7 +33,7 @@ const PatientList: React.FC<PatientListProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Pacientes ({patients.length})</CardTitle>
+        <CardTitle>Lista de Pacientes ({patients.length}) - MODELO TESTE</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
