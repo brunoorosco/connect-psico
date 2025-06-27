@@ -13,6 +13,7 @@ export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationP
     prisma.user.findMany({
       where: {
         role: "SUPERVISOR",
+        active: true,
         Professional: {
           isProfileCompleted: true,
         },
