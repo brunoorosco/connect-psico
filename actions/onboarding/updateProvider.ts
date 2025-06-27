@@ -38,11 +38,16 @@ export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) 
           isNewProfile: false,
         },
       });
-
-      console.log("updateProvider", user);
       if (isProfessional) {
-        await prisma.professional.create({
-          data: { userId: user?.id, numConselho: professionalRegistration, ufConselho: state },
+        await prisma.professional.upsert({
+          where: { userId: id },
+          update: { numConselho: professionalRegistration, ufConselho: state },
+          create: {
+            userId: user?.id,
+            numConselho: professionalRegistration,
+            ufConselho: state,
+            valorAtendimento: 5000,
+          },
         });
       }
     }

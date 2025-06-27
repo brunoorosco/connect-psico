@@ -38,8 +38,8 @@ const Onboarding = () => {
 
   const handleProfessionalInfo = (data: { numberConselho: string; ufConselho: string }) => {
     const professionalData = {
-      professionalRegistration: data.numberConselho,
-      state: data.ufConselho,
+      numberConselho: data.numberConselho,
+      ufConselho: data.ufConselho,
     };
 
     const updatedData = { ...onboardingData, ...professionalData };
@@ -62,6 +62,7 @@ const Onboarding = () => {
             toast.error("Usuário não autenticado.");
             return;
           }
+          console.log("data", data);
           await updateProvider({
             id,
             isProfessional: true,
