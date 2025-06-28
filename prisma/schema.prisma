@@ -32,8 +32,6 @@ model User {
   sentMessages             Message[]      @relation("SentMessages")
   Message                  Message[]
   Professional             Professional?
-  patientProntuario        Prontuario[]   @relation("PatientProntuario")
-  professionalProntuario   Prontuario[]   @relation("ProfessionalProntuario")
   patientUser              Pacientes[]    @relation("PatientUser")
   patientProfessional      Pacientes[]    @relation("PatientProfessional")
   Session                  Session[]
@@ -90,13 +88,28 @@ model Account {
 }
 
 model Pacientes {
-  id             Int    @id @default(autoincrement())
-  professionalId String @map("professional_id")
-  patientId      String @map("patient_id")
-  patient        User   @relation("PatientUser", fields: [patientId], references: [id])
-  professional   User   @relation("PatientProfessional", fields: [professionalId], references: [id])
+  id               Int           @id @default(autoincrement())
+  birthDate        DateTime?     @map("birth_date")
+  emergencyContact String?       @map("emergency_contact")
+  address          String?
+  medicalRecordId  String        @map("prontuario_id")
+  professionalId   String        @map("professional_id")
+  patientId        String        @map("patient_id")
+  patient          User          @relation("PatientUser", fields: [patientId], references: [id])
+  professional     User          @relation("PatientProfessional", fields: [professionalId], references: [id])
+  notePatient      NotePatient[]
 
   @@map("patients")
+}
+
+model NotePatient {
+  id        Int       @id @default(autoincrement())
+  patientId Int       @map("patitent_id")
+  notes     String
+  patients  Pacientes @relation(fields: [patientId], references: [id])
+  createdAt DateTime  @default(now())
+
+  @@map("note_patients")
 }
 
 model Comentarios {
@@ -187,21 +200,6 @@ model Message {
   User       User?    @relation(fields: [userId], references: [id])
 
   @@map("messages")
-}
-
-model Prontuario {
-  id             String   @id @default(uuid())
-  index          Int      @default(autoincrement())
-  professionalId String   @map("professional_id")
-  patientId      String   @map("patient_id")
-  content        String
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  patient        User     @relation("PatientProntuario", fields: [patientId], references: [id])
-  professional   User     @relation("ProfessionalProntuario", fields: [professionalId], references: [id])
-
-  @@index([id])
-  @@map("prontuarios")
 }
 
 enum UserRole {
