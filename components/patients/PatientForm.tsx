@@ -1,8 +1,8 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,15 +10,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Patient } from '@/types/appointment';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Patient } from "@/types/appointment";
+import InputMask from "react-input-mask";
 
 const patientSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  phoneNumber: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos').optional().or(z.literal('')),
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  phoneNumber: z
+    .string()
+    .min(10, "Telefone deve ter pelo menos 10 dígitos")
+    .optional()
+    .or(z.literal("")),
   medicalRecordId: z.string().optional(),
   address: z.string().optional(),
   birthDate: z.string().optional(),
@@ -30,31 +35,27 @@ type PatientFormData = z.infer<typeof patientSchema>;
 
 interface PatientFormProps {
   patient?: Patient | null;
-  onSubmit: (data: Omit<Patient, 'id'>) => void;
+  onSubmit: (data: Omit<Patient, "id">) => void;
   onCancel: () => void;
 }
 
-const PatientForm: React.FC<PatientFormProps> = ({
-  patient,
-  onSubmit,
-  onCancel,
-}) => {
+const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      name: patient?.name || '',
-      email: patient?.email || '',
-      phoneNumber: patient?.phoneNumber || '',
-      medicalRecordId: patient?.medicalRecordId || '',
-      address: (patient as any)?.address || '',
-      birthDate: (patient as any)?.birthDate || '',
-      emergencyContact: (patient as any)?.emergencyContact || '',
-      notes: (patient as any)?.notes || '',
+      name: patient?.name || "",
+      email: patient?.email || "",
+      phoneNumber: patient?.phoneNumber || "",
+      medicalRecordId: patient?.medicalRecordId || "",
+      address: (patient as any)?.address || "",
+      birthDate: (patient as any)?.birthDate || "",
+      emergencyContact: (patient as any)?.emergencyContact || "",
+      notes: (patient as any)?.notes || "",
     },
   });
 
   const handleSubmit = (data: PatientFormData) => {
-    onSubmit(data as Omit<Patient, 'id'>);
+    onSubmit(data as Omit<Patient, "id">);
   };
 
   return (
@@ -96,7 +97,14 @@ const PatientForm: React.FC<PatientFormProps> = ({
               <FormItem>
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
-                  <Input placeholder="(11) 99999-9999" {...field} />
+                  <InputMask
+                    mask="(99) 99999-9999"
+                    placeholder="(99) 91234-1234"
+                    {...field}
+                    onChange={field.onChange}
+                  >
+                    {(inputProps: any) => <Input {...inputProps} />}
+                  </InputMask>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,7 +175,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
             <FormItem>
               <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Observações adicionais sobre o paciente"
                   className="min-h-[100px]"
                   {...field}
@@ -182,9 +190,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit">
-            {patient ? 'Atualizar' : 'Criar'} Paciente
-          </Button>
+          <Button type="submit">{patient ? "Atualizar" : "Criar"} Paciente</Button>
         </div>
       </form>
     </Form>
