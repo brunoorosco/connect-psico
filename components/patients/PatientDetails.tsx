@@ -94,7 +94,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Telefone</label>
-                  <p>{patient.phoneNumber || '-'}</p>
+                  <p>{patient.phone || '-'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Data de Nascimento</label>

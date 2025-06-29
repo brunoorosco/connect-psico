@@ -10,35 +10,35 @@ export const mockPatients: Patient[] = [
     id: '1',
     name: 'Ana Silva Santos',
     email: 'ana.silva@email.com',
-    phoneNumber: '(11) 99999-1111',
+    phone: '(11) 99999-1111',
     medicalRecordId: 'PR-001',
   },
   {
     id: '2',
     name: 'João Pedro Oliveira',
     email: 'joao.pedro@email.com',
-    phoneNumber: '(11) 99999-2222',
+    phone: '(11) 99999-2222',
     medicalRecordId: 'PR-002',
   },
   {
     id: '3',
     name: 'Maria Fernanda Costa',
     email: 'maria.fernanda@email.com',
-    phoneNumber: '(11) 99999-3333',
+    phone: '(11) 99999-3333',
     medicalRecordId: 'PR-003',
   },
   {
     id: '4',
     name: 'Carlos Eduardo Lima',
     email: 'carlos.eduardo@email.com',
-    phoneNumber: '(11) 99999-4444',
+    phone: '(11) 99999-4444',
     medicalRecordId: 'PR-004',
   },
   {
     id: '5',
     name: 'Beatriz Almeida Rocha',
     email: 'beatriz.almeida@email.com',
-    phoneNumber: '(11) 99999-5555',
+    phone: '(11) 99999-5555',
     medicalRecordId: 'PR-005',
   },
 ];
@@ -48,7 +48,7 @@ export const mockProfessionals: Professional[] = [
     id: "prof1",
     name: "Dr. Roberto Lima",
     email: "roberto.lima@clinica.com",
-    phoneNumber: "(11) 99999-1111"
+    phone: "(11) 99999-1111"
   }
 ];
 

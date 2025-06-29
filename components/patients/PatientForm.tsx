@@ -15,9 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Patient } from "@/types/appointment";
 import InputMask from "react-input-mask";
+import { createPatient } from "@/actions/patients/addPatient";
+import { useSession } from "next-auth/react";
 
 const patientSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  name: z.string().min(2, "Nome deve ter pelo menos 5 caracteres"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos").optional().or(z.literal("")),
   medicalRecordId: z.string().optional(),
@@ -30,6 +32,7 @@ const patientSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   number: z.string().optional(),
+  profissionalId: z.string().cuid("ID do profissional inválido").optional(),
 });
 
 type PatientFormData = z.infer<typeof patientSchema>;
@@ -41,6 +44,7 @@ interface PatientFormProps {
 }
 
 const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
+  const { data: session } = useSession(); // Certifique-se de que useSession está importado corretamente
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
@@ -57,12 +61,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
       city: (patient as any)?.city || "",
       state: (patient as any)?.state || "",
       number: (patient as any)?.number || "",
+      profissionalId: session!.user.id || "", 
     },
   });
 
   const handleSubmit = async (data: PatientFormData) => {
     try {
-      const newPatient = await addPatientWithTransaction(data);
+      console.log("Dados do formulário:", data);
+     "use server"
+      const newPatient = await createPatient(data);
       console.log("Paciente criado:", newPatient);
     } catch (err) {
       console.error("Erro ao criar paciente:", err);
@@ -317,22 +324,4 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
     </Form>
   );
 };
-
 export default PatientForm;
-function addPatientWithTransaction(data: {
-  name: string;
-  number?: string | undefined;
-  email?: string | undefined;
-  birthDate?: string | undefined;
-  emergencyContact?: string | undefined;
-  medicalRecordId?: string | undefined;
-  cep?: string | undefined;
-  street?: string | undefined;
-  neighborhood?: string | undefined;
-  city?: string | undefined;
-  state?: string | undefined;
-  notes?: string | undefined;
-  phoneNumber?: string | undefined;
-}) {
-  throw new Error("Function not implemented.");
-}

@@ -13,7 +13,7 @@ import { Eye, Edit, Trash2, MessageSquare } from 'lucide-react';
 import { Patient } from '@/types/appointment';
 
 interface PatientListProps {
-  patients: Patient[];
+  patients: any[];
   onViewPatient: (patient: Patient) => void;
   onEditPatient: (patient: Patient) => void;
   onDeletePatient: (patientId: string) => void;
@@ -25,6 +25,7 @@ const PatientList: React.FC<PatientListProps> = ({
   onEditPatient,
   onDeletePatient,
 }) => {
+      console.log("Pacientes carregados:", patients);
   const handleSendMessage = (patient: Patient) => {
     // Implementar envio de mensagem
     console.log('Enviando mensagem para:', patient.name);
@@ -49,9 +50,9 @@ const PatientList: React.FC<PatientListProps> = ({
           <TableBody>
             {patients.map((patient) => (
               <TableRow key={patient.id}>
-                <TableCell className="font-medium">{patient.name}</TableCell>
-                <TableCell>{patient.email || '-'}</TableCell>
-                <TableCell>{patient.phoneNumber || '-'}</TableCell>
+                <TableCell className="font-medium">{patient.patient.name}</TableCell>
+                <TableCell>{patient.patient.email || '-'}</TableCell>
+                <TableCell>{patient.patient.phone || '-'}</TableCell>
                 <TableCell>{patient.medicalRecordId || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">

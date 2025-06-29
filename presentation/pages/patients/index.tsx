@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -7,15 +7,26 @@ import PatientList from "@/components/patients/PatientList";
 import PatientForm from "@/components/patients/PatientForm";
 import PatientDetails from "@/components/patients/PatientDetails";
 import { Patient } from "@/types/appointment";
-import { mockPatients } from "./mockdata";
+import { getPatients } from "@/actions/patients"; // ✅
 
 const Patients = () => {
-  const [patients, setPatients] = useState<Patient[]>(mockPatients);
+  const [patients, setPatients] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
 
+  useEffect(() => {
+    const loadPatients = async () => {
+      const result = await getPatients();
+      if (!("error" in result)) {
+        setPatients(result);
+      }
+    };
+    loadPatients();
+  }, []);
+
   const handleAddPatient = (patientData: Omit<Patient, "id">) => {
+    // Aqui você pode também integrar com uma action de criação
     const newPatient: Patient = {
       ...patientData,
       id: Math.random().toString(36).substr(2, 9),

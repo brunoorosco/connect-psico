@@ -131,7 +131,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       patient: {
         id: selectedPatient.id,
         name: selectedPatient.name,
-        telefone: selectedPatient.phoneNumber || '1111111111' ,
+        telefone: selectedPatient.phone || '1111111111' ,
         email: selectedPatient.email || 'teste@TestTube.com'
       },
       appointmentDate,
