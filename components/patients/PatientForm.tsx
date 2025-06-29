@@ -19,16 +19,17 @@ import InputMask from "react-input-mask";
 const patientSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
-  phoneNumber: z
-    .string()
-    .min(10, "Telefone deve ter pelo menos 10 dígitos")
-    .optional()
-    .or(z.literal("")),
+  phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos").optional().or(z.literal("")),
   medicalRecordId: z.string().optional(),
-  address: z.string().optional(),
   birthDate: z.string().optional(),
   emergencyContact: z.string().optional(),
   notes: z.string().optional(),
+  cep: z.string().min(8, "CEP inválido").optional(),
+  street: z.string().optional(),
+  neighborhood: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  number: z.string().optional(),
 });
 
 type PatientFormData = z.infer<typeof patientSchema>;
@@ -45,28 +46,60 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
     defaultValues: {
       name: patient?.name || "",
       email: patient?.email || "",
-      phoneNumber: patient?.phoneNumber || "",
+      phone: patient?.phone || "",
       medicalRecordId: patient?.medicalRecordId || "",
-      address: (patient as any)?.address || "",
       birthDate: (patient as any)?.birthDate || "",
       emergencyContact: (patient as any)?.emergencyContact || "",
       notes: (patient as any)?.notes || "",
+      cep: (patient as any)?.cep || "",
+      street: (patient as any)?.street || "",
+      neighborhood: (patient as any)?.neighborhood || "",
+      city: (patient as any)?.city || "",
+      state: (patient as any)?.state || "",
+      number: (patient as any)?.number || "",
     },
   });
 
-  const handleSubmit = (data: PatientFormData) => {
-    onSubmit(data as Omit<Patient, "id">);
+  const handleSubmit = async (data: PatientFormData) => {
+    try {
+      const newPatient = await addPatientWithTransaction(data);
+      console.log("Paciente criado:", newPatient);
+    } catch (err) {
+      console.error("Erro ao criar paciente:", err);
+    }
+  };
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, "");
+    form.setValue("cep", cep);
+
+    if (cep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
+
+        if (!data.erro) {
+          form.setValue("street", data.logradouro || "");
+          form.setValue("neighborhood", data.bairro || "");
+          form.setValue("city", data.localidade || "");
+          form.setValue("state", data.uf || "");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
+      }
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Linha 1: Nome, Email, Telefone */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1 md:col-span-3">
                 <FormLabel>Nome Completo *</FormLabel>
                 <FormControl>
                   <Input placeholder="Nome do paciente" {...field} />
@@ -80,7 +113,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1 md:col-span-2">
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input type="email" placeholder="email@exemplo.com" {...field} />
@@ -92,9 +125,9 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
 
           <FormField
             control={form.control}
-            name="phoneNumber"
+            name="phone"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1 md:col-span-1">
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
                   <InputMask
@@ -110,26 +143,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
               </FormItem>
             )}
           />
+        </div>
 
-          <FormField
-            control={form.control}
-            name="medicalRecordId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Número do Prontuário</FormLabel>
-                <FormControl>
-                  <Input placeholder="PR-001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+        {/* Linha 2: Data de nascimento, Contato, Prontuário */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
             name="birthDate"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1 md:col-span-2">
                 <FormLabel>Data de Nascimento</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
@@ -143,7 +165,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
             control={form.control}
             name="emergencyContact"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-1 md:col-span-2">
                 <FormLabel>Contato de Emergência</FormLabel>
                 <FormControl>
                   <Input placeholder="Nome e telefone" {...field} />
@@ -152,22 +174,120 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="medicalRecordId"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-2">
+                <FormLabel>Número do Prontuário</FormLabel>
+                <FormControl>
+                  <Input placeholder="PR-001" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Endereço</FormLabel>
-              <FormControl>
-                <Input placeholder="Endereço completo" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Endereço - Linha 3 */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <FormField
+            control={form.control}
+            name="cep"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-2">
+                <FormLabel>CEP</FormLabel>
+                <FormControl>
+                  <InputMask
+                    mask="99999-999"
+                    placeholder="00000-000"
+                    {...field}
+                    onChange={(e: any) => handleCepChange(e)}
+                  >
+                    {(inputProps: any) => <Input {...inputProps} />}
+                  </InputMask>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={form.control}
+            name="street"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-3">
+                <FormLabel>Rua</FormLabel>
+                <FormControl>
+                  <Input placeholder="Rua" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="number"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-1">
+                <FormLabel>Número</FormLabel>
+                <FormControl>
+                  <Input placeholder="Número" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Endereço - Linha 4 */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <FormField
+            control={form.control}
+            name="neighborhood"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-2">
+                <FormLabel>Bairro</FormLabel>
+                <FormControl>
+                  <Input placeholder="Bairro" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-3">
+                <FormLabel>Cidade</FormLabel>
+                <FormControl>
+                  <Input placeholder="Cidade" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-1">
+                <FormLabel>Estado</FormLabel>
+                <FormControl>
+                  <Input placeholder="UF" maxLength={2} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Observações */}
         <FormField
           control={form.control}
           name="notes"
@@ -186,6 +306,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
           )}
         />
 
+        {/* Botões */}
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
@@ -198,3 +319,20 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
 };
 
 export default PatientForm;
+function addPatientWithTransaction(data: {
+  name: string;
+  number?: string | undefined;
+  email?: string | undefined;
+  birthDate?: string | undefined;
+  emergencyContact?: string | undefined;
+  medicalRecordId?: string | undefined;
+  cep?: string | undefined;
+  street?: string | undefined;
+  neighborhood?: string | undefined;
+  city?: string | undefined;
+  state?: string | undefined;
+  notes?: string | undefined;
+  phoneNumber?: string | undefined;
+}) {
+  throw new Error("Function not implemented.");
+}

@@ -1,10 +1,10 @@
-export type Status = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+export type Status = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
 export type User = {
   id: string;
   name: string;
   email?: string;
-  phoneNumber?: string;
+  phone?: string;
   medicalRecordId?: string;
 };
 
@@ -41,4 +41,4 @@ export type Availability = {
   psychologist?: Professional;
 };
 
-export type CalendarViewType = 'daily' | 'weekly' | 'monthly';
+export type CalendarViewType = "daily" | "weekly" | "monthly";
