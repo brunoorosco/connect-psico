@@ -1,0 +1,43 @@
+"use server";
+import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
+import { patientSchema } from "@/domain/model/patient";
+import { auth } from "@/auth"; // Certifique-se de que está importando corretamente
+
+export const getPatients = async () => {
+  const session = await auth(); // Obtém a sessão do usuário autenticado
+  try {
+    const patients = await prisma.pacientes.findMany({
+      where: {
+        professionalId: session?.user.id,
+      },
+      include: {
+        patient: true, 
+      },
+    });
+
+    return patients;
+  } catch (error) {
+    console.error("Erro ao buscar pacientes:", error);
+    return { error: "Erro ao buscar pacientes" };
+  }
+};
+
+export const getPatientById = async (id: number) => {
+  return await prisma.pacientes.findUnique({ where: { id } });
+};
+
+export const updatePatient = async (id: number, data: unknown) => {
+  const result = patientSchema.safeParse(data);
+  if (!result.success) {
+    throw new Error("Dados inválidos");
+  }
+
+  return await prisma.pacientes.update({
+    where: { id },
+    data: result.data,
+  });
+};
+
+export const deletePatient = async (id: number) => {
+  return await prisma.pacientes.delete({ where: { id } });
+};

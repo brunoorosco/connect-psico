@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -92,9 +93,16 @@ model Pacientes {
   birthDate        DateTime?     @map("birth_date")
   emergencyContact String?       @map("emergency_contact")
   address          String?
-  medicalRecordId  String        @map("prontuario_id")
+  medicalRecordId  String        @unique @map("prontuario_id")
   professionalId   String        @map("professional_id")
   patientId        String        @map("patient_id")
+  cep              String?
+  street           String?
+  neighborhood     String?
+  city             String?
+  state            String?
+  number           String?
+  notes            String?
   patient          User          @relation("PatientUser", fields: [patientId], references: [id])
   professional     User          @relation("PatientProfessional", fields: [professionalId], references: [id])
   notePatient      NotePatient[]
