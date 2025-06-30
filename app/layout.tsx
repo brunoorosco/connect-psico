@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     "psicólogo em São Paulo",
     "psicólogo no Rio de Janeiro",
     "psicólogo em Minas Gerais",
+    "psicólogo em Curitiba",
     "psicólogo no Brasil",
   ],
   authors: [{ name: "Psico Mais", url: "https://psicomais.com" }],
