@@ -17,7 +17,11 @@ import { Patient } from "@/types/appointment";
 import InputMask from "react-input-mask";
 import { createPatient } from "@/actions/patients/addPatient";
 import { useSession } from "next-auth/react";
+import { customAlphabet } from 'nanoid';
 
+
+
+const nanoid = customAlphabet('1234567890', 5);
 const patientSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 5 caracteres"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
@@ -45,13 +49,17 @@ interface PatientFormProps {
 
 const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
   const { data: session } = useSession(); // Certifique-se de que useSession está importado corretamente
+  const generateMedicalRecordId = () => {
+     return `PR-${nanoid()}`;
+  };
+
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
       name: patient?.name || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      medicalRecordId: patient?.medicalRecordId || "",
+      medicalRecordId: patient?.medicalRecordId || generateMedicalRecordId(),
       birthDate: (patient as any)?.birthDate || "",
       emergencyContact: (patient as any)?.emergencyContact || "",
       notes: (patient as any)?.notes || "",
@@ -61,14 +69,13 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
       city: (patient as any)?.city || "",
       state: (patient as any)?.state || "",
       number: (patient as any)?.number || "",
-      profissionalId: session!.user.id || "", 
+      profissionalId: session!.user.id || "",
     },
   });
 
   const handleSubmit = async (data: PatientFormData) => {
     try {
-      console.log("Dados do formulário:", data);
-     "use server"
+      ("use server");
       const newPatient = await createPatient(data);
       console.log("Paciente criado:", newPatient);
     } catch (err) {
@@ -100,7 +107,6 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Linha 1: Nome, Email, Telefone */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
@@ -189,7 +195,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
               <FormItem className="col-span-1 md:col-span-2">
                 <FormLabel>Número do Prontuário</FormLabel>
                 <FormControl>
-                  <Input placeholder="PR-001" {...field} />
+                  <Input placeholder="PR-001" {...field} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
