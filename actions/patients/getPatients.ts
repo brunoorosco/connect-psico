@@ -22,9 +22,7 @@ export const getPatients = async () => {
   }
 };
 
-export const getPatientById = async (id: number) => {
-  return await prisma.pacientes.findUnique({ where: { id } });
-};
+
 
 export const updatePatient = async (id: number, data: unknown) => {
   const result = patientSchema.safeParse(data);

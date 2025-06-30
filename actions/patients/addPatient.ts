@@ -59,3 +59,4 @@ export const createPatient = async (params: any) => {
     return { error: "Erro ao criar usuário e paciente" };
   }
 };
+
