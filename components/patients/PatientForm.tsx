@@ -19,6 +19,7 @@ import { createPatient } from "@/actions/patients/addPatient";
 import { useSession } from "next-auth/react";
 import { customAlphabet } from "nanoid";
 import { toast } from "sonner";
+import { updatePatient } from "@/actions/patients/updatePatient";
 
 const nanoid = customAlphabet("1234567890", 5);
 const patientSchema = z.object({
@@ -73,17 +74,22 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
   });
 
   const handleSubmit = async (data: PatientFormData) => {
-    try {
-      ("use server");
-      const newPatient = await createPatient(data);
-      toast.success("Sucesso", {
-        description: `Paciente criado com sucesso!`,
-      });
-      form.reset();
-    } catch (err) {
-      toast.error("Erro ao atualizar perfil.");
-      console.error("Erro ao criar paciente:", err);
-    }
+    const handleSubmit = async (data: PatientFormData) => {
+      try {
+        if (patient) {
+          await updatePatient(data.medicalRecordId!, data); // ou patient.id
+          toast.success("Paciente atualizado com sucesso!");
+        } else {
+          await createPatient(data);
+          toast.success("Paciente criado com sucesso!");
+        }
+
+        form.reset();
+      } catch (err) {
+        toast.error("Erro ao salvar paciente.");
+        console.error("Erro:", err);
+      }
+    };
   };
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
