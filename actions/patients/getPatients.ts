@@ -11,7 +11,7 @@ export const getPatients = async () => {
         professionalId: session?.user.id,
       },
       include: {
-        patient: true, 
+        patient: true,
       },
     });
 
@@ -20,20 +20,6 @@ export const getPatients = async () => {
     console.error("Erro ao buscar pacientes:", error);
     return { error: "Erro ao buscar pacientes" };
   }
-};
-
-
-
-export const updatePatient = async (id: number, data: unknown) => {
-  const result = patientSchema.safeParse(data);
-  if (!result.success) {
-    throw new Error("Dados inválidos");
-  }
-
-  return await prisma.pacientes.update({
-    where: { id },
-    data: result.data,
-  });
 };
 
 export const deletePatient = async (id: number) => {
