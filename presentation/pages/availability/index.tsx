@@ -33,12 +33,19 @@ const AvailabilityPage = () => {
   };
 
   const handleDayAvailabilityUpdate = (dayAvailability: DayAvailability) => {
-    console.log('dispobilidade111',dayAvailability);
+    console.log(dayAvailability);
     setDayAvailabilities((prev) => {
-      const filtered = prev.filter((d) => d.date !== dayAvailability.date);
-      return [...filtered, dayAvailability];
+      const exists = prev.find((d) => d.date === dayAvailability.date);
+      if (!exists) {
+        return [...prev, dayAvailability];
+      }
+  
+      return prev.map((d) =>
+        d.date === dayAvailability.date ? dayAvailability : d
+      );
     });
   };
+  
 
   return (
     <div className="bg-gray-50 container-full">
