@@ -27,6 +27,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
   onBack,
   onEdit,
 }) => {
+  const patientDetail = patient 
   // Filtrar consultas do paciente
   const patientAppointments = mockAppointments.filter(
     (apt) => apt.patientId === patient.id

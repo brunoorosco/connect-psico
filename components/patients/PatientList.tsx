@@ -58,21 +58,21 @@ const PatientList: React.FC<PatientListProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onViewPatient(patient)}
+                      onClick={() => onViewPatient(patient.patient)}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onEditPatient(patient)}
+                      onClick={() => onEditPatient(patient.patient)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSendMessage(patient)}
+                      onClick={() => handleSendMessage(patient.patient)}
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
