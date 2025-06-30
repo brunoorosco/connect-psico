@@ -19,8 +19,8 @@ const LoginSocialButton = ({ children, provider, callbackUrl }: Props) => {
       size={"default"}
       className=" rounded-lg"
       onClick={async () => {
-        signIn(provider, { redirectTo: callbackUrl });
-        // signIn(provider, { redirect: true, callbackUrl, redirectTo: });
+        // signIn(provider, { redirectTo: callbackUrl });
+        signIn(provider, { redirect: true, callbackUrl });
       }}
     >
       {children}
