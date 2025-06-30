@@ -17,11 +17,10 @@ import { Patient } from "@/types/appointment";
 import InputMask from "react-input-mask";
 import { createPatient } from "@/actions/patients/addPatient";
 import { useSession } from "next-auth/react";
-import { customAlphabet } from 'nanoid';
+import { customAlphabet } from "nanoid";
+import { toast } from "sonner";
 
-
-
-const nanoid = customAlphabet('1234567890', 5);
+const nanoid = customAlphabet("1234567890", 5);
 const patientSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 5 caracteres"),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
@@ -50,7 +49,7 @@ interface PatientFormProps {
 const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
   const { data: session } = useSession(); // Certifique-se de que useSession está importado corretamente
   const generateMedicalRecordId = () => {
-     return `PR-${nanoid()}`;
+    return `PR-${nanoid()}`;
   };
 
   const form = useForm<PatientFormData>({
@@ -63,7 +62,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
       birthDate: (patient as any)?.birthDate || "",
       emergencyContact: (patient as any)?.emergencyContact || "",
       notes: (patient as any)?.notes || "",
-      cep: (patient as any)?.cep || "",
+      cep: (patient as any)?.cep || undefined,
       street: (patient as any)?.street || "",
       neighborhood: (patient as any)?.neighborhood || "",
       city: (patient as any)?.city || "",
@@ -77,8 +76,12 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
     try {
       ("use server");
       const newPatient = await createPatient(data);
-      console.log("Paciente criado:", newPatient);
+      toast.success("Sucesso", {
+        description: `Paciente criado com sucesso!`,
+      });
+      form.reset();
     } catch (err) {
+      toast.error("Erro ao atualizar perfil.");
       console.error("Erro ao criar paciente:", err);
     }
   };
