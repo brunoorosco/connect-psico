@@ -59,7 +59,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
       name: patient?.name || "",
       email: patient?.email || "",
       phone: patient?.phone || "",
-      medicalRecordId: patient?.medicalRecordId || generateMedicalRecordId(),
+      medicalRecordId: patient?.medicalRecordId ?? generateMedicalRecordId(),
       birthDate: (patient as any)?.birthDate || "",
       emergencyContact: (patient as any)?.emergencyContact || "",
       notes: (patient as any)?.notes || "",
@@ -74,22 +74,20 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
   });
 
   const handleSubmit = async (data: PatientFormData) => {
-    const handleSubmit = async (data: PatientFormData) => {
-      try {
-        if (patient) {
-          await updatePatient(data.medicalRecordId!, data); // ou patient.id
-          toast.success("Paciente atualizado com sucesso!");
-        } else {
-          await createPatient(data);
-          toast.success("Paciente criado com sucesso!");
-        }
-
-        form.reset();
-      } catch (err) {
-        toast.error("Erro ao salvar paciente.");
-        console.error("Erro:", err);
+    try {
+      if (patient) {
+        await updatePatient(data.medicalRecordId!, data); // ou patient.id
+        toast.success("Paciente atualizado com sucesso!");
+      } else {
+        await createPatient(data);
+        toast.success("Paciente criado com sucesso!");
       }
-    };
+
+      form.reset();
+    } catch (err) {
+      toast.error("Erro ao salvar paciente.");
+      console.error("Erro:", err);
+    }
   };
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,7 +152,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
                 <FormControl>
                   <InputMask
                     mask="(99) 99999-9999"
-                    placeholder="(99) 91234-1234"
+                    placeholder="(99) 99999-9999"
                     {...field}
                     onChange={field.onChange}
                   >

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,9 +8,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Eye, Edit, Trash2, MessageSquare } from 'lucide-react';
-import { Patient } from '@/types/appointment';
+} from "@/components/ui/table";
+import { Eye, Edit, Trash2, MessageSquare } from "lucide-react";
+import { Patient } from "@/types/appointment";
 
 interface PatientListProps {
   patients: any[];
@@ -25,9 +25,9 @@ const PatientList: React.FC<PatientListProps> = ({
   onEditPatient,
   onDeletePatient,
 }) => {
-   const handleSendMessage = (patient: Patient) => {
+  const handleSendMessage = (patient: Patient) => {
     // Implementar envio de mensagem
-    console.log('Enviando mensagem para:', patient.name);
+    console.log("Enviando mensagem para:", patient.name);
   };
 
   return (
@@ -50,9 +50,9 @@ const PatientList: React.FC<PatientListProps> = ({
             {patients.map((patient) => (
               <TableRow key={patient.id}>
                 <TableCell className="font-medium">{patient.patient.name}</TableCell>
-                <TableCell>{patient.patient.email || '-'}</TableCell>
-                <TableCell>{patient.patient.phone || '-'}</TableCell>
-                <TableCell>{patient.medicalRecordId || '-'}</TableCell>
+                <TableCell>{patient.patient.email || "-"}</TableCell>
+                <TableCell>{patient.patient.phone || "-"}</TableCell>
+                <TableCell>{patient.medicalRecordId || "-"}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
                     <Button
@@ -65,7 +65,14 @@ const PatientList: React.FC<PatientListProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onEditPatient(patient.patient)}
+                      onClick={() => {
+                        const dataToSend = {
+                          ...patient.patient,
+                          medicalRecordId: patient.medicalRecordId,
+                        };
+                        console.log("Dados enviados para edição:", dataToSend);
+                        onEditPatient(dataToSend);
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -76,11 +83,7 @@ const PatientList: React.FC<PatientListProps> = ({
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onDeletePatient(patient.id)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => onDeletePatient(patient.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -90,9 +93,7 @@ const PatientList: React.FC<PatientListProps> = ({
           </TableBody>
         </Table>
         {patients.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            Nenhum paciente cadastrado ainda.
-          </div>
+          <div className="text-center py-8 text-gray-500">Nenhum paciente cadastrado ainda.</div>
         )}
       </CardContent>
     </Card>

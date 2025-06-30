@@ -10,10 +10,22 @@ export const getPatients = async () => {
       where: {
         professionalId: session?.user.id,
       },
-      include: {
+      select: {
+        id:true,
+        medicalRecordId: true,
+        cep: true,
+        state: true,
+        street: true,
+        neighborhood: true,
+        emergencyContact: true,
+        birthDate: true,
+        city: true,
+        number: true,
+        notes: true,
         patient: true,
       },
     });
+    console.log("", patients);
 
     return patients;
   } catch (error) {

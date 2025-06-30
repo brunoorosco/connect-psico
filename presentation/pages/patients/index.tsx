@@ -12,7 +12,7 @@ import { getPatients } from "@/actions/patients"; // ✅
 const Patients = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
 
   useEffect(() => {
@@ -38,7 +38,13 @@ const Patients = () => {
   const handleEditPatient = (patientData: Omit<Patient, "id">) => {
     if (editingPatient) {
       const updatedPatients = patients.map((p) =>
-        p.id === editingPatient.id ? { ...patientData, id: editingPatient.id } : p
+        p.id === editingPatient.id
+          ? {
+              ...patientData,
+              id: editingPatient.id,
+              medicalRecordId: editingPatient.medicalRecordId,
+            }
+          : p
       );
       setPatients(updatedPatients);
       setEditingPatient(null);
@@ -55,6 +61,7 @@ const Patients = () => {
   };
 
   const handleEditClick = (patient: Patient) => {
+    console.log("pattiti", patient);
     setEditingPatient(patient);
     setShowForm(true);
   };
