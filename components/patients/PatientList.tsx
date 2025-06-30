@@ -25,8 +25,7 @@ const PatientList: React.FC<PatientListProps> = ({
   onEditPatient,
   onDeletePatient,
 }) => {
-      console.log("Pacientes carregados:", patients);
-  const handleSendMessage = (patient: Patient) => {
+   const handleSendMessage = (patient: Patient) => {
     // Implementar envio de mensagem
     console.log('Enviando mensagem para:', patient.name);
   };
@@ -34,7 +33,7 @@ const PatientList: React.FC<PatientListProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Pacientes ({patients.length}) - MODELO TESTE</CardTitle>
+        <CardTitle>Lista de Pacientes ({patients.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
