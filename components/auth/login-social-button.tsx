@@ -20,7 +20,7 @@ const LoginSocialButton = ({ children, provider, callbackUrl }: Props) => {
       className=" rounded-lg"
       onClick={async () => {
         // signIn(provider, { redirectTo: callbackUrl });
-        signIn(provider, { redirect: true, callbackUrl });
+        signIn(provider, { redirect: true, callbackUrl: "https://www.psicomais.com/app" });
       }}
     >
       {children}
