@@ -95,9 +95,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                       </div>
 
                       {hasAvailability && (
-                        <div className="flex flex-col items-center space-y-1 text-[10px] text-green-600 font-medium">
+                        <div className="flex flex-col items-center space-y-1 text-[10px] text-green-700 font-medium">
                           {timeSlots.slice(0, 2).map((slot, i) => (
-                            <div key={i}>
+                            <div key={i} className=" h-2 ">
                               {slot.startTime} - {slot.endTime}
                             </div>
                           ))}
