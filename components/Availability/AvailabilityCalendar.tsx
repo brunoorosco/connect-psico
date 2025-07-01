@@ -95,11 +95,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                       </div>
 
                       {hasAvailability && (
-                        <div className="flex flex-col items-center space-y-1">
-                          <div className="w-2 h-2 bg-green-500 rounded-full" />
-                          <div className="text-xs text-green-600 font-medium">
-                            {timeSlots.length} slot{timeSlots.length > 1 ? "s" : ""}
-                          </div>
+                        <div className="flex flex-col items-center space-y-1 text-[10px] text-green-600 font-medium">
+                          {timeSlots.slice(0, 2).map((slot, i) => (
+                            <div key={i}>
+                              {slot.startTime} - {slot.endTime}
+                            </div>
+                          ))}
+                          {timeSlots.length > 2 && <div>+{timeSlots.length - 2} mais</div>}
                         </div>
                       )}
 
