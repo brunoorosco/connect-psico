@@ -77,7 +77,7 @@ const PsychologistDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        title="Dashboard do Psicólogo"
+        title="Seu Dashboard"
         subtitle="Gerencie suas consultas e pacientes"
         userRole="SUPERVISOR"
       />
