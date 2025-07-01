@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState, startTransition } from "react";
 import { Calendar } from "lucide-react";
-import AvailabilityCalendar from "@/components/Availability/AvailabilityCalendar";
-import WeeklyScheduleForm from "@/components/Availability/WeeklyScheduleForm";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import AvailabilityCalendar from "@/components/Availability/AvailabilityCalendar";
+import WeeklyScheduleForm from "@/components/Availability/WeeklyScheduleForm";
+import { getDayAvailabilitiesForMonth } from "@/actions/availability/getAvailability";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { toast } from "sonner";
 
 export interface TimeSlot {
   id: string;
@@ -24,28 +27,41 @@ export interface WeeklySchedule {
 }
 
 const AvailabilityPage = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([]);
   const [dayAvailabilities, setDayAvailabilities] = useState<DayAvailability[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const professionalId = useCurrentUser();
+
+  useEffect(() => {
+    const toastId = "loading-availability";
+
+    toast.loading("Carregando disponibilidade...", { id: toastId });
+    startTransition(() => {
+      getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
+        .then((data) => {
+          setDayAvailabilities(data);
+          toast.dismiss(toastId);
+        })
+        .catch(() => {
+          toast.dismiss(toastId);
+          toast.error("Erro ao carregar disponibilidade");
+        });
+    });
+  }, [selectedDate]);
 
   const handleWeeklyScheduleUpdate = (schedules: WeeklySchedule[]) => {
     setWeeklySchedules(schedules);
   };
 
   const handleDayAvailabilityUpdate = (dayAvailability: DayAvailability) => {
-    console.log(dayAvailability);
     setDayAvailabilities((prev) => {
       const exists = prev.find((d) => d.date === dayAvailability.date);
-      if (!exists) {
-        return [...prev, dayAvailability];
-      }
-  
-      return prev.map((d) =>
-        d.date === dayAvailability.date ? dayAvailability : d
-      );
+      if (!exists) return [...prev, dayAvailability];
+      return prev.map((d) => (d.date === dayAvailability.date ? dayAvailability : d));
     });
   };
-  
 
   return (
     <div className="bg-gray-50 container-full">
@@ -65,7 +81,6 @@ const AvailabilityPage = () => {
 
       <main className="mx-auto py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendário - Coluna Principal */}
           <div className="lg:col-span-2">
             <AvailabilityCalendar
               selectedDate={selectedDate}
@@ -76,7 +91,6 @@ const AvailabilityPage = () => {
             />
           </div>
 
-          {/* Formulário Lateral */}
           <div className="space-y-6">
             <WeeklyScheduleForm
               weeklySchedules={weeklySchedules}

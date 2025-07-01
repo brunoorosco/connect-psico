@@ -25,6 +25,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   onDayAvailabilityUpdate,
 }) => {
   const [editingDate, setEditingDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<Date>(selectedDate);
 
   const getAvailabilityForDate = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
@@ -63,8 +64,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             <Calendar
               mode="single"
               selected={selectedDate}
+              month={currentMonth}
               onSelect={(date) => date && onDateSelect(date)}
               locale={ptBR}
+              onMonthChange={(month) => {
+                setCurrentMonth(month);
+                onDateSelect(month); // <- avisa o pai para buscar novas datas
+              }}
               className="rounded-md border w-full"
               classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
