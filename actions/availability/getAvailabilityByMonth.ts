@@ -64,7 +64,6 @@ export const getAvailableDaysWithStatus = async (
     ORDER BY
       av.date, av.start_time;
   `;
-  console.log(result);
     return result;
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
