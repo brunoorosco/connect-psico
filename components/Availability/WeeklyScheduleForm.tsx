@@ -1,3 +1,5 @@
+"use client";
+
 import React, { startTransition, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,21 @@ const daysOfWeek = [
   { value: 6, label: "Sábado" },
 ];
 
+const months = [
+  { value: 0, label: "Janeiro" },
+  { value: 1, label: "Fevereiro" },
+  { value: 2, label: "Março" },
+  { value: 3, label: "Abril" },
+  { value: 4, label: "Maio" },
+  { value: 5, label: "Junho" },
+  { value: 6, label: "Julho" },
+  { value: 7, label: "Agosto" },
+  { value: 8, label: "Setembro" },
+  { value: 9, label: "Outubro" },
+  { value: 10, label: "Novembro" },
+  { value: 11, label: "Dezembro" },
+];
+
 const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
   weeklySchedules,
   onScheduleUpdate,
@@ -33,7 +50,10 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("17:00");
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+
   const { data: session } = useSession();
+
   const handleDayToggle = (dayValue: number) => {
     setSelectedDays((prev) =>
       prev.includes(dayValue) ? prev.filter((d) => d !== dayValue) : [...prev, dayValue]
@@ -42,16 +62,17 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
 
   const handleApplySchedule = () => {
     if (selectedDays.length === 0 || !startTime || !endTime) return;
+
     const newTimeSlot: TimeSlot = {
       id: `${Date.now()}`,
       startTime,
       endTime,
     };
+
     const updatedSchedules = [...weeklySchedules];
 
     selectedDays.forEach((dayOfWeek) => {
       const existingIndex = updatedSchedules.findIndex((s) => s.dayOfWeek === dayOfWeek);
-
       if (existingIndex >= 0) {
         updatedSchedules[existingIndex].timeSlots.push(newTimeSlot);
       } else {
@@ -63,12 +84,14 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
     });
 
     onScheduleUpdate(updatedSchedules);
+
     const availabilities = generateAvailabilityList(
       updatedSchedules,
       session?.user?.id as string,
       new Date().getFullYear(),
-      new Date().getMonth()
+      selectedMonth
     );
+
     startTransition(async () => {
       const result = await createAvailabilityBulk(availabilities);
       if (result.error) {
@@ -102,7 +125,6 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Formulário para adicionar horários semanais */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
@@ -127,6 +149,24 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="mt-4">
+            <Label htmlFor="month-select" className="text-sm font-medium mb-2 block">
+              Mês de agendamento:
+            </Label>
+            <select
+              id="month-select"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              {months.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -161,7 +201,6 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Lista de horários configurados */}
       {weeklySchedules.length > 0 && (
         <Card>
           <CardHeader>
