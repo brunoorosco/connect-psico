@@ -24,7 +24,6 @@ export async function getDayAvailabilitiesForMonth(
 ): Promise<DayAvailability[]> {
   const start = startOfMonth(dateRef);
   const end = endOfMonth(dateRef);
-console.log("start",dateRef)
   const raw = await prisma.availability.findMany({
     where: {
       professionalId,
