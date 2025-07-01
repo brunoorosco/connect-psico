@@ -55,7 +55,7 @@ export default async function RootLayout({
     <html lang="pt-BR">
       <body className={roboto.className} suppressHydrationWarning>
         <AuthProvider>
-          <Toaster />
+          <Toaster expand={true} richColors closeButton={true} />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

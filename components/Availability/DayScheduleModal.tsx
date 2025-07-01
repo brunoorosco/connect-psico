@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import { WeeklySchedule, DayAvailability, TimeSlot } from "@/presentation/pages/availability";
 import TimeSlotForm from "./TimeSlotForm";
 import { Save, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface DayScheduleModalProps {
   date: Date;
@@ -63,15 +64,40 @@ const DayScheduleModal: React.FC<DayScheduleModalProps> = ({
       prev.map((slot) => (slot.id === slotId ? { ...updatedSlot, id: slotId } : slot))
     );
   };
-
   const handleSave = () => {
     const dateStr = format(date, "yyyy-MM-dd");
-    const dayAvailability: DayAvailability = {
-      date: dateStr,
-      timeSlots: timeSlots,
-    };
 
-    onDayAvailabilityUpdate(dayAvailability);
+    const hasConflict = timeSlots.some((slot, index, arr) => {
+      const [startHour1, startMinute1] = slot.startTime.split(":").map(Number);
+      const [endHour1, endMinute1] = slot.endTime.split(":").map(Number);
+      const start1 = startHour1 * 60 + startMinute1;
+      const end1 = endHour1 * 60 + endMinute1;
+
+      return arr.some((otherSlot, i) => {
+        if (i === index) return false;
+
+        const [startHour2, startMinute2] = otherSlot.startTime.split(":").map(Number);
+        const [endHour2, endMinute2] = otherSlot.endTime.split(":").map(Number);
+        const start2 = startHour2 * 60 + startMinute2;
+        const end2 = endHour2 * 60 + endMinute2;
+
+        return (
+          (start1 < end2 && end1 > start2) || // sobreposição parcial
+          (start1 >= start2 && end1 <= end2) // está contido
+        );
+      });
+    });
+
+    if (hasConflict) {
+      toast.error("Há intervalos sobrepostos ou inválidos. Corrija antes de salvar.");
+      return;
+    }
+
+    onDayAvailabilityUpdate({
+      date: dateStr,
+      timeSlots,
+    });
+
     onClose();
   };
 

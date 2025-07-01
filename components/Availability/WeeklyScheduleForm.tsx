@@ -74,7 +74,7 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
         toast.error("Erro ao criar disponibilidade", { description: result.error });
       } else {
         toast.success("Disponibiliade!", {
-          description: "Disponibiliade salva com sucesso!",
+          description: "Disponibilidade salva com sucesso!",
         });
         setSelectedDays([]);
         setStartTime("08:00");
