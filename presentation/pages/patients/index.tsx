@@ -40,12 +40,14 @@ const Patients = () => {
       const updatedPatients = patients.map((p) =>
         p.id === editingPatient.id
           ? {
-              ...patientData,
-              id: editingPatient.id,
-              medicalRecordId: editingPatient.medicalRecordId,
+              // ...patientData,
+              // id: editingPatient.id,
+              // medicalRecordId: editingPatient.medicalRecordId,
+              ...editingPatient,
             }
           : p
       );
+      console.log("wqwqwq", updatedPatients);
       setPatients(updatedPatients);
       setEditingPatient(null);
       setShowForm(false);
@@ -61,7 +63,7 @@ const Patients = () => {
   };
 
   const handleEditClick = (patient: Patient) => {
-    console.log("pattiti", patient);
+    console.log("pattiti", editingPatient);
     setEditingPatient(patient);
     setShowForm(true);
   };

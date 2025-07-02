@@ -3,14 +3,18 @@ import { z } from "zod";
 import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
 import { patientSchema } from "@/domain/model/patient";
 import { RegisterSchema } from "@/schemas/auth";
+import bcryptjs from "bcryptjs";
+import { randomInt } from "node:crypto";
 
 export const createPatient = async (params: any) => {
+  const randow = randomInt(6);
+  const hashedPassword = await bcryptjs.hash(randow.toString(), 10);
   const validPatient = patientSchema.safeParse(params);
   const validUser = RegisterSchema.safeParse({
     name: params.name,
     email: params.email,
     phone: params.phone,
-    password: "123123", // talvez você queira gerar dinamicamente ou pedir depois
+    password: hashedPassword,
   });
 
   if (!validUser.success) {
@@ -59,4 +63,3 @@ export const createPatient = async (params: any) => {
     return { error: "Erro ao criar usuário e paciente" };
   }
 };
-

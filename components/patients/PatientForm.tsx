@@ -52,7 +52,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
   const generateMedicalRecordId = () => {
     return `PR-${nanoid()}`;
   };
-
+  console.log("fdsdsffteste", patient);
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
