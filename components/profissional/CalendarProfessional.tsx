@@ -70,7 +70,6 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
 
     setAvailableSlots(slots);
   }, [agendaProfissional]);
-  console.log("agendaProfissional", agendaProfissional);
   const handleScheduleAppointment = () => {
     if (!selectedSlot || !session?.user?.id) return;
 

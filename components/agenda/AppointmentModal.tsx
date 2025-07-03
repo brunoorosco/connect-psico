@@ -1,6 +1,6 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import { Patient } from '@/types/appointment';
+"use client";
+import React, { useEffect, useState } from "react";
+import { Patient } from "@/types/appointment";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,17 +21,23 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from 'date-fns';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { mockPatients } from './mockData';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from '@/components/ui/use-toast';
-import { AppointmentModel } from '@/domain/model/appointment';
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { mockPatients } from "./mockData";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "@/components/ui/use-toast";
+import { AppointmentModel } from "@/domain/model/appointment";
 
 const TIME_REGEX = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -58,7 +64,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onClose,
   onSave,
   selectedDate,
-  editingAppointment
+  editingAppointment,
 }) => {
   const [patients, setPatients] = useState<Patient[]>(mockPatients);
   const [patientOpen, setPatientOpen] = useState(false);
@@ -66,11 +72,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
-      patientId: '',
-      date: format(selectedDate, 'yyyy-MM-dd'),
-      startTime: '09:00',
-      endTime: '09:30',
-      notes: '',
+      patientId: "",
+      date: format(selectedDate, "yyyy-MM-dd"),
+      startTime: "09:00",
+      endTime: "09:30",
+      notes: "",
     },
   });
 
@@ -79,32 +85,38 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     if (editingAppointment) {
       form.reset({
         patientId: editingAppointment.patient.id,
-        date: format(new Date(editingAppointment.appointmentDate), 'yyyy-MM-dd'),
-        startTime: format(new Date(editingAppointment.appointmentDate), 'HH:mm'),
-        endTime: editingAppointment.duration 
-          ? format(new Date(new Date(editingAppointment.appointmentDate).getTime() + editingAppointment.duration * 60000), 'HH:mm') 
-          : '09:30',
-        notes: editingAppointment.notes || '',
+        date: format(new Date(editingAppointment.appointmentDate), "yyyy-MM-dd"),
+        startTime: format(new Date(editingAppointment.appointmentDate), "HH:mm"),
+        endTime: editingAppointment.duration
+          ? format(
+              new Date(
+                new Date(editingAppointment.appointmentDate).getTime() +
+                  editingAppointment.duration * 60000
+              ),
+              "HH:mm"
+            )
+          : "09:30",
+        notes: editingAppointment.notes || "",
       });
     } else {
       form.reset({
-        patientId: '',
-        date: format(selectedDate, 'yyyy-MM-dd'),
-        startTime: '09:00',
-        endTime: '09:30',
-        notes: '',
+        patientId: "",
+        date: format(selectedDate, "yyyy-MM-dd"),
+        startTime: "09:00",
+        endTime: "09:30",
+        notes: "",
       });
     }
   }, [editingAppointment, selectedDate, form]);
 
   const handleSubmit = (values: AppointmentFormValues) => {
-    const selectedPatient = patients.find(p => p.id === values.patientId);
-    
+    const selectedPatient = patients.find((p) => p.id === values.patientId);
+
     if (!selectedPatient) {
       toast({
         title: "Erro",
         description: "Paciente não encontrado",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -113,33 +125,33 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     const appointmentDate = new Date(`${values.date}T${values.startTime}:00`);
 
     // Calcular duração em minutos
-    const [startHour, startMinute] = values.startTime.split(':').map(Number);
-    const [endHour, endMinute] = values.endTime.split(':').map(Number);
+    const [startHour, startMinute] = values.startTime.split(":").map(Number);
+    const [endHour, endMinute] = values.endTime.split(":").map(Number);
 
-    const duration = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+    const duration = endHour * 60 + endMinute - (startHour * 60 + startMinute);
 
     const newAppointment: AppointmentModel = {
-      id: editingAppointment?.id || `a${Date.now()}`,
+      id: editingAppointment?.id as number,
       professionalId: "prof1",
       professional: {
         id: "prof1",
         name: "Dr. Fulano",
         telefone: "00000000",
-        email: "dr@clinic.com"
+        email: "dr@clinic.com",
       },
       patientId: selectedPatient.id,
       patient: {
         id: selectedPatient.id,
         name: selectedPatient.name,
-        telefone: selectedPatient.phone || '1111111111' ,
-        email: selectedPatient.email || 'teste@TestTube.com'
+        telefone: selectedPatient.phone || "1111111111",
+        email: selectedPatient.email || "teste@TestTube.com",
       },
       appointmentDate,
       status: "PENDING",
       createdAt: new Date(),
       notes: values.notes,
       duration,
-      isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId
+      isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId,
     };
 
     onSave(newAppointment);
@@ -150,15 +162,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{editingAppointment ? 'Editar Consulta' : 'Nova Consulta'}</DialogTitle>
+          <DialogTitle>{editingAppointment ? "Editar Consulta" : "Nova Consulta"}</DialogTitle>
           <DialogDescription>
-            {editingAppointment 
-              ? 'Faça alterações nas informações da consulta abaixo'
-              : 'Preencha as informações para agendar uma nova consulta'
-            }
+            {editingAppointment
+              ? "Faça alterações nas informações da consulta abaixo"
+              : "Preencha as informações para agendar uma nova consulta"}
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
@@ -180,7 +191,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                           )}
                         >
                           {field.value
-                            ? patients.find(p => p.id === field.value)?.name
+                            ? patients.find((p) => p.id === field.value)?.name
                             : "Selecione um paciente"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -203,16 +214,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  patient.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
+                                  patient.id === field.value ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               <div className="flex flex-col">
                                 <span>{patient.name}</span>
                                 <span className="text-xs text-muted-foreground">
-                                  {patient.medicalRecordId 
-                                    ? `Prontuário: ${patient.medicalRecordId}` 
+                                  {patient.medicalRecordId
+                                    ? `Prontuário: ${patient.medicalRecordId}`
                                     : "Sem prontuário vinculado"}
                                 </span>
                               </div>
@@ -280,9 +289,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Informações adicionais sobre a consulta.
-                  </FormDescription>
+                  <FormDescription>Informações adicionais sobre a consulta.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -293,7 +300,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 Cancelar
               </Button>
               <Button type="submit">
-                {editingAppointment ? 'Salvar Alterações' : 'Agendar Consulta'}
+                {editingAppointment ? "Salvar Alterações" : "Agendar Consulta"}
               </Button>
             </DialogFooter>
           </form>

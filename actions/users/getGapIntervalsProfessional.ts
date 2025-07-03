@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/db";
 
 type Interval = { start: Date; end: Date };
+const DEFAULT_DURATION_MINUTES = 60; // Duração padrão de 30 minutos para os slots
 
 function getFreeIntervals(availability: Interval, appointments: Interval[]): Interval[] {
   let freeIntervals: Interval[] = [];
@@ -68,7 +69,7 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   // Transformar appointments em Interval[]
   const appointmentIntervals = appointments.map((app) => {
     const start = app.appointmentDate;
-    const end = new Date(start.getTime() + 30 * 60 * 1000); // Ex: 30 minutos de duração fixa
+    const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000); // Ex: 30 minutos de duração fixa
     return { start, end };
   });
 
@@ -94,7 +95,7 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
 
     while (current < end) {
       slotsInInterval.push({ start: new Date(current) });
-      current = new Date(current.getTime() + 30 * 60 * 1000); // adiciona 30 min
+      current = new Date(current.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000); // adiciona 30 min
     }
     return slotsInInterval;
   });

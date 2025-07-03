@@ -1,7 +1,7 @@
 import { Status } from "@prisma/client";
 
 export type AppointmentModel = {
-  id: string;
+  id: number;
   patientId: string;
   professionalId: string;
   appointmentDate: Date;

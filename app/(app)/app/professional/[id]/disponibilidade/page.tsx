@@ -1,9 +1,7 @@
-import AvailabilityPage from "@/presentation/pages/availability"
+import { AvailabilityPage } from "@presentation/pages/availability";
 
 const Availability = () => {
-  return (
-   <AvailabilityPage/>
-  );
+  return <AvailabilityPage />;
 };
 
 export default Availability;
