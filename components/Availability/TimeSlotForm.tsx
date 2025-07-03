@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { TimeSlot } from "@/presentation/pages/availability";
+import { TimeSlot } from "@presentation/pages/availability";
 
 interface TimeSlotFormProps {
   onAddTimeSlot: (timeSlot: Omit<TimeSlot, "id">) => void;

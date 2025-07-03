@@ -1,6 +1,6 @@
 // hooks/useAvailabilityLogic.ts
 import { useState } from "react";
-import { WeeklySchedule, DayAvailability } from "@/presentation/pages/availability";
+import { WeeklySchedule, DayAvailability } from "@presentation/pages/availability";
 import { getAvailabilityForDate as getAvailability } from "@/services/availabilityService";
 
 export function useAvailabilityLogic(

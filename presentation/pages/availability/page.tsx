@@ -4,33 +4,16 @@ import React, { useEffect, useState, startTransition } from "react";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import AvailabilityCalendar from "@/components/Availability/AvailabilityCalendar";
-import WeeklyScheduleForm from "@/components/Availability/WeeklyScheduleForm";
 import { getDayAvailabilitiesForMonth } from "@/actions/availability/getAvailability";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { toast } from "sonner";
+import { AvailabilityCalendar,WeeklyScheduleForm } from "@components/Availability";
+import { DayAvailability, WeeklySchedule } from "./types";
 
-export interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-}
-
-export interface DayAvailability {
-  date: string;
-  timeSlots: TimeSlot[];
-}
-
-export interface WeeklySchedule {
-  dayOfWeek: number;
-  timeSlots: TimeSlot[];
-}
-
-const AvailabilityPage = () => {
+export const AvailabilityPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([]);
   const [dayAvailabilities, setDayAvailabilities] = useState<DayAvailability[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const professionalId = useCurrentUser();
 

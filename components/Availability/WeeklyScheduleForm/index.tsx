@@ -1,107 +1,33 @@
 "use client";
 
-import React, { startTransition, useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Calendar } from "lucide-react";
-import { WeeklySchedule, TimeSlot } from "@/presentation/pages/availability";
-import { generateAvailabilityList } from "@/services/availabilityService";
-import { useSession } from "next-auth/react";
-import { createAvailabilityBulk } from "@/actions/availability/createManyAvailabity";
-import { toast } from "sonner";
 import { daysOfWeek, months } from "@/utils/constants";
+import { useWeeklySchedule } from "@/hooks/useWeeklySchedule";
+import { WeeklyScheduleFormProps } from "./types";
 
-interface WeeklyScheduleFormProps {
-  weeklySchedules: WeeklySchedule[];
-  onScheduleUpdate: (schedules: WeeklySchedule[]) => void;
-}
 
-const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
+export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
   weeklySchedules,
   onScheduleUpdate,
 }) => {
-  const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [startTime, setStartTime] = useState("08:00");
-  const [endTime, setEndTime] = useState("17:00");
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-
-  const { data: session } = useSession();
-
-  const handleDayToggle = (dayValue: number) => {
-    setSelectedDays((prev) =>
-      prev.includes(dayValue) ? prev.filter((d) => d !== dayValue) : [...prev, dayValue]
-    );
-  };
-
-  const handleSaveAvailability = () => {
-    if (selectedDays.length === 0 || !startTime || !endTime) return;
-
-    const newTimeSlotsByDay: WeeklySchedule[] = selectedDays.map((dayOfWeek) => ({
-      dayOfWeek,
-      timeSlots: [
-        {
-          id: `${Date.now()}-${dayOfWeek}-${Math.random()}`,
-          startTime,
-          endTime,
-        },
-      ],
-    }));
-
-    const availabilities = generateAvailabilityList(
-      newTimeSlotsByDay,
-      session?.user?.id as string,
-      new Date().getFullYear(),
-      selectedMonth
-    );
-
-    startTransition(async () => {
-      const result = await createAvailabilityBulk(availabilities);
-
-      if (result.error) {
-        toast.error("Erro ao criar disponibilidade", { description: result.error });
-        return;
-      }
-      // Atualiza o estado apenas com os novos timeSlots após sucesso
-      const updatedSchedules = [...weeklySchedules];
-
-      newTimeSlotsByDay.forEach(({ dayOfWeek, timeSlots }) => {
-        const existingIndex = updatedSchedules.findIndex((s) => s.dayOfWeek === dayOfWeek);
-        if (existingIndex >= 0) {
-          updatedSchedules[existingIndex].timeSlots.push(...timeSlots);
-        } else {
-          updatedSchedules.push({ dayOfWeek, timeSlots });
-        }
-      });
-      onScheduleUpdate(updatedSchedules);
-
-      toast.success("Disponibilidade!", {
-        description: "Disponibilidade salva com sucesso!",
-      });
-
-      setSelectedDays([]);
-      setStartTime("08:00");
-      setEndTime("17:00");
-    });
-  };
-
-  const removeTimeSlot = (dayOfWeek: number, timeSlotId: string) => {
-    const updatedSchedules = weeklySchedules
-      .map((schedule) => {
-        if (schedule.dayOfWeek === dayOfWeek) {
-          return {
-            ...schedule,
-            timeSlots: schedule.timeSlots.filter((slot) => slot.id !== timeSlotId),
-          };
-        }
-        return schedule;
-      })
-      .filter((schedule) => schedule.timeSlots.length > 0);
-
-    onScheduleUpdate(updatedSchedules);
-  };
+  const {
+    selectedDays,
+    startTime,
+    endTime,
+    selectedMonth,
+    handleDayToggle,
+    setStartTime,
+    setEndTime,
+    setSelectedMonth,
+    handleSaveAvailability,
+    removeTimeSlot,
+  } = useWeeklySchedule(weeklySchedules, onScheduleUpdate);
 
   return (
     <div className="space-y-6">

@@ -14,18 +14,9 @@ import { ptBR } from "date-fns/locale";
 import { Save, Trash2 } from "lucide-react";
 import TimeSlotForm from "../TimeSlotForm";
 import { useDayScheduleModal } from "@/hooks/useDayScheduleModal";
-import { DayAvailability, WeeklySchedule } from "@/presentation/pages/availability";
+import { IDayScheduleModal } from "./types";
 
-interface Props {
-  date: Date;
-  isOpen: boolean;
-  onClose: () => void;
-  dayAvailabilities: DayAvailability[];
-  weeklySchedules: WeeklySchedule[];
-  onDayAvailabilityUpdate: (dayAvailability: DayAvailability) => void;
-}
-
-const DayScheduleModal: React.FC<Props> = ({
+export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   date,
   isOpen,
   onClose,

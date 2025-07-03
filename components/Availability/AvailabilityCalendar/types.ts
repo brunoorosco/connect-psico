@@ -1,4 +1,4 @@
-import { WeeklySchedule, DayAvailability } from "@/presentation/pages/availability";
+import { WeeklySchedule, DayAvailability } from "@presentation/pages/availability";
 export interface ICustomCalendarDay {
   date: Date;
   selectedDate: Date;

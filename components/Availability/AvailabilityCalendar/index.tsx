@@ -21,7 +21,7 @@ const calendarClassNames = {
   day_selected: "bg-[#5847ebaa] text-white font-semibold  hover:text-white",
 };
 
-const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
+export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
   selectedDate,
   onDateSelect,
   weeklySchedules,

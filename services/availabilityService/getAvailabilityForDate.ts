@@ -1,6 +1,6 @@
 // services/availabilityService.ts
 import { format, getDay } from "date-fns";
-import { WeeklySchedule, DayAvailability } from "@/presentation/pages/availability";
+import { WeeklySchedule, DayAvailability } from "@presentation/pages/availability";
 
 export function getAvailabilityForDate(
   date: Date,
