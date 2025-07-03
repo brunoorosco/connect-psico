@@ -171,7 +171,7 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  id              String   @id @default(uuid())
+  id              Int      @id @default(autoincrement())
   professionalId  String   @map("professional_id")
   patientId       String   @map("patient_id")
   appointmentDate DateTime @map("appointment_date")
@@ -184,7 +184,7 @@ model Appointment {
 }
 
 model Availability {
-  id             String   @id @default(uuid())
+  id             Int      @id @default(autoincrement())
   professionalId String   @map("professional_id")
   dayOfWeek      Int      @map("day_of_week")
   startTime      DateTime @map("start_time")
@@ -196,7 +196,7 @@ model Availability {
 }
 
 model Message {
-  id         String   @id @default(uuid())
+  id         Int      @id @default(autoincrement())
   senderId   String   @map("sender_id")
   receiverId String   @map("receiver_id")
   content    String

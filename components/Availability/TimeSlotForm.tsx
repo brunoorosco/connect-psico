@@ -1,37 +1,37 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
-import { TimeSlot } from '@/presentation/pages/availability';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus } from "lucide-react";
+import { TimeSlot } from "@/presentation/pages/availability";
 
 interface TimeSlotFormProps {
-  onAddTimeSlot: (timeSlot: Omit<TimeSlot, 'id'>) => void;
+  onAddTimeSlot: (timeSlot: Omit<TimeSlot, "id">) => void;
 }
 
 const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot }) => {
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState("08:00");
+  const [endTime, setEndTime] = useState("17:00");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted', e);
-    
-    if (!startTime || !endTime) return;
-    
-    if (startTime >= endTime) {
-      alert('O horário inicial deve ser anterior ao horário final');
+
+    if (!startTime || !endTime) {
+      alert("Preencha ambos os horários.");
       return;
     }
 
-    onAddTimeSlot({
-      startTime,
-      endTime
-    });
+    if (startTime >= endTime) {
+      alert("O horário inicial deve ser anterior ao horário final.");
+      return;
+    }
 
-    // Limpar o formulário
-    setStartTime('');
-    setEndTime('');
+    const newSlot = { startTime, endTime };
+    onAddTimeSlot(newSlot);
+
+    // Resetar formulário
+    setStartTime("");
+    setEndTime("");
   };
 
   return (
@@ -44,7 +44,6 @@ const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot }) => {
             type="time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
-            required
           />
         </div>
         <div>
@@ -54,17 +53,11 @@ const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot }) => {
             type="time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
-            required
           />
         </div>
       </div>
-      
-      <Button 
-        type="submit" 
-        variant="outline" 
-        className="w-full"
-        disabled={!startTime || !endTime}
-      >
+
+      <Button type="submit" variant="outline" className="w-full">
         <Plus className="h-4 w-4 mr-2" />
         Adicionar Horário
       </Button>

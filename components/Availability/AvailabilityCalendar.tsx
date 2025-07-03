@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { format, isSameDay, getDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { WeeklySchedule, DayAvailability } from '@/presentation/pages/availability';
-import DayScheduleModal from './DayScheduleModal';
-import { Clock, Edit } from 'lucide-react';
+import React, { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { format, isSameDay, getDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { WeeklySchedule, DayAvailability } from "@/presentation/pages/availability";
+import DayScheduleModal from "./DayScheduleModal";
+import { Clock, Edit } from "lucide-react";
 
 interface AvailabilityCalendarProps {
   selectedDate: Date;
@@ -22,26 +22,28 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   onDateSelect,
   weeklySchedules,
   dayAvailabilities,
-  onDayAvailabilityUpdate
+  onDayAvailabilityUpdate,
 }) => {
   const [editingDate, setEditingDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<Date>(selectedDate);
 
   const getAvailabilityForDate = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const dayAvailability = dayAvailabilities.find(d => d.date === dateStr);
-    
+    const dateStr = format(date, "yyyy-MM-dd");
+    const dayAvailability = dayAvailabilities.find((d) => d.date === dateStr);
+
     if (dayAvailability) {
       return dayAvailability.timeSlots;
     }
 
     // Se não há disponibilidade específica, usa a programação semanal
     const dayOfWeek = getDay(date);
-    const weeklySchedule = weeklySchedules.find(w => w.dayOfWeek === dayOfWeek);
+    const weeklySchedule = weeklySchedules.find((w) => w.dayOfWeek === dayOfWeek);
     return weeklySchedule?.timeSlots || [];
   };
 
   const handleDateClick = (date: Date) => {
     setEditingDate(date);
+    console.log(date);
   };
 
   const handleCloseModal = () => {
@@ -62,15 +64,21 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             <Calendar
               mode="single"
               selected={selectedDate}
+              month={currentMonth}
               onSelect={(date) => date && onDateSelect(date)}
               locale={ptBR}
+              onMonthChange={(month) => {
+                setCurrentMonth(month);
+                onDateSelect(month); // <- avisa o pai para buscar novas datas
+              }}
               className="rounded-md border w-full"
               classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
                 month: "space-y-4 flex-1",
                 table: "w-full border-collapse space-y-1",
                 head_row: "flex w-full",
-                head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] text-center",
+                head_cell:
+                  "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] text-center",
                 row: "flex w-full mt-2",
                 cell: "relative h-16 w-full text-center text-sm p-1 focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent",
                 day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
@@ -82,37 +90,36 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                   const timeSlots = getAvailabilityForDate(date);
                   const hasAvailability = timeSlots.length > 0;
                   const isToday = isSameDay(date, new Date());
-                  
+
                   return (
-                    <div 
+                    <div
                       className="flex flex-col items-center justify-center h-full w-full cursor-pointer group"
                       onClick={() => handleDateClick(date)}
                     >
-                      <div className={cn(
-                        "text-sm font-medium mb-1",
-                        isToday && "font-bold"
-                      )}>
-                        {format(date, 'd')}
+                      <div className={cn("text-sm font-medium mb-1", isToday && "font-bold")}>
+                        {format(date, "d")}
                       </div>
-                      
+
                       {hasAvailability && (
-                        <div className="flex flex-col items-center space-y-1">
-                          <div className="w-2 h-2 bg-green-500 rounded-full" />
-                          <div className="text-xs text-green-600 font-medium">
-                            {timeSlots.length} slot{timeSlots.length > 1 ? 's' : ''}
-                          </div>
+                        <div className="flex flex-col items-center space-y-1 text-[10px] text-green-700 font-medium">
+                          {timeSlots.slice(0, 2).map((slot, i) => (
+                            <div key={i} className=" h-2 ">
+                              {slot.startTime} - {slot.endTime}
+                            </div>
+                          ))}
+                          {timeSlots.length > 2 && <div>+{timeSlots.length - 2} mais</div>}
                         </div>
                       )}
-                      
+
                       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Edit className="h-3 w-3 text-gray-400" />
                       </div>
                     </div>
                   );
-                }
+                },
               }}
             />
-            
+
             <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
@@ -132,6 +139,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
       {editingDate && (
         <DayScheduleModal
+          key={editingDate.toISOString()}
           date={editingDate}
           isOpen={!!editingDate}
           onClose={handleCloseModal}
