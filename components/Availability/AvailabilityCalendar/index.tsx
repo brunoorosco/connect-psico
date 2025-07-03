@@ -5,18 +5,23 @@ import { Clock } from "lucide-react";
 import { ptBR } from "date-fns/locale";
 import DayScheduleModal from "../DayScheduleModal";
 import { CustomCalendarDay } from "./CustomCalendarDay";
-import { WeeklySchedule, DayAvailability } from "@/presentation/pages/availability";
 import { useAvailabilityLogic } from "@/hooks/useAvailabilityService";
+import { IAvailabilityCalendar } from "./types";
 
-interface AvailabilityCalendarProps {
-  selectedDate: Date;
-  onDateSelect: (date: Date) => void;
-  weeklySchedules: WeeklySchedule[];
-  dayAvailabilities: DayAvailability[];
-  onDayAvailabilityUpdate: (dayAvailability: DayAvailability) => void;
-}
+const calendarClassNames = {
+  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
+  month: "space-y-4 flex-1",
+  table: "w-full border-collapse space-y-1",
+  head_row: "flex w-full",
+  head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] text-center",
+  row: "flex w-full gap-1",
+  cell: "relative h-16 w-full text-center text-sm transition-colors duration-150 hover:bg-transparent focus-within:z-10",
+  day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+  day_today: "ring-1 ring-medical text-medical-dark font-bold",
+  day_selected: "bg-[#5847ebaa] text-white font-semibold  hover:text-white",
+};
 
-const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
+const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
   selectedDate,
   onDateSelect,
   weeklySchedules,
@@ -48,6 +53,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                 onDateSelect(month);
               }}
               className="rounded-md border w-full"
+              classNames={calendarClassNames}
               components={{
                 DayContent: ({ date }) => (
                   <CustomCalendarDay
