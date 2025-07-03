@@ -18,7 +18,7 @@ type Response = {
 export const getAppointmentsUsers = async ({
   page = 1,
   limit = 10,
-}: PaginationParams): Promise<Response>  => {
+}: PaginationParams): Promise<Response> => {
   const skip = (page - 1) * limit;
   const session = await auth();
   if (!session) {
@@ -79,7 +79,7 @@ export const getAppointmentsUsers = async ({
     };
   });
   return {
-    data: mappedUsers as AppointmentModel[],
+    data: mappedUsers as any,
     total,
     page,
     lastPage: Math.ceil(total / limit),
