@@ -65,20 +65,6 @@ export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
                 ),
               }}
             />
-
-            <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full" />
-                  <span>Com disponibilidade</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gray-300 rounded-full" />
-                  <span>Sem disponibilidade</span>
-                </div>
-              </div>
-              <span className="text-xs">Clique em um dia para editar</span>
-            </div>
           </div>
         </CardContent>
       </Card>

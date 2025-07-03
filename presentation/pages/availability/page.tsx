@@ -20,15 +20,15 @@ export const AvailabilityPage = () => {
   useEffect(() => {
     const toastId = "loading-availability";
 
-    toast.loading("Carregando disponibilidade...", { id: toastId });
+    // toast.loading("Carregando disponibilidade...", { id: toastId });
     startTransition(() => {
       getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
         .then((data) => {
           setDayAvailabilities(data);
-          toast.dismiss(toastId);
+       //   toast.dismiss(toastId);
         })
         .catch(() => {
-          toast.dismiss(toastId);
+         // toast.dismiss(toastId);
           toast.error("Erro ao carregar disponibilidade");
         });
     });
