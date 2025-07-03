@@ -2,8 +2,7 @@ import { auth } from "@/auth";
 import {
   Calendar,
   Home,
-  Inbox,
-  Settings,
+CalendarClock,
   LogOut,
   GraduationCap,
   HomeIcon,
@@ -74,7 +73,7 @@ export const menus = [
   {
     title: "Disponibilidade",
     url: `/app/professional/{userId}/disponibilidade`,
-    icon: CalendarDaysIcon,
+    icon: CalendarClock,
     rules: ["SUPERVISOR"],
   },
   {
