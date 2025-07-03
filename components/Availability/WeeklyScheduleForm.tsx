@@ -36,50 +36,54 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
     );
   };
 
-  const handleApplySchedule = () => {
+  const handleSaveAvailability = () => {
     if (selectedDays.length === 0 || !startTime || !endTime) return;
 
-    const newTimeSlot: TimeSlot = {
-      id: `${Date.now()}`,
-      startTime,
-      endTime,
-    };
-
-    const updatedSchedules = [...weeklySchedules];
-
-    selectedDays.forEach((dayOfWeek) => {
-      const existingIndex = updatedSchedules.findIndex((s) => s.dayOfWeek === dayOfWeek);
-      if (existingIndex >= 0) {
-        updatedSchedules[existingIndex].timeSlots.push(newTimeSlot);
-      } else {
-        updatedSchedules.push({
-          dayOfWeek,
-          timeSlots: [newTimeSlot],
-        });
-      }
-    });
-
-    onScheduleUpdate(updatedSchedules);
+    const newTimeSlotsByDay: WeeklySchedule[] = selectedDays.map((dayOfWeek) => ({
+      dayOfWeek,
+      timeSlots: [
+        {
+          id: `${Date.now()}-${dayOfWeek}-${Math.random()}`,
+          startTime,
+          endTime,
+        },
+      ],
+    }));
 
     const availabilities = generateAvailabilityList(
-      updatedSchedules,
+      newTimeSlotsByDay,
       session?.user?.id as string,
       new Date().getFullYear(),
       selectedMonth
     );
-    console.log(availabilities);
+
     startTransition(async () => {
       const result = await createAvailabilityBulk(availabilities);
+
       if (result.error) {
         toast.error("Erro ao criar disponibilidade", { description: result.error });
-      } else {
-        toast.success("Disponibiliade!", {
-          description: "Disponibilidade salva com sucesso!",
-        });
-        setSelectedDays([]);
-        setStartTime("08:00");
-        setEndTime("17:00");
+        return;
       }
+      // Atualiza o estado apenas com os novos timeSlots após sucesso
+      const updatedSchedules = [...weeklySchedules];
+
+      newTimeSlotsByDay.forEach(({ dayOfWeek, timeSlots }) => {
+        const existingIndex = updatedSchedules.findIndex((s) => s.dayOfWeek === dayOfWeek);
+        if (existingIndex >= 0) {
+          updatedSchedules[existingIndex].timeSlots.push(...timeSlots);
+        } else {
+          updatedSchedules.push({ dayOfWeek, timeSlots });
+        }
+      });
+      onScheduleUpdate(updatedSchedules);
+
+      toast.success("Disponibilidade!", {
+        description: "Disponibilidade salva com sucesso!",
+      });
+
+      setSelectedDays([]);
+      setStartTime("08:00");
+      setEndTime("17:00");
     });
   };
 
@@ -167,7 +171,7 @@ const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
           </div>
 
           <Button
-            onClick={handleApplySchedule}
+            onClick={handleSaveAvailability}
             className="w-full"
             disabled={selectedDays.length === 0 || !startTime || !endTime}
           >

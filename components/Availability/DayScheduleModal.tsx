@@ -5,7 +5,7 @@ import { format, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { WeeklySchedule, DayAvailability, TimeSlot } from "@/presentation/pages/availability";
 import TimeSlotForm from "./TimeSlotForm";
-import { Save, Plus, Trash2 } from "lucide-react";
+import { Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface DayScheduleModalProps {

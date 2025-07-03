@@ -27,7 +27,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [editingDate, setEditingDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(selectedDate);
 
-  const getAvailabilityForDate = (date: Date) => {
+  const getAvailabilityForDate = (date: Date, currentMonth: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const dayAvailability = dayAvailabilities.find((d) => d.date === dateStr);
 
@@ -35,7 +35,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       return dayAvailability.timeSlots;
     }
 
-    // Se não há disponibilidade específica, usa a programação semanal
+    if (
+      date.getMonth() !== currentMonth.getMonth() ||
+      date.getFullYear() !== currentMonth.getFullYear()
+    ) {
+      return [];
+    }
+
     const dayOfWeek = getDay(date);
     const weeklySchedule = weeklySchedules.find((w) => w.dayOfWeek === dayOfWeek);
     return weeklySchedule?.timeSlots || [];
@@ -87,7 +93,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
               }}
               components={{
                 DayContent: ({ date }) => {
-                  const timeSlots = getAvailabilityForDate(date);
+                  const timeSlots = getAvailabilityForDate(date, selectedDate);
                   const hasAvailability = timeSlots.length > 0;
                   const isToday = isSameDay(date, new Date());
 
