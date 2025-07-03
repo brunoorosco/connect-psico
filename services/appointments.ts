@@ -42,7 +42,7 @@ export const appointmentService = {
   },
 
   // Atualizar status do agendamento
-  async updateStatus(id: string, status: Appointment["status"]) {
+  async updateStatus(id: number, status: Appointment["status"]) {
     return await prisma.appointment.update({
       where: { id },
       data: { status },
@@ -50,7 +50,7 @@ export const appointmentService = {
   },
 
   // Excluir agendamento
-  async delete(id: string) {
+  async delete(id: number) {
     await prisma.appointment.delete({ where: { id } });
     return true;
   },
