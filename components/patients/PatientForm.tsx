@@ -1,4 +1,4 @@
-import React from "react";
+"use server";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -41,13 +41,13 @@ const patientSchema = z.object({
 
 type PatientFormData = z.infer<typeof patientSchema>;
 
-interface PatientFormProps {
+type PatientFormProps = {
   patient?: Patient | null;
   onSubmit: (data: Omit<Patient, "id">) => void;
   onCancel: () => void;
-}
+};
 
-const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
+const PatientForm = ({ patient, onSubmit, onCancel }: PatientFormProps) => {
   const { data: session } = useSession(); // Certifique-se de que useSession está importado corretamente
   const generateMedicalRecordId = () => {
     return `PR-${nanoid()}`;

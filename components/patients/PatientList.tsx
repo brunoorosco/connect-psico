@@ -1,4 +1,4 @@
-import React from "react";
+"use server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,19 +12,19 @@ import {
 import { Eye, Edit, Trash2, MessageSquare } from "lucide-react";
 import { Patient } from "@/types/appointment";
 
-interface PatientListProps {
+type PatientListProps = {
   patients: any[];
   onViewPatient: (patient: Patient) => void;
   onEditPatient: (patient: Patient) => void;
   onDeletePatient: (patientId: string) => void;
-}
+};
 
-const PatientList: React.FC<PatientListProps> = ({
+const PatientList = ({
   patients,
   onViewPatient,
   onEditPatient,
   onDeletePatient,
-}) => {
+}: PatientListProps) => {
   const handleSendMessage = (patient: Patient) => {
     // Implementar envio de mensagem
     console.log("Enviando mensagem para:", patient.name);
