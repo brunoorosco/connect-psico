@@ -1,9 +1,7 @@
-import PatientsPage from "@/presentation/pages/patients"
+import { PatientsPage } from "@presentation/pages/patients";
 
 const Patients = () => {
-  return (
-   <PatientsPage/>
-  );
+  return <PatientsPage />;
 };
 
 export default Patients;

@@ -1,0 +1,80 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getPatients } from "@/actions/patients";
+import { Patient } from "@/types/appointment";
+import { toast } from "sonner";
+
+export function usePatientManager() {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const result = await getPatients();
+      if (!Array.isArray(result)) {
+        toast.error("Erro a carregar pacientes")
+        console.error("Error fetching patients:", result.error);
+        return;
+      }
+      setPatients(result);
+    };
+    load();
+  }, []);
+
+  const handleAddPatient = (patient: Omit<Patient, "id">) => {
+    const newPatient: Patient = {
+      ...patient,
+      id: parseInt(Math.random().toString().substring(2, 9)),
+    };
+    setPatients((prev) => [...prev, newPatient]);
+    setShowForm(false);
+  };
+
+  const handleEditPatient = (patientData: Omit<Patient, "id">) => {
+    if (!editingPatient) return;
+    setPatients((prev) =>
+      prev.map((p) => (p.id === editingPatient.id ? { ...editingPatient, ...patientData } : p))
+    );
+    setEditingPatient(null);
+    setShowForm(false);
+  };
+
+  const handleDeletePatient = (id: number) => {
+    setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleViewPatient = (patient: Patient) => {
+    console.log("handleViewPatient", patient);
+    setSelectedPatient(patient);
+  };
+
+  const handleEditClick = (patient: Patient) => {
+    setEditingPatient(patient);
+    setShowForm(true);
+  };
+
+  const cancelForm = () => {
+    setShowForm(false);
+    setEditingPatient(null);
+  };
+
+  const backToList = () => setSelectedPatient(null);
+
+  return {
+    patients,
+    showForm,
+    selectedPatient,
+    editingPatient,
+    handleAddPatient,
+    handleEditPatient,
+    handleDeletePatient,
+    handleViewPatient,
+    handleEditClick,
+    cancelForm,
+    backToList,
+    setShowForm,
+  };
+}
