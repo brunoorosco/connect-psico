@@ -29,7 +29,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         </TabsList>
 
         <TabsContent value="info">
-          <PatientInfoTab patient={patient} />
+           <PatientInfoTab patient={patient} /> 
         </TabsContent>
 
         <TabsContent value="appointments">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { getPatients } from "@/actions/patients";
 import { Patient } from "@/types/appointment";
 import { toast } from "sonner";
@@ -11,17 +11,26 @@ export function usePatientManager() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      const result = await getPatients();
-      if (!Array.isArray(result)) {
-        toast.error("Erro a carregar pacientes")
-        console.error("Error fetching patients:", result.error);
-        return;
+  const fetchPatients = async () => {
+    startTransition(async () => {
+      try {
+        const result = await getPatients();
+        if (!Array.isArray(result)) {
+          toast.error("Erro ao carregar pacientes");
+          console.error("Erro no carregamento:", result.error);
+          return;
+        }
+        console.log("Pacientes carregados com sucesso:", result);
+        setPatients(result);
+      } catch (err) {
+        toast.error("Erro inesperado");
+        console.error("Erro na requisição:", err);
       }
-      setPatients(result);
-    };
-    load();
+    });
+  };
+
+  useEffect(() => {
+    fetchPatients();
   }, []);
 
   const handleAddPatient = (patient: Omit<Patient, "id">) => {
