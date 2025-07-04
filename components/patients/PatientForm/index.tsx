@@ -1,8 +1,10 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+// components/patients/PatientForm.tsx
+'use client';
+
+import React from 'react';
+import { usePatientForm } from '@/hooks/usePatientForm';
+import { Patient } from '@/types/appointment';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,109 +12,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Patient } from "@/types/appointment";
-import InputMask from "react-input-mask";
-import { createPatient } from "@/actions/patients/addPatient";
-import { useSession } from "next-auth/react";
-import { customAlphabet } from "nanoid";
-import { toast } from "sonner";
-import { updatePatient } from "@/actions/patients/updatePatient";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import InputMask from 'react-input-mask';
 
-const nanoid = customAlphabet("1234567890", 5);
-const patientSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 5 caracteres"),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
-  phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos").optional().or(z.literal("")),
-  medicalRecordId: z.string().optional(),
-  birthDate: z.string().optional(),
-  emergencyContact: z.string().optional(),
-  notes: z.string().optional(),
-  cep: z.string().min(8, "CEP inválido").optional(),
-  street: z.string().optional(),
-  neighborhood: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  number: z.string().optional(),
-  profissionalId: z.string().cuid("ID do profissional inválido").optional(),
-});
-
-type PatientFormData = z.infer<typeof patientSchema>;
-
-interface PatientFormProps {
+type Props = {
   patient?: Patient | null;
-  onSubmit: (data: Omit<Patient, "id">) => void;
+  onSubmit: (data: Omit<Patient, 'id'>) => void;
   onCancel: () => void;
-}
+};
 
-const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }) => {
-  const { data: session } = useSession(); // Certifique-se de que useSession está importado corretamente
-  const generateMedicalRecordId = () => {
-    return `PR-${nanoid()}`;
-  };
-
-  const form = useForm<PatientFormData>({
-    resolver: zodResolver(patientSchema),
-    defaultValues: {
-      name: patient?.name || "",
-      email: patient?.email || "",
-      phone: patient?.phone || "",
-      medicalRecordId: patient?.medicalRecordId ?? generateMedicalRecordId(),
-      birthDate: (patient as any)?.birthDate || "",
-      emergencyContact: (patient as any)?.emergencyContact || "",
-      notes: (patient as any)?.notes || "",
-      cep: (patient as any)?.cep || undefined,
-      street: (patient as any)?.street || "",
-      neighborhood: (patient as any)?.neighborhood || "",
-      city: (patient as any)?.city || "",
-      state: (patient as any)?.state || "",
-      number: (patient as any)?.number || "",
-      profissionalId: session!.user.id || "",
-    },
-  });
-
-  const handleSubmit = async (data: PatientFormData) => {
-    try {
-      if (patient) {
-        await updatePatient(data.medicalRecordId!, data); // ou patient.id
-        toast.success("Paciente atualizado com sucesso!");
-      } else {
-        await createPatient(data);
-        toast.success("Paciente criado com sucesso!");
-      }
-
-      form.reset();
-    } catch (err) {
-      toast.error("Erro ao salvar paciente.");
-      console.error("Erro:", err);
-    }
-  };
-
-  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cep = e.target.value.replace(/\D/g, "");
-    form.setValue("cep", cep);
-
-    if (cep.length === 8) {
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
-
-        if (!data.erro) {
-          form.setValue("street", data.logradouro || "");
-          form.setValue("neighborhood", data.bairro || "");
-          form.setValue("city", data.localidade || "");
-          form.setValue("state", data.uf || "");
-        }
-      } catch (error) {
-        console.error("Erro ao buscar CEP:", error);
-      }
-    }
-  };
+export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) => {
+  const {
+    form,
+    handleCepChange,
+    handleSubmit,
+    isEdit,
+  } = usePatientForm({ patient, onSubmit });
 
   return (
-    <Form {...form}>
+ <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
@@ -122,7 +42,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
               <FormItem className="col-span-1 md:col-span-3">
                 <FormLabel>Nome Completo *</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome do paciente" {...field} />
+                  <Input className='uppercase' placeholder="Nome do paciente" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -337,4 +257,5 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
     </Form>
   );
 };
+
 export default PatientForm;

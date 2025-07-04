@@ -110,7 +110,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   }, [editingAppointment, selectedDate, form]);
 
   const handleSubmit = (values: AppointmentFormValues) => {
-    const selectedPatient = patients.find((p) => p.id === values.patientId);
+    const selectedPatient = patients.find((p) => p.userId === values.patientId);
 
     if (!selectedPatient) {
       toast({
@@ -139,9 +139,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         telefone: "00000000",
         email: "dr@clinic.com",
       },
-      patientId: selectedPatient.id,
+      patientId: selectedPatient.userId,
       patient: {
-        id: selectedPatient.id,
+        id: selectedPatient.userId,
         name: selectedPatient.name,
         telefone: selectedPatient.phone || "1111111111",
         email: selectedPatient.email || "teste@TestTube.com",
@@ -191,7 +191,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                           )}
                         >
                           {field.value
-                            ? patients.find((p) => p.id === field.value)?.name
+                            ? patients.find((p) => p.userId === field.value)?.name
                             : "Selecione um paciente"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -204,17 +204,17 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                         <CommandGroup>
                           {patients.map((patient) => (
                             <CommandItem
-                              key={patient.id}
-                              value={patient.id}
+                              key={patient.userId}
+                              value={patient.userId}
                               onSelect={() => {
-                                form.setValue("patientId", patient.id);
+                                form.setValue("patientId", patient.userId);
                                 setPatientOpen(false);
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  patient.id === field.value ? "opacity-100" : "opacity-0"
+                                  patient.userId === field.value ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               <div className="flex flex-col">

@@ -4,6 +4,8 @@ import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
 import { useState, useTransition } from "react";
+import { Patient } from '@/types/appointment';
+import { mockAppointments } from "@components/agenda/mockData";
 
 export function usePatientsFetcher() {
   const [userDefault, setUserDefault] = useState<any>([]);
@@ -36,3 +38,23 @@ export function useProfessionalsAvaliabilitiesFetcher() {
 export const fetchProfessionalSchedule = async (userId: string, date: Date) => {
   return await getProfessionalSchedule(userId, date);
 };
+
+export function usePatientDetails(patient: Patient) {
+  const patientAppointments = mockAppointments.filter(
+    (apt) => apt.patientId === patient.userId
+  );
+
+  const handleSendMessage = () => {
+    console.log('Enviando mensagem para:', patient.name);
+  };
+
+  const handleScheduleAppointment = () => {
+    console.log('Agendando consulta para:', patient.name);
+  };
+
+  return {
+    patientAppointments,
+    handleSendMessage,
+    handleScheduleAppointment,
+  };
+}

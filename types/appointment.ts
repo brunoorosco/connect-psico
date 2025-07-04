@@ -1,14 +1,27 @@
 export type Status = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
 export type User = {
-  id: string;
+  id: number;
   name: string;
   email?: string;
   phone?: string;
   medicalRecordId?: string;
 };
 
-export type Patient = User;
+export type Patient = User & {
+  cep: string;
+  state: string;
+  street: string;
+  neighborhood: string;
+  emergencyContact: string;
+  birthDate?: Date; // ISO string format
+  city: string;
+  number: string;
+  notes: string;
+  active: boolean;
+  image?: string;
+  userId: string;
+};
 
 export type Professional = User;
 
