@@ -10,9 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Edit, Trash2, MessageSquare } from "lucide-react";
+import { Eye, Edit, Trash2, MessageSquare, SquarePlay } from "lucide-react";
 import { usePatientList } from "@/hooks/usePatientList";
 import { IPatientList } from "./types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
+import Link from "next/link";
+import { usePatientStore } from "@/stores/usePatientStore";
+import { Patient } from "@/types/appointment";
 
 const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) => {
   const { handleView, handleEdit, handleDelete, handleSendMessage } = usePatientList({
@@ -21,6 +25,10 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
     onDeletePatient,
   });
 
+  const handleStartConsultation = (item: Patient) => {
+    console.log("Iniciar consulta para o paciente:", item);
+    usePatientStore.getState().setPatient(item);
+  };
   return (
     <Card>
       <CardHeader>
@@ -46,18 +54,60 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
                 <TableCell>{item.medicalRecordId || "-"}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handleView(item)}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleSendMessage(item)}>
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleView(item)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Detalhes do Paciente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={`./pacientes/${item.userId}/consulta`}
+                          onClick={() => handleStartConsultation(item)}
+                          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-10"
+                        >
+                          <SquarePlay className="h-4 w-4" />
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Iniciar Consulta</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Editar Paciente</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleSendMessage(item)}>
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Enviar Mensagem</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Excluir Paciente</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </TableCell>
               </TableRow>

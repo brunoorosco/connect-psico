@@ -20,7 +20,6 @@ export function usePatientManager() {
           console.error("Erro no carregamento:", result.error);
           return;
         }
-        console.log("Pacientes carregados com sucesso:", result);
         setPatients(result);
       } catch (err) {
         toast.error("Erro inesperado");
@@ -65,6 +64,11 @@ export function usePatientManager() {
     setShowForm(true);
   };
 
+  const handleAppointmentCreate = (patient: Patient) => {
+    console.log("handleAppointmentCreate", patient);
+    setSelectedPatient(patient);
+  };
+
   const cancelForm = () => {
     setShowForm(false);
     setEditingPatient(null);
@@ -85,5 +89,6 @@ export function usePatientManager() {
     cancelForm,
     backToList,
     setShowForm,
+    handleAppointmentCreate
   };
 }
