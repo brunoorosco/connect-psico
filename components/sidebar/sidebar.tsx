@@ -44,9 +44,9 @@ export async function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            <div className="flex items-center">
+            <div className="flex items-center mx-auto mt-2">
               <Link href="/" className="flex items-center">
-                {/* <Logo /> */}
+                <Logo />
 
                 <span className="text-2xl font-bold text-therapy-primary">
                   {env.applicationName}
