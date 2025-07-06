@@ -19,6 +19,7 @@ export function PatientsPage() {
     handleDeletePatient,
     handleViewPatient,
     handleEditClick,
+    handleAppointmentCreate,
     cancelForm,
     backToList,
     setShowForm,
@@ -62,6 +63,7 @@ export function PatientsPage() {
             onViewPatient={handleViewPatient}
             onEditPatient={handleEditClick}
             onDeletePatient={handleDeletePatient}
+            onAppointmentCreate={handleAppointmentCreate}
           />
         )}
       </main>

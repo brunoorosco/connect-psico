@@ -7,4 +7,5 @@ export interface IPatientList {
   onViewPatient: (patient: Patient) => void;
   onEditPatient: (patient: Patient) => void;
   onDeletePatient: (patientId: number) => void;
+  onAppointmentCreate: (patientId: Patient) => void;
 };

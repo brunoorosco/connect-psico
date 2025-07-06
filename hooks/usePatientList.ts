@@ -5,7 +5,7 @@ import { Patient } from "@/types/appointment";
 export function usePatientList({
   onViewPatient,
   onEditPatient,
-  onDeletePatient,
+  onDeletePatient
 }: {
   onViewPatient: (patient: Patient) => void;
   onEditPatient: (patient: Patient) => void;
