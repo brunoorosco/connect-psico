@@ -1,6 +1,6 @@
-"use client"
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+"use client";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,15 +8,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Calendar } from 'lucide-react';
-import { IPatientAppointmentsTab } from './types';
+} from "@/components/ui/table";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar, Eye } from "lucide-react";
+import { IPatientAppointmentsTab } from "./types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
+import { Button } from "@components/ui";
 
 export const PatientAppointmentsTab: React.FC<IPatientAppointmentsTab> = (props) => {
   const { appointments } = props || {};
-
   return (
     <Card>
       <CardHeader>
@@ -31,33 +32,60 @@ export const PatientAppointmentsTab: React.FC<IPatientAppointmentsTab> = (props)
                 <TableHead>Horário</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Profissional</TableHead>
+                <TableHead hidden>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {appointments.map((apt) => (
                 <TableRow key={apt.id}>
                   <TableCell>
-                    {format(new Date(apt.appointmentDate), 'dd/MM/yyyy', { locale: ptBR })}
+                    {format(new Date(apt.appointmentDate), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(apt.appointmentDate), 'HH:mm', { locale: ptBR })}
+                    {format(new Date(apt.appointmentDate), "HH:mm", { locale: ptBR })}
                   </TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded text-xs ${
-                        apt.status === 'CONFIRMED'
-                          ? 'bg-green-100 text-green-800'
-                          : apt.status === 'PENDING'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : apt.status === 'CANCELLED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-blue-100 text-blue-800'
+                        apt.status === "CONFIRMED"
+                          ? "bg-green-100 text-green-800"
+                          : apt.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : apt.status === "CANCELLED"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      {apt.status}
+                      {apt.status === "CONFIRMED"
+                        ? "CONFIRMADA"
+                        : apt.status === "PENDING"
+                        ? "PENDENTE DE CONFIRMAÇÃO"
+                        : apt.status === "CANCELLED"
+                        ? "CANCELADA"
+                        : "CONCLUÍDA"}
                     </span>
                   </TableCell>
-                  <TableCell>{apt.professional?.name || 'Dr. Silva'}</TableCell>
+                  <TableCell>{apt.professional?.name || "-"}</TableCell>
+                  {apt.status === "CONCLUDED" ? (
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => console.log("detalhes da consulta")}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Detalhes da Consulta</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                  ) : (
+                    ""
+                  )}
                 </TableRow>
               ))}
             </TableBody>

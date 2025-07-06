@@ -1,5 +1,9 @@
-import { getAppointmentsByPatient, getAppointmentsUsers,   } from "@/actions/appointments";
-import { useState, useTransition } from "react";
+import {
+  getAppointmentsByPatient,
+  getAppointmentsByUserId,
+  getAppointmentsUsers,
+} from "@/actions/appointments";
+import { useEffect, useState, useTransition } from "react";
 
 export function useAppointments() {
   const [appointments, setAppointments] = useState<any>([]);
@@ -45,3 +49,27 @@ export function useAppointmentsByProfessional() {
   };
   return { appointments: appointments.data, total, loading, fetchAppointments };
 }
+
+export const usePatientAppointments = (userId: string) => {
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [isPending, startTransition] = useTransition();
+
+  const fetchAppointments = (page = 1, limit = 10) => {
+    if (!userId) return;
+    startTransition(() => {
+      getAppointmentsByUserId({ userId, page, limit })
+        .then((res) => setAppointments(res.data))
+        .catch((err) => console.error("Erro ao buscar consultas:", err));
+    });
+  };
+
+  useEffect(() => {
+    fetchAppointments(); // busca inicial
+  }, [userId]);
+
+  return {
+    appointments,
+    isLoading: isPending,
+    fetchAppointments,
+  };
+};

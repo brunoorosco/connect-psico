@@ -3,9 +3,10 @@
 import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
-import { useState, useTransition } from "react";
-import { Patient } from '@/types/appointment';
-import { mockAppointments } from "@components/agenda/mockData";
+import { useEffect, useState, useTransition } from "react";
+import { Patient } from "@/types/appointment";
+import { getAppointmentsByPatient, getAppointmentsByUserId } from "@/actions/appointments";
+import { usePatientAppointments } from "./useAppointments";
 
 export function usePatientsFetcher() {
   const [userDefault, setUserDefault] = useState<any>([]);
@@ -32,7 +33,7 @@ export function useProfessionalsAvaliabilitiesFetcher() {
       setProfessional(res);
     });
   };
-  return { disponibilidadeProfissional:professional, loading, fetchProfessional };
+  return { disponibilidadeProfissional: professional, loading, fetchProfessional };
 }
 
 export const fetchProfessionalSchedule = async (userId: string, date: Date) => {
@@ -40,20 +41,20 @@ export const fetchProfessionalSchedule = async (userId: string, date: Date) => {
 };
 
 export function usePatientDetails(patient: Patient) {
-  const patientAppointments = mockAppointments.filter(
-    (apt) => apt.patientId === patient.userId
-  );
-
   const handleSendMessage = () => {
-    console.log('Enviando mensagem para:', patient.name);
+    console.log("Enviando mensagem para:", patient.name);
   };
 
   const handleScheduleAppointment = () => {
-    console.log('Agendando consulta para:', patient.name);
+    console.log("Agendando consulta para:", patient.name);
   };
 
+  const { appointments, fetchAppointments, isLoading } = usePatientAppointments(patient?.userId);
+
   return {
-    patientAppointments,
+    patientAppointments: appointments,
+    fetchAppointments,
+    isAppointmentsLoading: isLoading,
     handleSendMessage,
     handleScheduleAppointment,
   };
