@@ -46,40 +46,46 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
           </TableHeader>
           <TableBody>
             {patients.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium uppercase">{item.name}</TableCell>
-                <TableCell>{item.email || "-"}</TableCell>
-                <TableCell>{item.phone || "-"}</TableCell>
-                <TableCell>{item.medicalRecordId || "-"}</TableCell>
-                <TableCell className="text-right">
+              <TableRow
+                key={item.id}
+                className="hover:bg-gray-100 cursor-pointer "
+                onClick={() => handleView(item)}
+              >
+                <TableCell className="font-medium uppercase py-2">{item.name}</TableCell>
+                <TableCell className="py-2">{item.email || "-"}</TableCell>
+                <TableCell className="py-2">{item.phone || "-"}</TableCell>
+                <TableCell className="py-2">{item.medicalRecordId || "-"}</TableCell>
+                <TableCell className="text-right py-3">
                   <div className="flex justify-end space-x-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => handleView(item)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Detalhes do Paciente</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    {/* Botões e links com stopPropagation */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
                           href={`./pacientes/${item.userId}/consulta`}
-                          onClick={() => handleStartConsultation(item)}
-                          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartConsultation(item);
+                          }}
+                          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-11"
                         >
-                          <SquarePlay className="h-4 w-4" />
+                          <SquarePlay className="h-5 w-5" />
                         </Link>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Iniciar Consulta</p>
                       </TooltipContent>
                     </Tooltip>
+
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(item);
+                          }}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
@@ -87,9 +93,17 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
                         <p>Editar Paciente</p>
                       </TooltipContent>
                     </Tooltip>
+
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => handleSendMessage(item)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSendMessage(item);
+                          }}
+                        >
                           <MessageSquare className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
@@ -97,9 +111,17 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
                         <p>Enviar Mensagem</p>
                       </TooltipContent>
                     </Tooltip>
+
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                          }}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>

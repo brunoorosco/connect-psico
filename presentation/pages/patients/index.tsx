@@ -27,17 +27,17 @@ export function PatientsPage() {
 
   return (
     <div className="container-full bg-gray-50">
-      <div className="mx-auto py-4">
+      <div className="mx-auto py-2">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-medical">Gerenciamento de Pacientes</h1>
           <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-2 w-2 mr-2" />
             Novo Paciente
           </Button>
         </div>
       </div>
 
-      <main className="mx-auto py-6">
+      <main className="mx-auto py-2">
         {showForm ? (
           <Card>
             <CardHeader>
