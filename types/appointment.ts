@@ -1,4 +1,4 @@
-export type Status = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+export type Status = "PENDING" | "CONFIRMED" | "CANCELLED" | "CONCLUDED";
 
 export type User = {
   id: number;

@@ -10,7 +10,7 @@ import { IPatientDetails } from "./types";
 export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onEdit }) => {
   const { patientAppointments, handleSendMessage, handleScheduleAppointment } =
     usePatientDetails(patient);
-
+  
   return (
     <div className="space-y-6">
       <PatientHeader
@@ -29,7 +29,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         </TabsList>
 
         <TabsContent value="info">
-           <PatientInfoTab patient={patient} /> 
+          <PatientInfoTab patient={patient} />
         </TabsContent>
 
         <TabsContent value="appointments">
