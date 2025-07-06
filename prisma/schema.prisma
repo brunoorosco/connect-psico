@@ -37,6 +37,7 @@ model User {
   patientProfessional      Pacientes[]    @relation("PatientProfessional")
   Session                  Session[]
   Account                  Account[]
+  NotePatient              NotePatient[] @relation("NotePatientProfessional")
 
   @@index([id])
   @@map("users")
@@ -111,11 +112,14 @@ model Pacientes {
 }
 
 model NotePatient {
-  id        Int       @id @default(autoincrement())
-  patientId Int       @map("patitent_id")
-  notes     String
-  patients  Pacientes @relation(fields: [patientId], references: [id])
-  createdAt DateTime  @default(now())
+  id             Int       @id @default(autoincrement())
+  patientId      Int       @map("patitent_id")
+  notes          String
+  prescription   String
+  professionalId String    @map("professional_id")
+  patients       Pacientes @relation(fields: [patientId], references: [id])
+  createdAt      DateTime  @default(now())
+  professional   User      @relation("NotePatientProfessional", fields: [professionalId], references: [id])
 
   @@map("note_patients")
 }
