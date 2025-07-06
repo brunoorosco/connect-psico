@@ -26,7 +26,6 @@ const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }
   });
 
   const handleStartConsultation = (item: Patient) => {
-    console.log("Iniciar consulta para o paciente:", item);
     usePatientStore.getState().setPatient(item);
   };
   return (
