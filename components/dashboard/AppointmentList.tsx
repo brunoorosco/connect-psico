@@ -86,7 +86,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
               <div className="flex items-center space-x-3">
                 <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
                   <span className="font-semibold text-sm">
-                    {appointment?.appointmentDate.toISOString().substring(11, 16)}
+                    {appointment?.appointmentDate.getHours()}:00
                   </span>
                 </div>
                 <div>

@@ -64,15 +64,15 @@ export const CalendarProfessional: React.FC<ProfessionalProps> = ({ professional
 
     const slots = agendaProfissional.map((interval: { start: string | Date }) => {
       const start = new Date(interval.start);
-      start.setHours(start.getHours() + 3); // ajuste para fuso se necessário
+      start.setHours(start.getHours()); // ajuste para fuso se necessário
       return { start };
     });
 
     setAvailableSlots(slots);
   }, [agendaProfissional]);
+
   const handleScheduleAppointment = () => {
     if (!selectedSlot || !session?.user?.id) return;
-
     startTransition(async () => {
       const result = await createAppointment({
         patientId: session?.user.id as string,

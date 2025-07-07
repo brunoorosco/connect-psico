@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, MessageCircle, Calendar as CalendarIcon, Heart, DollarSign } from "lucide-react";
+import { MapPin, MessageCircle, Calendar as CalendarIcon, DollarSign } from "lucide-react";
 import { ProfessionalModel } from "@/domain/model/professional";
 import { TextMessage } from "./TextMessage";
 import { CalendarProfessional } from "./CalendarProfessional";
@@ -88,7 +88,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                     {(Number(professional?.valorAtendimento) / 100).toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    })}{" "}
+                    })}
                     / sessão
                   </span>
                 </div>
