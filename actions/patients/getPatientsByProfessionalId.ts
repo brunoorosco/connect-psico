@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
 import { auth } from "@/auth"; // Certifique-se de que está importando corretamente
 import { Patient } from "@/types/appointment";
 
-export const getPatients = async (): Promise<Patient[] | { error: string }> => {
+export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error: string }> => {
   const session = await auth(); // Obtém a sessão do usuário autenticado
   try {
     const patients = await prisma.pacientes.findMany({
@@ -61,6 +61,3 @@ export const getPatients = async (): Promise<Patient[] | { error: string }> => {
   }
 };
 
-export const deletePatient = async (id: number) => {
-  return await prisma.pacientes.delete({ where: { id } });
-};

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AppointmentModel } from "@/domain/model/appointment";
 import { toast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
+import { mockPatients } from "@components/agenda/mockData";
 
 const TIME_REGEX = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 

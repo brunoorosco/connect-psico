@@ -3,9 +3,8 @@
 import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Patient } from "@/types/appointment";
-import { getAppointmentsByPatient, getAppointmentsByUserId } from "@/actions/appointments";
 import { usePatientAppointments } from "./useAppointments";
 
 export function usePatientsFetcher() {

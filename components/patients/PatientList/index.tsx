@@ -15,7 +15,7 @@ import { usePatientList } from "@/hooks/usePatientList";
 import { IPatientList } from "./types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
 import Link from "next/link";
-import { usePatientStore } from "@/stores/usePatientStore";
+import { usePatientStore } from "@/infra/stores/usePatientStore";
 import { Patient } from "@/types/appointment";
 
 const PatientList = ({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) => {

@@ -1,5 +1,6 @@
-export * from './getPatients'
+export * from './getPatientsByProfessionalId'
 export * from './addPatient'
 export * from './getPatientById'
 export * from './updatePatient'
 export * from './getPatientByUserId'
+export * from './deletePatient'

@@ -2,16 +2,40 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import { mockPatients } from "../mockData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IFormPatientField } from "./types";
+import { getPatientsByProfessionalId } from "@/actions/patients";
+import { Patient } from "@/types/appointment";
 
 export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
   const [open, setOpen] = useState(false);
-  const patients = mockPatients;
+  const [patients, setPatients] = useState<Patient[]>([]);
+
+  const getPatients = async () => {
+    try {
+      const patientsList = await getPatientsByProfessionalId();
+      console.log("response", patientsList);
+      if (Array.isArray(patientsList)) {
+        setPatients(patientsList);
+      }
+      return [];
+    } catch (error) {
+      throw new Error("Failed to fetch patients");
+    }
+  };
+
+  useEffect(() => {
+    getPatients();
+  }, []);
 
   return (
     <FormField
@@ -51,7 +75,10 @@ export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
                       }}
                     >
                       <Check
-                        className={cn("mr-2 h-4 w-4", patient.userId === field.value ? "opacity-100" : "opacity-0")}
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          patient.userId === field.value ? "opacity-100" : "opacity-0"
+                        )}
                       />
                       <div className="flex flex-col">
                         <span>{patient.name}</span>

@@ -9,7 +9,7 @@ import { ConsultationDateTimeEditor } from "@components/consulta/ConsultationDat
 import { ClinicalEvolution } from "@components/consulta/ClinicalEvolution";
 import { AiSummary } from "@components/consulta/AISummary";
 import { Prescription } from "@components/consulta/Prescription";
-import { usePatientStore } from "@/stores/usePatientStore";
+import { usePatientStore } from "@/infra/stores/usePatientStore";
 import { ConsultaSkeleton } from "@components/skeletons";
 import { getPatientByUserId } from "@/actions/patients/getPatientByUserId";
 import { useConsultationForm } from "@/hooks/useConsultation";
