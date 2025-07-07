@@ -59,7 +59,10 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://psicomais.com"),
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: '/favicon.png"', media: "(prefers-color-scheme: light)" },
+      { url: '/favicon.png"', media: "(prefers-color-scheme: dark)" },
+    ],
     shortcut: "/favicon-32x32.png",
     apple: "/apple-touch-icon.png",
   },
