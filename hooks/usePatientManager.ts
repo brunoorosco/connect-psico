@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
-import { getPatients } from "@/actions/patients";
+import { getPatientsByProfessionalId } from "@/actions/patients";
 import { Patient } from "@/types/appointment";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ export function usePatientManager() {
   const fetchPatients = async () => {
     startTransition(async () => {
       try {
-        const result = await getPatients();
+        const result = await getPatientsByProfessionalId();
         if (!Array.isArray(result)) {
           toast.error("Erro ao carregar pacientes");
           console.error("Erro no carregamento:", result.error);
