@@ -10,6 +10,7 @@ const roboto = Roboto({
 });
 
 import type { Metadata } from "next";
+import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Psico Mais | Psicologia online e presencial",
@@ -57,7 +58,28 @@ export const metadata: Metadata = {
       "Terapia online com psicólogos especializados. Privacidade, acolhimento e segurança.",
   },
   metadataBase: new URL("https://psicomais.com"),
-};
+  icons: {
+    icon: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: "/favicon-32x32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        url: "/favicon-16x16.png",
+      },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        url: "/apple-touch-icon.png",
+      },
+    ],
+   },
+  };
 
 export default async function RootLayout({
   children,

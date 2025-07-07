@@ -6,6 +6,7 @@ import Button from "../shared/Button";
 import { env } from "@/config/application";
 import LogoutButton from "../auth/logout-button";
 import { useState } from "react";
+import Logo from "../logo";
 
 const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
   const linkClass = isMobile
@@ -93,6 +94,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
+            <Logo />
               <span className="text-2xl font-bold text-therapy-primary">{env.applicationName}</span>
             </Link>
           </div>
