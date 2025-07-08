@@ -23,7 +23,6 @@ export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
   const getPatients = async () => {
     try {
       const patientsList = await getPatientsByProfessionalId();
-      console.log("response", patientsList);
       if (Array.isArray(patientsList)) {
         setPatients(patientsList);
       }
