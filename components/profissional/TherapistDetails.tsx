@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, MessageCircle, Calendar as CalendarIcon, DollarSign } from "lucide-react";
+import {
+  MapPin,
+  MessageCircle,
+  Calendar as CalendarIcon,
+  DollarSign,
+  User2,
+  BookCopyIcon,
+} from "lucide-react";
 import { ProfessionalModel } from "@/domain/model/professional";
 import { TextMessage } from "./TextMessage";
 import { CalendarProfessional } from "./CalendarProfessional";
@@ -20,6 +27,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("schedule");
+  console.log("professional", professional);
 
   // Reset state when modal opens or professional changes
   useEffect(() => {
@@ -61,8 +69,11 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
         <div className="mt-2 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              {/* <h4 className="font-medium mb-2">Sobre o profissional</h4> */}
-              <p className="text-sm">{professional.bio}</p>
+              <p className="text-sm text-justify">
+                {professional.bio.length > 500
+                  ? `${professional.bio.slice(0, 497)}...`
+                  : professional.bio}
+              </p>
 
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -94,19 +105,32 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                 </div>
               </div>
             </div>
-
             <div>
-              <h4 className="font-medium mb-2">Disponibilidade</h4>
-              <p className="text-sm mb-2">
-                <span className="font-medium">Dias:</span> {getAvailableDayNames()}
-              </p>
-              <div className="text-sm">
-                <span className="font-medium">Horários:</span>
-                {/* {professional.availableHours.map((interval, idx) => (
-                  <div key={idx} className="ml-2">
-                    {interval.startTime} até {interval.endTime}
-                  </div>
-                ))} */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <BookCopyIcon className="h-4 w-4 text-therapy-primary" />
+                  <h4 className="font-medium">Especialidade:</h4>
+                </div>
+                <ul className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm line-clamp-3 overflow-hidden">
+                  {professional.especialidade.map((target, idx) => (
+                    <li key={idx} className="before:content-['–'] before:mr-2">
+                      {target}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User2 className="h-4 w-4 text-therapy-primary" />
+                  <h4 className="font-medium">Público Alvo:</h4>
+                </div>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                  {professional.publicoAlvo.map((target, idx) => (
+                    <li key={idx} className="before:content-['–'] before:mr-2">
+                      {target}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>

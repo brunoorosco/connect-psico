@@ -37,16 +37,10 @@ const FindTherapist = () => {
   const handleChatClick = (therapistId: string) => {
     if (!session) {
       toast.info("É necessário fazer login para iniciar uma conversa");
-
-      // Store the therapist ID in localStorage so we can return to it after login
       localStorage.setItem("selectedTherapistId", therapistId.toString());
-
-      // Redirect to login page
       navigate.push("/login");
       return;
     }
-
-    // If user is logged in, show the therapist details
     setSelectedTherapist(therapistId);
   };
 
