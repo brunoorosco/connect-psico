@@ -1,12 +1,14 @@
 import { Status } from "@prisma/client";
 
+export type StatusAppointment = Status;
+
 export type AppointmentModel = {
   id: number;
   patientId: string;
   professionalId: string;
   appointmentDate: Date;
   notes?: string;
-  status: Status;
+  status: StatusAppointment;
   duration?: number;
   isLinkedToMedicalRecord?: boolean;
   createdAt?: Date;
