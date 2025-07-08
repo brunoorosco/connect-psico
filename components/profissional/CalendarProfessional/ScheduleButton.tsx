@@ -4,16 +4,9 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { createAppointment } from "@/actions/appointments";
-import { ProfessionalModel } from "@/domain/model/professional";
+import { IScheduleButton } from "./types";
 
-type Props = {
-  selectedSlot: { start: Date };
-  userId: string;
-  professional: ProfessionalModel;
-  onSuccess: () => void;
-};
-
-export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }: Props) {
+export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }: IScheduleButton) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {

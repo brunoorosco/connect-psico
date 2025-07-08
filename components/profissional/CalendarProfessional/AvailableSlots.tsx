@@ -1,14 +1,8 @@
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { IAvailableSlots } from "./types";
 
-type Props = {
-  selectedDate: Date;
-  availableSlots: { start: Date }[];
-  selectedSlot: { start: Date } | null;
-  onSelectSlot: (slot: { start: Date }) => void;
-};
-
-export function AvailableSlots({ selectedDate, availableSlots, selectedSlot, onSelectSlot }: Props) {
+export function AvailableSlots({ selectedDate, availableSlots, selectedSlot, onSelectSlot }: IAvailableSlots) {
   const slotsForDate = availableSlots.filter(
     ({ start }) => format(start, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
   );

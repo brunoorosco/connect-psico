@@ -11,13 +11,9 @@ import { format } from "date-fns";
 import { useAvailableSlots } from "./useAvailableSlots";
 import { AvailableSlots } from "./AvailableSlots";
 import { ScheduleButton } from "./ScheduleButton";
-import { ProfessionalModel } from "@/domain/model/professional";
+import { ICalendarProfessional } from "./types";
 
-type Props = {
-  professionalData: ProfessionalModel;
-};
-
-export const CalendarProfessional = ({ professionalData }: Props) => {
+export const CalendarProfessional = ({ professionalData }: ICalendarProfessional) => {
   const { data: session, status } = useSession();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null);
