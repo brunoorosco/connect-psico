@@ -31,8 +31,6 @@ const AdminRoleManagement = ({ professionals }: Props) => {
   ) => {
     // Set the processing state for this user and role
     setProcessingUsers((prev) => ({ ...prev, [userId + role]: role }));
-    console.log(processingUsers);
-    console.log(userId, role);
     try {
       // Mock update action for now
       setUsers(

@@ -10,7 +10,6 @@ export const getConsultaltionByPatientId = async (patientId: number) => {
       patientId: patientId
      }
     });
-    console.log(notePatient)
     return { data: notePatient };
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {

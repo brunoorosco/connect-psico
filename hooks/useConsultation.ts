@@ -35,7 +35,6 @@ export function useConsultationForm({ notePatient, onSubmit }: UseConsultationFo
 
   const handleSubmit = async (data: ConsultationFormData) => {
     try {
-      console.log("Dados da consulta:", data);
       await createConsultation(data);
       toast.success("Consulta finalizada com sucesso!");
       form.reset();

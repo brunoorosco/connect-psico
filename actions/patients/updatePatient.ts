@@ -8,7 +8,6 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
     if (!result.success) {
       throw new Error("Dados inválidos");
     }
-    console.log(result.data);
     return await prisma.pacientes.update({
       where: { medicalRecordId: prontuarioId },
       data: {

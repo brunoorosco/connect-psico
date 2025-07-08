@@ -27,7 +27,6 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("schedule");
-  console.log("professional", professional);
 
   // Reset state when modal opens or professional changes
   useEffect(() => {

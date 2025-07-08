@@ -67,7 +67,6 @@ export const getMessages = async () => {
 
     const conversas = groupMessagesByConversation(messages);
 
-    // console.log(JSON.stringify(conversas, null, 2));
     return conversas as any;
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {

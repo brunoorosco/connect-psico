@@ -37,10 +37,6 @@ const Contact = () => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
-      // In a real application, this would send data to a backend API
-      // For now, we'll simulate a successful submission
-      console.log("Form data submitted:", data);
-      
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       

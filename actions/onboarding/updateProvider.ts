@@ -12,7 +12,6 @@ const UpdateProfileSchema = z.object({
 });
 
 export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) => {
-  console.log("data", data);
   const valid = await UpdateProfileSchema.safeParseAsync(data);
 
   if (!valid.success) {
@@ -20,7 +19,6 @@ export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) 
   }
 
   const { id, isProfessional, state, professionalRegistration } = valid.data;
-  console.log("valid", data);
   try {
     // Verificar sobreposição com outras disponibilidades
     const account = await prisma.account.findFirst({

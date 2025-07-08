@@ -2,7 +2,6 @@
 import { prisma } from "@/lib/db";
 
 export const getProfessionalAvailabilities = async (userId: string) => {
-  console.log("getProfessionalAvailabilities called with userId:", userId);
   const professional = await prisma.professional.findUnique({
     where: { userId, user: { active: true } },
     select: {
