@@ -5,7 +5,7 @@ import {
 CalendarClock,
   LogOut,
   GraduationCap,
-  HomeIcon,
+  FilePieChartIcon,
   MessageCircle,
   CalendarDaysIcon,
   Users,
@@ -74,6 +74,12 @@ export const menus = [
     title: "Disponibilidade",
     url: `/app/professional/{userId}/disponibilidade`,
     icon: CalendarClock,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Relatório",
+    url: `/app/professional/{userId}/report`,
+    icon: FilePieChartIcon,
     rules: ["SUPERVISOR"],
   },
   {
