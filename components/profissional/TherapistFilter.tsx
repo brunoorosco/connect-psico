@@ -13,10 +13,16 @@ interface TherapistFilterProps {
 
 export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: TherapistFilterProps) => {
   const specialties = [
-    "Terapia Cognitivo-Comportamental",
-    "Psicanálise",
-    "Terapia Sistêmica",
-    "Psicologia Humanista",
+ "Neuropsicologia",
+  "Psicanálise",
+  "Psicologia do Esporte",
+  "Psicologia Educacional",
+  "Psicologia Humanista",
+  "Psicologia Infantil",
+  "Psicologia Organizacional",
+  "Terapia Cognitivo-Comportamental",
+  "Terapia de Casal",
+  "Terapia Familiar",
   ];
 
   return (
