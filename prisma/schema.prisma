@@ -37,7 +37,7 @@ model User {
   patientProfessional      Pacientes[]    @relation("PatientProfessional")
   Session                  Session[]
   Account                  Account[]
-  NotePatient              NotePatient[] @relation("NotePatientProfessional")
+  NotePatient              NotePatient[]  @relation("NotePatientProfessional")
 
   @@index([id])
   @@map("users")
@@ -56,6 +56,7 @@ model Professional {
   bio                String?
   valorAtendimento   Int?          @default(0) @map("valor_atendimento")
   tempoConsulta      Int?          @default(60) @map("tempo_consulta")
+  visivel            Boolean       @default(true) @map("visivel")
   userId             String        @unique
   Comentarios        Comentarios[]
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
