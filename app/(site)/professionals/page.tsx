@@ -1,56 +1,46 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
-import { TherapistFilter } from "@/components/profissional/TherapistFilter";
-import { ProfessionalCard } from "@/components/profissional/TherapistCard";
-import { ProfessionalDetailsModal } from "@/components/profissional/TherapistDetails";
-import { useSession } from "next-auth/react";
-import { useProfessionalsFetcher } from "@/hooks/useProfissionals";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui/select";
-import { Button } from "@components/ui/button";
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Navbar from "@/components/layout/Navbar"
+import { TherapistFilter } from "@/components/profissional/TherapistFilter"
+import { ProfessionalCard } from "@/components/profissional/TherapistCard"
+import { ProfessionalDetailsModal } from "@/components/profissional/TherapistDetails"
+import { useSession } from "next-auth/react"
+import { useProfessionalsFetcher } from "@/hooks/useProfissionals"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
+import { Button } from "@components/ui/button"
 
-const PAGE_SIZE_OPTIONS = [6, 10, 20];
+const PAGE_SIZE_OPTIONS = [6, 10, 20]
 
 const FindTherapist = () => {
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("");
-  const [selectedTherapist, setSelectedTherapist] = useState<any | null>(null);
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("")
+  const [selectedTherapist, setSelectedTherapist] = useState<any | null>(null)
+  const [page, setPage] = useState<number>(1)
+  const [limit, setLimit] = useState<number>(6)
 
-  const navigate = useRouter();
-  const { data: session, status } = useSession();
+  const navigate = useRouter()
+  const { data: session, status } = useSession()
 
-  const { professionals, total, loading, fetchProfessionals } = useProfessionalsFetcher();
+  const { professionals, total, loading, fetchProfessionals } = useProfessionalsFetcher()
 
   useEffect(() => {
-    fetchProfessionals(page, limit, selectedSpecialty);
-  }, [page, limit, selectedSpecialty]);
+    fetchProfessionals(page, limit, selectedSpecialty)
+  }, [page, limit, selectedSpecialty])
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit)
 
   const onSpecialtyChange = (specialty: string) => {
-    setSelectedSpecialty(specialty);
-    setPage(1);
-  };
-
+    setSelectedSpecialty(specialty)
+    setPage(1)
+  }
   return (
     <>
       <Navbar />
       <div className="container mx-auto p-6">
         <div className="flex flex-col lg:flex-row justify-between mb-6 gap-4">
           <h1 className="text-3xl font-bold text-therapy-primary">Encontre seu Terapeuta</h1>
-          <TherapistFilter
-            selectedSpecialty={selectedSpecialty}
-            onSpecialtyChange={onSpecialtyChange}
-          />
+          <TherapistFilter selectedSpecialty={selectedSpecialty} onSpecialtyChange={onSpecialtyChange} />
         </div>
 
         {/* Paginação e seleção limit */}
@@ -63,8 +53,8 @@ const FindTherapist = () => {
               <Select
                 value={limit.toString()}
                 onValueChange={(val) => {
-                  setLimit(Number(val));
-                  setPage(1);
+                  setLimit(Number(val))
+                  setPage(1)
                 }}
               >
                 <SelectTrigger id="pageSize" className="w-[80px]">
@@ -125,10 +115,10 @@ const FindTherapist = () => {
         />
       </div>
     </>
-  );
-};
+  )
+}
 
-export default FindTherapist;
+export default FindTherapist
 
 const TherapistCardSkeleton = () => {
   return (
@@ -138,5 +128,5 @@ const TherapistCardSkeleton = () => {
       <div className="h-4 bg-gray-200 rounded w-1/2" />
       <div className="h-6 bg-gray-200 rounded w-full" />
     </div>
-  );
-};
+  )
+}
