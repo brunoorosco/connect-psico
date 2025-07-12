@@ -1,31 +1,31 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth"
 import {
   Calendar,
   Home,
-CalendarClock,
+  CalendarClock,
   LogOut,
   GraduationCap,
   FilePieChartIcon,
   MessageCircle,
   CalendarDaysIcon,
   Users,
-} from "lucide-react";
+} from "lucide-react"
 
 const useDynamicMenus = async () => {
-  const session = await auth();
+  const session = await auth()
 
-  const userId = session?.user?.id;
+  const userId = session?.user?.id
   const updatedMenus = menus.map((menu) => {
     return {
       ...menu,
       url: menu.url.replace(/userId/g, `${userId}`),
-    };
-  });
+    }
+  })
 
-  return updatedMenus;
-};
+  return updatedMenus
+}
 
-export default useDynamicMenus;
+export default useDynamicMenus
 
 export const menus = [
   {
@@ -64,6 +64,7 @@ export const menus = [
     icon: MessageCircle,
     rules: ["SUPERVISOR"],
   },
+
   {
     title: "Agendamentos",
     url: `/app/professional/{userId}/agendamentos`,
@@ -93,11 +94,17 @@ export const menus = [
     url: "/app",
     icon: GraduationCap,
     rules: ["DEFAULT"],
-  }
-];
+  },
+  {
+    title: "Chat",
+    url: `/app/users/{userId}/chat`,
+    icon: MessageCircle,
+    rules: ["DEFAULT"],
+  },
+]
 
 export const menusFooter = {
   title: "Sair",
   url: "/auth/logout",
   icon: LogOut,
-};
+}
