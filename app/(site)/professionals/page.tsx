@@ -11,7 +11,7 @@ import { useProfessionalsFetcher } from "@/hooks/useProfissionals"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
 import { Button } from "@components/ui/button"
 
-const PAGE_SIZE_OPTIONS = [6, 10, 20]
+const PAGE_SIZE_OPTIONS = [6, 12, 18, 24]
 
 const FindTherapist = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("")
