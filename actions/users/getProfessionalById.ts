@@ -1,5 +1,5 @@
-"use server";
-import { prisma } from "@/lib/db";
+"use server"
+import { prisma } from "@/lib/db"
 
 export const getProfessioanlById = async (id: string): Promise<any> => {
   const user = await prisma.user.findUnique({
@@ -13,16 +13,15 @@ export const getProfessioanlById = async (id: string): Promise<any> => {
       isTwoFactorAuthEnabled: true,
       twoFactorAuthVerified: true,
     },
-  });
+  })
   if (!user) {
-    return { error: "Usuário não encontrado" };
+    return { error: "Usuário não encontrado" }
   }
-  const { Professional, ...restUser } = user;
+  const { Professional, ...restUser } = user
   // Pega o primeiro professional, caso exista
-  const professionalData = Professional ?? {};
-
+  const professionalData = Professional ?? {}
   return {
     ...restUser,
     ...professionalData,
-  };
-};
+  }
+}

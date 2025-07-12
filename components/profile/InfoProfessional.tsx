@@ -1,27 +1,20 @@
-import React from "react";
-import { GraduationCap } from "lucide-react";
-import { useFormContext } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
-import { ProfessionalModel } from "@/domain/model/professional";
-import { especialidades } from "@/utils/constants";
+import React from "react"
+import { GraduationCap } from "lucide-react"
+import { useFormContext } from "react-hook-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
+import { ProfessionalModel } from "@/domain/model/professional"
+import { especialidades } from "@/utils/constants"
 
 type Props = {
-  profile: ProfessionalModel;
-};
+  profile: ProfessionalModel
+}
 
 export const ProfessionalInfoForm = ({ profile }: Props) => {
-  const { control } = useFormContext<ProfileFormValues>();
+  const { control } = useFormContext<ProfileFormValues>()
 
   return (
     <Card className="therapy-card">
@@ -30,30 +23,41 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
           <GraduationCap className="h-5 w-5 text-therapy-tertiary" />
           <CardTitle>Dados Profissionais</CardTitle>
         </div>
-        <CardDescription>
-          Informações sobre sua formação, especialidades e experiência
-        </CardDescription>
+        <CardDescription>Informações sobre sua formação, especialidades e experiência</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField
-            control={control}
-            name="numConselho"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CRP (Registro Profissional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="CRP SP/12345"
-                    {...field}
-                    value={`${control._formValues.ufConselho}/${control._formValues.numConselho}`}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Campo CRP (UF + Número) em uma linha */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={control}
+              name="ufConselho"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>UF</FormLabel>
+                  <FormControl>
+                    <Input placeholder="SP" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="numConselho"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Registro Profissional</FormLabel>
+                  <FormControl>
+                    <Input placeholder="12345" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
+          {/* Formação Acadêmica */}
           <FormField
             control={control}
             name="education"
@@ -68,6 +72,7 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
             )}
           />
 
+          {/* Anos de Experiência */}
           <FormField
             control={control}
             name="experiencia"
@@ -96,24 +101,19 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
             <FormItem>
               <div className="mb-4">
                 <FormLabel className="text-base">Especialidades</FormLabel>
-                <FormDescription>
-                  Selecione todas as suas especialidades e abordagens
-                </FormDescription>
+                <FormDescription>Selecione todas as suas especialidades e abordagens</FormDescription>
               </div>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                 {especialidades.map((specialty) => (
-                  <FormItem
-                    key={specialty}
-                    className="flex flex-row items-start space-x-3 space-y-0"
-                  >
+                  <FormItem key={specialty} className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox
                         checked={(field.value ?? []).includes(specialty)}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            field.onChange([...(field.value ?? []), specialty]);
+                            field.onChange([...(field.value ?? []), specialty])
                           } else {
-                            field.onChange((field.value ?? []).filter((v) => v !== specialty));
+                            field.onChange((field.value ?? []).filter((v) => v !== specialty))
                           }
                         }}
                       />
@@ -128,5 +128,5 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
         />
       </CardContent>
     </Card>
-  );
-};
+  )
+}
