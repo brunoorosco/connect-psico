@@ -11,8 +11,7 @@ export const useUserPagination = () => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<"name" | "email" | "createdAt">("name");
   const [loading, setLoading] = useState(false);
-
-  const limit = 10;
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     const fetch = async () => {
@@ -28,7 +27,7 @@ export const useUserPagination = () => {
     };
 
     fetch();
-  }, [page, search, order, orderBy]);
+  }, [page, search, order, orderBy, limit]);
 
  const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -44,6 +43,7 @@ export const useUserPagination = () => {
     orderBy,
     setOrderBy,
     setPage,
+     setLimit, 
     totalPages,
     loading,
   };

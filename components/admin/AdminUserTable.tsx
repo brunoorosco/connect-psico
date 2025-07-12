@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useUserPagination } from "@/hooks/useUserPagination"; // Pega dados do backend
 import PaginationControls from "@/components/PaginationControls";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 const AdminUserTable = () => {
   const { toast } = useToast();
@@ -28,7 +29,9 @@ const AdminUserTable = () => {
     totalPages,
     loading,
     orderBy,
+    limit,
     setOrderBy,
+    setLimit,
   } = useUserPagination();
 
   const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
@@ -71,6 +74,22 @@ const AdminUserTable = () => {
               setPage(1);
             }}
           />
+          <Select
+            value={limit.toString()}
+            onValueChange={(value) => {
+              setLimit(Number(value));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Itens por página" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 por página</SelectItem>
+              <SelectItem value="10">10 por página</SelectItem>
+              <SelectItem value="25">25 por página</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
