@@ -20,7 +20,7 @@ const KpiCards = () => {
               title="Total de Pacientes"
               value={totalPatients || 0}
               icon={Users}
-              description="+12% em relação ao mês anterior"
+              // description="+8% em relação ao mês anterior"
               trend="up"
             />
           )}
@@ -30,7 +30,7 @@ const KpiCards = () => {
           title="Consultas Realizadas"
           value={0}
           icon={CheckCircle}
-          description="+8% em relação ao mês anterior"
+          // description="+8% em relação ao mês anterior"
           trend="up"
         />
         <StatsCard
@@ -66,14 +66,14 @@ const KpiCards = () => {
           title="Atendimento Remoto"
           value={0}
           icon={Monitor}
-          description={`${Math.round((40 / 100) * 100)}% do total`}
+          description={`${Math.round((0 / 100) * 100)}% do total`}
         />
 
         <StatsCard
           title="Atendimento Presencial"
           value={0}
           icon={Clock}
-          description={`${Math.round((60 / 100) * 100)}% do total`}
+          description={`${Math.round((0 / 100) * 100)}% do total`}
         />
       </div>
     </>
