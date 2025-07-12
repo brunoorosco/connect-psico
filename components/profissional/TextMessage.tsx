@@ -15,6 +15,7 @@ interface ProfessionalProps {
 export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
   const [message, setMessage] = useState("");
   const { data: session, status } = useSession();
+  console.log("professional", professional);
 
   const handleSendMessage = () => {
     if (!message || message.trim() === "" || !professional) return;
@@ -22,7 +23,8 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
     startTransition(async () => {
       const result = await createMessage({
         senderId: session?.user.id as string, // <-- Substitua pelo ID do usuário logado
-        receiverId: professional.id, // <-- ID do profissional destino
+        //@ts-ignore
+        receiverId: professional.userId, // <-- ID do profissional destino
         content: message.trim(),
       });
       if (result.error) {
