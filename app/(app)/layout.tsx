@@ -20,7 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <AppSidebar />
         <div className="flex-1">
           <Navbar />
-          <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-6 py-2">{children}</main>
+          <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-6">{children}</main>
         </div>
       </SidebarProvider>
     </div>
