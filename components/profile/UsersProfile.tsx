@@ -1,28 +1,41 @@
-"use client";
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import {
-  defaultProfileValues,
-  ProfileFormValues,
-  profileSchema,
-} from "@/schemas/PsicologoProfileSchema";
-import useSWR from "swr";
-import { getUserById } from "@/actions/users";
-import { UserInfoForm } from "./InfoPersonalDefault";
-import { useParams } from "next/navigation";
+import React, { useEffect, useRef } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
+import useSWR from "swr"
+
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { defaultProfileValues } from "@/schemas/PsicologoProfileSchema"
+import { getUserById, updateUserProfile } from "@/actions/users"
+import { useRouter, useParams } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@components/ui"
+import { UploadCloud, User } from "lucide-react"
+import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage"
+import { TUser, userSchemaProfile } from "@/domain/model/user"
+import { useSession } from "next-auth/react"
+import { ProfileSkeleton } from "./ProfileUserSkeleton"
 
 const UserProfileForm: React.FC = () => {
-  const { id } = useParams() as { id: string };
+  const { id } = useParams() as { id: string }
+  const { data: session } = useSession()
+  const router = useRouter()
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+  useEffect(() => {
+    if (session && id !== String(session.user.id)) {
+      toast.error("Você não tem permissão para acessar essa página.")
+      router.push("/")
+    }
+  }, [session, id, router])
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const form = useForm<TUser>({
+    resolver: zodResolver(userSchemaProfile),
     defaultValues: defaultProfileValues,
-  });
+  })
+  const { control } = form
 
   const {
     data: user,
@@ -30,24 +43,33 @@ const UserProfileForm: React.FC = () => {
     isLoading,
   } = useSWR(id ? `/user/${id}` : null, () => getUserById(id), {
     revalidateOnFocus: false,
-  });
+  })
 
   useEffect(() => {
     if (user) {
       form.reset({
         name: user.name ?? "",
         email: user.email ?? "",
-        phone: user.phone ?? "",
-        profilePhoto: user.image ?? "",
-      });
+        telefone: user.phone ?? "",
+        image: user.image ?? "",
+      })
     }
-  }, [user, form]);
+  }, [user, form])
 
-  function onSubmit(data: ProfileFormValues) {
-    console.log(data);
-    toast.success("Perfil atualizado com sucesso!", {
-      description: "Suas informações foram salvas.",
-    });
+  const onSubmit = async (data: TUser) => {
+    try {
+      const result = await updateUserProfile(id, data)
+      toast.success(result.success, {
+        description: "Suas informações foram salvas.",
+      })
+    } catch (error) {
+      console.error("Erro ao enviar os dados:", error)
+      toast.error("Erro ao atualizar o perfil. Por favor, tente novamente.")
+    }
+  }
+
+  if (isLoading || status === "loading") {
+    return <ProfileSkeleton />
   }
 
   return (
@@ -57,7 +79,108 @@ const UserProfileForm: React.FC = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <UserInfoForm profile={user} />
+          <Card className="therapy-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5 text-therapy-tertiary" />
+                <CardTitle>Dados Pessoais</CardTitle>
+              </div>
+              <CardDescription>Informações básicas sobre você que serão exibidas no seu perfil</CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome completo</FormLabel>
+                        <FormControl>
+                          <Input placeholder="João Silva" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-4">
+                    <div className="w-3/4">
+                      <FormField
+                        control={control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="seu.email@exemplo.com" {...field} disabled />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={control}
+                      name="telefone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(11) 99999-9999" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={control}
+                    name="image"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foto de perfil</FormLabel>
+                        <FormControl>
+                          <div>
+                            <label
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-32 h-32 rounded-full border flex items-center justify-center cursor-pointer hover:opacity-80 transition"
+                            >
+                              {field.value ? (
+                                <img src={field.value} alt="Preview" className="w-32 h-32 object-cover rounded-full" />
+                              ) : (
+                                <UploadCloud className="w-10 h-10 text-gray-400" />
+                              )}
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              ref={fileInputRef}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (file && user?.id) {
+                                  const url = await uploadImageToCloudinary(file, user.id)
+                                  field.onChange(url)
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="flex justify-end gap-4">
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
@@ -69,7 +192,7 @@ const UserProfileForm: React.FC = () => {
         </form>
       </Form>
     </div>
-  );
-};
+  )
+}
 
-export default UserProfileForm;
+export default UserProfileForm

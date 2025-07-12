@@ -1,8 +1,20 @@
 import React, { useRef } from "react";
 import { UploadCloud, User } from "lucide-react";
-import { useFormContext } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { UseFormReturn } from "react-hook-form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
 import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage";
@@ -10,11 +22,13 @@ import { User as UserModel } from "@/domain/model/user";
 
 type Props = {
   profile: UserModel;
+  form: UseFormReturn<ProfileFormValues>;
 };
 
-export const UserInfoForm = ({ profile }: Props) => {
-  const { control } = useFormContext<ProfileFormValues>();
+export const UserInfoForm = ({ profile, form }: Props) => {
+  const { control } = form;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   return (
     <Card className="therapy-card">
       <CardHeader>
@@ -26,6 +40,7 @@ export const UserInfoForm = ({ profile }: Props) => {
           Informações básicas sobre você que serão exibidas no seu perfil
         </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-2">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-4">
@@ -42,6 +57,7 @@ export const UserInfoForm = ({ profile }: Props) => {
                 </FormItem>
               )}
             />
+
             <div className="flex gap-4">
               <div className="w-3/4">
                 <FormField
@@ -51,7 +67,11 @@ export const UserInfoForm = ({ profile }: Props) => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="seu.email@exemplo.com" {...field} disabled />
+                        <Input
+                          placeholder="seu.email@exemplo.com"
+                          {...field}
+                          disabled
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -74,23 +94,24 @@ export const UserInfoForm = ({ profile }: Props) => {
               />
             </div>
           </div>
-          <div className="flex flex-col items-center ">
+
+          <div className="flex flex-col items-center">
             <FormField
               control={control}
               name="profilePhoto"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="">Foto de perfil</FormLabel>
+                  <FormLabel>Foto de perfil</FormLabel>
                   <FormControl>
                     <div>
                       <label
                         onClick={() => fileInputRef.current?.click()}
                         className="w-32 h-32 rounded-full border flex items-center justify-center cursor-pointer hover:opacity-80 transition"
                       >
-                        {typeof field.value === "string" && field.value ? (
+                        {field.value ? (
                           <img
                             src={field.value}
-                            alt="Preview da imagem"
+                            alt="Preview"
                             className="w-32 h-32 object-cover rounded-full"
                           />
                         ) : (
@@ -104,8 +125,11 @@ export const UserInfoForm = ({ profile }: Props) => {
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const url = await uploadImageToCloudinary(file, profile.id as string);
-                            field.onChange(url); // ✅ Agora sim, salva no form uma URL pública
+                            const url = await uploadImageToCloudinary(
+                              file,
+                              profile.id as string
+                            );
+                            field.onChange(url);
                           }
                         }}
                         className="hidden"
