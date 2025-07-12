@@ -15,6 +15,7 @@ export async function getProfessionalUsers({ page = 1, limit = 10, specialty }: 
     active: true,
     Professional: {
       isProfileCompleted: true,
+      visivel: true,
     },
   };
 

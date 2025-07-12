@@ -19,9 +19,6 @@ const FindTherapist = () => {
   const [page, setPage] = useState<number>(1)
   const [limit, setLimit] = useState<number>(6)
 
-  const navigate = useRouter()
-  const { data: session, status } = useSession()
-
   const { professionals, total, loading, fetchProfessionals } = useProfessionalsFetcher()
 
   useEffect(() => {
