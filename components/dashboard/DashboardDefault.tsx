@@ -64,7 +64,7 @@ const PatientDashboard: React.FC = () => {
     .filter((app: AppointmentModel) => app.status === "PENDING");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 mt-4">
       <DashboardHeader
         title="Meu Acompanhamento"
         subtitle="Histórico e agenda de consultas"
@@ -154,7 +154,7 @@ const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Seu Progresso</h2>
           <Card className="therapy-card">
             <CardHeader className="pb-2">
@@ -177,7 +177,7 @@ const PatientDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
