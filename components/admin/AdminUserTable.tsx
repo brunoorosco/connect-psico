@@ -1,5 +1,5 @@
-import { useState, useEffect, startTransition } from "react";
-import { Loader2, Ban, Shield, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Ban, Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Table,
@@ -10,61 +10,44 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ProfessionalModel } from "@/domain/model/professional";
+import { useUserPagination } from "@/hooks/useUserPagination";
+import { AdminTableLayout } from "./AdminTableLayout";
 
-type Props = {
-  professional: ProfessionalModel[];
-};
-
-const AdminUserTable = ({ professional }: Props) => {
+const AdminUserTable = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    users,
+    search,
+    setSearch,
+    order,
+    setOrder,
+    page,
+    setPage,
+    totalPages,
+    loading,
+    orderBy,
+    limit,
+    setOrderBy,
+    setLimit,
+  } = useUserPagination();
+
   const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   const toggleUserBlock = async (userId: string, currentBlockStatus: boolean) => {
     setProcessingUsers((prev) => ({ ...prev, [userId]: true }));
-
     try {
-      // Mock toggle action for now
-      setUsers(
-        users.map((user) =>
-          user.id === userId ? { ...user, is_blocked: !currentBlockStatus } : user
-        )
-      );
-
       toast({
         title: "Usuário atualizado",
         description: `Usuário ${!currentBlockStatus ? "bloqueado" : "desbloqueado"} com sucesso!`,
       });
-
-      // Commented out actual implementation until database is set up
-      /*
-      const { error } = await supabase.rpc("toggle_user_block_status", {
-        target_user_id: userId,
-        block_status: !currentBlockStatus
-      });
-
-      if (error) throw error;
-
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, is_blocked: !currentBlockStatus } 
-          : user
-      ));
-
-      toast({
-        title: "Usuário atualizado",
-        description: `Usuário ${!currentBlockStatus ? "bloqueado" : "desbloqueado"} com sucesso!`,
-      });
-      */
     } catch (error) {
-      console.error("Error toggling user block status:", error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o status do usuário",
@@ -75,107 +58,161 @@ const AdminUserTable = ({ professional }: Props) => {
     }
   };
 
-  // Filter users based on search query
-
-  const filteredUsers =
-    professional.length > 0 &&
-    professional.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()));
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Gerenciar Usuários</h2>
-        <div className="w-1/3">
-          <Input
-            placeholder="Buscar por email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
-          />
-        </div>
+    <AdminTableLayout
+      title="Gerenciar Permissões"
+      search={search}
+      setSearch={setSearch}
+      searchPlaceholder="Buscar por nome e email..."
+      limit={limit}
+      setLimit={setLimit}
+      page={page}
+      setPage={setPage}
+      totalPages={totalPages}
+      loading={loading}
+    >
+      {/* Tabela - visível apenas em telas maiores */}
+      <div className="hidden sm:block rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead
+                className="cursor-pointer select-none"
+                onClick={() => {
+                  setOrderBy("name");
+                  setOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+                  setPage(1);
+                }}
+              >
+                Nome {orderBy === "name" && (order === "asc" ? "↑" : "↓")}
+              </TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Data</TableHead>
+              <TableHead>Permissões</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{new Date(user.createdAt).toLocaleDateString("pt-BR")}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      user.role === "ADMIN"
+                        ? "destructive"
+                        : user.role === "SUPERVISOR"
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
+                    {user.role === "ADMIN"
+                      ? "Admin"
+                      : user.role === "SUPERVISOR"
+                      ? "Supervisor"
+                      : "Usuário"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={user.active ? "default" : "destructive"}
+                    className={user.active ? "bg-green-600" : ""}
+                  >
+                    {user.active ? "Ativo" : "Bloqueado"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant={user.active ? "outline" : "destructive"}
+                    size="sm"
+                    onClick={() => toggleUserBlock(user.id, user.active)}
+                    disabled={processingUsers[user.id]}
+                  >
+                    {processingUsers[user.id] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : user.active ? (
+                      <>
+                        <Check className="mr-1 h-4 w-4" /> Bloquear
+                      </>
+                    ) : (
+                      <>
+                        <Ban className="mr-1 h-4 w-4" /> Desbloquear
+                      </>
+                    )}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
-      {!filteredUsers ? (
-        <div className="flex justify-center my-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Data de Cadastro</TableHead>
-                <TableHead>Permissões</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers ? (
-                filteredUsers?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {/* {user.roles.map((role: any) => (
-                          <Badge
-                            key={role}
-                            variant={role === "admin" ? "destructive" : "secondary"}
-                          >
-                            {role === "admin"
-                              ? "Admin"
-                              : role === "supervisor"
-                              ? "Supervisor"
-                              : "Usuário"}
-                          </Badge>
-                        ))} */}
-                        {/* {user.roles.length === 0 && <Badge variant="outline">Usuário</Badge>} */}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.active ? "default" : "destructive"}
-                        className={user.active ? "bg-green-600" : ""}
-                      >
-                        {user.active ? "Ativo" : "Bloqueado"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant={user.active ? "outline" : "destructive"}
-                        size="sm"
-                        onClick={() => toggleUserBlock(user.id, user.active)}
-                        disabled={processingUsers[user.id]}
-                      >
-                        {processingUsers[user.id] ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : user.active ? (
-                          <>
-                            <Check className="mr-1 h-4 w-4" /> Bloquear
-                          </>
-                        ) : (
-                          <>
-                            <Ban className="mr-1 h-4 w-4" /> Desbloquear
-                          </>
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+      {/* Mobile layout - cards */}
+      <div className="sm:hidden space-y-4">
+        {users.map((user) => (
+          <div
+            key={user.id}
+            className="border rounded-lg p-4 shadow-sm space-y-2 bg-white dark:bg-zinc-900"
+          >
+            <div>
+              <p className="text-sm font-semibold">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <p className="text-xs text-muted-foreground">
+                Criado em {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant={
+                  user.role === "ADMIN"
+                    ? "destructive"
+                    : user.role === "SUPERVISOR"
+                    ? "secondary"
+                    : "outline"
+                }
+              >
+                {user.role === "ADMIN"
+                  ? "Admin"
+                  : user.role === "SUPERVISOR"
+                  ? "Supervisor"
+                  : "Usuário"}
+              </Badge>
+
+              <Badge
+                variant={user.active ? "default" : "destructive"}
+                className={user.active ? "bg-green-600" : ""}
+              >
+                {user.active ? "Ativo" : "Bloqueado"}
+              </Badge>
+            </div>
+
+            <Button
+              variant={user.active ? "outline" : "destructive"}
+              size="sm"
+              className="w-full"
+              onClick={() => toggleUserBlock(user.id, user.active)}
+              disabled={processingUsers[user.id]}
+            >
+              {processingUsers[user.id] ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : user.active ? (
+                <>
+                  <Check className="mr-1 h-4 w-4" /> Bloquear
+                </>
               ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    Nenhum usuário encontrado.
-                  </TableCell>
-                </TableRow>
+                <>
+                  <Ban className="mr-1 h-4 w-4" /> Desbloquear
+                </>
               )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
+            </Button>
+          </div>
+        ))}
+      </div>
+    </AdminTableLayout>
   );
 };
 
