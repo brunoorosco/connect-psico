@@ -54,51 +54,53 @@ const FindTherapist = () => {
         </div>
 
         {/* Paginação e seleção limit */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="pageSize" className="font-medium">
-              Itens por página:
-            </label>
-            <Select
-              value={limit.toString()}
-              onValueChange={(val) => {
-                setLimit(Number(val));
-                setPage(1);
-              }}
-            >
-              <SelectTrigger id="pageSize" className="w-[80px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAGE_SIZE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt.toString()}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+            <div className="flex items-center gap-2">
+              <label htmlFor="pageSize" className="font-medium">
+                Itens por página:
+              </label>
+              <Select
+                value={limit.toString()}
+                onValueChange={(val) => {
+                  setLimit(Number(val));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger id="pageSize" className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt.toString()}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              disabled={page === 1 || loading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Anterior
-            </Button>
-            <span>
-              Página {page} de {totalPages || 1}
-            </span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages || loading}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Próxima
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page === 1 || loading}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Anterior
+              </Button>
+              <span>
+                Página {page} de {totalPages || 1}
+              </span>
+              <Button
+                variant="outline"
+                disabled={page === totalPages || loading}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Próxima
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {loading ? (
