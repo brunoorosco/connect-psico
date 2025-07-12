@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminUserTable from "@/components/admin/AdminUserTable";
-import AdminRoleManagement from "@components/admin/AdminRoleManagement_1";
+import AdminRoleManagement from "@components/admin/AdminRoleManagement";
 
 const AdminPanel = () => {
   return (
@@ -22,9 +22,7 @@ const AdminPanel = () => {
               <TabsTrigger value="roles" className="px-4 py-2 text-sm sm:text-base">
                 Gerenciar Permissões
               </TabsTrigger>
-              <TabsTrigger value="payments" className="px-4 py-2 text-sm sm:text-base">
-                Status de Pagamentos
-              </TabsTrigger>
+             
             </TabsList>
           </div>
 

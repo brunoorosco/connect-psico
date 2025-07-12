@@ -1,26 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, Shield, ShieldX } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useUserPagination } from "@/hooks/useUserPagination";
 import { AdminTableLayout } from "./AdminTableLayout";
 import { Button } from "@components/ui/button";
-import { User } from "@/domain/model/user";
 
 const AdminRoleManagement = () => {
   const { toast } = useToast();
-  const {
-    users,
-    search,
-    setSearch,
-    page,
-    setPage,
-    totalPages,
-    loading,
-    limit,
-    setLimit,
-  } = useUserPagination();
+  const { users, search, setSearch, page, setPage, totalPages, loading, limit, setLimit } =
+    useUserPagination();
 
   const [processingUsers, setProcessingUsers] = useState<Record<string, string>>({});
 
@@ -91,7 +88,9 @@ const AdminRoleManagement = () => {
                   <Button
                     variant={user.role === "SUPERVISOR" ? "destructive" : "outline"}
                     size="sm"
-                    onClick={() => updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")}
+                    onClick={() =>
+                      updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")
+                    }
                     disabled={!!processingUsers[user.id + "SUPERVISOR"]}
                   >
                     {processingUsers[user.id + "SUPERVISOR"] ? (
