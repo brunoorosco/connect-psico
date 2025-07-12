@@ -4,45 +4,52 @@ import { prisma } from "@/lib/db";
 interface PaginationParams {
   page?: number;
   limit?: number;
+  specialty?: string;
 }
 
-export async function getProfessionalUsers({ page = 1, limit = 10 }: PaginationParams) {
+export async function getProfessionalUsers({ page = 1, limit = 10, specialty }: PaginationParams) {
   const skip = (page - 1) * limit;
+
+  const where: any = {
+    role: "SUPERVISOR",
+    active: true,
+    Professional: {
+      isProfileCompleted: true,
+    },
+  };
+
+  if (specialty && specialty!=='none') {
+    // Assumindo que Professional possui campo 'especialidade' do tipo string ou array de strings
+    // Ajuste se for diferente (ex: array, JSON, etc)
+    where.Professional.especialidade = {
+      has: specialty,
+    };
+  }
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({
-      where: {
-        role: "SUPERVISOR",
-        active: true,
-        Professional: {
-          isProfileCompleted: true,
-        },
-      },
+      where,
       skip,
       take: limit,
       include: {
-        Professional: { omit: { id: true } },
-      },
-      omit: {
-        password: true,
-        isTwoFactorAuthEnabled: true,
-        twoFactorAuthVerified: true,
-        emailVerified: true,
+        Professional: true,
       },
     }),
-    prisma.user.count({
-      where: {
-        role: "SUPERVISOR",
-        Professional: {
-          isProfileCompleted: true,
-        },
-      },
-    }),
+    prisma.user.count({ where }),
   ]);
-  const mappedUsers = users.map((user) => {
-    const { Professional, ...restUser } = user;
 
-    // Pega o primeiro professional, caso exista
+  // Remove campos sensíveis manualmente, cria objeto final
+  const mappedUsers = users.map((user) => {
+    const {
+      password,
+      isTwoFactorAuthEnabled,
+      twoFactorAuthVerified,
+      emailVerified,
+      Professional,
+      ...restUser
+    } = user;
+
+    // Caso Professional seja undefined, garantir objeto vazio
     const professionalData = Professional ?? {};
 
     return {

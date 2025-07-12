@@ -1,4 +1,3 @@
-
 import {
   Select,
   SelectContent,
@@ -12,10 +11,7 @@ interface TherapistFilterProps {
   onSpecialtyChange: (value: string) => void;
 }
 
-export const TherapistFilter = ({
-  selectedSpecialty,
-  onSpecialtyChange,
-}: TherapistFilterProps) => {
+export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: TherapistFilterProps) => {
   const specialties = [
     "Terapia Cognitivo-Comportamental",
     "Psicanálise",
@@ -30,6 +26,9 @@ export const TherapistFilter = ({
           <SelectValue placeholder="Filtrar por especialidade" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem key={"none"} value="none">
+            Nenhuma
+          </SelectItem>
           {specialties.map((specialty) => (
             <SelectItem key={specialty} value={specialty}>
               {specialty}

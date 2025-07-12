@@ -5,23 +5,35 @@ import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessi
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
 import { getProfessioanlById } from "@/actions/users/getProfessionalById";
 import { ProfessionalModel } from "@/domain/model/professional";
-import { useState, useTransition } from "react";
+import { Professional } from "@/types/appointment";
+import { useCallback, useState, useTransition } from "react";
 import useSWR from 'swr';
 
 
 export function useProfessionalsFetcher() {
-  const [professionals, setProfessionals] = useState<any>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, startTransition] = useTransition();
 
-  const fetchProfessionals = async (page = 1, limit = 10) => {
-    startTransition(async () => {
-      const res = await getProfessionalUsers({ page, limit });
-      setProfessionals(res);
-      setTotal(res.total);
-    });
-  };
-  return { professionals: professionals.data, total, loading, fetchProfessionals };
+  const fetchProfessionals = useCallback(
+    (page = 1, limit = 10, specialty?: string) => {
+      startTransition(async () => {
+        try {
+          const res = await getProfessionalUsers({ page, limit, specialty });
+          //@ts-ignore
+          setProfessionals(res.data);
+          setTotal(res.total);
+        } catch (error) {
+          console.error("Erro ao buscar profissionais:", error);
+          setProfessionals([]);
+          setTotal(0);
+        }
+      });
+    },
+    []
+  );
+
+  return { professionals, total, loading, fetchProfessionals };
 }
 
 export function useProfessionalsAvaliabilitiesFetcher() {
