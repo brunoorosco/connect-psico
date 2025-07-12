@@ -1,30 +1,12 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { especialidades } from "@/utils/constants"
 
 interface TherapistFilterProps {
-  selectedSpecialty: string;
-  onSpecialtyChange: (value: string) => void;
+  selectedSpecialty: string
+  onSpecialtyChange: (value: string) => void
 }
 
 export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: TherapistFilterProps) => {
-  const specialties = [
- "Neuropsicologia",
-  "Psicanálise",
-  "Psicologia do Esporte",
-  "Psicologia Educacional",
-  "Psicologia Humanista",
-  "Psicologia Infantil",
-  "Psicologia Organizacional",
-  "Terapia Cognitivo-Comportamental",
-  "Terapia de Casal",
-  "Terapia Familiar",
-  ];
-
   return (
     <div className="flex items-center gap-4">
       <Select value={selectedSpecialty} onValueChange={onSpecialtyChange}>
@@ -35,7 +17,7 @@ export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: Therap
           <SelectItem key={"none"} value="none">
             Nenhuma
           </SelectItem>
-          {specialties.map((specialty) => (
+          {especialidades.map((specialty) => (
             <SelectItem key={specialty} value={specialty}>
               {specialty}
             </SelectItem>
@@ -43,5 +25,5 @@ export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: Therap
         </SelectContent>
       </Select>
     </div>
-  );
-};
+  )
+}

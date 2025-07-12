@@ -1,37 +1,37 @@
-"use client";
+"use client"
 
-import { Calendar } from "@/components/ui/calendar";
-import { TabsContent } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { useSession } from "next-auth/react";
-import { useState, useCallback } from "react";
-import { ptBR } from "date-fns/locale";
-import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar"
+import { TabsContent } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
+import { useSession } from "next-auth/react"
+import { useState, useCallback } from "react"
+import { ptBR } from "date-fns/locale"
+import { format } from "date-fns"
 
-import { useAvailableSlots } from "./useAvailableSlots";
-import { AvailableSlots } from "./AvailableSlots";
-import { ScheduleButton } from "./ScheduleButton";
-import { ICalendarProfessional } from "./types";
+import { useAvailableSlots } from "./useAvailableSlots"
+import { AvailableSlots } from "./AvailableSlots"
+import { ScheduleButton } from "./ScheduleButton"
+import { ICalendarProfessional } from "./types"
 
 export const CalendarProfessional = ({ professionalData }: ICalendarProfessional) => {
-  const { data: session, status } = useSession();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null);
+  const { data: session, status } = useSession()
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null)
 
   const { availableSlots, availableDatesSet, isLoading, error, mutate } = useAvailableSlots(
     professionalData.id,
     selectedDate
-  );
+  )
 
   const isDayDisabled = useCallback(
     (date: Date) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const dateStr = format(date, "yyyy-MM-dd");
-      return date < today || !availableDatesSet.has(dateStr);
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const dateStr = format(date, "yyyy-MM-dd")
+      return date < today || !availableDatesSet.has(dateStr)
     },
     [availableDatesSet]
-  );
+  )
 
   return (
     <TabsContent value="schedule" className="pt-4">
@@ -43,8 +43,8 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
             selected={selectedDate}
             onSelect={(date) => {
               if (date) {
-                setSelectedDate(date);
-                setSelectedSlot(null);
+                setSelectedDate(date)
+                setSelectedSlot(null)
               }
             }}
             locale={ptBR}
@@ -60,13 +60,15 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
               <p className="text-muted-foreground col-span-3">Carregando horários...</p>
             ) : error ? (
               <p className="text-muted-foreground col-span-3">Erro ao carregar agenda.</p>
-            ) : (
+            ) : availableSlots && availableSlots.length > 0 ? (
               <AvailableSlots
                 availableSlots={availableSlots}
                 selectedDate={selectedDate}
                 selectedSlot={selectedSlot}
                 onSelectSlot={setSelectedSlot}
               />
+            ) : (
+              <p className="text-muted-foreground col-span-3">Nenhum horário disponível para este dia.</p>
             )}
           </div>
 
@@ -81,5 +83,5 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
         </div>
       </div>
     </TabsContent>
-  );
-};
+  )
+}

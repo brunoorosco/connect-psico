@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { especialidades, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
+import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
 import { ProfessionalModel } from "@/domain/model/professional";
+import { especialidades } from "@/utils/constants";
 
 type Props = {
   profile: ProfessionalModel;
@@ -45,7 +46,6 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
                   <Input
                     placeholder="CRP SP/12345"
                     {...field}
-                    disabled
                     value={`${control._formValues.ufConselho}/${control._formValues.numConselho}`}
                   />
                 </FormControl>
@@ -100,7 +100,7 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
                   Selecione todas as suas especialidades e abordagens
                 </FormDescription>
               </div>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                 {especialidades.map((specialty) => (
                   <FormItem
                     key={specialty}

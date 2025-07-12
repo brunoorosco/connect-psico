@@ -22,3 +22,27 @@ export const months = [
   { value: 10, label: "Novembro" },
   { value: 11, label: "Dezembro" },
 ];
+
+export const especialidades = [
+  "Terapia Cognitivo-Comportamental",
+  "Psicanálise",
+  "Psicologia Humanista",
+  "Terapia Familiar",
+  "Terapia de Casal",
+  "Neuropsicologia",
+  "Psicologia Infantil",
+  "Psicologia do Esporte",
+  "Psicologia Organizacional",
+  "Psicologia Educacional",
+  "Psicologia do Adolescente",
+  "Psicologia do Envelhecimento / Psicogerontologia",
+  "Psicologia Perinatal",
+  "Psicologia LGBTQIAPN+ Afirmativa",
+  "Psicologia Escolar / Psicopedagogia",
+  "Psicologia Clínica",
+  "Psicologia Comunitária",
+  "Psicologia Social",
+  "Psicologia da Saúde",
+  "Psicologia do Trânsito",
+  "Psicologia do Trabalho"
+]

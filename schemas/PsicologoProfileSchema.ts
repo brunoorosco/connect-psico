@@ -1,10 +1,10 @@
-import * as z from "zod";
+import * as z from "zod"
 
 // Define a schema for time intervals
 const timeIntervalSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
-});
+})
 
 export const profileSchema = z.object({
   name: z.string().min(3, { message: "Nome é obrigatório" }),
@@ -30,11 +30,12 @@ export const profileSchema = z.object({
   // Changed from a single interval to an array of intervals
   availableHours: z
     .array(timeIntervalSchema)
-    .min(1, { message: "Adicione pelo menos um intervalo de horário" }).optional(),
-});
+    .min(1, { message: "Adicione pelo menos um intervalo de horário" })
+    .optional(),
+})
 
-export type ProfileFormValues = z.infer<typeof profileSchema>;
-export type TimeInterval = z.infer<typeof timeIntervalSchema>;
+export type ProfileFormValues = z.infer<typeof profileSchema>
+export type TimeInterval = z.infer<typeof timeIntervalSchema>
 
 export const defaultProfileValues: Partial<ProfileFormValues> = {
   name: "",
@@ -47,7 +48,7 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
   profilePhoto: "",
   especialidade: [],
   education: "",
-  isProfileCompleted:false,
+  isProfileCompleted: false,
   experiencia: 0,
   tempoConsulta: 50,
   valorAtendimento: 150,
@@ -64,30 +65,9 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
     },
   ],
   publicoAlvo: [],
-};
+}
 
-export const especialidades = [
-  "Terapia Cognitivo-Comportamental",
-  "Psicanálise",
-  "Psicologia Humanista",
-  "Terapia Familiar",
-  "Terapia de Casal",
-  "Neuropsicologia",
-  "Psicologia Infantil",
-  "Psicologia do Esporte",
-  "Psicologia Organizacional",
-  "Psicologia Educacional",
-];
-
-export const publicoAlvo = [
-  "Crianças",
-  "Adolescentes",
-  "Adultos",
-  "Idosos",
-  "Casais",
-  "Famílias",
-  "Empresas",
-];
+export const publicoAlvo = ["Crianças", "Adolescentes", "Adultos", "Idosos", "Casais", "Famílias", "Empresas"]
 
 export const weekdays = [
   { value: "monday", label: "Segunda-feira" },
@@ -97,4 +77,4 @@ export const weekdays = [
   { value: "friday", label: "Sexta-feira" },
   { value: "saturday", label: "Sábado" },
   { value: "sunday", label: "Domingo" },
-];
+]
