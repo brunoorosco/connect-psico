@@ -35,7 +35,7 @@ export function useProfessionalsAvaliabilitiesFetcher() {
   return { disponibilidadeProfissional: professional, loading, fetchProfessional };
 }
 
-export const fetchProfessionalSchedule = async (userId: string, date: Date) => {
+export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
   return await getProfessionalSchedule(userId, date);
 };
 
