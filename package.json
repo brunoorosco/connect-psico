@@ -91,6 +91,7 @@
     "typescript": "^5"
   },
   "prettier": {
-    "printWidth": 100
+    "printWidth": 120,
+    "semi": false
   }
 }

@@ -109,7 +109,7 @@ const PsychologistDashboard: React.FC = () => {
 
         <div className="lg:col-span-6  col-span-12 space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Prontuário</h2>
+            {/* <h2 className="text-xl font-semibold text-gray-800 mb-4">Prontuário</h2> */}
             {/* {currentPatient && <PatientRecord patient={currentPatient} />} */}
           </div>
         </div>

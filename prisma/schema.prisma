@@ -37,7 +37,7 @@ model User {
   patientProfessional      Pacientes[]    @relation("PatientProfessional")
   Session                  Session[]
   Account                  Account[]
-  NotePatient              NotePatient[] @relation("NotePatientProfessional")
+  NotePatient              NotePatient[]  @relation("NotePatientProfessional")
 
   @@index([id])
   @@map("users")
@@ -56,11 +56,13 @@ model Professional {
   bio                String?
   valorAtendimento   Int?          @default(0) @map("valor_atendimento")
   tempoConsulta      Int?          @default(60) @map("tempo_consulta")
+  visivel            Boolean       @default(true) @map("visivel")
   userId             String        @unique
   Comentarios        Comentarios[]
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?     @map("deleted_at")
   isProfileCompleted Boolean       @default(false) @map("is_profile_completed")
   experiencia        Int           @default(0) @map("experiencia")
 
@@ -97,6 +99,7 @@ model Pacientes {
   medicalRecordId  String        @unique @map("prontuario_id")
   professionalId   String        @map("professional_id")
   patientId        String        @map("patient_id")
+  deletedAt        DateTime?     @map("deleted_at")
   cep              String?
   street           String?
   neighborhood     String?
