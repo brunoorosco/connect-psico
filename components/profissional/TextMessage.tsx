@@ -16,9 +16,6 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
   const [message, setMessage] = useState("")
   const { data: session, status } = useSession()
 
-  console.log("Session status:", status)
-  console.log("Session data:", session)
-
   const handleSendMessage = () => {
     if (!message || message.trim() === "" || !professional) return
 
