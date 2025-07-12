@@ -62,6 +62,7 @@ model Professional {
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?     @map("deleted_at")
   isProfileCompleted Boolean       @default(false) @map("is_profile_completed")
   experiencia        Int           @default(0) @map("experiencia")
 
@@ -98,6 +99,7 @@ model Pacientes {
   medicalRecordId  String        @unique @map("prontuario_id")
   professionalId   String        @map("professional_id")
   patientId        String        @map("patient_id")
+  deletedAt        DateTime?     @map("deleted_at")
   cep              String?
   street           String?
   neighborhood     String?

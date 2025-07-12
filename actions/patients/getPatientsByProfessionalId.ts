@@ -9,6 +9,7 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
     const patients = await prisma.pacientes.findMany({
       where: {
         professionalId: session?.user.id,
+        deletedAt: null,
       },
       select: {
         id: true,
