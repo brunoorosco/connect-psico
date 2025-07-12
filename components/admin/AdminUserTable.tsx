@@ -1,5 +1,5 @@
-import { useState, useEffect, startTransition } from "react";
-import { Loader2, Ban, Shield, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Ban, Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Table,
@@ -12,59 +12,42 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ProfessionalModel } from "@/domain/model/professional";
+import { useUserPagination } from "@/hooks/useUserPagination"; // Pega dados do backend
+import PaginationControls from "@/components/PaginationControls";
 
-type Props = {
-  professional: ProfessionalModel[];
-};
-
-const AdminUserTable = ({ professional }: Props) => {
+const AdminUserTable = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    users,
+    search,
+    setSearch,
+    order,
+    setOrder,
+    page,
+    setPage,
+    totalPages,
+    loading,
+    orderBy,
+    setOrderBy,
+  } = useUserPagination();
+
   const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   const toggleUserBlock = async (userId: string, currentBlockStatus: boolean) => {
     setProcessingUsers((prev) => ({ ...prev, [userId]: true }));
-
     try {
-      // Mock toggle action for now
-      setUsers(
-        users.map((user) =>
-          user.id === userId ? { ...user, is_blocked: !currentBlockStatus } : user
-        )
-      );
+      // Ex: await updateUserStatus(userId, !currentBlockStatus);
 
       toast({
         title: "Usuário atualizado",
         description: `Usuário ${!currentBlockStatus ? "bloqueado" : "desbloqueado"} com sucesso!`,
       });
-
-      // Commented out actual implementation until database is set up
-      /*
-      const { error } = await supabase.rpc("toggle_user_block_status", {
-        target_user_id: userId,
-        block_status: !currentBlockStatus
-      });
-
-      if (error) throw error;
-
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, is_blocked: !currentBlockStatus } 
-          : user
-      ));
-
-      toast({
-        title: "Usuário atualizado",
-        description: `Usuário ${!currentBlockStatus ? "bloqueado" : "desbloqueado"} com sucesso!`,
-      });
-      */
     } catch (error) {
-      console.error("Error toggling user block status:", error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o status do usuário",
@@ -75,104 +58,108 @@ const AdminUserTable = ({ professional }: Props) => {
     }
   };
 
-  // Filter users based on search query
-
-  const filteredUsers =
-    professional.length > 0 &&
-    professional.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()));
-
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Gerenciar Usuários</h2>
-        <div className="w-1/3">
+        <div className="flex gap-2 items-center w-2/3">
           <Input
-            placeholder="Buscar por email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
+            placeholder="Buscar por nome e email..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
-      {!filteredUsers ? (
+      {loading ? (
         <div className="flex justify-center my-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : users.length === 0 ? (
+        <div className="text-center py-8">Nenhum usuário encontrado.</div>
       ) : (
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead
+                  className="cursor-pointer select-none"
+                  onClick={() => {
+                    setOrderBy("name");
+                    setOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+                    setPage(1);
+                  }}
+                >
+                  Nome {orderBy === "name" && (order === "asc" ? "↑" : "↓")}
+                </TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Data de Cadastro</TableHead>
+                <TableHead>Data</TableHead>
                 <TableHead>Permissões</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers ? (
-                filteredUsers?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {/* {user.roles.map((role: any) => (
-                          <Badge
-                            key={role}
-                            variant={role === "admin" ? "destructive" : "secondary"}
-                          >
-                            {role === "admin"
-                              ? "Admin"
-                              : role === "supervisor"
-                              ? "Supervisor"
-                              : "Usuário"}
-                          </Badge>
-                        ))} */}
-                        {/* {user.roles.length === 0 && <Badge variant="outline">Usuário</Badge>} */}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.active ? "default" : "destructive"}
-                        className={user.active ? "bg-green-600" : ""}
-                      >
-                        {user.active ? "Ativo" : "Bloqueado"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant={user.active ? "outline" : "destructive"}
-                        size="sm"
-                        onClick={() => toggleUserBlock(user.id, user.active)}
-                        disabled={processingUsers[user.id]}
-                      >
-                        {processingUsers[user.id] ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : user.active ? (
-                          <>
-                            <Check className="mr-1 h-4 w-4" /> Bloquear
-                          </>
-                        ) : (
-                          <>
-                            <Ban className="mr-1 h-4 w-4" /> Desbloquear
-                          </>
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    Nenhum usuário encontrado.
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{new Date(user.createdAt).toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        user.role === "ADMIN"
+                          ? "destructive"
+                          : user.role === "SUPERVISOR"
+                          ? "secondary"
+                          : "outline"
+                      }
+                    >
+                      {user.role === "ADMIN"
+                        ? "Admin"
+                        : user.role === "SUPERVISOR"
+                        ? "Supervisor"
+                        : "Usuário"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={user.active ? "default" : "destructive"}
+                      className={user.active ? "bg-green-600" : ""}
+                    >
+                      {user.active ? "Ativo" : "Bloqueado"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant={user.active ? "outline" : "destructive"}
+                      size="sm"
+                      onClick={() => toggleUserBlock(user.id, user.active)}
+                      disabled={processingUsers[user.id]}
+                    >
+                      {processingUsers[user.id] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : user.active ? (
+                        <>
+                          <Check className="mr-1 h-4 w-4" /> Bloquear
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="mr-1 h-4 w-4" /> Desbloquear
+                        </>
+                      )}
+                    </Button>
                   </TableCell>
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
+          {totalPages > 1 && (
+            <PaginationControls currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          )}
         </div>
       )}
     </div>
