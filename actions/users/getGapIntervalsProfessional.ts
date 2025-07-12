@@ -1,39 +1,39 @@
-"use server";
-import { prisma } from "@/lib/db";
+"use server"
+import { prisma } from "@/lib/db"
 
-type Interval = { start: Date; end: Date };
-const DEFAULT_DURATION_MINUTES = 60; // Duração padrão de 30 minutos para os slots
+type Interval = { start: Date; end: Date }
+const DEFAULT_DURATION_MINUTES = 60 // Duração padrão de 30 minutos para os slots
 
 function getFreeIntervals(availability: Interval, appointments: Interval[]): Interval[] {
-  let freeIntervals: Interval[] = [];
-  let currentStart = availability.start;
+  let freeIntervals: Interval[] = []
+  let currentStart = availability.start
 
   const sortedAppointments = appointments
     .filter((app) => app.end > availability.start && app.start < availability.end)
-    .sort((a, b) => a.start.getTime() - b.start.getTime());
+    .sort((a, b) => a.start.getTime() - b.start.getTime())
 
   for (const appointment of sortedAppointments) {
     if (currentStart < appointment.start) {
-      freeIntervals.push({ start: currentStart, end: appointment.start });
+      freeIntervals.push({ start: currentStart, end: appointment.start })
     }
-    currentStart = appointment.end > currentStart ? appointment.end : currentStart;
+    currentStart = appointment.end > currentStart ? appointment.end : currentStart
   }
 
   if (currentStart < availability.end) {
-    freeIntervals.push({ start: currentStart, end: availability.end });
+    freeIntervals.push({ start: currentStart, end: availability.end })
   }
 
-  return freeIntervals;
+  return freeIntervals
 }
 
-export const getProfessionalSchedule = async (userId: string, date: Date) => {
-  const dayOfWeek = date.getDay(); // 0=domingo, 1=segunda, etc.
+export const getProfessionalSchedule = async (userId: number, date: Date) => {
+  const dayOfWeek = date.getDay() // 0=domingo, 1=segunda, etc.
   const professional = await prisma.professional.findUnique({
-    where: { userId, user: { active: true } },
+    where: { id: userId, user: { active: true } },
     select: { id: true, userId: true },
-  });
+  })
 
-  if (!professional) throw new Error("Profissional não encontrado");
+  if (!professional) throw new Error("Profissional não encontrado")
 
   const availabilities = await prisma.availability.findMany({
     where: {
@@ -44,12 +44,12 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
         gte: new Date(), // pega horários >= agora
       }, // busca apenas horários futuros (>= agora)
     },
-  });
+  })
 
-  const startOfDay = new Date(date);
-  startOfDay.setHours(-3, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setHours(20, 59, 59, 999);
+  const startOfDay = new Date(date)
+  startOfDay.setHours(-3, 0, 0, 0)
+  const endOfDay = new Date(date)
+  endOfDay.setHours(20, 59, 59, 999)
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -60,47 +60,47 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
       },
       status: { not: "CANCELLED" }, // Ignorar cancelados se quiser
     },
-  });
+  })
 
   if (availabilities.length === 0) {
-    return [];
+    return []
   }
 
   // Transformar appointments em Interval[]
   const appointmentIntervals = appointments.map((app) => {
-    const start = app.appointmentDate;
-    const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000); // Ex: 30 minutos de duração fixa
-    return { start, end };
-  });
+    const start = app.appointmentDate
+    const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // Ex: 30 minutos de duração fixa
+    return { start, end }
+  })
 
   // Gerar buracos de horários livres
   const freeIntervals = availabilities.flatMap((av) => {
-    const startTime = new Date(av.startTime);
-    const endTime = new Date(av.endTime);
+    const startTime = new Date(av.startTime)
+    const endTime = new Date(av.endTime)
 
-    const start = new Date(av.startTime);
-    start.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0);
+    const start = new Date(av.startTime)
+    start.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0)
 
-    const end = new Date(av.startTime);
-    end.setHours(endTime.getHours(), endTime.getMinutes(), 0, 0);
+    const end = new Date(av.startTime)
+    end.setHours(endTime.getHours(), endTime.getMinutes(), 0, 0)
 
-    return getFreeIntervals({ start, end }, appointmentIntervals);
-  });
+    return getFreeIntervals({ start, end }, appointmentIntervals)
+  })
 
   // Explodir em slots de 30 minutos
   const slots = freeIntervals.flatMap((interval) => {
-    const slotsInInterval: { start: Date }[] = [];
-    let current = new Date(interval.start);
-    const end = new Date(interval.end);
+    const slotsInInterval: { start: Date }[] = []
+    let current = new Date(interval.start)
+    const end = new Date(interval.end)
 
     while (current < end) {
-      slotsInInterval.push({ start: new Date(current) });
-      current = new Date(current.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000); // adiciona 30 min
+      slotsInInterval.push({ start: new Date(current) })
+      current = new Date(current.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // adiciona 30 min
     }
-    return slotsInInterval;
-  });
-  const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map(
-    (start) => ({ start: new Date(start) })
-  );
-  return slotsUnique.sort((a, b) => a.start.getTime() - b.start.getTime()); // Ordena por data/hora;
-};
+    return slotsInInterval
+  })
+  const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
+    start: new Date(start),
+  }))
+  return slotsUnique.sort((a, b) => a.start.getTime() - b.start.getTime()) // Ordena por data/hora;
+}
