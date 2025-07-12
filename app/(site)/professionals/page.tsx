@@ -44,7 +44,7 @@ const FindTherapist = () => {
         </div>
 
         {/* Paginação e seleção limit */}
-        {totalPages > 1 && (
+        
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <div className="flex items-center gap-2">
               <label htmlFor="pageSize" className="font-medium">
@@ -90,7 +90,7 @@ const FindTherapist = () => {
               </Button>
             </div>
           </div>
-        )}
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {loading ? (
