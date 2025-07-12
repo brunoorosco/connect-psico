@@ -8,13 +8,12 @@ import { IScheduleButton } from "./types";
 
 export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }: IScheduleButton) {
   const [isLoading, setIsLoading] = useState(false);
-
   const handleClick = async () => {
     setIsLoading(true);
     try {
       const result = await createAppointment({
         patientId: userId,
-        professionalId: professional.id,
+        professionalId: professional.userId,
         appointmentDate: selectedSlot.start,
       });
 
