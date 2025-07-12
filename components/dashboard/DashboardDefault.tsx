@@ -1,59 +1,32 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import DashboardHeader from "./DashboardHeader";
-import CalendarNavigation from "./CalendarNavigation";
-import AppointmentsList from "./AppointmentList";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useAppointments, useAppointmentsByPatient } from "@/hooks/useAppointments";
-import { AppointmentModel } from "@/domain/model/appointment";
+"use client"
+import React, { useEffect, useState } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
+import DashboardHeader from "./DashboardHeader"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAppointmentsByPatient } from "@/hooks/useAppointments"
+import { AppointmentModel } from "@/domain/model/appointment"
+import { getSession, useSession } from "next-auth/react"
 
 // Mock data for the patient dashboard
 interface ProgressNote {
-  id: number;
-  date: string;
-  title: string;
-  content: string;
+  id: number
+  date: string
+  title: string
+  content: string
 }
 
-const mockProgressNotes: ProgressNote[] = [
-  {
-    id: 1,
-    date: "12/04/2023",
-    title: "Avanço nas técnicas de relaxamento",
-    content:
-      "Você tem praticado regularmente as técnicas de respiração e relatou melhora significativa nos momentos de ansiedade.",
-  },
-  {
-    id: 2,
-    date: "05/04/2023",
-    title: "Reconhecimento de padrões",
-    content:
-      "Começamos a identificar gatilhos emocionais específicos relacionados ao ambiente de trabalho.",
-  },
-  {
-    id: 3,
-    date: "29/03/2023",
-    title: "Estabelecimento de metas",
-    content:
-      "Definimos objetivos claros para as próximas semanas, focando em pequenas mudanças diárias.",
-  },
-];
-
 const PatientDashboard: React.FC = () => {
-  const isMobile = useIsMobile();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient();
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient()
+
   useEffect(() => {
-    fetchAppointments();
-  }, []);
+    getSession()
+    fetchAppointments()
+  }, [])
 
   // Filter past appointments
   // @ts-ignore
-  const pastAppointments = appointments?.filter(
-    (app: AppointmentModel) => app.appointmentDate < new Date()
-  );
+  const pastAppointments = appointments?.filter((app: AppointmentModel) => app.appointmentDate < new Date())
 
   // Filter future appointments
   const futureAppointments = appointments
@@ -61,15 +34,11 @@ const PatientDashboard: React.FC = () => {
       ...app,
       id: app.id,
     }))
-    .filter((app: AppointmentModel) => app.status === "PENDING");
+    .filter((app: AppointmentModel) => app.status === "PENDING")
 
   return (
     <div className="space-y-4 mt-4">
-      <DashboardHeader
-        title="Meu Acompanhamento"
-        subtitle="Histórico e agenda de consultas"
-        userRole="DEFAULT"
-      />
+      <DashboardHeader title="Meu Acompanhamento" subtitle="Histórico e agenda de consultas" userRole="DEFAULT" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-8">
@@ -88,7 +57,9 @@ const PatientDashboard: React.FC = () => {
                     <div className="flex justify-between items-start text-sm">
                       {/* Lado esquerdo: Nome + Local ou Link */}
                       <div className="flex flex-col">
-                        <div className="font-medium">Consulta com: <b>{consulta.professional.name}</b></div>
+                        <div className="font-medium">
+                          Consulta com: <b>{consulta.professional.name}</b>
+                        </div>
                         {consulta.tipo === "local" ? (
                           <p className="text-green-600 font-medium">Local: {consulta.endereco}</p>
                         ) : (
@@ -180,6 +151,6 @@ const PatientDashboard: React.FC = () => {
         </div> */}
       </div>
     </div>
-  );
-};
-export default PatientDashboard;
+  )
+}
+export default PatientDashboard

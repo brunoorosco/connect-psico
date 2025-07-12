@@ -1,24 +1,26 @@
-import React, { startTransition, useState } from "react";
-import { TabsContent } from "@/components/ui/tabs";
-import { MessageCircle } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { ProfessionalModel } from "@/domain/model/professional";
-import { createMessage } from "@/actions/messages";
-import { useSession } from "next-auth/react";
+import React, { startTransition, useState } from "react"
+import { TabsContent } from "@/components/ui/tabs"
+import { MessageCircle } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import { ProfessionalModel } from "@/domain/model/professional"
+import { createMessage } from "@/actions/messages"
+import { useSession } from "next-auth/react"
 
 interface ProfessionalProps {
-  professional: ProfessionalModel;
+  professional: ProfessionalModel
 }
 
 export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
-  const [message, setMessage] = useState("");
-  const { data: session, status } = useSession();
-  console.log("professional", professional);
+  const [message, setMessage] = useState("")
+  const { data: session, status } = useSession()
+
+  console.log("Session status:", status)
+  console.log("Session data:", session)
 
   const handleSendMessage = () => {
-    if (!message || message.trim() === "" || !professional) return;
+    if (!message || message.trim() === "" || !professional) return
 
     startTransition(async () => {
       const result = await createMessage({
@@ -26,21 +28,21 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
         //@ts-ignore
         receiverId: professional.userId, // <-- ID do profissional destino
         content: message.trim(),
-      });
+      })
       if (result.error) {
         toast.error("Erro ao enviar mensagem", {
           description: result.error,
-        });
-        return;
+        })
+        return
       }
 
       toast.success("Mensagem enviada!", {
         description: `Sua mensagem foi enviada com sucesso!!`,
-      });
+      })
 
-      setMessage("");
-    });
-  };
+      setMessage("")
+    })
+  }
   return (
     <TabsContent value="message" className="pt-4 space-y-4">
       <h4 className="text-sm font-medium">Envie uma mensagem para {professional.name}:</h4>
@@ -63,5 +65,5 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
         </Button>
       </div>
     </TabsContent>
-  );
-};
+  )
+}
