@@ -1,17 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageItem } from "./MessageItem";
-import { ReplyBox } from "./ReplyBox";
-
-import { MessageModel } from "./types";
-
-type Props = {
-  messages: MessageModel[];
-  currentUserId: string;
-  replyContent: string;
-  onReplyChange: (value: string) => void;
-  onReplySend: () => void;
-  selectedUserConversation: string | null;
-};
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MessageItem } from "./MessageItem"
+import { ReplyBox } from "./ReplyBox"
+import { IConversationView } from "./types"
 
 export const ConversationView = ({
   messages,
@@ -20,12 +10,10 @@ export const ConversationView = ({
   onReplyChange,
   onReplySend,
   selectedUserConversation,
-}: Props) => (
+}: IConversationView) => (
   <Card className="therapy-card lg:h-[calc(100vh-30px)] h-[calc(100vh-120px)] overfl flex flex-col">
     <CardHeader className="p-2">
-      <CardTitle className="text-lg text-therapy-tertiary">
-        Conversa com {selectedUserConversation}
-      </CardTitle>
+      <CardTitle className="text-lg text-therapy-tertiary">Conversa com {selectedUserConversation}</CardTitle>
     </CardHeader>
     <CardContent className="space-y-2 p-2 flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
@@ -38,7 +26,7 @@ export const ConversationView = ({
             ))}
         </div>
       </div>
-        <ReplyBox replyContent={replyContent} onChange={onReplyChange} onSend={onReplySend} />
+      <ReplyBox replyContent={replyContent} onChange={onReplyChange} onSend={onReplySend} />
     </CardContent>
   </Card>
-);
+)

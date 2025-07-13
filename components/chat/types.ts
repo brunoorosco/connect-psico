@@ -1,9 +1,16 @@
-export type MessageModel = {
-  id?: string;
-  senderId: string;
-  sender: { name: string };
-  content: string;
-  read: boolean;
-  createdAt: Date | string;
-  receiverId: string;
-};
+import { MessageModel } from "@/domain/model/messageChat"
+
+export interface IConversationsSidebar {
+  messagesUsers: any[]
+  selectedMessage: MessageModel[] | null
+  handleSelectConversation: (messages: MessageModel[], userConversation: string) => void
+}
+
+export interface IConversationView {
+  messages: MessageModel[]
+  currentUserId: string
+  replyContent: string
+  onReplyChange: (value: string) => void
+  onReplySend: () => void
+  selectedUserConversation: string | null
+}
