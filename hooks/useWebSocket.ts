@@ -32,11 +32,6 @@ export function useWebSocket(userId: string, token: string) {
 
     ws.onmessage = async (e) => {
       let raw = e.data instanceof Blob ? await e.data.text() : e.data.toString()
-      // let raw: string
-      // console.log(e.data)
-      // if (e.data instanceof Blob) raw = await e.data.text()
-      // else raw = e.data.toString()
-      // console.log("raws", raw)
       try {
         const msg = JSON.parse(raw)
         if (msg.type === "auth-success") {

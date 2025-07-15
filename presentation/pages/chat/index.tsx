@@ -1,20 +1,26 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useMessages } from "@/hooks/useMessages"
 import { MessageModel } from "@/domain/model/messageChat"
 import { ConversationView } from "@components/chat/ConversationView"
 import { ConversationsSidebar } from "@components/chat/ConversationsSidebar"
+import { getAccessTokenAction } from "@/actions/messages"
+import { useSession } from "next-auth/react"
 
 type Props = {
   messages: MessageModel[]
 }
 
 const MessagesList = ({ messages }: Props) => {
+  const { status: statusSession } = useSession()
+
   const {
     isMobile,
     session,
+    // statusSession,
+    token,
     selectedMessage,
     selectedUserConversation,
     replyContent,
@@ -24,6 +30,10 @@ const MessagesList = ({ messages }: Props) => {
     handleBackToList,
     setReplyContent,
   } = useMessages(messages)
+
+  if (statusSession === "loading" || !token) {
+    return <p>Carregando sessão e autenticando...</p>
+  }
 
   if (isMobile && selectedMessage) {
     return (

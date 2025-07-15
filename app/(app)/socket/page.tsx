@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useWebSocket } from "@hooks/useWebSocket"
-import { getAccessTokenAction, sendMessageAction } from "@/actions/messages"
+import { getAccessTokenAction } from "@/actions/messages"
 
 export default function ChatPage() {
   const { data: session, status: sessionStatus } = useSession()
