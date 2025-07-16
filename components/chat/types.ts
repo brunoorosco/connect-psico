@@ -3,7 +3,7 @@ import { MessageModel } from "@/domain/model/messageChat"
 export interface IConversationsSidebar {
   messagesUsers: any[]
   selectedMessage: MessageModel[] | null
-  handleSelectConversation: (messages: MessageModel[], userConversation: string) => void
+  handleSelectConversation: (messages: MessageModel[], userConversation: string,message:any) => void
 }
 
 export interface IConversationView {

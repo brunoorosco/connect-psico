@@ -2,7 +2,6 @@
 "use client"
 import { useEffect, useState, startTransition } from "react"
 import { createMessage, getAccessTokenAction } from "@/actions/messages"
-import { toast } from "sonner"
 import { useSession } from "next-auth/react"
 import { MessageModel } from "@/domain/model/messageChat"
 import { useWebSocket } from "./useWebSocket"
@@ -13,15 +12,12 @@ export const useMessages = (messages: MessageModel[]) => {
   const [replyContent, setReplyContent] = useState<string>("")
   const [isMobile, setIsMobile] = useState<boolean>(false)
   const [token, setToken] = useState("")
-  const [input, setInput] = useState("")
-  const [toUserId, setToUserId] = useState("")
   const [userId, setUserId] = useState("")
 
   const { data: session, status: statusSession } = useSession()
   const currentUserId = session?.user.id
   const socketReady = !!(currentUserId && token)
   const { messages: msg, status, send } = useWebSocket(socketReady ? currentUserId : "__", socketReady ? token : "__")
-  console.log("msg::", msg)
 
   const fetchToken = async () => {
     const result = await getAccessTokenAction()
@@ -39,9 +35,53 @@ export const useMessages = (messages: MessageModel[]) => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  const handleSelectConversation = (messages: MessageModel[], userConversation: string) => {
+  useEffect(() => {
+    if (!msg || !Array.isArray(msg)) return
+    if (!selectedUserConversation || !session?.user.id) return
+
+    msg.forEach((newMsg: any) => {
+      const senderId = newMsg.from
+      const receiverId = newMsg.to
+
+      const isCurrentConversation =
+        (senderId === selectedUserConversation && receiverId === session.user.id) ||
+        (receiverId === selectedUserConversation && senderId === session.user.id)
+
+      console.log("Nova mensagem recebida:", newMsg)
+      console.log("Usuário logado:", session.user.id)
+      console.log("Conversa selecionada:", selectedUserConversation)
+      console.log("isCurrentConversation?", isCurrentConversation)
+
+      if (isCurrentConversation) {
+        const formattedMessage: MessageModel = {
+          senderId,
+          receiverId,
+          content: newMsg.text,
+          createdAt: new Date(),
+          read: false,
+          sender: { name: "" }, // preencha se tiver
+        }
+
+        setSelectedMessage((prev) => [...(prev || []), formattedMessage])
+
+        // Salvar no banco
+        startTransition(async () => {
+          await createMessage({
+            senderId,
+            receiverId,
+            content: newMsg.text,
+          })
+        })
+      }
+    })
+  }, [msg, selectedUserConversation, session?.user.id])
+
+  const handleSelectConversation = (messages: MessageModel[], _userConversation: string, message: MessageModel) => {
     setSelectedMessage(messages)
-    setSelectedUserConversation(userConversation)
+
+    const otherUserId = message.senderId === session?.user.id ? message.receiverId : message.senderId
+
+    setSelectedUserConversation(otherUserId) // ✅ Agora é o ID correto do outro usuário
     setReplyContent("")
   }
 
@@ -51,28 +91,29 @@ export const useMessages = (messages: MessageModel[]) => {
     const lastMessage = selectedMessage[selectedMessage.length - 1]
     const senderId = session.user.id
     const receiverId = lastMessage.senderId === senderId ? lastMessage.receiverId : lastMessage.senderId
-    console.log(senderId, toUserId, replyContent.trim())
-    if (!replyContent.trim() || !receiverId || !userId) return
+    const content = replyContent.trim()
+
+    if (!content || !receiverId || !userId) return
+
+    const newMessage: MessageModel = {
+      senderId,
+      receiverId,
+      content,
+      createdAt: new Date(),
+      read: false,
+      sender: { name: session.user.name ?? "Você" },
+    }
+
+    // Adiciona a mensagem localmente para exibição imediata
+    setSelectedMessage((prev) => [...(prev || []), newMessage])
 
     if (status === "connected") {
       send(receiverId, replyContent.trim())
     }
     startTransition(async () => {
-      const result = await createMessage({ senderId, receiverId, content: replyContent.trim() })
+      await createMessage({ senderId, receiverId, content })
       setReplyContent("")
     })
-  }
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const message = input.trim()
-    if (!message || !toUserId || !userId) return
-
-    if (status === "connected") {
-      send(toUserId, message)
-    }
-    setInput("")
   }
 
   const handleBackToList = () => setSelectedMessage(null)

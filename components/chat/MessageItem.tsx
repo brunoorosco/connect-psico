@@ -17,7 +17,6 @@ type Props = {
 
 export const MessageItem = ({ message, currentUserId }: Props) => {
   const isCurrentUser = message.senderId === currentUserId;
-
   return (
     <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
       <div
