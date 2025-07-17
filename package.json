@@ -65,6 +65,7 @@
     "react-icons": "^5.1.0",
     "react-input-mask": "^2.0.4",
     "sharp": "^0.34.2",
+    "socket.io-client": "^4.8.1",
     "sonner": "^1.4.41",
     "swr": "^2.3.3",
     "tailwind-merge": "^2.6.0",

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import { useChatStore } from "./useChatStore"
 import { Image, Send, X } from "lucide-react"
+import { toast } from "sonner"
 
 const MessageInput = () => {
   const [text, setText] = useState("")
@@ -11,7 +12,7 @@ const MessageInput = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file.type.startsWith("image/")) {
-      // toast.error("Please select an image file")
+      toast.error("Please select an image file")
       return
     }
 
@@ -54,7 +55,7 @@ const MessageInput = () => {
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+              className="w-25 h-20 object-cover rounded-lg border border-zinc-700"
             />
             <button
               onClick={removeImage}
@@ -62,14 +63,14 @@ const MessageInput = () => {
               flex items-center justify-center"
               type="button"
             >
-              <X className="size-3" />
+              <X className="w-3" />
             </button>
           </div>
         </div>
       )}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-        <div className="flex-1 flex gap-2">
+        <div className="flex-1 flex gap-2 h-12">
           <input
             type="text"
             className="w-full input input-bordered rounded-lg input-sm sm:input-md"
@@ -81,15 +82,15 @@ const MessageInput = () => {
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
+            className={`hidden sm:flex btn btn-circle pt-2
                      ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >
-            <Image size={20} />
+            <Image size={30} />
           </button>
         </div>
         <button type="submit" className="btn btn-sm btn-circle" disabled={!text.trim() && !imagePreview}>
-          <Send size={22} />
+          <Send size={30} />
         </button>
       </form>
     </div>
