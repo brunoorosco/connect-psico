@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import axios from "axios";
 import { useAuthStore } from './useAuthStore'
+import { getPatientsByProfessionalId } from "@/actions/patients";
 // import { axiosInstance } from "../lib/axios";
 
 export const axiosInstance = axios.create({
@@ -16,12 +17,14 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
 
-  getUsers: async () => {
+  getUsers: async (userId) => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/messages/users");
-      console.log(res.data);
-      set({ users: res.data });
+      // const res = await axiosInstance.get("/messages/users");
+      // console.log(res.data);
+      const patients = await getPatientsByProfessionalId(userId)
+      console.log(patients)
+      set({ users: patients});
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
