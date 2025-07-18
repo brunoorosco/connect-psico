@@ -9,5 +9,6 @@ export const env = {
   nodemailerHost: process.env.NODEMAILER_HOST , 
   nodemailerPort: Number(process.env.NODEMAILER_PORT), 
   nodemailerUser:process.env.NODEMAILER_USER, 
-  nodemailerPassword:process.env.NODEMAILER_PASS
+  nodemailerPassword:process.env.NODEMAILER_PASS,
+  baseUrlPsicomaisApi: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS,
 };
