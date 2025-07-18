@@ -3,10 +3,11 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useAuthStore } from './useAuthStore'
 import { getPatientsByProfessionalId } from "@/actions/patients";
+import { env } from "../../../config/application";
 // import { axiosInstance } from "../lib/axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:4000/api",
+  baseURL: env.baseUrlPsicomaisApi,
   withCredentials: true,
 });
 
