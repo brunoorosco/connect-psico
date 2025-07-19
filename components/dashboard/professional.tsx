@@ -7,6 +7,7 @@ const Dashboard = () => {
   const { data: session } = useSession();
   const alert = session?.user.role === "SUPERVISOR" && !session?.user.isProfileCompleted;
 
+
   return (
     <div className="min-h-screen">
       {alert && (
@@ -18,7 +19,7 @@ const Dashboard = () => {
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
                 Necessário terminar seu cadastro de profissional.{" "}
-                <a className="font-semibold" href={`/app/professional/${session?.user.id}/profile`}>
+                <a className="font-semibold" href={`/app/professional/${session.user?.id}/profile`}>
                   Clique Aqui!
                 </a>
                 {"  "}Após a atualização é necessário relogar pra que as alterações sejam refletidas{" "}

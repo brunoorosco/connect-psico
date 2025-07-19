@@ -1,16 +1,20 @@
-import { useRef, useState } from "react"
-import { useChatStore } from "./useChatStore"
+import { useRef, useState, ChangeEvent, FormEvent } from "react"
 import { Image, Send, X } from "lucide-react"
 import { toast } from "sonner"
+import { useSession } from "next-auth/react"
+import { useChatStore } from "@/infra/stores/useChatStore"
 
 const MessageInput = () => {
-  const [text, setText] = useState("")
-  const [imagePreview, setImagePreview] = useState(null)
-  const fileInputRef = useRef(null)
-  const { sendMessage } = useChatStore()
+  const [text, setText] = useState<string>("")
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const { sendMessage, selectedUser } = useChatStore()
+  const { data: session } = useSession()
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file")
       return
@@ -18,7 +22,7 @@ const MessageInput = () => {
 
     const reader = new FileReader()
     reader.onloadend = () => {
-      setImagePreview(reader.result)
+      setImagePreview(reader.result as string)
     }
     reader.readAsDataURL(file)
   }
@@ -28,20 +32,20 @@ const MessageInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault()
     if (!text.trim() && !imagePreview) return
 
     try {
       await sendMessage({
         text: text.trim(),
-        image: imagePreview,
+        image: imagePreview || "",
+        receiverId: selectedUser.userId,
+        senderId: session?.user.id || ""
       })
 
-      // Clear form
       setText("")
-      setImagePreview(null)
-      if (fileInputRef.current) fileInputRef.current.value = ""
+      removeImage()
     } catch (error) {
       console.error("Failed to send message:", error)
     }
@@ -78,17 +82,19 @@ const MessageInput = () => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+
           <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
 
           <button
             type="button"
             className={`hidden sm:flex btn btn-circle pt-3
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+              ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
           </button>
         </div>
+
         <button type="submit" className="btn btn-sm btn-circle" disabled={!text.trim() && !imagePreview}>
           <Send size={20} />
         </button>
@@ -96,4 +102,5 @@ const MessageInput = () => {
     </div>
   )
 }
+
 export default MessageInput

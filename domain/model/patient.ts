@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from "zod"
 
 export const patientSchema = z.object({
   medicalRecordId: z.string(),
@@ -13,6 +13,28 @@ export const patientSchema = z.object({
   state: z.string().optional(),
   number: z.string().optional(),
   notes: z.string().optional(),
-});
+})
 
-export type PatientInput = z.infer<typeof patientSchema>;
+export type PatientInput = z.infer<typeof patientSchema>
+
+export type PatientModel = z.infer<typeof patientSchema>
+
+export type UserChat = {
+  id: number
+  name: string
+  userId: string
+  image: string
+  isOnline: boolean
+  role: "USER" | "SUPERVISOR" | "ADMIN"
+  // type: "patient"
+  // professionalId: string
+}
+
+export type ProfessionalChat = {
+  id: string
+  name: string
+  userId: string
+  image: string
+  // type: "professional"
+  // patients: Patient[]
+}

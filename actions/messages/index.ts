@@ -1,2 +1,7 @@
 export * from './addMessage'
 export * from './getMessages'
+export * from './sendMessageApi'
+export * from './getMessageApi'
+export * from './getUserChat'
+export * from './getContactsApi'
+export * from './getUserChatProfessional'
