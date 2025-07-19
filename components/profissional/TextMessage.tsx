@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { ProfessionalModel } from "@/domain/model/professional"
-import { createMessage } from "@/actions/messages"
+import { sendMessageApi } from "@/actions/messages"
 import { useSession } from "next-auth/react"
 
 interface ProfessionalProps {
@@ -20,12 +20,12 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
     if (!message || message.trim() === "" || !professional) return
 
     startTransition(async () => {
-      const result = await createMessage({
-        senderId: session?.user.id as string, // <-- Substitua pelo ID do usuário logado
-        //@ts-ignore
-        receiverId: professional.userId, // <-- ID do profissional destino
-        content: message.trim(),
-      })
+      const textMessage = {
+        senderId: session?.user.id as string,
+        text: message.trim(),
+        receiverId: professional.userId,
+      }
+      const result = await sendMessageApi(professional.userId, textMessage)
       if (result.error) {
         toast.error("Erro ao enviar mensagem", {
           description: result.error,

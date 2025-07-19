@@ -3,11 +3,6 @@
 import { axiosInstance } from "@/infra/httpClient/psicomaisApiMessage"
 
 export async function sendMessageApi(receiverId: string, messageData: Record<string, any>) {
-  // const tokenResult = await getAccessTokenAction()
-  // if (!tokenResult.ok || !tokenResult.accessToken) {
-  //   return { ok: false, error: tokenResult.error || "Não autenticado" }
-  // }
-
   try {
     const res = await axiosInstance.post(`/messages/send/${receiverId}`, messageData)
     return res.data
