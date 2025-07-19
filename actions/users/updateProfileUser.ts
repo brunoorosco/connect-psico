@@ -26,7 +26,7 @@ export const updateUserProfile = async (userId: string, data: z.infer<typeof use
       data: {
         name: data.name,
         email: data.email,
-        phone: data.telefone,
+        phone: data.telefone.replace(/\D/g, ""),
         image: data.image,
       },
     })

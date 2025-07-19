@@ -29,7 +29,7 @@ export const updateProfessionalProfile = async (
       data: {
         name: data.name,
         email: data.email,
-        phone: data.phone,
+        phone: data.phone.replace(/\D/g, ""),
         image: data.profilePhoto,
         Professional: {
           update: {
