@@ -1,10 +1,11 @@
 // hooks/useMessages.ts
 "use client"
 import { useEffect, useState, startTransition } from "react"
-import { createMessage, getAccessTokenAction } from "@/actions/messages"
+import { createMessage } from "@/actions/messages"
 import { useSession } from "next-auth/react"
 import { MessageModel } from "@/domain/model/messageChat"
 import { useWebSocket } from "./useWebSocket"
+import { getAccessToken } from "@/actions/token/getToken"
 
 export const useMessages = (messages: MessageModel[]) => {
   const [selectedMessage, setSelectedMessage] = useState<MessageModel[] | null>(null)
@@ -20,7 +21,7 @@ export const useMessages = (messages: MessageModel[]) => {
   const { messages: msg, status, send } = useWebSocket(socketReady ? currentUserId : "__", socketReady ? token : "__")
 
   const fetchToken = async () => {
-    const result = await getAccessTokenAction()
+    const result = await getAccessToken()
     if (result.ok) {
       setUserId(result.userId as string)
       setToken(result.accessToken as string)
@@ -151,3 +152,7 @@ export const useMessages = (messages: MessageModel[]) => {
     token,
   }
 }
+function getAccessTokenAction() {
+  throw new Error("Function not implemented.")
+}
+

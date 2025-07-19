@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useWebSocket } from "@hooks/useWebSocket"
-import { getAccessTokenAction } from "@/actions/messages"
+import { getAccessToken } from "@/actions/token/getToken"
 
 export default function ChatPage() {
   const { data: session, status: sessionStatus } = useSession()
@@ -14,7 +14,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     const fetchToken = async () => {
-      const result = await getAccessTokenAction()
+      const result = await getAccessToken()
       if (result.ok) {
         setUserId(result.userId as string)
         setToken(result.accessToken as string)

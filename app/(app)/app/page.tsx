@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 const DashboardPage = async () => {
   const session = await auth();
-
+  
   return (
     <>
       {session?.user.role === "ADMIN" && redirect("/app/admin")}

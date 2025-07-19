@@ -2,13 +2,12 @@
 
 import { getToken } from "next-auth/jwt"
 import { cookies } from "next/headers"
-import { prisma } from "@/lib/db"
 import jwt from "jsonwebtoken"
 
-export async function getAccessTokenAction() {
+export async function getAccessToken() {
   const token = await getToken({
     req: { headers: { cookie: cookies().toString() } },
-    secret: process.env.AUTH_SECRET || "secret"
+    secret: process.env.AUTH_SECRET || "secret",
   })
   const acessToken = cookies().get("authjs.session-token")
   if (!token || !token.sub || !acessToken?.value) {

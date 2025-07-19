@@ -1,4 +1,3 @@
-// stores/usePatientStore.ts
 import { Patient } from '@/types/appointment';
 import { create } from 'zustand';
 

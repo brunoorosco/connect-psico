@@ -1,5 +1,5 @@
 import { getMessages } from "@/actions/messages/getMessages";
-import MessagesList from "@presentation/pages/chat";
+import ChatPage from "@presentation/pages/chat/index";
 
 const Messages = async () => {
   const result = await getMessages();
@@ -8,7 +8,7 @@ const Messages = async () => {
     return <div>Erro: {result.error}</div>;
   }
 
-  return <MessagesList messages={result} />;
+  return <ChatPage  />;
 };
 
 export default Messages;
