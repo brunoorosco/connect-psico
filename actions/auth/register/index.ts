@@ -32,7 +32,7 @@ export const register = async (user: z.infer<typeof RegisterSchema>) => {
         email,
         password: hashedPassword,
         isNewProfile: false,
-        phone: user.phone,
+        phone: user.phone.replace(/\D/g, ""),
         role: user.professional === true ? UserRole.SUPERVISOR : UserRole.DEFAULT,
       },
     });
