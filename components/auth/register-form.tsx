@@ -1,37 +1,27 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
-import { Switch } from "@/components/ui/switch";
-
-import { register } from "@/actions/auth";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { RegisterSchema } from "@/schemas/auth";
-import AuthCard from "./auth-card";
-import AuthFormMessage from "./auth-form-message";
-import SocialLogin from "./social-login";
-import { ufCRP } from "@/utils/ufCRP";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { LoaderIcon } from "lucide-react"
+import Link from "next/link"
+import { useState, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import type { z } from "zod"
+import { Switch } from "@/components/ui/switch"
+import InputMask from "react-input-mask";
+import { register } from "@/actions/auth"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { RegisterSchema } from "@/schemas/auth"
+import AuthCard from "./auth-card"
+import AuthFormMessage from "./auth-form-message"
+import SocialLogin from "./social-login"
+import { ufCRP } from "@/utils/ufCRP"
 
 export default function RegisterForm() {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string>("")
+  const [success, setSuccess] = useState<string>("")
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -45,22 +35,22 @@ export default function RegisterForm() {
       professional: false,
       phone: "",
     },
-  });
+  })
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     startTransition(async () => {
       try {
-        const { success, error } = await register(values);
-        if (error) setError(error);
-        setSuccess(success || "");
-        form.reset();
+        const { success, error } = await register(values)
+        if (error) setError(error)
+        setSuccess(success || "")
+        form.reset()
       } catch (error) {
-        setSuccess("");
-        setError("Algo deu errado.");
-        form.reset();
+        setSuccess("")
+        setError("Algo deu errado.")
+        form.reset()
       }
-    });
-  };
+    })
+  }
 
   return (
     <AuthCard title="Registra-se" description="Seja bem-vindo">
@@ -110,13 +100,7 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="voce@provedor.com.br"
-                        required
-                        {...field}
-                        disabled={isPending}
-                      />
+                      <Input type="email" placeholder="voce@provedor.com.br" required {...field} disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,7 +113,23 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <Input type="type" placeholder="(00) 00000-0000" required {...field} />
+                      <InputMask
+                        mask="(99) 99999-9999"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      >
+                        {(inputProps: any) => (
+                          <Input
+                            {...inputProps}
+                            type="tel"
+                            placeholder="(00) 00000-0000"
+                            required
+                            name={field.name}
+                            ref={field.ref}
+                          />
+                        )}
+                      </InputMask>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,13 +142,7 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="******"
-                        required
-                        {...field}
-                        disabled={isPending}
-                      />
+                      <Input type="password" placeholder="******" required {...field} disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -192,12 +186,7 @@ export default function RegisterForm() {
                         <FormItem>
                           <FormLabel>Nº de Registro</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="123412"
-                              {...field}
-                              disabled={isPending}
-                              maxLength={6}
-                            />
+                            <Input placeholder="123412" {...field} disabled={isPending} maxLength={6} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -227,5 +216,5 @@ export default function RegisterForm() {
         </div>
       </div>
     </AuthCard>
-  );
+  )
 }
