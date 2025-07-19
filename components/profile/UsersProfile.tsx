@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import useSWR from "swr"
-
+import InputMask from "react-input-mask";
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { defaultProfileValues } from "@/schemas/PsicologoProfileSchema"
@@ -123,13 +123,29 @@ const UserProfileForm: React.FC = () => {
                     </div>
 
                     <FormField
-                      control={control}
+                      control={form.control}
                       name="telefone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Telefone</FormLabel>
+                          <FormLabel>Telefone/WhatsApp</FormLabel>
                           <FormControl>
-                            <Input placeholder="(11) 99999-9999" {...field} />
+                            <InputMask
+                              mask="(99) 99999-9999"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            >
+                              {(inputProps: any) => (
+                                <Input
+                                  {...inputProps}
+                                  type="tel"
+                                  placeholder="(00) 00000-0000"
+                                  required
+                                  name={field.name}
+                                  ref={field.ref}
+                                />
+                              )}
+                            </InputMask>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
