@@ -3,7 +3,7 @@ import { env } from "@/config/application"
 import { getAccessToken } from "@/actions/token/getToken"
 
 export const axiosInstance = axios.create({
-  baseURL: env.baseUrlPsicomaisApi,
+  baseURL: `${env.baseUrlPsicomaisApi}/api`,
   withCredentials: true,
 })
 
