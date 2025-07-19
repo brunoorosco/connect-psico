@@ -1,23 +1,24 @@
-import { create } from "zustand";
-import { io, Socket } from "socket.io-client";
+import { create } from "zustand"
+import { io, Socket } from "socket.io-client"
+import { env } from "@/config/application"
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = env.baseUrlPsicomaisApi || "http://localhost:4000"
 
 interface AuthUser {
-  id: string;
-  name?: string;
-  image?: string;
+  id: string
+  name?: string
+  image?: string
 }
 
 interface AuthStore {
-  authUser: AuthUser | null;
-  setAuthUser: (user: AuthUser | null) => void;
+  authUser: AuthUser | null
+  setAuthUser: (user: AuthUser | null) => void
 
-  onlineUsers: string[];
-  socket: Socket | null;
+  onlineUsers: string[]
+  socket: Socket | null
 
-  connectSocket: () => void;
-  disconnectSocket: () => void;
+  connectSocket: () => void
+  disconnectSocket: () => void
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -28,28 +29,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   socket: null,
 
   connectSocket: () => {
-    const { authUser, socket } = get();
-    console.log("Connecting socket...", authUser, socket);
-    if (!authUser || socket?.connected) return;
+    const { authUser, socket } = get()
+    console.log("Connecting socket...", authUser, socket)
+    if (!authUser || socket?.connected) return
 
     const newSocket: Socket = io(BASE_URL, {
       query: {
         userId: authUser.id,
       },
-    });
+    })
 
-    newSocket.connect();
-    console.log("Socket connected");
-    set({ socket: newSocket });
+    newSocket.connect()
+    console.log("Socket connected")
+    set({ socket: newSocket })
 
     newSocket.on("getOnlineUsers", (userIds: string[]) => {
-      console.log("Online users:", userIds);
-      set({ onlineUsers: userIds });
-    });
+      console.log("Online users:", userIds)
+      set({ onlineUsers: userIds })
+    })
   },
 
   disconnectSocket: () => {
-    const socket = get().socket;
-    if (socket?.connected) socket.disconnect();
+    const socket = get().socket
+    if (socket?.connected) socket.disconnect()
   },
-}));
+}))
