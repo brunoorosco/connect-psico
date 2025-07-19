@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { v4 as uuid } from "uuid";
+import { randomUUID as uuid } from "crypto";
 
 export const findResetPasswordTokenByToken = async (token: string) => {
 	const resetPasswordToken = await prisma.resetPasswordToken.findUnique({
