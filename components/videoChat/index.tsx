@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthStore } from "@/infra/stores/useAuthStore"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -23,76 +23,84 @@ export default function VideoChat({ remoteUserId }: Props) {
   const setOnAnswer = useAuthStore((s) => s.setOnAnswer)
   const setOnIceCandidate = useAuthStore((s) => s.setOnIceCandidate)
 
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([])
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([])
+  const [selectedCamera, setSelectedCamera] = useState<string>("")
+  const [selectedMic, setSelectedMic] = useState<string>("")
+  const [permissionGranted, setPermissionGranted] = useState(false)
+
   useEffect(() => {
     if (!authUser || !socket) return
-    console.log("aquiiii")
 
-    let isMounted = true
+    const setupListeners = () => {
+      setOnOffer(async ({ offer, from }) => {
+        if (!localStreamRef.current) return
 
-    const setupMediaAndListeners = async () => {
-      try {
-        console.log("🔒 Solicitando permissão de mídia...")
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        pcRef.current = createPeerConnection(from)
 
-        if (!isMounted) return
+        await pcRef.current.setRemoteDescription(new RTCSessionDescription(offer))
 
-        console.log("📷 Mídia local ativa")
-        localStreamRef.current = stream
+        localStreamRef.current.getTracks().forEach((track) => {
+          pcRef.current?.addTrack(track, localStreamRef.current!)
+        })
 
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream
+        const answer = await pcRef.current.createAnswer()
+        await pcRef.current.setLocalDescription(answer)
+
+        socket.emit("answer", { to: from, answer })
+      })
+
+      setOnAnswer(async ({ answer }) => {
+        await pcRef.current?.setRemoteDescription(new RTCSessionDescription(answer))
+      })
+
+      setOnIceCandidate(async ({ candidate }) => {
+        try {
+          await pcRef.current?.addIceCandidate(new RTCIceCandidate(candidate))
+        } catch (err) {
+          console.error("Erro ao adicionar ICE:", err)
         }
-
-        setOnOffer(async ({ offer, from }) => {
-          console.log("📩 OFFER recebido de", from)
-          pcRef.current = createPeerConnection(from)
-
-          await pcRef.current.setRemoteDescription(new RTCSessionDescription(offer))
-
-          stream.getTracks().forEach((track) => {
-            pcRef.current?.addTrack(track, stream)
-          })
-
-          const answer = await pcRef.current.createAnswer()
-          await pcRef.current.setLocalDescription(answer)
-
-          socket.emit("answer", { to: from, answer })
-        })
-
-        setOnAnswer(async ({ answer }) => {
-          console.log("📨 ANSWER recebido")
-          await pcRef.current?.setRemoteDescription(new RTCSessionDescription(answer))
-        })
-
-        setOnIceCandidate(async ({ candidate }) => {
-          console.log("🧊 ICE recebido")
-          try {
-            await pcRef.current?.addIceCandidate(new RTCIceCandidate(candidate))
-          } catch (err) {
-            console.error("Erro ao adicionar ICE:", err)
-          }
-        })
-      } catch (err) {
-        console.error("❌ Erro ao acessar mídia:", err)
-        alert("Erro ao acessar a câmera e o microfone. Verifique as permissões.")
-      }
+      })
     }
 
-    setupMediaAndListeners()
+    setupListeners()
 
     return () => {
-      isMounted = false
-      // Optionally stop media tracks
       localStreamRef.current?.getTracks().forEach((track) => track.stop())
     }
   }, [authUser, socket])
+
+  const requestPermissionAndLoadDevices = async () => {
+    try {
+      // 1. Solicita permissão genérica (sem deviceId)
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      setPermissionGranted(true)
+
+      localStreamRef.current = stream
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream
+      }
+
+      // 2. Agora pode listar com labels corretos
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videos = devices.filter((d) => d.kind === "videoinput")
+      const audios = devices.filter((d) => d.kind === "audioinput")
+
+      setVideoDevices(videos)
+      setAudioDevices(audios)
+      setSelectedCamera(videos[0]?.deviceId || "")
+      setSelectedMic(audios[0]?.deviceId || "")
+    } catch (err) {
+      console.error("❌ Erro ao solicitar permissão:", err)
+      alert("Não foi possível acessar câmera/microfone. Verifique as permissões do navegador.")
+    }
+  }
 
   const createPeerConnection = (targetUserId: string): RTCPeerConnection => {
     const pc = new RTCPeerConnection(ICE_SERVERS)
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("📤 Enviando ICE para", targetUserId)
         socket?.emit("ice-candidate", {
           to: targetUserId,
           candidate: event.candidate,
@@ -101,7 +109,6 @@ export default function VideoChat({ remoteUserId }: Props) {
     }
 
     pc.ontrack = (event) => {
-      console.log("📺 Vídeo remoto recebido")
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0]
       }
@@ -111,26 +118,37 @@ export default function VideoChat({ remoteUserId }: Props) {
   }
 
   const startCall = async () => {
-    console.log("📞 Iniciando chamada com", remoteUserId)
-    console.log("authUser", authUser)
-    console.log("localStreamRef", localStreamRef)
-    console.log("socket", socket)
+    try {
+      const constraints: MediaStreamConstraints = {
+        video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
+        audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+      }
 
-    if (!remoteUserId || !authUser || !socket || !localStreamRef.current) {
-      console.warn("🔌 Sem dados suficientes para iniciar a chamada")
-      return
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      localStreamRef.current = stream
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream
+      }
+
+      pcRef.current = createPeerConnection(remoteUserId)
+
+      stream.getTracks().forEach((track) => {
+        pcRef.current?.addTrack(track, stream)
+      })
+
+      const offer = await pcRef.current.createOffer()
+      await pcRef.current.setLocalDescription(offer)
+
+      socket.emit("offer", { to: remoteUserId, offer })
+    } catch (err: any) {
+      console.error("❌ Erro ao iniciar chamada:", err)
+      if (err.name === "OverconstrainedError") {
+        alert("O dispositivo selecionado não foi encontrado. Escolha outro microfone/câmera.")
+      } else {
+        alert("Erro ao iniciar chamada: " + err.message)
+      }
     }
-
-    pcRef.current = createPeerConnection(remoteUserId)
-
-    localStreamRef.current.getTracks().forEach((track) => {
-      pcRef.current?.addTrack(track, localStreamRef.current!)
-    })
-
-    const offer = await pcRef.current.createOffer()
-    await pcRef.current.setLocalDescription(offer)
-
-    socket.emit("offer", { to: remoteUserId, offer })
   }
 
   return (
@@ -139,12 +157,52 @@ export default function VideoChat({ remoteUserId }: Props) {
         <video ref={localVideoRef} autoPlay muted playsInline className="w-64 h-48 border rounded bg-black" />
         <video ref={remoteVideoRef} autoPlay playsInline className="w-64 h-48 border rounded bg-black" />
       </div>
-      <button
-        onClick={startCall}
-        className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
-      >
-        Iniciar Chamada
-      </button>
+
+      {!permissionGranted ? (
+        <button
+          onClick={requestPermissionAndLoadDevices}
+          className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700"
+        >
+          Permitir Acesso à Câmera e Microfone
+        </button>
+      ) : (
+        <>
+          <div className="flex flex-col items-start space-y-2 w-64">
+            <label className="text-sm font-medium">Selecionar Câmera:</label>
+            <select
+              className="w-full p-2 border rounded"
+              value={selectedCamera}
+              onChange={(e) => setSelectedCamera(e.target.value)}
+            >
+              {videoDevices.map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Câmera ${device.deviceId}`}
+                </option>
+              ))}
+            </select>
+
+            <label className="text-sm font-medium mt-2">Selecionar Microfone:</label>
+            <select
+              className="w-full p-2 border rounded"
+              value={selectedMic}
+              onChange={(e) => setSelectedMic(e.target.value)}
+            >
+              {audioDevices.map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Microfone ${device.deviceId}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={startCall}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+          >
+            Iniciar Chamada
+          </button>
+        </>
+      )}
     </div>
   )
 }

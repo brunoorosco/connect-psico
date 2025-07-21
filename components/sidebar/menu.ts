@@ -64,6 +64,24 @@ export const menus = [
     icon: MessageCircle,
     rules: ["SUPERVISOR"],
   },
+  {
+    title: "Dashboard",
+    url: "/app",
+    icon: GraduationCap,
+    rules: ["DEFAULT"],
+  },
+  {
+    title: "Chat",
+    url: `/app/users/{userId}/chat`,
+    icon: MessageCircle,
+    rules: ["DEFAULT"],
+  },
+  {
+    title: "Video Chamada",
+    url: `/app/{userId}/videochamada`,
+    icon: MessageCircle,
+    rules: ["SUPERVISOR", "DEFAULT"],
+  },
 
   {
     title: "Agendamentos",
@@ -89,18 +107,7 @@ export const menus = [
     icon: Calendar,
     rules: ["ADMIN"],
   },
-  {
-    title: "Dashboard",
-    url: "/app",
-    icon: GraduationCap,
-    rules: ["DEFAULT"],
-  },
-  {
-    title: "Chat",
-    url: `/app/users/{userId}/chat`,
-    icon: MessageCircle,
-    rules: ["DEFAULT"],
-  },
+
 ]
 
 export const menusFooter = {
