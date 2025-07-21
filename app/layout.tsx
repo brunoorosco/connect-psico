@@ -1,16 +1,16 @@
-import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Roboto } from "next/font/google";
-import { Toaster } from "sonner";
-import AuthProvider from "@/components/auth/auth-provider";
+import "./globals.css"
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Roboto } from "next/font/google"
+import { Toaster } from "sonner"
+import AuthProvider from "@/components/auth/auth-provider"
 
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["100", "300", "400", "500", "700"], // choose the required font weights
-});
+})
 
-import type { Metadata } from "next";
-import Head from "next/head";
+import type { Metadata } from "next"
+import Head from "next/head"
 
 export const metadata: Metadata = {
   title: "Psico Mais | Psicologia online e presencial",
@@ -54,8 +54,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Psico Mais | Psicologia online",
-    description:
-      "Terapia online com psicólogos especializados. Privacidade, acolhimento e segurança.",
+    description: "Terapia online com psicólogos especializados. Privacidade, acolhimento e segurança.",
   },
   metadataBase: new URL("https://psicomais.com"),
   icons: {
@@ -78,29 +77,27 @@ export const metadata: Metadata = {
         url: "/apple-touch-icon.png",
       },
     ],
-   },
-  };
+  },
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="pt-BR">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
       <body className={roboto.className} suppressHydrationWarning>
         <AuthProvider>
           <Toaster expand={true} richColors closeButton={true} />
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             {children}
           </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

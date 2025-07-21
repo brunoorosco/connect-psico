@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { io, Socket } from "socket.io-client"
 import { env } from "@/config/application"
 
-const BASE_URL = env.baseUrlPsicomaisApi || "http://localhost:4000"
+const BASE_URL = env.baseUrlPsicomaisApi
 
 interface AuthUser {
   id: string

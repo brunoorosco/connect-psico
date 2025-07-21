@@ -1,7 +1,5 @@
 // app/room/[id]/VideoChatWrapper.tsx (client component)
 "use client"
-
-import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
@@ -10,8 +8,6 @@ import { useSession } from "next-auth/react"
 const VideoChat = dynamic(() => import("@/components/videoChat"), { ssr: false })
 
 export default function VideoChatWrapper() {
-  const params = useParams()
-  const id = params.id as string
   const setAuthUser = useAuthStore((s) => s.setAuthUser)
   const connectSocket = useAuthStore((s) => s.connectSocket)
   const { data: session } = useSession()
@@ -27,7 +23,7 @@ export default function VideoChatWrapper() {
     }
   }, [session, setAuthUser])
 
-  if (!id) return <div>Carregando sala...</div>
+  if (!session?.user.id) return <div>Carregando sala...</div>
 
-  return <VideoChat remoteUserId={id} />
+  return <VideoChat remoteUserId={session?.user.id} />
 }
