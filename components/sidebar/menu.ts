@@ -9,6 +9,7 @@ import {
   MessageCircle,
   CalendarDaysIcon,
   Users,
+  WebcamIcon
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -79,7 +80,7 @@ export const menus = [
   {
     title: "Video Chamada",
     url: `/app/{userId}/videochamada`,
-    icon: MessageCircle,
+    icon: WebcamIcon,
     rules: ["SUPERVISOR", "DEFAULT"],
   },
 

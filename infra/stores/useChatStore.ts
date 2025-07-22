@@ -32,21 +32,23 @@ export const useChatStore = create<State>((set, get) => ({
   getUsers: async (user: User): Promise<void> => {
     set({ isUsersLoading: true })
     let users
+    let usersChat
     try {
-      if (user.role === "SUPERVISOR") {
-        users = await getUserChat()
-        if (!users) {
-          toast.error("Erro ao buscar usuários")
-          return
-        }
-      } else {
-        const usersChat = await getContactsApi()
-        users = await getUserChatProfessionals(usersChat as string[])
+      // if (user.role === "SUPERVISOR") {
+      //   usersChat = await getUserChat()
+      //   if (!users) {
+      //     toast.error("Erro ao buscar usuários")
+      //     return
+      //   }
+      // }
+      // const messageIds = usersChat?.map((item) => item)
+      const usershat = await getContactsApi()
+      console.log(usershat)
+      const users = await getUserChatProfessionals(usershat as string[])
 
-        if (!users) {
-          toast.error("Erro ao buscar usuários")
-          return
-        }
+      if (!users) {
+        toast.error("Erro ao buscar usuários")
+        return
       }
       // @ts-ignore
       set({ users })
@@ -85,12 +87,11 @@ export const useChatStore = create<State>((set, get) => ({
   subscribeToMessages: () => {
     const { selectedUser, messages } = get()
     const socket = useAuthStore.getState().socket
-    
 
     if (!selectedUser || !socket) return
 
     socket.on("newMessage", (newMessage: TMessage) => {
-      console.log("new message",newMessage)
+      console.log("new message", newMessage)
       const isFromUser = newMessage.senderId === selectedUser.userId
       if (!isFromUser) return
 

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
 import { auth } from "@/auth" // Certifique-se de que está importando corretamente
 import { UserChat } from "@/domain/model/patient"
 
-export const getUserChat = async (): Promise<UserChat[] | { error: string }> => {
+export const getUserChat = async (): Promise<{userId:string}[] | { error: string }> => {
   const session = await auth() // Obtém a sessão do usuário autenticado
   if (!session) {
     return { error: "Usuário não autenticado" }
@@ -29,12 +29,12 @@ export const getUserChat = async (): Promise<UserChat[] | { error: string }> => 
       },
     })
     const userMapped = users.map((item) => ({
-      id: item.id,
+      // id: item.id,
       userId: item.patient.id,
-      name: item.patient.name,
-      image: item.patient.image || "",
-      isOnline: false,
-      role: item.patient.role,
+      // name: item.patient.name,
+      // image: item.patient.image || "",
+      // isOnline: false,
+      // role: item.patient.role,
     }))
     return userMapped as UserChat[]
   } catch (error) {
