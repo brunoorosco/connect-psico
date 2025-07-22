@@ -7,6 +7,7 @@ import VideoContainer from "./VideoContainer"
 import SettingsModal from "./SettingsModal"
 import { useEffect, useRef, useState } from "react"
 import PermissionScreen from "./PermissionScreen"
+import { VideoCallScheduleMenu } from "./sidebarSchedules"
 
 interface Props {
   remoteUserId: string
@@ -51,6 +52,7 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
   return (
     <>
       <VideoContainer>
+        
         <VideoStreams localRef={localVideoRef} remoteRef={remoteVideoRef} />
 
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4">

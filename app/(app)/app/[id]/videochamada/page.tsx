@@ -1,8 +1,10 @@
 import React from "react"
 import ChatVideoPage from "@presentation/pages/chatVideo"
+import { VideoCallScheduleMenu } from "@components/videoChat/sidebarSchedules"
 
 const PageChatVideo: React.FC = () => {
-  return <ChatVideoPage />
+  // return <ChatVideoPage />
+  return <VideoCallScheduleMenu />
 }
 
 export default PageChatVideo
@@ -14,15 +16,15 @@ export default PageChatVideo
 // import { Input } from '@/components/ui/input';
 // import { ScrollArea } from '@/components/ui/scroll-area';
 // import { Badge } from '@/components/ui/badge';
-// import { 
-//   Mic, 
-//   MicOff, 
-//   Video, 
-//   VideoOff, 
-//   PhoneOff, 
-//   ScreenShare, 
-//   MessageSquare, 
-//   Settings, 
+// import {
+//   Mic,
+//   MicOff,
+//   Video,
+//   VideoOff,
+//   PhoneOff,
+//   ScreenShare,
+//   MessageSquare,
+//   Settings,
 //   Users,
 //   Send,
 //   MoreVertical,

@@ -10,34 +10,35 @@ datasource db {
 }
 
 model User {
-  id                       String         @id @default(cuid())
-  index                    Int            @default(autoincrement())
+  id                       String                 @id @default(cuid())
+  index                    Int                    @default(autoincrement())
   name                     String
-  email                    String         @unique
+  email                    String                 @unique
   emailVerified            DateTime?
   image                    String?
-  active                   Boolean        @default(true)
+  active                   Boolean                @default(true)
   phone                    String?
-  role                     UserRole       @default(DEFAULT)
+  role                     UserRole               @default(DEFAULT)
   password                 String?
-  isTwoFactorAuthEnabled   Boolean        @default(false)
+  isTwoFactorAuthEnabled   Boolean                @default(false)
   twoFactorAuthVerified    DateTime?
-  isNewProfile             Boolean        @default(true)
-  createdAt                DateTime       @default(now())
-  updatedAt                DateTime       @updatedAt
-  patientAppointments      Appointment[]  @relation("PatientAppointments")
-  professionalAppointments Appointment[]  @relation("ProfessionalAppointments")
+  isNewProfile             Boolean                @default(true)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  patientAppointments      Appointment[]          @relation("PatientAppointments")
+  professionalAppointments Appointment[]          @relation("ProfessionalAppointments")
   availabilities           Availability[]
   Comentarios              Comentarios[]
-  receivedMessages         Message[]      @relation("ReceivedMessages")
-  sentMessages             Message[]      @relation("SentMessages")
+  receivedMessages         Message[]              @relation("ReceivedMessages")
+  sentMessages             Message[]              @relation("SentMessages")
   Message                  Message[]
   Professional             Professional?
-  patientUser              Pacientes[]    @relation("PatientUser")
-  patientProfessional      Pacientes[]    @relation("PatientProfessional")
+  patientUser              Pacientes[]            @relation("PatientUser")
+  patientProfessional      Pacientes[]            @relation("PatientProfessional")
   Session                  Session[]
   Account                  Account[]
-  NotePatient              NotePatient[]  @relation("NotePatientProfessional")
+  NotePatient              NotePatient[]          @relation("NotePatientProfessional")
+  VideoCallParticipant     VideoCallParticipant[]
 
   @@index([id])
   @@map("users")
@@ -215,6 +216,26 @@ model Message {
   User       User?    @relation(fields: [userId], references: [id])
 
   @@map("messages")
+}
+
+model VideoCallRoom {
+  id           String                 @id @default(cuid())
+  participants VideoCallParticipant[]
+  scheduledAt  DateTime
+  createdAt    DateTime               @default(now())
+
+  @@map("video_call_rooms")
+}
+
+model VideoCallParticipant {
+  id       Int           @id @default(autoincrement())
+  userId   String
+  roomId   String
+  joinedAt DateTime      @default(now())
+  user     User          @relation(fields: [userId], references: [id])
+  room     VideoCallRoom @relation(fields: [roomId], references: [id])
+
+  @@unique([userId, roomId])
 }
 
 enum UserRole {
