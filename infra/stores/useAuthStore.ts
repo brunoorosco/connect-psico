@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { io, Socket } from "socket.io-client"
 import { env } from "@/config/application"
 
-const BASE_URL = env.baseUrlPsicomaisApi || "http://localhost:4000"
+const BASE_URL = env.baseUrlPsicomaisApi
 
 interface AuthUser {
   id: string
@@ -30,7 +30,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   connectSocket: () => {
     const { authUser, socket } = get()
-    console.log("Connecting socket...", authUser, socket)
     if (!authUser || socket?.connected) return
 
     const newSocket: Socket = io(BASE_URL, {
@@ -40,7 +39,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     })
 
     newSocket.connect()
-    console.log("Socket connected")
     set({ socket: newSocket })
 
     newSocket.on("getOnlineUsers", (userIds: string[]) => {

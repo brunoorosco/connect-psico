@@ -27,7 +27,7 @@ export const getUserChatProfessionals = async (userIds: string[]): Promise<UserC
       },
     })
     const userMapped = users.map((item) => ({
-      id: item.Professional?.id,
+      id: item.Professional?.id || "",
       userId: item.id,
       name: item.name,
       image: item.image || "",
