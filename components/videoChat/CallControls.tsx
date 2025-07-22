@@ -23,7 +23,6 @@ export const CallControls = ({
   onSettingsClick,
   onStartCall,
 }: Props) => {
-  console.log("CallControls rendered", inCall)
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-4 bg-black/60 px-4 py-2 rounded-full">
       {!inCall ? (

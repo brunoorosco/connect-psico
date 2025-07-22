@@ -7,7 +7,6 @@ import VideoContainer from "./VideoContainer"
 import SettingsModal from "./SettingsModal"
 import { useEffect, useRef, useState } from "react"
 import PermissionScreen from "./PermissionScreen"
-import { VideoCallScheduleMenu } from "./sidebarSchedules"
 
 interface Props {
   remoteUserId: string
