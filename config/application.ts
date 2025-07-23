@@ -6,9 +6,9 @@ export const env = {
   apikeyMailerSender: process.env.TOKEN_MAILERSEND,
   version: "1.0.0",
   apiKeyBabyMail: process.env.API_KEY_BABY_MAIL,
-  nodemailerHost: process.env.NODEMAILER_HOST , 
-  nodemailerPort: Number(process.env.NODEMAILER_PORT), 
-  nodemailerUser:process.env.NODEMAILER_USER, 
-  nodemailerPassword:process.env.NODEMAILER_PASS,
-  baseUrlPsicomaisApi: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS,
-};
+  nodemailerHost: process.env.NODEMAILER_HOST,
+  nodemailerPort: Number(process.env.NODEMAILER_PORT),
+  nodemailerUser: process.env.NODEMAILER_USER,
+  nodemailerPassword: process.env.NODEMAILER_PASS,
+  baseUrlPsicomaisApi: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS || "http://localhost:4000",
+}

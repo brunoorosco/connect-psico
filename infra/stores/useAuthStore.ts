@@ -19,6 +19,14 @@ interface AuthStore {
 
   connectSocket: () => void
   disconnectSocket: () => void
+
+  onOffer?: (data: { offer: RTCSessionDescriptionInit; from: string }) => void
+  onAnswer?: (data: { answer: RTCSessionDescriptionInit; from: string }) => void
+  onIceCandidate?: (data: { candidate: RTCIceCandidateInit; from: string }) => void
+
+  setOnOffer: (handler: AuthStore["onOffer"]) => void
+  setOnAnswer: (handler: AuthStore["onAnswer"]) => void
+  setOnIceCandidate: (handler: AuthStore["onIceCandidate"]) => void
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -45,10 +53,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       console.log("Online users:", userIds)
       set({ onlineUsers: userIds })
     })
-  },
 
+    newSocket.on("offer", (data) => get().onOffer?.(data))
+    newSocket.on("answer", (data) => get().onAnswer?.(data))
+    newSocket.on("ice-candidate", (data) => get().onIceCandidate?.(data))
+    newSocket.on("disconnect", () => {
+      console.warn("Socket disconnected. Reconnecting...");
+      setTimeout(() => {
+        get().connectSocket();
+      }, 1000);
+    });
+  },
+  
   disconnectSocket: () => {
     const socket = get().socket
     if (socket?.connected) socket.disconnect()
   },
+
+  setOnOffer: (handler) => set({ onOffer: handler }),
+  setOnAnswer: (handler) => set({ onAnswer: handler }),
+  setOnIceCandidate: (handler) => set({ onIceCandidate: handler }),
 }))
