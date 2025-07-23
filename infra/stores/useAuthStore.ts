@@ -59,8 +59,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     newSocket.on("offer", (data) => get().onOffer?.(data))
     newSocket.on("answer", (data) => get().onAnswer?.(data))
     newSocket.on("ice-candidate", (data) => get().onIceCandidate?.(data))
+    newSocket.on("disconnect", () => {
+      console.warn("Socket disconnected. Reconnecting...");
+      setTimeout(() => {
+        get().connectSocket();
+      }, 1000);
+    });
   },
-
+  
   disconnectSocket: () => {
     const socket = get().socket
     if (socket?.connected) socket.disconnect()
