@@ -90,26 +90,44 @@ export const useWebRTC = (remoteUserId: string) => {
   const requestPermissionAndLoadDevices = async () => {
     try {
       console.log("requestPermissionAndLoadDevices")
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      localStreamRef.current = stream
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream
-
-      setPermissionGranted(true)
-      localStorage.setItem("webrtc-permission", "granted") // ✅ salva no localStorage
-      setConsentGiven(true)
+  
       const devices = await navigator.mediaDevices.enumerateDevices()
       const videos = devices.filter((d) => d.kind === "videoinput")
       const audios = devices.filter((d) => d.kind === "audioinput")
-
+  
       setVideoDevices(videos)
       setAudioDevices(audios)
       setSelectedCamera(videos[0]?.deviceId || "")
       setSelectedMic(audios[0]?.deviceId || "")
+  
+      // Monta constraints apenas se houver dispositivos disponíveis
+      const constraints: MediaStreamConstraints = {
+        video: videos.length > 0,
+        audio: audios.length > 0,
+      }
+  
+      // Se não há nenhum dispositivo, ainda assim prossegue
+      if (!constraints.video && !constraints.audio) {
+        console.warn("Nenhum dispositivo de entrada encontrado.")
+        setPermissionGranted(true)
+        localStorage.setItem("webrtc-permission", "granted")
+        setConsentGiven(true)
+        return
+      }
+  
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      localStreamRef.current = stream
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream
+  
+      setPermissionGranted(true)
+      localStorage.setItem("webrtc-permission", "granted")
+      setConsentGiven(true)
     } catch (err) {
-      console.error("Permissão de mídia negada:", err)
+      console.error("Erro ao solicitar permissão de mídia:", err)
       setPermissionGranted(false)
     }
   }
+  
 
   const createPeerConnection = (targetUserId: string): RTCPeerConnection => {
     const pc = new RTCPeerConnection(ICE_SERVERS)
