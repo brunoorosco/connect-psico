@@ -37,6 +37,12 @@ export const useWebRTC = (remoteUserId: string) => {
       requestPermissionAndLoadDevices()
       setConsentGiven(true)
     }
+    const cleanup = () => {
+      leaveCall()
+    }
+  
+    window.addEventListener("beforeunload", cleanup)
+    return () => window.removeEventListener("beforeunload", cleanup)
   }, [])
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import VideoChat from "@components/videoChat"
 import { getVideoCall } from "@/actions/scheduleVideo/getUserVideoPartipitants"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
@@ -39,12 +39,12 @@ export default function VideoCallRoomPage({ params }: Props) {
   if (!room) return <div>Sala não encontrada</div>
 
   const currentUserId = session?.user?.id
-  const remoteUser = useMemo(() => {
-    return room.participants.find((p: any) => p.user.id !== currentUserId)
-  }, [room.participants, currentUserId])
-
+  const remoteUser = room.participants.find((p: any) => p.user.id !== currentUserId)
   const remoteUserId = remoteUser?.user.id
 
+  // const remoteUser = useMemo(() => {
+  //   return room.participants.find((p: any) => p.user.id !== currentUserId)
+  // }, [room.participants, currentUserId])
   return (
     <div>
       <h1 className="text-xl font-bold">Consulta Remoto</h1>
