@@ -2,6 +2,7 @@ import React from "react"
 import ChatVideoPage from "@presentation/pages/chatVideo"
 import { VideoCallScheduleMenu } from "@components/videoChat/sidebarSchedules"
 
+
 const PageChatVideo: React.FC = () => {
   // return <ChatVideoPage />
   return <VideoCallScheduleMenu />

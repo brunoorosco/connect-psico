@@ -1,26 +1,23 @@
-"use client";
-import { usePathname } from "next/navigation";
-import MobileDrawer from "@/components/sidebar/MobileDrawer";
-import { useEffect, useState } from "react";
-import { update } from "@/auth";
+"use client"
+import MobileDrawer from "@/components/sidebar/MobileDrawer"
+import { useEffect, useState } from "react"
 export default function Navbar() {
-  const pathname = usePathname();
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const mediaQuery = window.matchMedia("(max-width: 768px)")
 
     const handleResize = () => {
-      setIsMobile(mediaQuery.matches);
-    };
+      setIsMobile(mediaQuery.matches)
+    }
 
-    handleResize();
-    mediaQuery.addEventListener("change", handleResize);
+    handleResize()
+    mediaQuery.addEventListener("change", handleResize)
 
     return () => {
-      mediaQuery.removeEventListener("change", handleResize);
-    };
-  }, []);
+      mediaQuery.removeEventListener("change", handleResize)
+    }
+  }, [])
 
   return (
     <header className="bg-white shadow-sm">
@@ -128,5 +125,5 @@ export default function Navbar() {
         )}
       </div>
     </header>
-  );
+  )
 }

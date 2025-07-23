@@ -35,6 +35,12 @@ export const CallControls = ({
       ) : (
         <>
           <button
+            onClick={onStartCall}
+            className="p-2 rounded-full bg-green-600 hover:bg-green-700 text-white transition"
+          >
+            <Phone size={20} />
+          </button>
+          <button
             onClick={toggleMic}
             className={`p-2 rounded-full text-white transition ${
               micEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-500"

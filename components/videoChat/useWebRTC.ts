@@ -40,6 +40,7 @@ export const useWebRTC = (remoteUserId: string) => {
   }, [])
 
   useEffect(() => {
+    console.log("socket", socket)
     if (!authUser || !socket) return
 
     setOnOffer(async ({ offer, from }) => {
@@ -126,11 +127,12 @@ export const useWebRTC = (remoteUserId: string) => {
   }
 
   const startCall = async () => {
+    console.log("startCall")
     const constraints: MediaStreamConstraints = {
       video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
       audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
     }
-
+    console.log("constraints", constraints)
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     localStreamRef.current = stream
     if (localVideoRef.current) localVideoRef.current.srcObject = stream
@@ -140,6 +142,8 @@ export const useWebRTC = (remoteUserId: string) => {
 
     const offer = await pcRef.current.createOffer()
     await pcRef.current.setLocalDescription(offer)
+    console.log("offer", offer)
+    console.log("socket", socket)
     socket?.emit("offer", { to: remoteUserId, offer })
   }
 
