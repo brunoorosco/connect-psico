@@ -40,8 +40,10 @@ export default function VideoCallRoomPage({ params }: Props) {
   //   return room.participants.find((p: any) => p.user.id !== currentUserId)
   // }, [room.participants, currentUserId])
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">  
+      <main className="flex-1 bg-black relative">
+        <VideoChat remoteUserId={remoteUserId ?? ""} isScheduledCall />
+      </main>
       <aside className="w-full md:w-64 bg-zinc-900 text-white p-4 flex-shrink-0 overflow-y-auto">
         <h1 className="text-lg font-semibold">Consulta Remota</h1>
         <p className="text-sm mt-1">Agendada para: {new Date(room.scheduledAt).toLocaleString()}</p>
@@ -59,11 +61,6 @@ export default function VideoCallRoomPage({ params }: Props) {
           </ul>
         </div>
       </aside>
-
-      {/* Área de vídeo */}
-      <main className="flex-1 bg-black relative">
-        <VideoChat remoteUserId={remoteUserId ?? ""} isScheduledCall />
-      </main>
     </div>
   )
 }
