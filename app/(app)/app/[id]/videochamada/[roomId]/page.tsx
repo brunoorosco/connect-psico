@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import VideoChat from "@components/videoChat"
 import { getVideoCall } from "@/actions/scheduleVideo/getUserVideoPartipitants"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
+import { useCallStore } from "@/infra/stores/useCallStore"
 
 interface Props {
   params: { roomId: string }
@@ -16,6 +17,8 @@ export default function VideoCallRoomPage({ params }: Props) {
   const [loading, setLoading] = useState(true)
   const setAuthUser = useAuthStore((s) => s.setAuthUser)
   const connectSocket = useAuthStore((s) => s.connectSocket)
+  const setMinimized = useCallStore((s) => s.setMinimized)
+  const setMeta = useCallStore((s) => s.setMeta)
 
   useEffect(() => {
     if (!session?.user?.id) return
@@ -27,7 +30,10 @@ export default function VideoCallRoomPage({ params }: Props) {
     connectSocket()
     getVideoCall(params.roomId).then(setRoom)
     setLoading(false)
-  }, [session, setAuthUser])
+      // estou na sala => desminimiza
+      setMinimized(false)
+      setMeta({ roomId: params.roomId })
+  }, [session, setAuthUser, params.roomId, setMinimized, setMeta])
 
   if (loading) return <div>Carregando...</div>
   if (!room) return <div>Sala não encontrada</div>
