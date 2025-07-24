@@ -40,13 +40,12 @@ export const useWebRTC = (remoteUserId: string) => {
     const cleanup = () => {
       leaveCall()
     }
-  
+
     window.addEventListener("beforeunload", cleanup)
     return () => window.removeEventListener("beforeunload", cleanup)
   }, [])
 
   useEffect(() => {
-    console.log("socket", socket)
     if (!authUser || !socket) return
 
     setOnOffer(async ({ offer, from }) => {
@@ -89,23 +88,21 @@ export const useWebRTC = (remoteUserId: string) => {
 
   const requestPermissionAndLoadDevices = async () => {
     try {
-      console.log("requestPermissionAndLoadDevices")
-  
       const devices = await navigator.mediaDevices.enumerateDevices()
       const videos = devices.filter((d) => d.kind === "videoinput")
       const audios = devices.filter((d) => d.kind === "audioinput")
-  
+
       setVideoDevices(videos)
       setAudioDevices(audios)
       setSelectedCamera(videos[0]?.deviceId || "")
       setSelectedMic(audios[0]?.deviceId || "")
-  
+
       // Monta constraints apenas se houver dispositivos disponíveis
       const constraints: MediaStreamConstraints = {
         video: videos.length > 0,
         audio: audios.length > 0,
       }
-  
+
       // Se não há nenhum dispositivo, ainda assim prossegue
       if (!constraints.video && !constraints.audio) {
         console.warn("Nenhum dispositivo de entrada encontrado.")
@@ -114,11 +111,11 @@ export const useWebRTC = (remoteUserId: string) => {
         setConsentGiven(true)
         return
       }
-  
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
       localStreamRef.current = stream
       if (localVideoRef.current) localVideoRef.current.srcObject = stream
-  
+
       setPermissionGranted(true)
       localStorage.setItem("webrtc-permission", "granted")
       setConsentGiven(true)
@@ -127,7 +124,6 @@ export const useWebRTC = (remoteUserId: string) => {
       setPermissionGranted(false)
     }
   }
-  
 
   const createPeerConnection = (targetUserId: string): RTCPeerConnection => {
     const pc = new RTCPeerConnection(ICE_SERVERS)
@@ -156,7 +152,7 @@ export const useWebRTC = (remoteUserId: string) => {
       video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
       audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
     }
-    console.log("constraints", constraints)
+
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     localStreamRef.current = stream
     if (localVideoRef.current) localVideoRef.current.srcObject = stream
@@ -166,12 +162,13 @@ export const useWebRTC = (remoteUserId: string) => {
 
     const offer = await pcRef.current.createOffer()
     await pcRef.current.setLocalDescription(offer)
-    console.log("offer", offer)
-    console.log("socket", socket)
+
     socket?.emit("offer", { to: remoteUserId, offer })
   }
 
   const leaveCall = () => {
+    console.log("leave-call")
+    socket?.emit("leave-call")
     localStreamRef.current?.getTracks().forEach((track) => track.stop())
     pcRef.current?.close()
     pcRef.current = null
@@ -180,11 +177,10 @@ export const useWebRTC = (remoteUserId: string) => {
   }
 
   const joinRoom = async () => {
+    console.log('joinRoom')
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     localStreamRef.current = stream
     if (localVideoRef.current) localVideoRef.current.srcObject = stream
-
-    setInCall(true) // Está pronto, aguardando ligação de outro
   }
 
   return {
@@ -205,5 +201,7 @@ export const useWebRTC = (remoteUserId: string) => {
     toggleCamera,
     micEnabled,
     cameraEnabled,
+    inCall,
+    socket
   }
 }
