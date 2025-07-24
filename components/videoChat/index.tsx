@@ -47,22 +47,6 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
     }
   }, [isScheduledCall, permissionGranted])
   
- useEffect(() => {
-    if (!socket) return
-
-    const handleCallStatus = ({ userId, inCall }: { userId: string; inCall: boolean }) => {
-      if (userId === remoteUserId) {
-        console.log("handleCallStatus",inCall)
-        // setInCall(inCall)
-      }
-    }
-
-    socket.on("call-status-updated", handleCallStatus)
-
-    return () => {
-      socket.off("call-status-updated", handleCallStatus)
-    }
-  }, [socket, remoteUserId])
 
 
   if (!permissionGranted) {

@@ -6,6 +6,18 @@ import { useAuthStore } from "@/infra/stores/useAuthStore"
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 }
+type OfferPayload = {
+  offer: RTCSessionDescriptionInit
+  from: string
+}
+
+type AnswerPayload = {
+  answer: RTCSessionDescriptionInit
+}
+
+type IceCandidatePayload = {
+  candidate: RTCIceCandidateInit
+}
 
 export const useWebRTC = (remoteUserId: string) => {
   const [permissionGranted, setPermissionGranted] = useState(false)
@@ -14,8 +26,13 @@ export const useWebRTC = (remoteUserId: string) => {
   const [selectedCamera, setSelectedCamera] = useState<string>("")
   const [selectedMic, setSelectedMic] = useState<string>("")
   const [inCall, setInCall] = useState(false)
+  const [consentGiven, setConsentGiven] = useState(false)
+  const [micEnabled, setMicEnabled] = useState(true)
+  const [cameraEnabled, setCameraEnabled] = useState(true)
+
   const localStreamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
+  const remoteUserIdRef = useRef(remoteUserId)
 
   const localVideoRef = useRef<HTMLVideoElement>(null)
   const remoteVideoRef = useRef<HTMLVideoElement>(null)
@@ -26,21 +43,18 @@ export const useWebRTC = (remoteUserId: string) => {
   const setOnAnswer = useAuthStore((s) => s.setOnAnswer)
   const setOnIceCandidate = useAuthStore((s) => s.setOnIceCandidate)
 
-  const [consentGiven, setConsentGiven] = useState(false)
-  const [micEnabled, setMicEnabled] = useState(true)
-  const [cameraEnabled, setCameraEnabled] = useState(true)
+  useEffect(() => {
+    remoteUserIdRef.current = remoteUserId
+  }, [remoteUserId])
 
-  // 🚀 Checa permissão já concedida no load
   useEffect(() => {
     const granted = localStorage.getItem("webrtc-permission") === "granted"
     if (granted) {
       requestPermissionAndLoadDevices()
       setConsentGiven(true)
     }
-    const cleanup = () => {
-      leaveCall()
-    }
 
+    const cleanup = () => leaveCall()
     window.addEventListener("beforeunload", cleanup)
     return () => window.removeEventListener("beforeunload", cleanup)
   }, [])
@@ -48,43 +62,36 @@ export const useWebRTC = (remoteUserId: string) => {
   useEffect(() => {
     if (!authUser || !socket) return
 
-    setOnOffer(async ({ offer, from }) => {
+    const handleOffer = async ({ offer, from }: OfferPayload) => {
       if (!localStreamRef.current) return
-      pcRef.current = createPeerConnection(from)
-      await pcRef.current.setRemoteDescription(new RTCSessionDescription(offer))
-      localStreamRef.current.getTracks().forEach((track) => pcRef.current?.addTrack(track, localStreamRef.current!))
-      const answer = await pcRef.current.createAnswer()
-      await pcRef.current.setLocalDescription(answer)
+      const pc = createPeerConnection(from)
+      pcRef.current = pc
+      await pc.setRemoteDescription(new RTCSessionDescription(offer))
+      localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!))
+      const answer = await pc.createAnswer()
+      await pc.setLocalDescription(answer)
       socket.emit("answer", { to: from, answer })
       setInCall(true)
-    })
+    }
 
-    setOnAnswer(async ({ answer }) => {
+    const handleAnswer = async ({ answer }: AnswerPayload) => {
       await pcRef.current?.setRemoteDescription(new RTCSessionDescription(answer))
-    })
+    }
 
-    setOnIceCandidate(async ({ candidate }) => {
+    const handleIceCandidate = async ({ candidate }: IceCandidatePayload) => {
       await pcRef.current?.addIceCandidate(new RTCIceCandidate(candidate))
-    })
+    }
+
+    setOnOffer(handleOffer)
+    setOnAnswer(handleAnswer)
+    setOnIceCandidate(handleIceCandidate)
+
+    return () => {
+      setOnOffer((data: OfferPayload) => handleOffer(data))
+      setOnAnswer((data: AnswerPayload) => handleAnswer(data))
+      setOnIceCandidate((data: IceCandidatePayload) => handleIceCandidate(data))
+    }
   }, [authUser, socket])
-
-  const toggleMic = () => {
-    const audioTracks = localStreamRef.current?.getAudioTracks()
-    if (audioTracks?.length) {
-      const enabled = !micEnabled
-      audioTracks.forEach((track) => (track.enabled = enabled))
-      setMicEnabled(enabled)
-    }
-  }
-
-  const toggleCamera = () => {
-    const videoTracks = localStreamRef.current?.getVideoTracks()
-    if (videoTracks?.length) {
-      const enabled = !cameraEnabled
-      videoTracks.forEach((track) => (track.enabled = enabled))
-      setCameraEnabled(enabled)
-    }
-  }
 
   const requestPermissionAndLoadDevices = async () => {
     try {
@@ -97,13 +104,11 @@ export const useWebRTC = (remoteUserId: string) => {
       setSelectedCamera(videos[0]?.deviceId || "")
       setSelectedMic(audios[0]?.deviceId || "")
 
-      // Monta constraints apenas se houver dispositivos disponíveis
       const constraints: MediaStreamConstraints = {
         video: videos.length > 0,
         audio: audios.length > 0,
       }
 
-      // Se não há nenhum dispositivo, ainda assim prossegue
       if (!constraints.video && !constraints.audio) {
         console.warn("Nenhum dispositivo de entrada encontrado.")
         setPermissionGranted(true)
@@ -129,8 +134,8 @@ export const useWebRTC = (remoteUserId: string) => {
     const pc = new RTCPeerConnection(ICE_SERVERS)
 
     pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket?.emit("ice-candidate", {
+      if (event.candidate && socket) {
+        socket.emit("ice-candidate", {
           to: targetUserId,
           candidate: event.candidate,
         })
@@ -143,11 +148,23 @@ export const useWebRTC = (remoteUserId: string) => {
       }
     }
 
+    pc.oniceconnectionstatechange = () => {
+      const state = pc.iceConnectionState
+      if (["disconnected", "failed", "closed"].includes(state)) {
+        console.warn("ICE connection finalizada:", state)
+        leaveCall()
+      }
+    }
+
     return pc
   }
 
   const startCall = async () => {
-    console.log("startCall")
+    if (!remoteUserIdRef.current) {
+      console.warn("remoteUserId não definido.")
+      return
+    }
+
     const constraints: MediaStreamConstraints = {
       video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
       audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
@@ -157,30 +174,62 @@ export const useWebRTC = (remoteUserId: string) => {
     localStreamRef.current = stream
     if (localVideoRef.current) localVideoRef.current.srcObject = stream
 
-    pcRef.current = createPeerConnection(remoteUserId)
-    stream.getTracks().forEach((track) => pcRef.current?.addTrack(track, stream))
+    const pc = createPeerConnection(remoteUserIdRef.current)
+    pcRef.current = pc
+    stream.getTracks().forEach((track) => pc.addTrack(track, stream))
 
-    const offer = await pcRef.current.createOffer()
-    await pcRef.current.setLocalDescription(offer)
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
 
-    socket?.emit("offer", { to: remoteUserId, offer })
+    socket?.emit("offer", {
+      to: remoteUserIdRef.current,
+      offer,
+    })
+
+    socket?.emit("call-status-updated", {
+      to: remoteUserIdRef.current,
+      inCall: true,
+    })
+
+    setInCall(true)
   }
 
   const leaveCall = () => {
     console.log("leave-call")
-    socket?.emit("leave-call")
+
+    socket?.emit("leave-call", {
+      to: remoteUserIdRef.current,
+    })
+
     localStreamRef.current?.getTracks().forEach((track) => track.stop())
     pcRef.current?.close()
     pcRef.current = null
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null
+    }
+
     setInCall(false)
-    // Pode emitir evento de saída se necessário
   }
 
-  const joinRoom = async () => {
-    console.log('joinRoom')
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    localStreamRef.current = stream
-    if (localVideoRef.current) localVideoRef.current.srcObject = stream
+  const joinRoom = requestPermissionAndLoadDevices
+
+  const toggleMic = () => {
+    const audioTracks = localStreamRef.current?.getAudioTracks()
+    if (audioTracks?.length) {
+      const enabled = !micEnabled
+      audioTracks.forEach((track) => (track.enabled = enabled))
+      setMicEnabled(enabled)
+    }
+  }
+
+  const toggleCamera = () => {
+    const videoTracks = localStreamRef.current?.getVideoTracks()
+    if (videoTracks?.length) {
+      const enabled = !cameraEnabled
+      videoTracks.forEach((track) => (track.enabled = enabled))
+      setCameraEnabled(enabled)
+    }
   }
 
   return {
@@ -202,6 +251,6 @@ export const useWebRTC = (remoteUserId: string) => {
     micEnabled,
     cameraEnabled,
     inCall,
-    socket
+    socket,
   }
 }
