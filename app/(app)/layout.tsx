@@ -23,8 +23,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Navbar />
           <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-6">{children}</main>
         </div>
-      </SidebarProvider>
         <CallFloatingWindow />
+      </SidebarProvider>
     </div>
   )
 }

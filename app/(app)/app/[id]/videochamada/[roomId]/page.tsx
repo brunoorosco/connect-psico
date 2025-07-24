@@ -30,10 +30,18 @@ export default function VideoCallRoomPage({ params }: Props) {
     connectSocket()
     getVideoCall(params.roomId).then(setRoom)
     setLoading(false)
-      // estou na sala => desminimiza
-      setMinimized(false)
-      setMeta({ roomId: params.roomId })
+    setMinimized(false) // entrou na call, desminimiza
+    setMeta({ roomId: params.roomId })
   }, [session, setAuthUser, params.roomId, setMinimized, setMeta])
+
+  // 🧠 Ao sair da tela, ativa a mini tela
+  useEffect(() => {
+    return () => {
+      if (useCallStore.getState().inCall) {
+        setMinimized(true)
+      }
+    }
+  }, [setMinimized])
 
   if (loading) return <div>Carregando...</div>
   if (!room) return <div>Sala não encontrada</div>
@@ -42,11 +50,8 @@ export default function VideoCallRoomPage({ params }: Props) {
   const remoteUser = room.participants.find((p: any) => p.user.id !== currentUserId)
   const remoteUserId = remoteUser?.user.id
 
-  // const remoteUser = useMemo(() => {
-  //   return room.participants.find((p: any) => p.user.id !== currentUserId)
-  // }, [room.participants, currentUserId])
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden">  
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
       <main className="flex-1 bg-black relative">
         <VideoChat remoteUserId={remoteUserId ?? ""} isScheduledCall />
       </main>
