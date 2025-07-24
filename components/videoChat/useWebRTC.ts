@@ -164,6 +164,8 @@ export const useWebRTC = (remoteUserId: string) => {
     await pcRef.current.setLocalDescription(offer)
 
     socket?.emit("offer", { to: remoteUserId, offer })
+    socket?.emit("call-status-updated", { to: remoteUserId, inCall: true });
+
   }
 
   const leaveCall = () => {
