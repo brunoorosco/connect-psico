@@ -33,7 +33,10 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
     cameraEnabled,
     leaveCall,
     joinRoom,
+    inCall,
+    socket
   } = useWebRTC(remoteUserId)
+
 
   const hasJoined = useRef(false)
 
@@ -43,6 +46,24 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
       hasJoined.current = true
     }
   }, [isScheduledCall, permissionGranted])
+  
+ useEffect(() => {
+    if (!socket) return
+
+    const handleCallStatus = ({ userId, inCall }: { userId: string; inCall: boolean }) => {
+      if (userId === remoteUserId) {
+        console.log("handleCallStatus",inCall)
+        // setInCall(inCall)
+      }
+    }
+
+    socket.on("call-status-updated", handleCallStatus)
+
+    return () => {
+      socket.off("call-status-updated", handleCallStatus)
+    }
+  }, [socket, remoteUserId])
+
 
   if (!permissionGranted) {
     return <PermissionScreen onAllow={requestPermissionAndLoadDevices} />
@@ -62,7 +83,7 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
             toggleMic={toggleMic}
             toggleCamera={toggleCamera}
             leaveCall={leaveCall}
-            inCall={!!remoteUserId}
+            inCall={inCall}
             onStartCall={() => {
               joinRoom()
               startCall()
