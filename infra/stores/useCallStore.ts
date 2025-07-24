@@ -8,13 +8,16 @@ interface CallState {
   remoteStream: MediaStream | null
   roomId?: string
   remoteUserId?: string
-
+  leaveCall?: () => void
+  setLeaveCall: (fn: () => void) => void
   setInCall: (v: boolean) => void
   setMinimized: (v: boolean) => void
   setLocalStream: (s: MediaStream | null) => void
   setRemoteStream: (s: MediaStream | null) => void
   setMeta: (data: { roomId?: string; remoteUserId?: string }) => void
   reset: () => void
+  audioOnly: boolean
+  setAudioOnly: (v: boolean) => void
 }
 
 export const useCallStore = create<CallState>((set) => ({
@@ -23,8 +26,10 @@ export const useCallStore = create<CallState>((set) => ({
   localStream: null,
   remoteStream: null,
   roomId: undefined,
-  remoteUserId: undefined,
-
+  remoteUserId: undefined,leaveCall: undefined,
+  audioOnly: false,
+  setAudioOnly: (v) => set({ audioOnly: v }),
+  setLeaveCall: (fn) => set({ leaveCall: fn }),
   setInCall: (v) => set({ inCall: v }),
   setMinimized: (v) => set({ minimized: v }),
   setLocalStream: (s) => set({ localStream: s }),

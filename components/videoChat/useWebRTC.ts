@@ -288,15 +288,7 @@ export const useWebRTC = (remoteUserId: string) => {
   const [micEnabled, setMicEnabled] = useState(true)
   const [cameraEnabled, setCameraEnabled] = useState(true)
 
-  const {
-    inCall,
-    setInCall,
-    setLocalStream,
-    setRemoteStream,
-    setMinimized,
-    setMeta,
-    reset,
-  } = useCallStore()
+  const { inCall, setInCall, setLocalStream, setRemoteStream, setMinimized, setMeta, reset, setLeaveCall } = useCallStore()
 
   const localStreamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
@@ -441,9 +433,8 @@ export const useWebRTC = (remoteUserId: string) => {
       console.warn("remoteUserId não definido.")
       return
     }
-
     const constraints: MediaStreamConstraints = {
-      video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
+      video: selectedCamera ? { deviceId: { exact: selectedCamera } } : false,
       audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
     }
 
@@ -473,7 +464,7 @@ export const useWebRTC = (remoteUserId: string) => {
   }
 
   const leaveCall = () => {
-    console.log("leave-call")
+    setLeaveCall(leaveCall)
 
     socket?.emit("call-status-updated", {
       to: remoteUserIdRef.current,
