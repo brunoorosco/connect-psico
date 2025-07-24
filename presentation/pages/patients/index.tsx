@@ -26,7 +26,7 @@ export function PatientsPage() {
   } = usePatientManager();
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden px-4 py-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden px-2 py-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Título e botão responsivos */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">

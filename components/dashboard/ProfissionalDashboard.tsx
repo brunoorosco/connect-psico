@@ -75,7 +75,7 @@ const PsychologistDashboard: React.FC = () => {
     : mockPatients[0];
 
   return (
-    <div className="space-y-6 mt-4">
+    <div className="space-y-6  px-2 py-4 sm:px-6 lg:px-8">
       <DashboardHeader
         title="Seu Dashboard"
         subtitle="Gerencie suas consultas e pacientes"

@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { CalendarViewType } from '@/types/appointment';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { 
-  CalendarDays, 
-  CalendarIcon, 
+import {
+  CalendarDays,
+  CalendarIcon,
   Calendar as CalendarMonth,
-  ChevronLeft, 
+  ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 
@@ -63,24 +63,26 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center my-2">
+      {/* Navegação de datas */}
+      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
         <Button variant="outline" size="icon" onClick={handlePrevious}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-xl font-semibold px-2 min-w-[200px] text-center">
+        <h2 className="text-base sm:text-xl font-semibold px-2 text-center min-w-[200px]">
           {formatTitle()}
         </h2>
         <Button variant="outline" size="icon" onClick={handleNext}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" className="ml-2" onClick={handleToday}>
+        <Button variant="outline" size="sm" className="ml-0 sm:ml-2" onClick={handleToday}>
           Hoje
         </Button>
       </div>
-      
-      <div className="flex items-center gap-2">
-        <Button 
+
+      {/* Mudança de visualização */}
+      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
+        <Button
           variant={view === 'daily' ? 'default' : 'outline'}
           onClick={() => onViewChange('daily')}
           className="flex gap-1 items-center"
@@ -88,7 +90,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <CalendarIcon className="h-4 w-4" />
           <span>Diário</span>
         </Button>
-        <Button 
+        <Button
           variant={view === 'weekly' ? 'default' : 'outline'}
           onClick={() => onViewChange('weekly')}
           className="flex gap-1 items-center"
@@ -96,7 +98,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <CalendarDays className="h-4 w-4" />
           <span>Semanal</span>
         </Button>
-        <Button 
+        <Button
           variant={view === 'monthly' ? 'default' : 'outline'}
           onClick={() => onViewChange('monthly')}
           className="flex gap-1 items-center"
