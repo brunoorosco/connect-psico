@@ -17,12 +17,6 @@ export default function VideoCallRoomPage({ params }: Props) {
   const setAuthUser = useAuthStore((s) => s.setAuthUser)
   const connectSocket = useAuthStore((s) => s.connectSocket)
 
-  // useEffect(() => {
-  //   if (!session?.user?.id) return
-  //   getVideoCall(params.roomId).then(setRoom)
-  //   setLoading(false)
-  // }, [session])
-
   useEffect(() => {
     if (!session?.user?.id) return
     setAuthUser({
@@ -46,18 +40,30 @@ export default function VideoCallRoomPage({ params }: Props) {
   //   return room.participants.find((p: any) => p.user.id !== currentUserId)
   // }, [room.participants, currentUserId])
   return (
-    <div>
-      <h1 className="text-xl font-bold">Consulta Remoto</h1>
-      <p>Agendada para: {new Date(room.scheduledAt).toLocaleString()}</p>
-      <h2 className="mt-4">Participantes:</h2>
-      <ul>
-        {room.participants.map((p: any) => (
-          <li key={p.user.id}>
-            {p.user.name} {p.user.id === currentUserId && "(você)"}
-          </li>
-        ))}
-      </ul>
-      <VideoChat remoteUserId={remoteUserId ?? ""} isScheduledCall />
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      {/* Sidebar */}
+      <aside className="w-full md:w-64 bg-zinc-900 text-white p-4 flex-shrink-0 overflow-y-auto">
+        <h1 className="text-lg font-semibold">Consulta Remota</h1>
+        <p className="text-sm mt-1">Agendada para: {new Date(room.scheduledAt).toLocaleString()}</p>
+        <div className="mt-4">
+          <h2 className="font-medium mb-2">Participantes</h2>
+          <ul className="space-y-2">
+            {room.participants.map((p: any) => (
+              <li key={p.user.id} className="flex items-center gap-2">
+                <img src={p.user.image || "/default-avatar.png"} alt="" className="w-8 h-8 rounded-full" />
+                <span className="text-sm">
+                  {p.user.name} {p.user.id === currentUserId && "(você)"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      {/* Área de vídeo */}
+      <main className="flex-1 bg-black relative">
+        <VideoChat remoteUserId={remoteUserId ?? ""} isScheduledCall />
+      </main>
     </div>
   )
 }
