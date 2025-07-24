@@ -288,7 +288,17 @@ export const useWebRTC = (remoteUserId: string) => {
   const [micEnabled, setMicEnabled] = useState(true)
   const [cameraEnabled, setCameraEnabled] = useState(true)
 
-  const { inCall, setInCall, setLocalStream, setRemoteStream, setMinimized, setMeta, reset, setLeaveCall } = useCallStore()
+  const {
+    inCall,
+    setInCall,
+    setLocalStream,
+    setRemoteStream,
+    setMinimized,
+    setMeta,
+    reset,
+    setLeaveCall,
+    audioOnly,
+  } = useCallStore()
 
   const localStreamRef = useRef<MediaStream | null>(null)
   const pcRef = useRef<RTCPeerConnection | null>(null)
@@ -307,6 +317,10 @@ export const useWebRTC = (remoteUserId: string) => {
     remoteUserIdRef.current = remoteUserId
     setMeta({ remoteUserId })
   }, [remoteUserId, setMeta])
+
+  useEffect(() => {
+    setLeaveCall(() => leaveCall)
+  }, [])
 
   useEffect(() => {
     const granted = localStorage.getItem("webrtc-permission") === "granted"
@@ -387,7 +401,9 @@ export const useWebRTC = (remoteUserId: string) => {
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
       localStreamRef.current = stream
       setLocalStream(stream)
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream
+      if (localVideoRef.current && !localVideoRef.current.srcObject) {
+        localVideoRef.current.srcObject = stream
+      }
 
       setPermissionGranted(true)
       localStorage.setItem("webrtc-permission", "granted")
@@ -411,7 +427,7 @@ export const useWebRTC = (remoteUserId: string) => {
     }
 
     pc.ontrack = (event) => {
-      if (remoteVideoRef.current) {
+      if (remoteVideoRef.current && !remoteVideoRef.current.srcObject) {
         remoteVideoRef.current.srcObject = event.streams[0]
       }
       setRemoteStream(event.streams[0])
@@ -419,9 +435,15 @@ export const useWebRTC = (remoteUserId: string) => {
 
     pc.oniceconnectionstatechange = () => {
       const state = pc.iceConnectionState
-      if (["disconnected", "failed", "closed"].includes(state)) {
-        console.warn("ICE connection finalizada:", state)
+      if (state === "failed" || state === "closed") {
         leaveCall()
+      }
+      if (state === "disconnected") {
+        setTimeout(() => {
+          if (pc.iceConnectionState === "disconnected") {
+            leaveCall()
+          }
+        }, 5000)
       }
     }
 
@@ -429,19 +451,32 @@ export const useWebRTC = (remoteUserId: string) => {
   }
 
   const startCall = async () => {
+    if (!permissionGranted) {
+      await requestPermissionAndLoadDevices()
+    }
+
     if (!remoteUserIdRef.current) {
       console.warn("remoteUserId não definido.")
       return
     }
+
     const constraints: MediaStreamConstraints = {
-      video: selectedCamera ? { deviceId: { exact: selectedCamera } } : false,
-      audio: selectedMic ? { deviceId: { exact: selectedMic } } : true,
+      video: audioOnly
+        ? false
+        : selectedCamera
+        ? { deviceId: { exact: selectedCamera } }
+        : true,
+      audio: selectedMic
+        ? { deviceId: { exact: selectedMic } }
+        : true,
     }
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     localStreamRef.current = stream
     setLocalStream(stream)
-    if (localVideoRef.current) localVideoRef.current.srcObject = stream
+    if (localVideoRef.current && !localVideoRef.current.srcObject) {
+      localVideoRef.current.srcObject = stream
+    }
 
     const pc = createPeerConnection(remoteUserIdRef.current)
     pcRef.current = pc
@@ -464,8 +499,6 @@ export const useWebRTC = (remoteUserId: string) => {
   }
 
   const leaveCall = () => {
-    setLeaveCall(leaveCall)
-
     socket?.emit("call-status-updated", {
       to: remoteUserIdRef.current,
       inCall: false,
@@ -479,7 +512,7 @@ export const useWebRTC = (remoteUserId: string) => {
       remoteVideoRef.current.srcObject = null
     }
 
-    reset() // limpa Zustand: inCall, streams, etc.
+    reset()
   }
 
   const joinRoom = requestPermissionAndLoadDevices
