@@ -1,17 +1,18 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import { AppSidebar } from "@/components/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import Navbar from "./app/navbar";
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
+import { AppSidebar } from "@/components/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import Navbar from "./app/navbar"
+import { CallFloatingWindow } from "@components/videoChat/CallFloatingWindow"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  const session = await auth()
   if (!session) {
-    return redirect("/");
+    return redirect("/")
   }
 
   if (session.user.isNewProfile === true) {
-    return redirect(`/onboarding/${session.user.id}`);
+    return redirect(`/onboarding/${session.user.id}`)
   }
 
   return (
@@ -20,9 +21,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <AppSidebar />
         <div className="flex-1">
           <Navbar />
-          <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-6">{children}</main>
+          <main className="max-w-8xl mx-auto">{children}</main>
         </div>
+        <CallFloatingWindow />
       </SidebarProvider>
     </div>
-  );
+  )
 }
