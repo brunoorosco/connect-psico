@@ -37,7 +37,7 @@ export default function VideoCallRoomPage({ params }: Props) {
       if (res && res.participants?.some((p: any) => p.user.id === currentUserId)) {
         setRoom(res)
       } else {
-        setTimeout(() => setNotFound(true), 5000)
+        setNotFound(true)
       }
       setLoading(false)
     }
