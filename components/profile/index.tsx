@@ -25,7 +25,6 @@ const ProfileProfessionalForm: React.FC = () => {
   const id = params.id as string
   const { data: session, update } = useSession()
   const { user, loading, error } = useGetProfessionalById(id)
-  console.log("Tipo de ID recebido:", typeof user?.id, user?.id);
 
   async function onSubmit(data: ProfileFormValues) {
     startTransition(async () => {
@@ -89,7 +88,7 @@ const ProfileProfessionalForm: React.FC = () => {
       </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <pre className="text-red-500">{JSON.stringify(form.formState.errors, null, 2)}</pre>
+          {/* <pre className="text-red-500">{JSON.stringify(form.formState.errors, null, 2)}</pre> */}
           <PersonalInfoForm profile={user} />
           <ProfessionalInfoForm profile={user} />
           <TargetAudienceForm profile={user} />
