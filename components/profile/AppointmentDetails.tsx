@@ -1,46 +1,21 @@
-import React from "react";
-import { Calendar, DollarSign, Clock, Video, Globe, Plus, Trash2 } from "lucide-react";
-import { useFormContext } from "react-hook-form";
-import { MapPin } from "@/components/ui/map-pin";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
-import { ProfileFormValues, TimeInterval, weekdays } from "@/schemas/PsicologoProfileSchema";
-import { ProfessionalModel } from "@/domain/model/professional";
+import React from "react"
+import { Calendar, Video, Globe } from "lucide-react"
+import { useFormContext } from "react-hook-form"
+import { MapPin } from "@/components/ui/map-pin"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
+import { ProfessionalModel } from "@/domain/model/professional"
 
 type Props = {
-  profile: ProfessionalModel;
-};
+  profile: ProfessionalModel
+}
 
 export const AppointmentDetailsForm = ({ profile }: Props) => {
-  const { control, watch, setValue } = useFormContext<ProfileFormValues>();
-  const availableHours = watch("availableHours") || [];
-
-  const addTimeInterval = () => {
-    const newInterval: TimeInterval = {
-      startTime: "08:00",
-      endTime: "17:00",
-    };
-    setValue("availableHours", [...availableHours, newInterval]);
-    toast.success("Intervalo de horário adicionado");
-  };
-
-  const removeTimeInterval = (index: number) => {
-    if (availableHours.length <= 1) {
-      toast.error("É necessário ter pelo menos um intervalo de horário");
-      return;
-    }
-
-    const updatedIntervals = availableHours.filter((_, idx) => idx !== index);
-    setValue("availableHours", updatedIntervals);
-    toast.success("Intervalo de horário removido");
-  };
+  const { control, watch, setValue } = useFormContext<ProfileFormValues>()
 
   return (
     <Card className="therapy-card">
@@ -49,9 +24,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
           <Calendar className="h-5 w-5 text-therapy-tertiary" />
           <CardTitle>Disponibilidade e Consulta</CardTitle>
         </div>
-        <CardDescription>
-          Configure os detalhes sobre suas consultas e disponibilidade
-        </CardDescription>
+        <CardDescription>Configure os detalhes sobre suas consultas e disponibilidade</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -93,11 +66,11 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
                     value={new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    }).format((field.value || 5000) / 100)} // <-- divide por 100 para mostrar
+                    }).format((field.value || 0) / 100)} // <-- divide por 100 para mostrar
                     onChange={(e) => {
-                      const rawValue = e.target.value.replace(/\D/g, ""); // remove tudo que não for número
-                      const numericValue = Number(rawValue); // inteiro em centavos
-                      field.onChange(numericValue);
+                      const rawValue = e.target.value.replace(/\D/g, "") // remove tudo que não for número
+                      const numericValue = Number(rawValue) // inteiro em centavos
+                      field.onChange(numericValue)
                     }}
                   />
                 </FormControl>
@@ -113,11 +86,7 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
             <FormItem className="space-y-3">
               <FormLabel>Tipo de atendimento</FormLabel>
               <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  className="flex flex-col space-y-1"
-                >
+                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-1">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="remoto" id="remoto" />
                     <FormLabel htmlFor="remoto" className="font-normal flex items-center gap-1">
@@ -144,5 +113,5 @@ export const AppointmentDetailsForm = ({ profile }: Props) => {
         />
       </CardContent>
     </Card>
-  );
-};
+  )
+}

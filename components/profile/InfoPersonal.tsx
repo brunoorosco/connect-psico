@@ -1,28 +1,22 @@
-import React, { useRef } from "react";
-import { UploadCloud, User } from "lucide-react";
-import { useFormContext } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
-import { ProfessionalModel } from "@/domain/model/professional";
-import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage";
+import React, { useRef } from "react"
+import { UploadCloud, User } from "lucide-react"
+import { useFormContext } from "react-hook-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
+import { ProfessionalModel } from "@/domain/model/professional"
+import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage"
+import InputMask from "react-input-mask"
 
 type Props = {
-  profile: ProfessionalModel;
-};
+  profile: ProfessionalModel
+}
 
 export const PersonalInfoForm = ({ profile }: Props) => {
-  const { control } = useFormContext<ProfileFormValues>();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { control } = useFormContext<ProfileFormValues>()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   return (
     <Card className="therapy-card">
@@ -31,9 +25,7 @@ export const PersonalInfoForm = ({ profile }: Props) => {
           <User className="h-5 w-5 text-therapy-tertiary" />
           <CardTitle>Dados Pessoais</CardTitle>
         </div>
-        <CardDescription>
-          Informações básicas sobre você que serão exibidas no seu perfil
-        </CardDescription>
+        <CardDescription>Informações básicas sobre você que serão exibidas no seu perfil</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -73,9 +65,25 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Telefone</FormLabel>
+                    <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <Input placeholder="(11) 99999-9999" {...field} />
+                      <InputMask
+                        mask="(99) 99999-9999"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      >
+                        {(inputProps: any) => (
+                          <Input
+                            {...inputProps}
+                            type="tel"
+                            placeholder="(00) 00000-0000"
+                            required
+                            name={field.name}
+                            ref={field.ref}
+                          />
+                        )}
+                      </InputMask>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -111,10 +119,10 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                         accept="image/*"
                         ref={fileInputRef}
                         onChange={async (e) => {
-                          const file = e.target.files?.[0];
+                          const file = e.target.files?.[0]
                           if (file) {
-                            const url = await uploadImageToCloudinary(file, profile.id);
-                            field.onChange(url); // ✅ Agora sim, salva no form uma URL pública
+                            const url = await uploadImageToCloudinary(file, profile.id)
+                            field.onChange(url) // ✅ Agora sim, salva no form uma URL pública
                           }
                         }}
                         className="hidden"
@@ -141,14 +149,12 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Esta descrição será exibida publicamente em seu perfil
-              </FormDescription>
+              <FormDescription>Esta descrição será exibida publicamente em seu perfil</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
       </CardContent>
     </Card>
-  );
-};
+  )
+}
