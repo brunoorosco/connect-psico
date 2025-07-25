@@ -33,10 +33,9 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
     cameraEnabled,
     leaveCall,
     joinRoom,
-    inCall,
-    socket
+    checkingPermission,
+    inCall
   } = useWebRTC(remoteUserId)
-
 
   const hasJoined = useRef(false)
 
@@ -46,9 +45,8 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
       hasJoined.current = true
     }
   }, [isScheduledCall, permissionGranted])
-  
 
-
+  if (checkingPermission) return null
   if (!permissionGranted) {
     return <PermissionScreen onAllow={requestPermissionAndLoadDevices} />
   }
@@ -56,7 +54,6 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
   return (
     <>
       <VideoContainer>
-        
         <VideoStreams localRef={localVideoRef} remoteRef={remoteVideoRef} />
 
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4">

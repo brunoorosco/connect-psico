@@ -33,10 +33,11 @@ export default function VideoCallRoomPage({ params }: Props) {
 
     const loadRoom = async () => {
       const res = await getVideoCall(params.roomId)
-      if (res) {
+      const currentUserId = session?.user?.id
+      if (res && res.participants?.some((p: any) => p.user.id === currentUserId)) {
         setRoom(res)
       } else {
-        setTimeout(() => setNotFound(true), 10000) // exibe "sala não encontrada" só após 10s
+        setNotFound(true)
       }
       setLoading(false)
     }
@@ -47,10 +48,14 @@ export default function VideoCallRoomPage({ params }: Props) {
   }, [session, setAuthUser, params.roomId, setMinimized, setMeta, connectSocket])
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      setMinimized(true)
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
     return () => {
-      if (useCallStore.getState().inCall) {
-        setMinimized(true)
-      }
+      setMinimized(true)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
     }
   }, [setMinimized])
 
@@ -74,12 +79,21 @@ export default function VideoCallRoomPage({ params }: Props) {
     )
   }
 
-  if (!room && notFound) return <div className="text-center mt-10 text-white">Sala não encontrada</div>
-
   const currentUserId = session?.user?.id
   const remoteUser = room?.participants?.find((p: any) => p.user.id !== currentUserId)
   const remoteUserId = remoteUser?.user.id
 
+  if (!room && notFound) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-zinc-900 text-white text-center px-4">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">Acesso não autorizado</h2>
+          <p className="text-sm text-zinc-300">Você não tem permissão para acessar esta sala ou ela não existe.</p>
+        </div>
+      </div>
+    )
+  }
+  if (!room) return null
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
       <main className="flex-1 bg-black relative">
@@ -87,19 +101,15 @@ export default function VideoCallRoomPage({ params }: Props) {
       </main>
       <aside className="w-full md:w-64 bg-zinc-900 text-white p-4 flex-shrink-0 overflow-y-auto">
         <h1 className="text-lg font-semibold">Consulta Remota</h1>
-        <p className="text-sm mt-1">
-          Agendada para: {new Date(room.scheduledAt).toLocaleString()}
-        </p>
+        {room?.scheduledAt && (
+          <p className="text-sm mt-1">Agendada para: {new Date(room.scheduledAt).toLocaleString()}</p>
+        )}
         <div className="mt-4">
           <h2 className="font-medium mb-2">Participantes</h2>
           <ul className="space-y-2">
-            {room.participants.map((p: any) => (
+            {(room.participants ?? []).map((p: any) => (
               <li key={p.user.id} className="flex items-center gap-2">
-                <img
-                  src={p.user.image || "/default-avatar.png"}
-                  alt=""
-                  className="w-8 h-8 rounded-full"
-                />
+                <img src={p.user.image || "/default-avatar.png"} alt="" className="w-8 h-8 rounded-full" />
                 <span className="text-sm">
                   {p.user.name} {p.user.id === currentUserId && "(você)"}
                 </span>

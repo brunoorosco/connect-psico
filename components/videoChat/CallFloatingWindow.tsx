@@ -7,7 +7,7 @@ import { useCallStore } from "@/infra/stores/useCallStore"
 import { useRouter } from "next/navigation"
 
 export function CallFloatingWindow() {
-  const { minimized, inCall, localStream, remoteStream, setMinimized } = useCallStore()
+  const { minimized, inCall, localStream, remoteStream, setMinimized, leaveCall } = useCallStore()
   const localRef = useRef<HTMLVideoElement>(null)
   const remoteRef = useRef<HTMLVideoElement>(null)
   const router = useRouter()
@@ -47,11 +47,13 @@ export function CallFloatingWindow() {
         </button>
         <button
           onClick={() => {
-            // aqui você pode acessar o leaveCall via um singleton/global
-            // ou via um callback salvo no store (ex: setLeaveCall(fn))
-            // para simplificar, você pode emitir um evento pelo socket ou usar outro store.
-            // Ex: useCallStore.getState().leaveCall()
-            // (adicione leaveCall no store se quiser acessá-lo aqui)
+            if (leaveCall) {
+              console.log("clicou em desligar")
+              leaveCall()
+            } else {
+              console.warn("leaveCall não está definido")
+            }
+            // setMinimized(false)
           }}
           className="p-2 bg-red-600 text-white rounded-full"
         >

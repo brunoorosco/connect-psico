@@ -42,7 +42,7 @@ export function VideoCallScheduleMenu() {
   }, [session])
 
   if (!session) return null
-console.log(calls)
+
   return (
     <div className="w-80 bg-card border-r flex flex-col">
       <div className="p-6 border-b">
