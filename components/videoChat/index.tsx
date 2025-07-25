@@ -66,6 +66,7 @@ export default function VideoChat({ remoteUserId, isScheduledCall }: Props) {
             cameraEnabled={cameraEnabled}
             toggleMic={toggleMic}
             toggleCamera={toggleCamera}
+            leaveCall={leaveCall}
             onStartCall={() => {
               joinRoom()
               startCall()

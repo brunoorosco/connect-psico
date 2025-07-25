@@ -1,11 +1,10 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
 import DashboardHeader from "./DashboardHeader"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useAppointmentsByPatient } from "@/hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
-import { getSession, useSession } from "next-auth/react"
+import { getSession } from "next-auth/react"
 
 // Mock data for the patient dashboard
 interface ProgressNote {
@@ -37,7 +36,7 @@ const PatientDashboard: React.FC = () => {
     .filter((app: AppointmentModel) => app.status === "PENDING")
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4 mt-4 px-4 sm:px-6 lg:px-6">
       <DashboardHeader title="Meu Acompanhamento" subtitle="Histórico e agenda de consultas" userRole="DEFAULT" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

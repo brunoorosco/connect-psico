@@ -1,33 +1,22 @@
-import React, { useRef } from "react";
-import { UploadCloud, User } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
-import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage";
-import { User as UserModel } from "@/domain/model/user";
+import React, { useRef } from "react"
+import { UploadCloud, User } from "lucide-react"
+import { UseFormReturn } from "react-hook-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
+import { uploadImageToCloudinary } from "@/services/cloudinaryService/uploadImage"
+import { User as UserModel } from "@/domain/model/user"
+import InputMask from "react-input-mask"
 
 type Props = {
-  profile: UserModel;
-  form: UseFormReturn<ProfileFormValues>;
-};
+  profile: UserModel
+  form: UseFormReturn<ProfileFormValues>
+}
 
 export const UserInfoForm = ({ profile, form }: Props) => {
-  const { control } = form;
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { control } = form
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   return (
     <Card className="therapy-card">
@@ -36,9 +25,7 @@ export const UserInfoForm = ({ profile, form }: Props) => {
           <User className="h-5 w-5 text-therapy-tertiary" />
           <CardTitle>Dados Pessoais</CardTitle>
         </div>
-        <CardDescription>
-          Informações básicas sobre você que serão exibidas no seu perfil
-        </CardDescription>
+        <CardDescription>Informações básicas sobre você que serão exibidas no seu perfil</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-2">
@@ -67,11 +54,7 @@ export const UserInfoForm = ({ profile, form }: Props) => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="seu.email@exemplo.com"
-                          {...field}
-                          disabled
-                        />
+                        <Input placeholder="seu.email@exemplo.com" {...field} disabled />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -80,13 +63,29 @@ export const UserInfoForm = ({ profile, form }: Props) => {
               </div>
 
               <FormField
-                control={control}
+                control={form.control}
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Telefone</FormLabel>
+                    <FormLabel>Telefone/WhatsApp</FormLabel>
                     <FormControl>
-                      <Input placeholder="(11) 99999-9999" {...field} />
+                      <InputMask
+                        mask="(99) 99999-9999"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      >
+                        {(inputProps: any) => (
+                          <Input
+                            {...inputProps}
+                            type="tel"
+                            placeholder="(00) 00000-0000"
+                            required
+                            name={field.name}
+                            ref={field.ref}
+                          />
+                        )}
+                      </InputMask>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -109,11 +108,7 @@ export const UserInfoForm = ({ profile, form }: Props) => {
                         className="w-32 h-32 rounded-full border flex items-center justify-center cursor-pointer hover:opacity-80 transition"
                       >
                         {field.value ? (
-                          <img
-                            src={field.value}
-                            alt="Preview"
-                            className="w-32 h-32 object-cover rounded-full"
-                          />
+                          <img src={field.value} alt="Preview" className="w-32 h-32 object-cover rounded-full" />
                         ) : (
                           <UploadCloud className="w-10 h-10 text-gray-400" />
                         )}
@@ -123,13 +118,10 @@ export const UserInfoForm = ({ profile, form }: Props) => {
                         accept="image/*"
                         ref={fileInputRef}
                         onChange={async (e) => {
-                          const file = e.target.files?.[0];
+                          const file = e.target.files?.[0]
                           if (file) {
-                            const url = await uploadImageToCloudinary(
-                              file,
-                              profile.id as string
-                            );
-                            field.onChange(url);
+                            const url = await uploadImageToCloudinary(file, profile.id as string)
+                            field.onChange(url)
                           }
                         }}
                         className="hidden"
@@ -144,5 +136,5 @@ export const UserInfoForm = ({ profile, form }: Props) => {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
