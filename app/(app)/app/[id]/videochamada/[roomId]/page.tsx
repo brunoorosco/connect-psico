@@ -47,12 +47,17 @@ export default function VideoCallRoomPage({ params }: Props) {
   }, [session, setAuthUser, params.roomId, setMinimized, setMeta, connectSocket])
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      setMinimized(true)
+    }
+  
+    window.addEventListener("beforeunload", handleBeforeUnload)
     return () => {
-      if (useCallStore.getState().inCall) {
-        setMinimized(true)
-      }
+      setMinimized(true)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
     }
   }, [setMinimized])
+  
 
   if (loading) {
     return (

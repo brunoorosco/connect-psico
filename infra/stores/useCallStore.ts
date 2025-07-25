@@ -18,6 +18,11 @@ interface CallState {
   reset: () => void
   audioOnly: boolean
   setAudioOnly: (v: boolean) => void
+  cameraEnabled: boolean
+  setCameraEnabled: (v:boolean) => void
+  authUser: any
+  setAuthUser: (user:any) => void
+  
 }
 
 export const useCallStore = create<CallState>((set) => ({
@@ -35,6 +40,10 @@ export const useCallStore = create<CallState>((set) => ({
   setLocalStream: (s) => set({ localStream: s }),
   setRemoteStream: (s) => set({ remoteStream: s }),
   setMeta: (data) => set(data),
+  cameraEnabled: true,
+setCameraEnabled: (v) => set({ cameraEnabled: v }),
+authUser: null,
+setAuthUser: (user) => set({ authUser: user }),
   reset: () =>
     set({
       inCall: false,
