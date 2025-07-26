@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AdminUserTable from "@/components/admin/AdminUserTable";
-import AdminRoleManagement from "@components/admin/AdminRoleManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import AdminUserTable from "@/components/admin/AdminUserTable"
+import AdminRoleManagement from "@components/admin/AdminRoleManagement"
 
 const AdminPanel = () => {
   return (
@@ -22,7 +22,6 @@ const AdminPanel = () => {
               <TabsTrigger value="roles" className="px-4 py-2 text-sm sm:text-base">
                 Gerenciar Permissões
               </TabsTrigger>
-             
             </TabsList>
           </div>
 
@@ -37,9 +36,7 @@ const AdminPanel = () => {
           <TabsContent value="payments" className="mt-6">
             <section>
               <h2 className="text-xl sm:text-2xl font-semibold mb-4">Status de Pagamentos</h2>
-              <p className="text-muted-foreground">
-                Visualize e gerencie o status de pagamento dos usuários.
-              </p>
+              <p className="text-muted-foreground">Visualize e gerencie o status de pagamento dos usuários.</p>
               <div className="mt-4">
                 <p className="text-muted-foreground">Funcionalidade em desenvolvimento.</p>
               </div>
@@ -48,7 +45,7 @@ const AdminPanel = () => {
         </Tabs>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminPanel;
+export default AdminPanel

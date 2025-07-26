@@ -1,199 +1,168 @@
-import { useState } from "react";
-import { Loader2, Shield, ShieldX } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { useUserPagination } from "@/hooks/useUserPagination";
-import { AdminTableLayout } from "./AdminTableLayout";
-import { Button } from "@components/ui/button";
+"use client"
+import { useState } from "react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useUserPagination } from "@/hooks/useUserPagination"
+import { AdminTableLayout } from "./AdminTableLayout"
+import { promoveUserToSupervisor, unpromoteSupervisortoUser } from "@/actions/admin"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Select } from "@/components/ui/select"
+import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { toast } from "sonner"
+import { User } from "@/domain/model/user"
+
+const ROLES = [
+  { value: "DEFAULT", label: "Usuário" },
+  { value: "SUPERVISOR", label: "Supervisor" },
+  { value: "ADMIN", label: "Administrador" },
+]
+type UserRole = Omit<User, "id"> & { id: string }
 
 const AdminRoleManagement = () => {
-  const { toast } = useToast();
-  const { users, search, setSearch, page, setPage, totalPages, loading, limit, setLimit } =
-    useUserPagination();
+  const { users, search, setSearch, page, setPage, totalPages, loading, limit, setLimit } = useUserPagination()
 
-  const [processingUsers, setProcessingUsers] = useState<Record<string, string>>({});
+  const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({})
+  const [confirmModal, setConfirmModal] = useState<{ user: UserRole; role: string } | null>(null)
 
-  const updateUserRole = async (
-    userId: string,
-    role: "ADMIN" | "SUPERVISOR",
-    shouldHaveRole: boolean
-  ) => {
-    setProcessingUsers((prev) => ({ ...prev, [userId + role]: role }));
+  const handleConfirmChange = (user: UserRole, newRole: string) => {
+    setConfirmModal({ user, role: newRole })
+  }
+
+  const handleApplyChange = async () => {
+    if (!confirmModal) return
+
+    const { user, role } = confirmModal
+    setProcessingUsers((prev) => ({ ...prev }))
 
     try {
-      toast({
-        title: "Permissão atualizada",
-        description: `Usuário ${shouldHaveRole ? "promovido a" : "removido de"} ${
-          role === "ADMIN" ? "administrador" : "supervisor"
-        }!`,
-      });
-    } catch (error) {
-      console.error(`Erro ao atualizar ${role}:`, error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar as permissões do usuário",
-        variant: "destructive",
-      });
+      if (role === "SUPERVISOR") {
+        await promoveUserToSupervisor(user.id)
+      } else if (role === "DEFAULT") {
+        await unpromoteSupervisortoUser(user.id)
+      } else {
+        // ADMIN ou outro: implemente aqui se necessário
+      }
+
+      toast.success("Permissão atualizada", {
+        description: `Permissão alterada para ${user.name.split(" ")[0]}.`,
+      })
+    } catch (err) {
+      toast.error("Erro", {
+        description: "Erro ao atualizar a permissão.",
+      })
     } finally {
-      setProcessingUsers((prev) => ({ ...prev, [userId + role]: "" }));
+      setProcessingUsers((prev) => ({ ...prev }))
+      setConfirmModal(null)
     }
-  };
+  }
 
   return (
-    <AdminTableLayout
-      title="Gerenciar Permissões"
-      search={search}
-      setSearch={setSearch}
-      searchPlaceholder="Buscar por nome e email..."
-      limit={limit}
-      setLimit={setLimit}
-      page={page}
-      setPage={setPage}
-      totalPages={totalPages}
-      loading={loading}
-    >
-      {/* Tabela para telas grandes */}
-      <div className="hidden sm:block rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Permissões</TableHead>
-              <TableHead>Supervisor</TableHead>
-              <TableHead>Administrador</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1 flex-wrap">
-                    {user.role === "ADMIN" && <Badge variant="destructive">Admin</Badge>}
-                    {user.role === "SUPERVISOR" && <Badge variant="secondary">Supervisor</Badge>}
-                    {user.role === "DEFAULT" && <Badge variant="outline">Usuário</Badge>}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant={user.role === "SUPERVISOR" ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={() =>
-                      updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")
-                    }
-                    disabled={!!processingUsers[user.id + "SUPERVISOR"]}
-                  >
-                    {processingUsers[user.id + "SUPERVISOR"] ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : user.role === "SUPERVISOR" ? (
-                      <>
-                        <ShieldX className="mr-1 h-4 w-4" /> Remover
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="mr-1 h-4 w-4" /> Promover
-                      </>
-                    )}
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant={user.role === "ADMIN" ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={() => updateUserRole(user.id, "ADMIN", user.role !== "ADMIN")}
-                    disabled={!!processingUsers[user.id + "ADMIN"]}
-                  >
-                    {processingUsers[user.id + "ADMIN"] ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : user.role === "ADMIN" ? (
-                      <>
-                        <ShieldX className="mr-1 h-4 w-4" /> Remover
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="mr-1 h-4 w-4" /> Promover
-                      </>
-                    )}
-                  </Button>
-                </TableCell>
+    <>
+      <AdminTableLayout
+        title="Gerenciar Permissões"
+        search={search}
+        setSearch={setSearch}
+        searchPlaceholder="Buscar por nome e email..."
+        limit={limit}
+        setLimit={setLimit}
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+        loading={loading}
+      >
+        {/* Desktop Layout */}
+        <div className="hidden sm:block rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Permissão</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Select
+                      defaultValue={user.role}
+                      onValueChange={(value) => handleConfirmChange(user, value)}
+                      disabled={processingUsers[user.id]}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ROLES.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-      {/* Layout mobile em cards */}
-      <div className="sm:hidden space-y-4">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="border rounded-lg p-4 shadow-sm space-y-2 bg-white dark:bg-zinc-900"
-          >
-            <div>
-              <p className="text-sm font-semibold">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
+        {/* Mobile Layout */}
+        <div className="sm:hidden space-y-4">
+          {users.map((user) => (
+            <div key={user.id} className="border rounded-lg p-4 shadow-sm bg-white dark:bg-zinc-900 space-y-2">
+              <div>
+                <p className="text-sm font-semibold">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </div>
+
+              <div>
+                <Select
+                  defaultValue={user.role}
+                  onValueChange={(value) => handleConfirmChange(user.id, value)}
+                  disabled={processingUsers[user.id]}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+          ))}
+        </div>
+      </AdminTableLayout>
 
-            <div className="flex flex-wrap gap-1">
-              {user.role === "ADMIN" && <Badge variant="destructive">Admin</Badge>}
-              {user.role === "SUPERVISOR" && <Badge variant="secondary">Supervisor</Badge>}
-              {user.role === "DEFAULT" && <Badge variant="outline">Usuário</Badge>}
-            </div>
+      {/* Modal de confirmação */}
+      <Dialog open={!!confirmModal} onOpenChange={(open) => !open && setConfirmModal(null)}>
+        <DialogContent aria-describedby={"update role"}>
+          <DialogHeader>
+            <DialogTitle>Confirmar alteração</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm">
+            {`Tem certeza que deseja alterar a permissão do ${confirmModal?.user.name.split(" ")[0]} para `}
+            <strong>{ROLES.find((r) => r.value === confirmModal?.role)?.label}</strong>?
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmModal(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleApplyChange} disabled={!!processingUsers[String(confirmModal?.user.id)]}>
+              {processingUsers[String(confirmModal?.user.id)] ? "Atualizando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
 
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant={user.role === "SUPERVISOR" ? "destructive" : "outline"}
-                size="sm"
-                onClick={() => updateUserRole(user.id, "SUPERVISOR", user.role !== "SUPERVISOR")}
-                disabled={!!processingUsers[user.id + "SUPERVISOR"]}
-              >
-                {processingUsers[user.id + "SUPERVISOR"] ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : user.role === "SUPERVISOR" ? (
-                  <>
-                    <ShieldX className="mr-1 h-4 w-4" /> Remover Supervisor
-                  </>
-                ) : (
-                  <>
-                    <Shield className="mr-1 h-4 w-4" /> Promover Supervisor
-                  </>
-                )}
-              </Button>
-
-              <Button
-                variant={user.role === "ADMIN" ? "destructive" : "outline"}
-                size="sm"
-                onClick={() => updateUserRole(user.id, "ADMIN", user.role !== "ADMIN")}
-                disabled={!!processingUsers[user.id + "ADMIN"]}
-              >
-                {processingUsers[user.id + "ADMIN"] ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : user.role === "ADMIN" ? (
-                  <>
-                    <ShieldX className="mr-1 h-4 w-4" /> Remover Admin
-                  </>
-                ) : (
-                  <>
-                    <Shield className="mr-1 h-4 w-4" /> Promover Admin
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </AdminTableLayout>
-  );
-};
-
-export default AdminRoleManagement;
+export default AdminRoleManagement
