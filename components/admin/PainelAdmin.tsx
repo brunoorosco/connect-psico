@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AdminUserTable from "@/components/admin/AdminUserTable"
-import AdminRoleManagement from "@components/admin/AdminRoleManagement"
+import AdminRoleManagement from "@/components/admin/AdminRoleManagement"
 
 const AdminPanel = () => {
   return (
@@ -13,15 +13,18 @@ const AdminPanel = () => {
         </header>
 
         <Tabs defaultValue="users" className="w-full">
-          {/* TabsList com rolagem horizontal em mobile */}
+          {/* TabsList com rolagem horizontal no mobile */}
           <div className="overflow-x-auto">
-            <TabsList className="whitespace-nowrap flex w-max gap-2 px-1 sm:px-0">
+            <TabsList className="flex w-max gap-2 whitespace-nowrap px-1 sm:w-full sm:justify-start sm:px-0">
               <TabsTrigger value="users" className="px-4 py-2 text-sm sm:text-base">
                 Gerenciar Usuários
               </TabsTrigger>
               <TabsTrigger value="roles" className="px-4 py-2 text-sm sm:text-base">
                 Gerenciar Permissões
               </TabsTrigger>
+              {/* <TabsTrigger value="payments" className="px-4 py-2 text-sm sm:text-base">
+                Status de Pagamentos
+              </TabsTrigger> */}
             </TabsList>
           </div>
 
@@ -33,15 +36,15 @@ const AdminPanel = () => {
             <AdminRoleManagement />
           </TabsContent>
 
-          <TabsContent value="payments" className="mt-6">
-            <section>
+          {/* <TabsContent value="payments" className="mt-6">
+            <section className="px-1 sm:px-0">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4">Status de Pagamentos</h2>
               <p className="text-muted-foreground">Visualize e gerencie o status de pagamento dos usuários.</p>
               <div className="mt-4">
                 <p className="text-muted-foreground">Funcionalidade em desenvolvimento.</p>
               </div>
             </section>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

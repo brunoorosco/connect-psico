@@ -1,21 +1,14 @@
-import { useEffect, useState } from "react";
-import { Loader2, Ban, Check } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useUserPagination } from "@/hooks/useUserPagination";
-import { AdminTableLayout } from "./AdminTableLayout";
+import { useEffect, useState } from "react"
+import { Loader2, Ban, Check } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useUserPagination } from "@/hooks/useUserPagination"
+import { AdminTableLayout } from "./AdminTableLayout"
 
 const AdminUserTable = () => {
-  const { toast } = useToast();
+  const { toast } = useToast()
   const {
     users,
     search,
@@ -30,33 +23,33 @@ const AdminUserTable = () => {
     limit,
     setOrderBy,
     setLimit,
-  } = useUserPagination();
+  } = useUserPagination()
 
-  const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({});
+  const [processingUsers, setProcessingUsers] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (page > totalPages) {
-      setPage(totalPages);
+      setPage(totalPages)
     }
-  }, [page, totalPages]);
+  }, [page, totalPages])
 
   const toggleUserBlock = async (userId: string, currentBlockStatus: boolean) => {
-    setProcessingUsers((prev) => ({ ...prev, [userId]: true }));
+    setProcessingUsers((prev) => ({ ...prev, [userId]: true }))
     try {
       toast({
         title: "Usuário atualizado",
         description: `Usuário ${!currentBlockStatus ? "bloqueado" : "desbloqueado"} com sucesso!`,
-      });
+      })
     } catch (error) {
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o status do usuário",
         variant: "destructive",
-      });
+      })
     } finally {
-      setProcessingUsers((prev) => ({ ...prev, [userId]: false }));
+      setProcessingUsers((prev) => ({ ...prev, [userId]: false }))
     }
-  };
+  }
 
   return (
     <AdminTableLayout
@@ -72,16 +65,16 @@ const AdminUserTable = () => {
       loading={loading}
     >
       {/* Tabela - visível apenas em telas maiores */}
-      <div className="hidden sm:block rounded-md border">
+      <div className="hidden sm:block rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead
                 className="cursor-pointer select-none"
                 onClick={() => {
-                  setOrderBy("name");
-                  setOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-                  setPage(1);
+                  setOrderBy("name")
+                  setOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                  setPage(1)
                 }}
               >
                 Nome {orderBy === "name" && (order === "asc" ? "↑" : "↓")}
@@ -102,18 +95,10 @@ const AdminUserTable = () => {
                 <TableCell>
                   <Badge
                     variant={
-                      user.role === "ADMIN"
-                        ? "destructive"
-                        : user.role === "SUPERVISOR"
-                        ? "secondary"
-                        : "outline"
+                      user.role === "ADMIN" ? "destructive" : user.role === "SUPERVISOR" ? "secondary" : "outline"
                     }
                   >
-                    {user.role === "ADMIN"
-                      ? "Admin"
-                      : user.role === "SUPERVISOR"
-                      ? "Supervisor"
-                      : "Usuário"}
+                    {user.role === "ADMIN" ? "Admin" : user.role === "SUPERVISOR" ? "Supervisor" : "Usuário"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -151,12 +136,9 @@ const AdminUserTable = () => {
       </div>
 
       {/* Mobile layout - cards */}
-      <div className="sm:hidden space-y-4">
+      <div className="sm:hidden space-y-4 px-4">
         {users.map((user) => (
-          <div
-            key={user.id}
-            className="border rounded-lg p-4 shadow-sm space-y-2 bg-white dark:bg-zinc-900"
-          >
+          <div key={user.id} className="w-full border rounded-lg p-4 shadow-sm space-y-2 bg-white dark:bg-zinc-900">
             <div>
               <p className="text-sm font-semibold">{user.name}</p>
               <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -167,25 +149,12 @@ const AdminUserTable = () => {
 
             <div className="flex flex-wrap gap-2">
               <Badge
-                variant={
-                  user.role === "ADMIN"
-                    ? "destructive"
-                    : user.role === "SUPERVISOR"
-                    ? "secondary"
-                    : "outline"
-                }
+                variant={user.role === "ADMIN" ? "destructive" : user.role === "SUPERVISOR" ? "secondary" : "outline"}
               >
-                {user.role === "ADMIN"
-                  ? "Admin"
-                  : user.role === "SUPERVISOR"
-                  ? "Supervisor"
-                  : "Usuário"}
+                {user.role === "ADMIN" ? "Admin" : user.role === "SUPERVISOR" ? "Supervisor" : "Usuário"}
               </Badge>
 
-              <Badge
-                variant={user.active ? "default" : "destructive"}
-                className={user.active ? "bg-green-600" : ""}
-              >
+              <Badge variant={user.active ? "default" : "destructive"} className={user.active ? "bg-green-600" : ""}>
                 {user.active ? "Ativo" : "Bloqueado"}
               </Badge>
             </div>
@@ -213,7 +182,7 @@ const AdminUserTable = () => {
         ))}
       </div>
     </AdminTableLayout>
-  );
-};
+  )
+}
 
-export default AdminUserTable;
+export default AdminUserTable

@@ -1,41 +1,34 @@
-"use client";
-import React from "react";
-import { useRouter } from "next/navigation";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { signOut } from "next-auth/react";
-import { menus } from "./menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Menu } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+"use client"
+import React from "react"
+import { useRouter } from "next/navigation"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import { Button } from "@/components/ui/button"
+import { signOut } from "next-auth/react"
+import { menus } from "./menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, Menu } from "lucide-react"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 type MobileDrawerProps = {
   user: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string;
-    role: "ADMIN" | "SUPERVISOR" | "DEFAULT";
-  };
-};
+    id: string
+    name: string
+    email: string
+    image?: string
+    role: "ADMIN" | "SUPERVISOR" | "DEFAULT"
+  }
+}
 
 const MobileDrawer = () => {
-  const navigate = useRouter();
-  const user = useCurrentUser();
+  const navigate = useRouter()
+  const user = useCurrentUser()
   const getInitials = (name: string) => {
-    const nameParts = name.split(" ");
+    const nameParts = name?.split(" ")
     if (nameParts.length > 1) {
-      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
     }
-    return name.substring(0, 2).toUpperCase();
-  };
+    return name.substring(0, 2).toUpperCase()
+  }
 
   return (
     <Drawer>
@@ -63,8 +56,7 @@ const MobileDrawer = () => {
 
         <div className="px-4 py-2 space-y-4">
           {menus.map((item) => {
-            const hasPermission =
-              !item.rules || item.rules.length === 0 || item.rules.includes(user?.role as string);
+            const hasPermission = !item.rules || item.rules.length === 0 || item.rules.includes(user?.role as string)
 
             return hasPermission ? (
               <Button
@@ -76,7 +68,7 @@ const MobileDrawer = () => {
                 <item.icon className="mr-2 h-5 w-5" />
                 {item.title}
               </Button>
-            ) : null;
+            ) : null
           })}
           {user?.role === "SUPERVISOR" && (
             <>
@@ -101,7 +93,7 @@ const MobileDrawer = () => {
             variant="ghost"
             className="w-full justify-start text-red-500"
             onClick={() => {
-              signOut();
+              signOut()
             }}
           >
             <LogOut className="mr-2 h-5 w-5" />
@@ -118,7 +110,7 @@ const MobileDrawer = () => {
         </div>
       </DrawerContent>
     </Drawer>
-  );
-};
+  )
+}
 
-export default MobileDrawer;
+export default MobileDrawer

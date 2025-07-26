@@ -23,7 +23,7 @@ export default function Navbar() {
     <header className="bg-white shadow-sm">
       <div>
         {isMobile ? (
-          <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-end">
+          <div className="max-w-8xl mx-auto px-2 sm:px-6 lg:px-10 py-3 flex justify-end">
             <MobileDrawer />
           </div>
         ) : (
