@@ -9,7 +9,8 @@ import {
   MessageCircle,
   CalendarDaysIcon,
   Users,
-  WebcamIcon
+  WebcamIcon,
+  ShieldCheckIcon,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -103,12 +104,17 @@ export const menus = [
     rules: ["SUPERVISOR"],
   },
   {
+    title: "Permissão",
+    url: "/app/admin/permitions",
+    icon: ShieldCheckIcon,
+    rules: ["ADMIN"],
+  },
+  {
     title: "Salas",
     url: "/rooms",
     icon: Calendar,
     rules: ["ADMIN"],
   },
-
 ]
 
 export const menusFooter = {
