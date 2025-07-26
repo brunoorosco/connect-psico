@@ -121,7 +121,7 @@ const AdminRoleManagement = () => {
               <div>
                 <Select
                   defaultValue={user.role}
-                  onValueChange={(value) => handleConfirmChange(user.id, value)}
+                  onValueChange={(value) => handleConfirmChange(user, value)}
                   disabled={processingUsers[user.id]}
                 >
                   <SelectTrigger className="w-full">
