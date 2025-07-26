@@ -1,103 +1,87 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useState, useTransition } from "react";
+import Link from "next/link"
+import { useState, useTransition } from "react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import AuthCard from "./auth-card";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import AuthCard from "./auth-card"
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import type { z } from "zod"
 
-import { login } from "@/actions/auth";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { CredentialsSchema } from "@/schemas/auth";
-import { LoaderIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { Separator } from "../ui/separator";
-import AuthFormMessage from "./auth-form-message";
-import SocialLogin from "./social-login";
+import { login } from "@/actions/auth"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp"
+import { CredentialsSchema } from "@/schemas/auth"
+import { LoaderIcon } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { Separator } from "../ui/separator"
+import AuthFormMessage from "./auth-form-message"
+import SocialLogin from "./social-login"
 
 export default function LoginForm() {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
-  const [showOTPForm, setShowOTP] = useState<boolean>(false);
-  const searchParams = useSearchParams();
-
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string>("")
+  const [success, setSuccess] = useState<string>("")
+  const [showOTPForm, setShowOTP] = useState<boolean>(false)
+  const searchParams = useSearchParams()
 
   const callbackError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "E-mail em uso com provedor diferente"
-      : undefined;
+    searchParams.get("error") === "OAuthAccountNotLinked" ? "E-mail em uso com provedor diferente" : undefined
   const form = useForm<z.infer<typeof CredentialsSchema>>({
     resolver: zodResolver(CredentialsSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  });
+  })
 
   const onSubmit = async (values: z.infer<typeof CredentialsSchema>) => {
     startTransition(async () => {
       try {
-        const resp = await login(values);
+        const resp = await login(values)
 
         if (!resp) {
-          setError("Resposta inválida do servidor");
-          setSuccess("");
-          form.reset();
-          return;
+          setError("Resposta inválida do servidor")
+          setSuccess("")
+          form.reset()
+          return
         }
 
-        const { error, success, data } = resp;
+        const { error, success, data } = resp
 
         if (data?.twoFactorAuthEnabled) {
-          setShowOTP(true);
+          setShowOTP(true)
           if (resp.error) {
-            setError(resp.error);
-            setSuccess("");
-            return;
+            setError(resp.error)
+            setSuccess("")
+            return
           }
-          return;
+          return
         }
 
         if (error) {
-          setError(resp.error);
-          setSuccess("");
-          form.reset();
-          return;
+          setError(resp.error)
+          setSuccess("")
+          form.reset()
+          return
         }
         if (success) {
-          setSuccess(resp.success);
-          setError("");
-          return;
+          setSuccess(resp.success)
+          setError("")
+          return
         }
 
-        form.reset();
+        form.reset()
       } catch (err) {
-        setError("Algo deu errado");
-        setSuccess("");
-        form.reset();
+        setError("Algo deu errado")
+        setSuccess("")
+        form.reset()
       }
-    });
-  };
+    })
+  }
 
   return (
     <AuthCard title="Conecte-se" description="Seja bem-vindo novamente">
@@ -134,13 +118,7 @@ export default function LoginForm() {
                       <FormLabel>Senha</FormLabel>
                       <FormControl>
                         <div>
-                          <Input
-                            type="password"
-                            placeholder="******"
-                            required
-                            {...field}
-                            disabled={isPending}
-                          />
+                          <Input type="password" placeholder="******" required {...field} disabled={isPending} />
                           <div className="flex items-center">
                             <Link
                               href="/auth/reset-password"
@@ -156,9 +134,7 @@ export default function LoginForm() {
                     </FormItem>
                   )}
                 />
-                {callbackError && (
-                  <AuthFormMessage type="error" message={callbackError} title="Erro" />
-                )}
+                {callbackError && <AuthFormMessage type="error" message={callbackError} title="Erro" />}
                 {error && <AuthFormMessage type="error" message={error} title="Erro" />}
                 {success && <AuthFormMessage type="success" message={success} title="Sucesso" />}
                 <Button variant={"default"} className="w-full" disabled={isPending}>
@@ -189,7 +165,7 @@ export default function LoginForm() {
                           </InputOTPGroup>
                         </InputOTP>
                       </FormControl>
-                      <FormDescription>Favor entrar com o códio enviado por e-mail</FormDescription>
+                      <FormDescription>Favor entrar com o código enviado por e-mail</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -225,5 +201,5 @@ export default function LoginForm() {
         )}
       </div>
     </AuthCard>
-  );
+  )
 }
