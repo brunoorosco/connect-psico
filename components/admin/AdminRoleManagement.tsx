@@ -87,6 +87,7 @@ const AdminRoleManagement = () => {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Select
+                      aria-label={`Selecionar permissão para ${user.name}`}
                       defaultValue={user.role}
                       onValueChange={(value) => handleConfirmChange(user, value)}
                       disabled={processingUsers[user.id]}
@@ -120,6 +121,7 @@ const AdminRoleManagement = () => {
 
               <div>
                 <Select
+                  aria-label={`Selecionar permissão para ${user.name}`}
                   defaultValue={user.role}
                   onValueChange={(value) => handleConfirmChange(user, value)}
                   disabled={processingUsers[user.id]}
@@ -143,7 +145,7 @@ const AdminRoleManagement = () => {
 
       {/* Modal de confirmação */}
       <Dialog open={!!confirmModal} onOpenChange={(open) => !open && setConfirmModal(null)}>
-        <DialogContent aria-describedby={"update role"}>
+        <DialogContent aria-describedby="update role" className="w-full max-w-sm mx-4 sm:max-w-lg sm:mx-auto">
           <DialogHeader>
             <DialogTitle>Confirmar alteração</DialogTitle>
           </DialogHeader>
