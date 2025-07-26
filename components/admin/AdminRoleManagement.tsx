@@ -145,7 +145,10 @@ const AdminRoleManagement = () => {
 
       {/* Modal de confirmação */}
       <Dialog open={!!confirmModal} onOpenChange={(open) => !open && setConfirmModal(null)}>
-        <DialogContent aria-describedby="update role" className="w-full max-w-sm mx-4 sm:max-w-lg sm:mx-auto">
+        <DialogContent
+          aria-describedby="update role"
+          className="w-full max-w-sm mx-4 sm:max-w-lg sm:mx-auto rounded-2xl p-6 sm:p-8 shadow-lg"
+        >
           <DialogHeader>
             <DialogTitle>Confirmar alteração</DialogTitle>
           </DialogHeader>
