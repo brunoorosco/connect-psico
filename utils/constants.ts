@@ -6,7 +6,7 @@ export const daysOfWeek = [
   { value: 4, label: "Quinta-feira" },
   { value: 5, label: "Sexta-feira" },
   { value: 6, label: "Sábado" },
-];
+]
 
 export const months = [
   { value: 0, label: "Janeiro" },
@@ -21,7 +21,7 @@ export const months = [
   { value: 9, label: "Outubro" },
   { value: 10, label: "Novembro" },
   { value: 11, label: "Dezembro" },
-];
+]
 
 export const especialidades = [
   "Terapia Cognitivo-Comportamental",
@@ -31,6 +31,7 @@ export const especialidades = [
   "Terapia de Casal",
   "Neuropsicologia",
   "Psicologia Infantil",
+  "Coach",
   "Psicologia do Esporte",
   "Psicologia Organizacional",
   "Psicologia Educacional",
@@ -44,5 +45,5 @@ export const especialidades = [
   "Psicologia Social",
   "Psicologia da Saúde",
   "Psicologia do Trânsito",
-  "Psicologia do Trabalho"
+  "Psicologia do Trabalho",
 ]
