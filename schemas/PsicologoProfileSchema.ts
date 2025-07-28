@@ -23,7 +23,10 @@ export const profileSchema = z
     }),
   })
   .superRefine((data, ctx) => {
-    const exigeCRP = data.especialidade.some((esp) => !especialidadesSemCRP.includes(esp))
+    const especialidades = data.especialidade || []
+
+    const exigeCRP = especialidades.length > 0 &&
+      especialidades.some((esp) => !especialidadesSemCRP.includes(esp))
 
     if (exigeCRP) {
       if (!data.numConselho || data.numConselho.trim().length < 3) {
