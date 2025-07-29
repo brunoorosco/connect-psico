@@ -6,3 +6,5 @@ export const formatMessageTime = (dateInput: Date | string) => {
   const formattedDate = date.toLocaleDateString();
   return isToday ? time : `${formattedDate} - ${time}`;
 };
+
+export const TIME_REGEX = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;

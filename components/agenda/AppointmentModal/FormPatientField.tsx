@@ -1,40 +1,34 @@
-"use client";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { IFormPatientField } from "./types";
-import { getPatientsByProfessionalId } from "@/actions/patients";
-import { Patient } from "@/types/appointment";
+"use client"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
+import { IFormPatientField } from "./types"
+import { getPatientsByProfessionalId } from "@/actions/patients"
+import { Patient } from "@/types/appointment"
 
 export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
-  const [open, setOpen] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [open, setOpen] = useState(false)
+  const [patients, setPatients] = useState<Patient[]>([])
 
   const getPatients = async () => {
     try {
-      const patientsList = await getPatientsByProfessionalId();
+      const patientsList = await getPatientsByProfessionalId()
       if (Array.isArray(patientsList)) {
-        setPatients(patientsList);
+        setPatients(patientsList)
       }
-      return [];
+      return []
     } catch (error) {
-      throw new Error("Failed to fetch patients");
+      throw new Error("Failed to fetch patients")
     }
-  };
+  }
 
   useEffect(() => {
-    getPatients();
-  }, []);
+    getPatients()
+  }, [])
 
   return (
     <FormField
@@ -52,9 +46,7 @@ export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
                   aria-expanded={open}
                   className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
                 >
-                  {field.value
-                    ? patients.find((p) => p.userId === field.value)?.name
-                    : "Selecione um paciente"}
+                  {field.value ? patients.find((p) => p.userId === field.value)?.name : "Selecione um paciente"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </FormControl>
@@ -69,15 +61,12 @@ export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
                       key={patient.userId}
                       value={patient.userId}
                       onSelect={() => {
-                        form.setValue("patientId", patient.userId);
-                        setOpen(false);
+                        field.onChange(patient.userId) 
+                        setOpen(false)
                       }}
                     >
                       <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          patient.userId === field.value ? "opacity-100" : "opacity-0"
-                        )}
+                        className={cn("mr-2 h-4 w-4", patient.userId === field.value ? "opacity-100" : "opacity-0")}
                       />
                       <div className="flex flex-col">
                         <span>{patient.name}</span>
@@ -97,5 +86,5 @@ export const FormPatientField: React.FC<IFormPatientField> = ({ form }) => {
         </FormItem>
       )}
     />
-  );
-};
+  )
+}

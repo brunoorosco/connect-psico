@@ -50,7 +50,7 @@ const DailyView: React.FC<DailyViewProps> = ({
               const appointmentsAtTime = appointments.filter((apt) => {
                 return (
                   isSameDay(apt.appointmentDate, selectedDate) &&
-                  new Date(apt.appointmentDate).getHours() + 3 === hour
+                  new Date(apt.appointmentDate).getHours()  === hour
                 );
               });
               const blockDateTime = setMilliseconds(
@@ -69,8 +69,7 @@ const DailyView: React.FC<DailyViewProps> = ({
                         .sort((a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime())
                         .map((apt) => {
                           
-                          const startTime = apt.appointmentDate.toISOString().substring(11, 16);
-
+                         const startTime = format(apt.appointmentDate, "HH:mm", { locale: ptBR });
                           return (
                             <div
                               key={apt.id}

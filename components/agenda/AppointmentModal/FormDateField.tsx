@@ -6,7 +6,7 @@ import { IFormPatientField } from "./types";
 export const FormDateField: React.FC<IFormPatientField> = ({ form }) => (
   <FormField
     control={form.control}
-    name="date"
+    name="appointmentDate"
     render={({ field }) => (
       <FormItem>
         <FormLabel>Data</FormLabel>
