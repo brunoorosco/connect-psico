@@ -6,12 +6,11 @@ import { AppointmentModel } from "@/domain/model/appointment";
 import { toast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 import { mockPatients } from "@components/agenda/mockData";
-
-const TIME_REGEX = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+import { TIME_REGEX } from "@/utils/formatMessageTime";
 
 const appointmentSchema = z.object({
   patientId: z.string().min(1, "Selecione um paciente"),
-  date: z.string().min(1, "Selecione uma data"),
+  appointmentDate: z.string().min(1, "Selecione uma data"),
   startTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
   endTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
   notes: z.string().optional(),
@@ -32,7 +31,7 @@ export function useAppointmentForm({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
       patientId: "",
-      date: format(selectedDate, "yyyy-MM-dd"),
+      appointmentDate: format(selectedDate, "yyyy-MM-dd"),
       startTime: "09:00",
       endTime: "09:30",
       notes: "",
@@ -46,7 +45,7 @@ export function useAppointmentForm({
     if (editingAppointment) {
       form.reset({
         patientId: editingAppointment.patient.id,
-        date: format(new Date(editingAppointment.appointmentDate), "yyyy-MM-dd"),
+        appointmentDate: format(new Date(editingAppointment.appointmentDate), "yyyy-MM-dd"),
         startTime: format(new Date(editingAppointment.appointmentDate), "HH:mm"),
         endTime: editingAppointment.duration
           ? format(
@@ -71,7 +70,7 @@ export function useAppointmentForm({
       return;
     }
 
-    const appointmentDate = new Date(`${values.date}T${values.startTime}:00`);
+    const appointmentDate = new Date(`${values.appointmentDate}T${values.startTime}:00`);
     const [startHour, startMinute] = values.startTime.split(":").map(Number);
     const [endHour, endMinute] = values.endTime.split(":").map(Number);
     const duration = endHour * 60 + endMinute - (startHour * 60 + startMinute);
