@@ -1,5 +1,5 @@
 "use client"
-import React from "react"
+import React, { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
@@ -8,11 +8,18 @@ import { menus } from "./menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Menu } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
-import { Skeleton } from "@/components/ui/skeleton" // Certifique-se de ter esse componente
+import { Skeleton } from "@/components/ui/skeleton"
 
 const MobileDrawer = () => {
   const navigate = useRouter()
   const user = useCurrentUser()
+  const [isPending, startTransition] = useTransition()
+
+  const handleNavigate = (url: string) => {
+    startTransition(() => {
+      navigate.push(url)
+    })
+  }
 
   const getInitials = (name?: string) => {
     if (!name) return "?"
@@ -76,10 +83,12 @@ const MobileDrawer = () => {
                       key={item.title}
                       variant="ghost"
                       className="w-full justify-start"
-                      onClick={() => navigate.push(item.url.replace("/{userId}", `/${user.id}`))}
+                      onClick={() => handleNavigate(item.url.replace("/{userId}", `/${user.id}`))}
+                      disabled={isPending}
                     >
                       <item.icon className="mr-2 h-5 w-5" />
                       {item.title}
+                      {/* {isPending ? "Carregando..." : item.title} */}
                     </Button>
                   </DrawerClose>
                 ) : null
@@ -93,6 +102,7 @@ const MobileDrawer = () => {
                   variant="ghost"
                   onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
                   className="w-full justify-start"
+                  disabled={isPending}
                 >
                   Minha Assinatura
                 </Button>
@@ -102,6 +112,7 @@ const MobileDrawer = () => {
                   variant="ghost"
                   onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
                   className="w-full justify-start"
+                  disabled={isPending}
                 >
                   Perfil
                 </Button>
