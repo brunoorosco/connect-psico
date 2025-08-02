@@ -71,48 +71,54 @@ const MobileDrawer = () => {
                 const hasPermission = !item.rules || item.rules.length === 0 || item.rules.includes(user.role)
 
                 return hasPermission ? (
-                  <Button
-                    key={item.title}
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => navigate.push(item.url.replace("/{userId}", `/${user.id}`))}
-                  >
-                    <item.icon className="mr-2 h-5 w-5" />
-                    {item.title}
-                  </Button>
+                  <DrawerClose asChild key={item.title}>
+                    <Button
+                      key={item.title}
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => navigate.push(item.url.replace("/{userId}", `/${user.id}`))}
+                    >
+                      <item.icon className="mr-2 h-5 w-5" />
+                      {item.title}
+                    </Button>
+                  </DrawerClose>
                 ) : null
               })
             : Array.from({ length: 3 }).map((_, idx) => <Skeleton key={idx} className="h-9 w-full rounded-md" />)}
 
           {user?.role === "SUPERVISOR" && (
             <>
-              <Button
-                variant="ghost"
-                onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
-                className="w-full justify-start"
-              >
-                Minha Assinatura
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
-                className="w-full justify-start"
-              >
-                Perfil
-              </Button>
+              <DrawerClose asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
+                  className="w-full justify-start"
+                >
+                  Minha Assinatura
+                </Button>
+              </DrawerClose>
+              <DrawerClose asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
+                  className="w-full justify-start"
+                >
+                  Perfil
+                </Button>
+              </DrawerClose>
             </>
           )}
-
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-red-500"
-            onClick={() => signOut()}
-            disabled={!user}
-          >
-            <LogOut className="mr-2 h-5 w-5" />
-            Sair
-          </Button>
+          <DrawerClose asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-red-500"
+              onClick={() => signOut()}
+              disabled={!user}
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              Sair
+            </Button>
+          </DrawerClose>
         </div>
 
         <div className="p-4">
