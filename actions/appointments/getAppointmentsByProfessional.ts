@@ -1,28 +1,25 @@
-"use server";
-import { prisma } from "@/lib/db";
-import { auth } from "@/auth";
-import { AppointmentModel } from "@/domain/model/appointment";
+"use server"
+import { prisma } from "@/lib/db"
+import { auth } from "@/auth"
+import { AppointmentModel } from "@/domain/model/appointment"
 
 type PaginationParams = {
-  page?: number;
-  limit?: number;
-};
+  page?: number
+  limit?: number
+}
 
 type Response = {
-  data?: AppointmentModel[];
-  total: number;
-  page: number;
-  lastPage: number;
-};
+  data?: AppointmentModel[]
+  total: number
+  page: number
+  lastPage: number
+}
 
-export const getAppointmentsUsers = async ({
-  page = 1,
-  limit = 10,
-}: PaginationParams): Promise<Response> => {
-  const skip = (page - 1) * limit;
-  const session = await auth();
+export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationParams): Promise<Response> => {
+  const skip = (page - 1) * limit
+  const session = await auth()
   if (!session) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
 
   const [users, total] = await Promise.all([
@@ -39,6 +36,7 @@ export const getAppointmentsUsers = async ({
         status: true,
         professionalId: true,
         patientId: true,
+        roomId: true,
         professional: {
           select: {
             name: true,
@@ -63,25 +61,25 @@ export const getAppointmentsUsers = async ({
         professionalId: session.user.id,
       },
     }),
-  ]);
+  ])
 
   const mappedUsers = users.map((user) => {
-    const { professional, ...restUser } = user;
-    const { Professional, ...restProfessional } = professional;
+    const { professional, ...restUser } = user
+    const { Professional, ...restProfessional } = professional
 
     // Pega o primeiro professional, caso exista
-    const professionalData = Professional ?? {};
+    const professionalData = Professional ?? {}
 
     return {
       ...restUser,
       ...professionalData,
       professional: { ...restProfessional },
-    };
-  });
+    }
+  })
   return {
     data: mappedUsers as any,
     total,
     page,
     lastPage: Math.ceil(total / limit),
-  };
-};
+  }
+}
