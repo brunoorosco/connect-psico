@@ -44,9 +44,9 @@ export function VideoCallScheduleMenu() {
   if (!session) return null
 
   return (
-    <div className="w-80 bg-card border-r flex flex-col">
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-semibold mb-2">Agendamentos de Hoje</h2>
+    <div className="w-full sm:w-80 bg-card sm:border-r flex flex-col">
+      <div className="p-4 sm:p-6 border-b">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">Agendamentos de Hoje</h2>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="w-4 h-4" />
           <span>{format(new Date(), "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
@@ -95,9 +95,7 @@ export function VideoCallScheduleMenu() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${getStatusColor(appointment.status)}`}
-                    />
+                    <div className={`w-2 h-2 rounded-full ${getStatusColor(appointment.status)}`} />
                     <span className="text-xs text-muted-foreground capitalize">
                       {appointment.status === "waiting"
                         ? "Aguardando"
@@ -107,34 +105,18 @@ export function VideoCallScheduleMenu() {
                     </span>
                   </div>
 
-                  {/* {appointment.status === "waiting" && (
-                    <Button
-                      size="sm"
-                      className="h-8"
-                      onClick={() => {
-                        setActiveCall(appointment.id)
-                        router.push(`./videochamada/${appointment.id}`)
-                      }}
-                    >
-                      <VideoIcon className="w-3 h-3 mr-1" />
-                      Iniciar
-                    </Button>
-                  )} */}
-
-                  {/* {appointment.status === "in-call" && activeCall !== appointment.id && ( */}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8"
-                      onClick={() => {
-                        setActiveCall(appointment.id)
-                        router.push(`./videochamada/${appointment.id}`)
-                      }}
-                    >
-                      <Phone className="w-3 h-3 mr-1" />
-                      Entrar
-                    </Button>
-                  {/* )} */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8"
+                    onClick={() => {
+                      setActiveCall(appointment.id)
+                      router.push(`./videochamada/room/${appointment.id}`)
+                    }}
+                  >
+                    <Phone className="w-3 h-3 mr-1" />
+                    Entrar
+                  </Button>
                 </div>
               </Card>
             )
