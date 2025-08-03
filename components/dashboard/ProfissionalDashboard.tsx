@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import DashboardHeader from "./DashboardHeader";
 import CalendarNavigation from "./CalendarNavigation";
 import AppointmentsList from "./AppointmentList";
-import PatientRecord from "./PatientRecord";
 import { useAppointments } from "@/hooks/useAppointments";
-import { useSession } from "next-auth/react";
 
 const mockPatients = [
   {
@@ -51,12 +49,10 @@ const mockPatients = [
 ];
 
 const PsychologistDashboard: React.FC = () => {
-  const isMobile = useIsMobile();
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const { appointments, total, loading, fetchAppointments } = useAppointments();
-  const { data: session } = useSession();
 
   useEffect(() => {
     fetchAppointments();
@@ -70,14 +66,10 @@ const PsychologistDashboard: React.FC = () => {
     router.push(`/consulta?patientId=${patientId}`);
   };
 
-  const currentPatient = selectedPatient
-    ? mockPatients.find((p) => p.id === selectedPatient)
-    : mockPatients[0];
-
   return (
     <div className="space-y-6  px-2 py-4 sm:px-6 lg:px-8">
       <DashboardHeader
-        title="Seu Dashboard"
+        title="Meu Board"
         subtitle="Gerencie suas consultas e pacientes"
         userRole="SUPERVISOR"
       />

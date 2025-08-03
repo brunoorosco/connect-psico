@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { getUserVideoCalls } from "@/actions/scheduleVideo"
 import { Calendar, Clock, Phone, VideoIcon } from "lucide-react"
 import { ScrollArea } from "@components/ui/scroll-area"
 import { Button, Card } from "@components/ui"
@@ -12,6 +11,8 @@ import { Badge } from "@components/ui/badge"
 import { Avatar, AvatarFallback } from "@components/ui/avatar"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { useAppointments } from "@hooks/useAppointments"
+import { AppointmentModel } from "@/domain/model/appointment"
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -33,12 +34,13 @@ function getTypeLabel(type: string) {
 export function VideoCallScheduleMenu() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [calls, setCalls] = useState<any[]>([])
   const [activeCall, setActiveCall] = useState<string | null>(null)
+  const { appointments, fetchAppointments } = useAppointments()
 
   useEffect(() => {
     if (!session?.user?.id) return
-    getUserVideoCalls(session.user.id).then(setCalls)
+    // getUserVideoCalls(session.user.id).then(setCalls)
+    fetchAppointments()
   }, [session])
 
   if (!session) return null
@@ -55,19 +57,20 @@ export function VideoCallScheduleMenu() {
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
-          {calls.length === 0 && (
-            <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje.</p>
-          )}
+          {appointments.length === 0 && <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje.</p>}
 
-          {calls.map((appointment) => {
+          {appointments.map((appointment: AppointmentModel) => {
+            // const participantName =
+            //   appointment.participants.find((p: any) => p.user.id !== session.user.id)?.user.name || "Participante"
             const participantName =
-              appointment.participants.find((p: any) => p.user.id !== session.user.id)?.user.name || "Participante"
-
+              appointment.patient?.id === session.user?.id
+                ? appointment.professional?.name ?? "Participante"
+                : appointment.patient?.name ?? "Participante"
             return (
               <Card
-                key={appointment.id}
+                key={appointment.roomId}
                 className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-                  activeCall === appointment.id ? "ring-2 ring-primary" : ""
+                  activeCall === appointment.roomId ? "ring-2 ring-primary" : ""
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -84,12 +87,12 @@ export function VideoCallScheduleMenu() {
                       <h3 className="font-medium text-sm">{participantName}</h3>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        <span>{format(new Date(appointment.scheduledAt), "HH:mm")}</span>
+                        <span>{format(new Date(appointment.appointmentDate), "HH:mm")}</span>
                       </div>
                     </div>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {getTypeLabel(appointment.type)}
+                    {getTypeLabel("Consulta")}
                   </Badge>
                 </div>
 
@@ -97,11 +100,12 @@ export function VideoCallScheduleMenu() {
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${getStatusColor(appointment.status)}`} />
                     <span className="text-xs text-muted-foreground capitalize">
-                      {appointment.status === "waiting"
+                      {/* {appointment.status === "waiting"
                         ? "Aguardando"
                         : appointment.status === "in-call"
                         ? "Em chamada"
-                        : "Finalizada"}
+                        : "Finalizada"} */}
+                      andamento da consulta ...
                     </span>
                   </div>
 
@@ -110,8 +114,8 @@ export function VideoCallScheduleMenu() {
                     variant="outline"
                     className="h-8"
                     onClick={() => {
-                      setActiveCall(appointment.id)
-                      router.push(`./videochamada/room/${appointment.id}`)
+                      setActiveCall(appointment.roomId)
+                      router.push(`./videochamada/room/${appointment.roomId}`)
                     }}
                   >
                     <Phone className="w-3 h-3 mr-1" />

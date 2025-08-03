@@ -9,7 +9,7 @@ import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { User } from "@/domain/model/user";
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus";
-import { StatusAppointment } from "@/domain/model/appointment";
+import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment";
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass";
 
 type Appointment = {
@@ -23,7 +23,7 @@ type Appointment = {
 };
 
 interface AppointmentsListProps {
-  appointments: Appointment[];
+  appointments: AppointmentModel[];
   selectedDate: Date;
   userRole: "SUPERVISOR" | "DEFAULT";
   onViewRecord?: (patientId: string) => void;
@@ -102,7 +102,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                         ? appointment.patient.name
                         : "Consulta Psicológica"}
                     </h3>
-                    <p className="text-sm text-gray-500">{appointment.tempoConsulta} minutos</p>
+                    <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
