@@ -1,4 +1,3 @@
-// components/VideoCallScheduleMenu.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -45,6 +44,11 @@ export function VideoCallScheduleMenu() {
 
   if (!session) return null
 
+  const todayAppointments = appointments?.filter(
+    (app: AppointmentModel) => app.appointmentDate.getDate() === new Date().getDate()
+  )
+  console.log(todayAppointments)
+
   return (
     <div className="w-full sm:w-80 bg-card sm:border-r flex flex-col">
       <div className="p-4 sm:p-6 border-b">
@@ -57,9 +61,11 @@ export function VideoCallScheduleMenu() {
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
-          {appointments.length === 0 && <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje.</p>}
+          {todayAppointments.length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje.</p>
+          )}
 
-          {appointments.map((appointment: AppointmentModel) => {
+          {todayAppointments.map((appointment: AppointmentModel) => {
             // const participantName =
             //   appointment.participants.find((p: any) => p.user.id !== session.user.id)?.user.name || "Participante"
             const participantName =
