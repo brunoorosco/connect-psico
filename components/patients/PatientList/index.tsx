@@ -1,7 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -19,25 +18,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@components/ui/dialog"
-import { Textarea } from "@components/ui"
 import { useState } from "react"
+import ChatFooter from "./chatFooter"
+import { formatMessageTime } from "@/utils/formatMessageTime"
+import { useChatStore } from "@/infra/stores/useChatStore"
+import { useCurrentUser } from "@hooks/use-current-user"
 
 export default function PatientList({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) {
-  const { handleView, handleEdit, handleDelete, handleSendMessage } = usePatientList({
+  const { handleView, handleEdit, handleDelete } = usePatientList({
     onViewPatient,
     onEditPatient,
     onDeletePatient,
   })
+  const { messages } = useChatStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
-  const [message, setMessage] = useState("")
+  const user = useCurrentUser()
 
   const handleStartConsultation = (item: Patient) => {
     usePatientStore.getState().setPatient(item)
   }
 
   const handleOpenMessageModal = (patient: Patient) => {
-    console.log(patient)
     setSelectedPatient(patient)
     setIsDialogOpen(true)
   }
@@ -73,7 +75,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
                         onStart={handleStartConsultation}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        onSendMessage={handleSendMessage}
+                        onSendMessage={handleOpenMessageModal}
                       />
                     </div>
                   </TableCell>
@@ -110,35 +112,35 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
         )}
       </CardContent>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl w-full h-[70vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Enviar Mensagem</DialogTitle>
-            <DialogDescription>Envie uma mensagem para {selectedPatient?.name}.</DialogDescription>
+            <DialogDescription>Enviar mensagem para {selectedPatient?.name}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="Digite a mensagem aqui..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="min-h-[100px]"
-            />
+
+          <div className="flex-1 overflow-y-auto border rounded-md p-4 space-y-4 bg-muted">
+            {messages &&
+              messages
+                .filter((msg) => msg.receiverId === selectedPatient?.userId || msg.senderId === selectedPatient?.userId)
+                .map((msg) => {
+                  const isCurrentUser = msg.senderId === user?.id
+                  return (
+                    <div key={msg._id} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+                      <div className="bg-white p-2 rounded-md shadow-sm max-w-[70%]">
+                        <p className="text-sm">{msg.text}</p>
+                        <time className="block text-xs text-muted-foreground mt-1">
+                          {formatMessageTime(msg.createdAt)}
+                        </time>
+                      </div>
+                    </div>
+                  )
+                })}
           </div>
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                if (selectedPatient) {
-                  // Envie aqui via API, WhatsApp, etc.
-                  console.log("Enviando mensagem para:", selectedPatient.name)
-                  console.log("Conteúdo:", message)
-                }
-                setMessage("")
-                setSelectedPatient(null)
-                setIsDialogOpen(false)
-              }}
-            >
-              Enviar
-            </Button>
-          </DialogFooter>
+
+          <div className="pt-4 space-y-2">
+            <ChatFooter receiverId={selectedPatient?.userId as string} />
+            <DialogFooter></DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>

@@ -34,7 +34,7 @@ const Sidebar = () => {
       </div>
 
       <div className="overflow-y-auto w-full py-3">
-        {filteredUsers.map((user: UserChat) => {
+        {filteredUsers?.map((user: UserChat) => {
           const isSelected = selectedUser?.userId === user.userId
 
           return (
