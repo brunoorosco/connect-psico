@@ -42,7 +42,7 @@ export default function VideoCallPage() {
     userId: String(userId),
     avatar,
     userName: String(user?.name),
-    serverUrl: process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
+    serverUrl: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS || "http://localhost:3001",
   })
 
   const { messages, sendMessage } = useChat({
