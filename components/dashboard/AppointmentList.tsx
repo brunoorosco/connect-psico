@@ -1,40 +1,33 @@
-"use client";
-import React from "react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { isSameDay } from "date-fns";
-import { Calendar } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { User } from "@/domain/model/user";
-import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus";
-import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment";
-import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass";
-
+"use client"
+import React from "react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { isSameDay } from "date-fns"
+import { Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
+import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
+import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
 
 interface AppointmentsListProps {
-  appointments: AppointmentModel[];
-  selectedDate: Date;
-  userRole: "SUPERVISOR" | "DEFAULT";
-  onViewRecord?: (patientId: string) => void;
+  appointments: AppointmentModel[]
+  selectedDate: Date
+  userRole: "SUPERVISOR" | "DEFAULT"
+  onViewRecord?: (patientId: string) => void
 }
 
-const AppointmentsList: React.FC<AppointmentsListProps> = ({
-  appointments,
-  selectedDate,
-  userRole,
-  onViewRecord,
-}) => {
-  const isToday = isSameDay(selectedDate, new Date());
-  const { data: session } = useSession();
+const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
+  const isToday = isSameDay(selectedDate, new Date())
+  const { data: session } = useSession()
   const filteredAppointments = appointments?.filter((appointment) => {
-    return isSameDay(appointment.appointmentDate, selectedDate);
-  });
+    return isSameDay(appointment.appointmentDate, selectedDate)
+  })
 
   const handleStartConsultation = (patientId: string) => {
-    window.location.href = `/app/professional/${session?.user.id}/consulta?patientId=${patientId}`;
-  };
+    window.location.href = `/app/professional/${session?.user.id}/consulta?patientId=${patientId}`
+  }
 
   if (filteredAppointments?.length === 0) {
     return (
@@ -49,23 +42,19 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                   })}`}
             </h3>
             {userRole === "SUPERVISOR" && (
-              <p className="text-gray-500">
-                Você pode adicionar novas consultas pelo menu de agendamento
-              </p>
+              <p className="text-gray-500">Você pode adicionar novas consultas pelo menu de agendamento</p>
             )}
           </div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
     <div className="space-y-3">
       {filteredAppointments
         ?.slice()
-        .sort(
-          (a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime()
-        )
+        .sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime())
         .map((appointment) => (
           <Card
             key={appointment.id}
@@ -83,15 +72,11 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                   <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
-                    <span className="font-semibold text-sm">
-                      {appointment?.appointmentDate.getHours()}:00
-                    </span>
+                    <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
                   </div>
                   <div>
                     <h3 className="font-medium">
-                      {userRole === "SUPERVISOR"
-                        ? appointment.patient.name
-                        : "Consulta Psicológica"}
+                      {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                     </h3>
                     <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
                   </div>
@@ -132,7 +117,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
           </Card>
         ))}
     </div>
-  );
-};
+  )
+}
 
-export default AppointmentsList;
+export default AppointmentsList
