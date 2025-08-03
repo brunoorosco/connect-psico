@@ -26,6 +26,7 @@ const PatientDashboard: React.FC = () => {
   // Filter past appointments
   // @ts-ignore
   const pastAppointments = appointments?.filter((app: AppointmentModel) => app.appointmentDate < new Date())
+  const nextAppointments = appointments?.filter((app: AppointmentModel) => app.appointmentDate >= new Date())
 
   // Filter future appointments
   const futureAppointments = appointments
@@ -49,8 +50,8 @@ const PatientDashboard: React.FC = () => {
               selectedDate={selectedDate}
               userRole="DEFAULT"
             /> */}
-            {appointments &&
-              appointments.map((consulta: any) => (
+            {nextAppointments &&
+              nextAppointments.map((consulta: any) => (
                 <Card key={consulta.id} className="therapy-card border-l-4 border-l-green-400 mb-2">
                   <CardContent className="p-2 pl-4">
                     <div className="flex justify-between items-start text-sm">
@@ -74,23 +75,7 @@ const PatientDashboard: React.FC = () => {
                       </div>
 
                       {/* Lado direito: Data e Horário */}
-                      <div className="text-right font-sm">
-                        <div className="">
-                          <label className="text-sm text-muted-foreground mr-1">Data:</label>
-                          <label className="text-gray-600 font-semibold">
-                            {String(consulta.appointmentDate.getUTCDate()).padStart(2, "0")}/
-                            {String(consulta.appointmentDate.getUTCMonth() + 1).padStart(2, "0")}/
-                            {consulta.appointmentDate.getUTCFullYear()}
-                          </label>
-                        </div>
-                        <div className="">
-                          <label className="text-sm text-muted-foreground mr-1">Horário:</label>
-                          <label className="text-gray-600 font-semibold">
-                            {String(consulta.appointmentDate.getUTCHours()).padStart(2, "0")}h
-                            {String(consulta.appointmentDate.getUTCMinutes()).padStart(2, "0")}m
-                          </label>
-                        </div>
-                      </div>
+                      <WrapperDateTime consulta={consulta.appointmentDate}/>
                     </div>
                   </CardContent>
                 </Card>
@@ -102,17 +87,14 @@ const PatientDashboard: React.FC = () => {
             <div className="space-y-3">
               {pastAppointments?.map((appointment: AppointmentModel) => (
                 <Card key={appointment.id} className="therapy-card border-l-4 border-l-slate-400">
-                  <CardContent className="p-4">
+                  <CardContent className="p-2">
                     <div className="flex justify-between">
                       <div>
-                        <h3 className="font-medium">
+                        <h3 className="font-xs text-gray-500">
                           Consulta com {appointment.professional.name || "Nome do Médico"}
                         </h3>
                       </div>
-                      <div className="text-sm text-gray-600 flex items-center gap-2">
-                        <label className="">Duração da Consulta</label>
-                        <label className="">{appointment.duration}</label>
-                      </div>
+                     <WrapperDateTime consulta={appointment.appointmentDate}/>
                     </div>
                     {appointment.notes && (
                       <div className="mt-2 text-sm bg-gray-50 p-2 rounded">{appointment.notes}</div>
@@ -153,3 +135,28 @@ const PatientDashboard: React.FC = () => {
   )
 }
 export default PatientDashboard
+
+type TProps = {
+  consulta: Date
+}
+const WrapperDateTime = ({consulta}: TProps) => {
+  return (
+    <div className="text-right font-xs">
+      <div className="">
+        <label className="text-sm text-muted-foreground mr-1">Data:</label>
+        <label className="text-gray-600 font-semibold">
+          {String(consulta.getUTCDate()).padStart(2, "0")}/
+          {String(consulta.getUTCMonth() + 1).padStart(2, "0")}/
+          {consulta.getUTCFullYear()}
+        </label>
+      </div>
+      <div className="">
+        <label className="text-sm text-muted-foreground mr-1">Horário:</label>
+        <label className="text-gray-600 font-semibold">
+          {String(consulta.getUTCHours() - 3).padStart(2, "0")}h
+          {String(consulta.getUTCMinutes()).padStart(2, "0")}m
+        </label>
+      </div>
+    </div>
+  )
+}

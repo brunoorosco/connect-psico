@@ -18,7 +18,7 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
     await prisma.appointment.findMany({
       where: {
         patientId: session.user.id,
-        appointmentDate: { gte: new Date() },
+        // appointmentDate: { gte: new Date() },
         patient: {
           role: "DEFAULT",
         },
@@ -42,7 +42,7 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
     }),
     prisma.appointment.count({
       where: {
-        appointmentDate: { gte: new Date() },
+       // appointmentDate: { gte: new Date() },
         professionalId: session.user.id,
       },
     }),
