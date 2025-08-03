@@ -62,7 +62,7 @@ export const menus = [
   },
   {
     title: "Chat",
-    url: `/app/professional/{userId}/chat`,
+    url: `/app/{userId}/chat`,
     icon: MessageCircle,
     rules: ["SUPERVISOR"],
   },
@@ -74,7 +74,7 @@ export const menus = [
   },
   {
     title: "Chat",
-    url: `/app/users/{userId}/chat`,
+    url: `/app/{userId}/chat`,
     icon: MessageCircle,
     rules: ["DEFAULT"],
   },
