@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@components/ui/dialog"
 import { useState } from "react"
-import ChatFooter from "./chatFooter"
+import ChatFooter from "@/components/patients/PatientList/chatFooter"
 import { formatMessageTime } from "@/utils/formatMessageTime"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
