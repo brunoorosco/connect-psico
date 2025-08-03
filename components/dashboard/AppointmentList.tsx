@@ -12,15 +12,6 @@ import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus";
 import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment";
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass";
 
-type Appointment = {
-  id: string;
-  patientId: string;
-  patient: User;
-  appointmentDate: Date;
-  tempoConsulta: number;
-  status: "CONFIRMED" | "COMPLETED" | "CANCELLED" | "PENDING";
-  notes?: string;
-};
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[];
