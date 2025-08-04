@@ -22,14 +22,17 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     throw new Error("User not found")
   }
 
+  let query
+  if (session.user.role === "DEFAULT") {
+    query = { patientId: session.user.id }
+  } else {
+    query = { professionalId: session.user.id }
+  }
+
   const [users, total] = await Promise.all([
     await prisma.appointment.findMany({
-      where: {
-        professionalId: session.user.id,
-        professional: {
-          role: "SUPERVISOR",
-        },
-      },
+      where: query,
+
       select: {
         id: true,
         appointmentDate: true,
@@ -57,12 +60,9 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
       take: limit,
     }),
     prisma.appointment.count({
-      where: {
-        professionalId: session.user.id,
-      },
+      where: query,
     }),
   ])
-
   const mappedUsers = users.map((user) => {
     const { professional, ...restUser } = user
     const { Professional, ...restProfessional } = professional

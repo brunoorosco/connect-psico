@@ -15,7 +15,6 @@ const CreateAppointmentSchema = z.object({
 })
 
 export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAppointmentSchema>) => {
-  console.log(data)
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
   if (!valid.success) {
     return {
@@ -45,7 +44,7 @@ export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAp
     //   }
     // }
     // 3. Criar agendamento
-    console.log("chegou aqui")
+
     if (!professionalId) return
 
    
