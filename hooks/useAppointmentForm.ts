@@ -1,12 +1,12 @@
-import { format } from "date-fns";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AppointmentModel } from "@/domain/model/appointment";
-import { toast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
-import { mockPatients } from "@components/agenda/mockData";
-import { TIME_REGEX } from "@/utils/formatMessageTime";
+import { format } from "date-fns"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { AppointmentModel } from "@/domain/model/appointment"
+import { toast } from "@/components/ui/use-toast"
+import { useEffect } from "react"
+import { TIME_REGEX } from "@/utils/formatMessageTime"
+import { mockPatients } from "@components/agenda/mockData"
 
 const appointmentSchema = z.object({
   patientId: z.string().min(1, "Selecione um paciente"),
@@ -14,18 +14,18 @@ const appointmentSchema = z.object({
   startTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
   endTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
   notes: z.string().optional(),
-});
+})
 
-export type AppointmentFormValues = z.infer<typeof appointmentSchema>;
+export type AppointmentFormValues = z.infer<typeof appointmentSchema>
 
 export function useAppointmentForm({
   selectedDate,
   editingAppointment,
   onSubmit,
 }: {
-  selectedDate: Date;
-  editingAppointment: AppointmentModel | null;
-  onSubmit: (appointment: AppointmentModel) => void;
+  selectedDate: Date
+  editingAppointment: AppointmentModel | null
+  onSubmit: (appointment: Omit<AppointmentModel, "roomId">) => void
 }) {
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
@@ -36,12 +36,12 @@ export function useAppointmentForm({
       endTime: "09:30",
       notes: "",
     },
-  });
+  })
 
-  const patients = mockPatients;
+  const patients = mockPatients
 
   // Carrega dados se estiver editando
- useEffect(() => {
+  useEffect(() => {
     if (editingAppointment) {
       form.reset({
         patientId: editingAppointment.patient.id,
@@ -49,33 +49,30 @@ export function useAppointmentForm({
         startTime: format(new Date(editingAppointment.appointmentDate), "HH:mm"),
         endTime: editingAppointment.duration
           ? format(
-              new Date(
-                new Date(editingAppointment.appointmentDate).getTime() +
-                  editingAppointment.duration * 60000
-              ),
+              new Date(new Date(editingAppointment.appointmentDate).getTime() + editingAppointment.duration * 60000),
               "HH:mm"
             )
           : "09:30",
         notes: editingAppointment.notes || "",
-      });
+      })
     } else {
-      form.reset();
+      form.reset()
     }
-  }, [editingAppointment, selectedDate]);
+  }, [editingAppointment, selectedDate])
 
   const handleSubmit = (values: AppointmentFormValues) => {
-    const selectedPatient = patients.find((p) => p.userId === values.patientId);
+    const selectedPatient = patients.find((p) => p.userId === values.patientId)
     if (!selectedPatient) {
-      toast({ title: "Erro", description: "Paciente não encontrado", variant: "destructive" });
-      return;
+      toast({ title: "Erro", description: "Paciente não encontrado", variant: "destructive" })
+      return
     }
 
-    const appointmentDate = new Date(`${values.appointmentDate}T${values.startTime}:00`);
-    const [startHour, startMinute] = values.startTime.split(":").map(Number);
-    const [endHour, endMinute] = values.endTime.split(":").map(Number);
-    const duration = endHour * 60 + endMinute - (startHour * 60 + startMinute);
+    const appointmentDate = new Date(`${values.appointmentDate}T${values.startTime}:00`)
+    const [startHour, startMinute] = values.startTime.split(":").map(Number)
+    const [endHour, endMinute] = values.endTime.split(":").map(Number)
+    const duration = endHour * 60 + endMinute - (startHour * 60 + startMinute)
 
-    const newAppointment: AppointmentModel = {
+    const newAppointment: Omit<AppointmentModel, "roomId"> = {
       id: editingAppointment?.id || Math.random(),
       professionalId: "prof1",
       professional: {
@@ -97,10 +94,10 @@ export function useAppointmentForm({
       notes: values.notes,
       duration,
       isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId,
-    };
+    }
 
-    onSubmit(newAppointment);
-  };
+    onSubmit(newAppointment)
+  }
 
-  return { form, handleSubmit };
+  return { form, handleSubmit }
 }

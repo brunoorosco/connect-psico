@@ -1,78 +1,32 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useRouter } from "next/navigation";
-import DashboardHeader from "./DashboardHeader";
-import CalendarNavigation from "./CalendarNavigation";
-import AppointmentsList from "./AppointmentList";
-import { useAppointments } from "@/hooks/useAppointments";
-
-const mockPatients = [
-  {
-    id: "1",
-    name: "Maria Silva",
-    age: 35,
-    gender: "Feminino",
-    contactInfo: "maria.silva@email.com | (11) 98765-4321",
-    initialConsultation: "10/01/2023",
-    diagnosis: "Transtorno de Ansiedade Generalizada",
-    notes: [
-      "Paciente relatou melhora nos episódios de ansiedade após início da meditação diária.",
-      "Continuar com as técnicas de respiração e mindfulness ensinadas na última sessão.",
-    ],
-  },
-  {
-    id: "2",
-    name: "João Oliveira",
-    age: 42,
-    gender: "Masculino",
-    contactInfo: "joao.oliveira@email.com | (11) 91234-5678",
-    initialConsultation: "15/02/2023",
-    diagnosis: "Depressão Leve",
-    notes: [
-      "Paciente está respondendo bem ao tratamento combinado.",
-      "Incentivado a manter rotina de exercícios físicos e exposição solar matinal.",
-    ],
-  },
-  {
-    id: "3",
-    name: "Ana Santos",
-    age: 28,
-    gender: "Feminino",
-    contactInfo: "ana.santos@email.com | (11) 95678-1234",
-    initialConsultation: "03/03/2023",
-    notes: [
-      "Primeira sessão focou em estabelecer rapport e entender principais queixas.",
-      "Paciente demonstrou abertura ao processo terapêutico.",
-    ],
-  },
-];
+"use client"
+import React, { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import DashboardHeader from "./DashboardHeader"
+import CalendarNavigation from "./CalendarNavigation"
+import AppointmentsList from "./AppointmentList"
+import { useAppointments } from "@/hooks/useAppointments"
 
 const PsychologistDashboard: React.FC = () => {
-  const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
-  const { appointments, total, loading, fetchAppointments } = useAppointments();
+  const router = useRouter()
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
+  const { appointments, total, loading, fetchAppointments } = useAppointments()
 
   useEffect(() => {
-    fetchAppointments();
-  }, []);
+    fetchAppointments()
+  }, [])
 
   const handleViewRecord = (patientId: string) => {
-    setSelectedPatient(patientId);
-  };
+    setSelectedPatient(patientId)
+  }
 
   const handleStartConsultation = (patientId: string) => {
-    router.push(`/consulta?patientId=${patientId}`);
-  };
+    router.push(`/consulta?patientId=${patientId}`)
+  }
 
   return (
     <div className="space-y-6  px-2 py-4 sm:px-6 lg:px-8">
-      <DashboardHeader
-        title="Meu Board"
-        subtitle="Gerencie suas consultas e pacientes"
-        userRole="SUPERVISOR"
-      />
+      <DashboardHeader title="Meu Board" subtitle="Gerencie suas consultas e pacientes" userRole="SUPERVISOR" />
 
       <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
@@ -115,7 +69,7 @@ const PsychologistDashboard: React.FC = () => {
         </div> */}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PsychologistDashboard;
+export default PsychologistDashboard

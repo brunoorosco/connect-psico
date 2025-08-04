@@ -120,7 +120,7 @@ export function VideoCallScheduleMenu() {
                     variant="outline"
                     className="h-8"
                     onClick={() => {
-                      setActiveCall(appointment.roomId)
+                      setActiveCall(String(appointment.roomId))
                       router.push(`./videochamada/room/${appointment.roomId}`)
                     }}
                   >
