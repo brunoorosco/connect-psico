@@ -1,9 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, Phone, VideoIcon } from "lucide-react"
+import { Calendar, Clock, Phone } from "lucide-react"
 import { ScrollArea } from "@components/ui/scroll-area"
 import { Button, Card } from "@components/ui"
 import { Badge } from "@components/ui/badge"
@@ -12,6 +11,7 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useAppointments } from "@hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
+import { useCurrentUser } from "@hooks/use-current-user"
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -31,24 +31,21 @@ function getTypeLabel(type: string) {
 }
 
 export function VideoCallScheduleMenu() {
-  const { data: session } = useSession()
+  const user = useCurrentUser()
   const router = useRouter()
   const [activeCall, setActiveCall] = useState<string | null>(null)
   const { appointments, fetchAppointments } = useAppointments()
 
   useEffect(() => {
-    if (!session?.user?.id) return
-    // getUserVideoCalls(session.user.id).then(setCalls)
+    if (!user?.id) return
     fetchAppointments()
-  }, [session])
+  }, [user])
 
-  if (!session) return null
+  if (!user) return null
 
   const todayAppointments = appointments?.filter(
     (app: AppointmentModel) => app.appointmentDate.getDate() === new Date().getDate()
   )
-  console.log(todayAppointments)
-
   return (
     <div className="w-full sm:w-80 bg-card sm:border-r flex flex-col">
       <div className="p-4 sm:p-6 border-b">
@@ -66,12 +63,9 @@ export function VideoCallScheduleMenu() {
           )}
 
           {todayAppointments.map((appointment: AppointmentModel) => {
-            // const participantName =
-            //   appointment.participants.find((p: any) => p.user.id !== session.user.id)?.user.name || "Participante"
             const participantName =
-              appointment.patient?.id === session.user?.id
-                ? appointment.professional?.name ?? "Participante"
-                : appointment.patient?.name ?? "Participante"
+              user.role === "SUPERVISOR" ? appointment.patient?.name : appointment.professional?.name
+
             return (
               <Card
                 key={appointment.roomId}
@@ -90,7 +84,7 @@ export function VideoCallScheduleMenu() {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-medium text-sm">{participantName}</h3>
+                      <h3 className="font-medium text-sm">{participantName.toUpperCase()}</h3>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span>{format(new Date(appointment.appointmentDate), "HH:mm")}</span>

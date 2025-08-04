@@ -39,26 +39,26 @@ export function useAppointmentsByPatient() {
   const fetchAppointments = async (page = 1, limit = 10) => {
     startTransition(async () => {
       const res = await getAppointmentsByPatient({ page, limit })
-      setAppointments(res)
-      setTotal(res.total)
+      setAppointments(res?? [])
+      setTotal(res.total ?? 0)
     })
   }
   return { appointments: appointments.data, total, loading, fetchAppointments }
 }
 
-export function useAppointmentsByProfessional() {
-  const [appointments, setAppointments] = useState<any>([])
+export function useAppointmentsByProfessional(): TUseAppointments {
+  const [appointments, setAppointments] = useState<AppointmentModel[]>([])
   const [total, setTotal] = useState(0)
   const [loading, startTransition] = useTransition()
 
   const fetchAppointments = async (page = 1, limit = 10) => {
     startTransition(async () => {
       const res = await getAppointmentsUsers({ page, limit })
-      setAppointments(res)
-      setTotal(res.total)
+      setAppointments(res.data ?? [])
+      setTotal(res.total ?? 0)
     })
   }
-  return { appointments: appointments.data, total, loading, fetchAppointments }
+  return { appointments, total, loading, fetchAppointments }
 }
 
 export const usePatientAppointments = (userId: string) => {
