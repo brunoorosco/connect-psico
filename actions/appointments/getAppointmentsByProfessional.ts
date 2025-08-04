@@ -63,7 +63,6 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
       where: query,
     }),
   ])
-  console.log(users)
   const mappedUsers = users.map((user) => {
     const { professional, ...restUser } = user
     const { Professional, ...restProfessional } = professional
