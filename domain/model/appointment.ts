@@ -1,19 +1,19 @@
-import { Status } from "@prisma/client";
-
-export type StatusAppointment = Status;
+export type StatusAppointment = "PENDING" | "CANCELLED" | "CONFIRMED" | "COMPLETED" | "CONCLUDED"
 
 export type AppointmentModel = {
-  id: number;
-  patientId: string;
-  professionalId: string;
-  appointmentDate: Date;
-  notes?: string;
-  status: StatusAppointment;
-  duration?: number;
-  isLinkedToMedicalRecord?: boolean;
-  createdAt?: Date;
-  patient: { id: string; name: string; telefone: string; email: string };
-  professional: { id: string; name: string; telefone: string; email: string };
-};
+  id: number
+  patientId: string
+  professionalId: string
+  appointmentDate: Date
+  notes?: string
+  status: StatusAppointment
+  roomId?: string
+  tipoAtendimento?: "ambos" | "remoto" | "presencial"
+  duration?: number
+  isLinkedToMedicalRecord?: boolean
+  createdAt?: Date
+  patient: { id: string; name: string; telefone: string; email: string }
+  professional: { id: string; name: string; telefone: string; email: string }
+}
 
-export type CalendarViewType = "daily" | "weekly" | "monthly";
+export type CalendarViewType = "daily" | "weekly" | "monthly"
