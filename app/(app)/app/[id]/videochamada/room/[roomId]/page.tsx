@@ -42,7 +42,7 @@ export default function VideoCallPage() {
     userId: String(userId),
     avatar,
     userName: String(user?.name),
-    serverUrl: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS || "http://localhost:3001",
+    serverUrl: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS || "http://localhost:4000",
   })
 
   const { messages, sendMessage } = useChat({
@@ -83,7 +83,7 @@ export default function VideoCallPage() {
 
   const handleLeaveCall = () => {
     leaveRoom()
-    window.location.href = "/app"
+    window.location.href = "../"
   }
 
   const handleDeviceChange = (deviceId: string, kind: MediaDeviceKind) => {
@@ -101,7 +101,7 @@ export default function VideoCallPage() {
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Erro de Acesso</h1>
           <p className="text-gray-400 mb-4">{error}</p>
-          <Button onClick={() => (window.location.href = "/")}>Voltar ao Início</Button>
+          <Button onClick={() => (window.location.href = "/app")}>Voltar ao Início</Button>
         </div>
       </div>
     )
