@@ -1,18 +1,18 @@
 "use client"
 
-import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import VideoChat from "@components/videoChat"
 import { getVideoCall } from "@/actions/scheduleVideo/getUserVideoPartipitants"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
 import { useCallStore } from "@/infra/stores/useCallStore"
+import { useCurrentUser } from "@hooks/use-current-user"
 
 interface Props {
   params: { roomId: string }
 }
 
 export default function VideoCallRoomPage({ params }: Props) {
-  const { data: session } = useSession()
+  const user = useCurrentUser()
   const [room, setRoom] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -22,18 +22,18 @@ export default function VideoCallRoomPage({ params }: Props) {
   const setMeta = useCallStore((s) => s.setMeta)
 
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!user?.id) return
 
     setAuthUser({
-      id: session.user.id,
-      name: session.user.name ?? undefined,
-      image: session.user.image ?? undefined,
+      id: user.id,
+      name: user.name ?? undefined,
+      image: user.image ?? undefined,
     })
     connectSocket()
 
     const loadRoom = async () => {
       const res = await getVideoCall(params.roomId)
-      const currentUserId = session?.user?.id
+      const currentUserId = user?.id
       if (res && res.participants?.some((p: any) => p.user.id === currentUserId)) {
         setRoom(res)
       } else {
@@ -45,7 +45,7 @@ export default function VideoCallRoomPage({ params }: Props) {
     loadRoom()
     setMinimized(false)
     setMeta({ roomId: params.roomId })
-  }, [session, setAuthUser, params.roomId, setMinimized, setMeta, connectSocket])
+  }, [user, setAuthUser, params.roomId, setMinimized, setMeta, connectSocket])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -79,7 +79,7 @@ export default function VideoCallRoomPage({ params }: Props) {
     )
   }
 
-  const currentUserId = session?.user?.id
+  const currentUserId = user?.id
   const remoteUser = room?.participants?.find((p: any) => p.user.id !== currentUserId)
   const remoteUserId = remoteUser?.user.id
 
