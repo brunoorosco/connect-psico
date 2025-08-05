@@ -1,219 +1,315 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { useParams, useSearchParams } from "next/navigation"
-import { VideoParticipant } from "@/components/video-chat/video-participant"
-import { MediaControls } from "@/components/video-chat/media-controls"
-import { ChatPanel } from "@/components/video-chat/chat-panel"
-import { SettingsDialog } from "@/components/video-chat/settings-dialog"
+import React, { useState, useEffect, useRef } from "react"
+import { useParams } from "next/navigation"
+
+import { PhoneOff, Mic, MicOff, Video, VideoOff, Settings, MessageSquare, Users, CircleDot, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Loader2, AlertCircle } from "lucide-react"
-import { useChat, useMediaDevices, useWebRTC } from "@hooks/videoChat"
+import { useChat, useWebRTC } from "@hooks/videoChat"
+import { useAudioRecording } from "@components/videoChat/useAudioRecording"
+import { ChatOverlay } from "@components/videoChat/ChatOverlay"
+import { SidebarMenu } from "@components/videoChat/SidebarMenu"
+import { WaitingMessage } from "@components/videoChat/WaitingMessage"
+import { VideoParticipant } from "@components/videoChat/VideoParticipant"
+import { SettingsDialog } from "@components/videoChat/SettingsDialog"
 import { useCurrentUser } from "@hooks/use-current-user"
 
 export default function VideoCallPage() {
   const params = useParams()
-  const searchParams = useSearchParams()
-  const user = useCurrentUser()
   const roomId = params.roomId as string
-  const userId = user?.id
-
-  const userName = String(user?.name)
-  const avatar = searchParams.get("avatar") || undefined
+  const user = useCurrentUser()
+  const userId = user?.id as string
+  const userName = user?.name
+  const avatar = user?.image || undefined
 
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [hasJoined, setHasJoined] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting")
 
+  const localVideoRef = useRef<HTMLVideoElement>(null)
+  // Initialize WebRTC
   const {
-    socket,
     localStream,
     participants,
     isAudioEnabled,
     isVideoEnabled,
+    audioAvailable,
+    videoAvailable,
     isConnected,
+    error: webrtcError,
     joinRoom,
     toggleAudio,
     toggleVideo,
     leaveRoom,
+    socket
   } = useWebRTC({
     roomId,
-    userId: String(userId),
+    userId,
     avatar,
-    userName: String(user?.name),
-    serverUrl: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS || "http://localhost:3001",
+    serverUrl: process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
   })
 
+  // Initialize Chat
   const { messages, sendMessage } = useChat({
     socket,
     roomId,
-    userId: String(userId),
-    userName,
-    avatar,
+    userId,
+    userName: userName || `User ${userId}`,
   })
 
-  const { setSelectedAudioInput, setSelectedVideoInput } = useMediaDevices()
+  // Initialize Audio Recording
+  const {
+    isRecording,
+    isUploading,
+    recordingDuration,
+    startRecording,
+    stopRecording,
+    formatDuration,
+    error: recordingError,
+  } = useAudioRecording({
+    roomId,
+    userId,
+    socket,
+    autoStart: true, // Start recording automatically when joining
+  })
 
+  // Update connection status
   useEffect(() => {
-    const validateAccess = async () => {
-      try {
-        console.log("Acesso validado para:", { roomId, userId })
-      } catch (error) {
-        console.error("Erro na validação:", error)
-        setError("Não foi possível validar o acesso à consulta")
-      }
+    if (isConnected) {
+      setConnectionStatus("connected")
+    } else {
+      setConnectionStatus("connecting")
     }
+  }, [isConnected])
 
+  // Join room on mount
+  useEffect(() => {
     if (roomId && userId) {
-      validateAccess()
-    }
-  }, [roomId, userId])
-
-  useEffect(() => {
-    if (isConnected && !hasJoined && !error) {
       joinRoom()
-        .then(() => setHasJoined(true))
-        .catch((err) => {
-          console.error("Erro ao entrar na sala:", err)
-          setError("Não foi possível entrar na videochamada")
-        })
     }
-  }, [isConnected, hasJoined, joinRoom, error])
+  }, [roomId, userId, joinRoom])
+
+  // Set up local video stream
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream
+    }
+  }, [localStream])
+
+  const handleSendMessage = (message: string) => {
+    sendMessage(message)
+  }
 
   const handleLeaveCall = () => {
     leaveRoom()
-    window.location.href = "/app"
+    if (isRecording) {
+      stopRecording()
+    }
+    window.location.href = "../"
   }
 
-  const handleDeviceChange = (deviceId: string, kind: MediaDeviceKind) => {
-    if (kind === "audioinput") {
-      setSelectedAudioInput(deviceId)
-    } else if (kind === "videoinput") {
-      setSelectedVideoInput(deviceId)
+  const handleToggleRecording = () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
     }
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Erro de Acesso</h1>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <Button onClick={() => (window.location.href = "/")}>Voltar ao Início</Button>
-        </div>
-      </div>
-    )
+  const handleDeviceChange = (deviceId: string, kind: MediaDeviceKind) => {
+    console.log("Dispositivo alterado:", deviceId, kind)
+    // Aqui você pode aplicar as mudanças nos dispositivos
+    // como, por exemplo, reinicializar a stream local com o novo deviceId
   }
-
-  if (!isConnected || !hasJoined) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">
-            {!isConnected ? "Conectando..." : "Entrando na sala..."}
-          </h1>
-          <p className="text-gray-400">Aguarde enquanto preparamos sua videochamada</p>
-        </div>
-      </div>
-    )
-  }
+  // Show waiting message if no participants
+  const showWaitingMessage = participants.length === 0
 
   return (
-    <div className="h-[calc(100vh-50px)] bg-gray-900 flex flex-col md:flex-row">
-      {/* Parte principal com participantes */}
-      <div className="flex-1 relative overflow-hidden">
-        <div
-          className={`h-full w-full bg-black rounded-lg grid gap-2 sm:gap-4
-          ${
-            participants.length === 1
-              ? "grid-cols-1"
-              : participants.length === 2
-              ? "grid-cols-1 sm:grid-cols-2"
-              : participants.length <= 4
-              ? "grid-cols-1 sm:grid-cols-2 sm:grid-rows-2"
-              : "grid-cols-1 sm:grid-cols-3 sm:grid-rows-3"
-          }`}
-        >
-          {participants.map((participant) => (
-            <VideoParticipant
-              key={participant.userId}
-              userId={participant.userId}
-              stream={participant.stream}
-              isAudioEnabled={participant.isAudioEnabled}
-              isVideoEnabled={participant.isVideoEnabled}
-              avatar={participant.avatar}
-              isLocal={false}
-              name={participant.userName}
+    <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
+      {/* Header Controls */}
+      <div className="bg-gray-800 border-b border-gray-700 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-semibold text-white">Sala: {roomId}</h1>
+
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <Users className="w-4 h-4" />
+              <span>
+                {participants.length + 1} participante{participants.length !== 0 ? "s" : ""}
+              </span>
+            </div>
+
+            {/* Recording Status */}
+            {isRecording && (
+              <div className="flex items-center space-x-2 bg-red-600/20 text-red-400 px-3 py-1 rounded-full">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium">REC {formatDuration()}</span>
+              </div>
+            )}
+
+            {isUploading && <div className="text-sm text-yellow-400">Enviando áudio...</div>}
+          </div>
+
+          {/* Main Controls */}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant={!audioAvailable ? "outline" : isAudioEnabled ? "secondary" : "destructive"}
+              size="sm"
+              onClick={toggleAudio}
+              disabled={!audioAvailable}
+              title={
+                !audioAvailable
+                  ? "Microfone não disponível"
+                  : isAudioEnabled
+                  ? "Desativar microfone"
+                  : "Ativar microfone"
+              }
+            >
+              {!audioAvailable ? (
+                <MicOff className="w-4 h-4 opacity-50" />
+              ) : isAudioEnabled ? (
+                <Mic className="w-4 h-4" />
+              ) : (
+                <MicOff className="w-4 h-4" />
+              )}
+            </Button>
+
+            <Button
+              variant={!videoAvailable ? "outline" : isVideoEnabled ? "secondary" : "destructive"}
+              size="sm"
+              onClick={toggleVideo}
+              disabled={!videoAvailable}
+              title={!videoAvailable ? "Câmera não disponível" : isVideoEnabled ? "Desativar câmera" : "Ativar câmera"}
+            >
+              {!videoAvailable ? (
+                <VideoOff className="w-4 h-4 opacity-50" />
+              ) : isVideoEnabled ? (
+                <Video className="w-4 h-4" />
+              ) : (
+                <VideoOff className="w-4 h-4" />
+              )}
+            </Button>
+
+            <Button
+              variant={isRecording ? "destructive" : "outline"}
+              size="sm"
+              onClick={handleToggleRecording}
+              title={isRecording ? "Parar gravação" : "Iniciar gravação"}
+            >
+              {isRecording ? <Square className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => setIsChatOpen(true)}>
+              <MessageSquare className="w-4 h-4" />
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
+              <Settings className="w-4 h-4" />
+            </Button>
+
+            <Button variant="destructive" size="sm" onClick={handleLeaveCall}>
+              <PhoneOff className="w-4 h-4" />
+              <span className="ml-2">Sair</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar Menu */}
+        <SidebarMenu
+          currentUserId={userId}
+          currentUserName={userName || `User ${userId}`}
+          currentUserAvatar={avatar}
+          participants={participants.map((p) => ({
+            userId: p.userId,
+            userName: p.userName || `User ${p.userId}`,
+            isAudioEnabled: p.isAudioEnabled,
+            isVideoEnabled: p.isVideoEnabled,
+            avatar: p.avatar,
+            isConnected: true,
+          }))}
+          isAudioEnabled={isAudioEnabled}
+          isVideoEnabled={isVideoEnabled}
+          onToggleAudio={toggleAudio}
+          onToggleVideo={toggleVideo}
+          onOpenChat={() => setIsChatOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          localVideoRef={localVideoRef}
+          connectionStatus={connectionStatus}
+          roomId={roomId}
+        />
+
+        {/* Video Grid */}
+        <div className="flex-1 p-4">
+          {showWaitingMessage ? (
+            <WaitingMessage
+              userName={userName || `User ${userId}`}
+              roomId={roomId}
+              isAudioEnabled={isAudioEnabled}
+              isVideoEnabled={isVideoEnabled}
+              onToggleAudio={toggleAudio}
+              onToggleVideo={toggleVideo}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              localVideoRef={localVideoRef}
             />
-          ))}
-        </div>
-
-        {/* Controles de mídia centralizados no fundo */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-md px-4">
-          <MediaControls
-            isAudioEnabled={isAudioEnabled}
-            isVideoEnabled={isVideoEnabled}
-            onToggleAudio={toggleAudio}
-            onToggleVideo={toggleVideo}
-            onOpenSettings={() => setIsSettingsOpen(true)}
-            onToggleChat={() => setIsChatOpen(!isChatOpen)}
-            onLeaveCall={handleLeaveCall}
-            isChatOpen={isChatOpen}
-          />
-        </div>
-
-        {/* Mini vídeo local flutuante em mobile */}
-        <div className="fixed bottom-20 right-4 w-24 h-20 sm:w-32 sm:h-24 rounded-lg overflow-hidden z-30 shadow-lg border border-white/10 md:hidden">
-          <VideoParticipant
-            userId={String(userId)}
-            stream={localStream || undefined}
-            isAudioEnabled={isAudioEnabled}
-            isVideoEnabled={isVideoEnabled}
-            avatar={avatar}
-            isLocal={true}
-            name={userName}
-          />
-        </div>
-      </div>
-
-      {/* Área lateral visível apenas no desktop */}
-      <div className="hidden md:flex md:w-[280px] p-4 flex-col justify-between bg-black/30 backdrop-blur-md border-l border-white/10">
-        {/* Info da sala */}
-        <div className="text-white text-sm space-y-1 mb-4">
-          <div className="font-medium">Sala: {roomId}</div>
-          <div className="text-gray-300">
-            {participants.length + 1} participante{participants.length !== 0 ? "s" : ""}
-          </div>
-          <div className={`flex items-center gap-2 text-sm`}>
-            <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`} />
-            {isConnected ? "Conectado" : "Desconectado"}
-          </div>
-        </div>
-
-        {/* Mini vídeo local */}
-        <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/10 shadow-md">
-          <VideoParticipant
-            userId={String(userId)}
-            stream={localStream || undefined}
-            isAudioEnabled={isAudioEnabled}
-            isVideoEnabled={isVideoEnabled}
-            avatar={avatar}
-            isLocal={true}
-            name={userName}
-          />
+          ) : (
+            <div className="h-full">
+              {/* Participants Grid */}
+              <div
+                className={`grid gap-4 h-full ${
+                  participants.length === 1
+                    ? "grid-cols-1"
+                    : participants.length === 2
+                    ? "grid-cols-2"
+                    : participants.length <= 4
+                    ? "grid-cols-2 grid-rows-2"
+                    : participants.length <= 6
+                    ? "grid-cols-3 grid-rows-2"
+                    : "grid-cols-3 grid-rows-3"
+                }`}
+              >
+                {participants.map((participant) => (
+                  <VideoParticipant
+                    key={participant.userId}
+                    userId={participant.userId}
+                    name={participant.userName || `User ${participant.userId}`}
+                    isAudioEnabled={participant.isAudioEnabled}
+                    isVideoEnabled={participant.isVideoEnabled}
+                    avatar={participant.avatar}
+                    stream={participant.stream}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Chat Panel flutuante */}
-      <ChatPanel
+      {/* Hidden Local Video (for sidebar mini video) */}
+      <video ref={localVideoRef} autoPlay muted playsInline className="hidden" />
+
+      {/* Chat Overlay */}
+      <ChatOverlay
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        messages={messages}
-        onSendMessage={sendMessage}
-        currentUserId={String(userId)}
+        //@ts-ignore
+        messages={messages.map((msg) => ({
+          ...msg,
+          isOwn: msg.userId === userId,
+        }))}
+        participants={participants.map((p) => ({
+          userId: p.userId,
+          userName: p.userName || `User ${p.userId}`,
+          avatar: p.avatar,
+          isConnected: true,
+        }))}
+        currentUserId={userId}
+        currentUserName={userName || `User ${userId}`}
+        currentUserAvatar={avatar}
+        onSendMessage={handleSendMessage}
+        roomId={roomId}
       />
 
       {/* Settings Dialog */}
@@ -222,6 +318,34 @@ export default function VideoCallPage() {
         onClose={() => setIsSettingsOpen(false)}
         onDeviceChange={handleDeviceChange}
       />
+
+      {/* Error Messages */}
+      {webrtcError && (
+        <div className="fixed bottom-4 left-4 bg-red-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
+          <div className="font-semibold">Erro de Mídia</div>
+          <div className="text-sm">{webrtcError}</div>
+        </div>
+      )}
+
+      {recordingError && (
+        <div className="fixed bottom-16 left-30 bg-yellow-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
+          <div className="font-semibold">Erro de Gravação</div>
+          <div className="text-sm">{recordingError}</div>
+        </div>
+      )}
+
+      {/* Device Status Indicators */}
+      {!audioAvailable && (
+        <div className="fixed bottom-4 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
+          <div className="text-sm">⚠️ Microfone não disponível</div>
+        </div>
+      )}
+
+      {!videoAvailable && (
+        <div className="fixed bottom-16 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
+          <div className="text-sm">⚠️ Câmera não disponível</div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,320 +1,495 @@
-"use client"
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { MediaDeviceState, Participant, UseWebRTCProps } from './types';
 
-import { useState, useEffect, useRef, useCallback } from "react"
-import { io, Socket } from "socket.io-client"
+export function useWebRTC({ roomId, userId, avatar, serverUrl = 'http://localhost:4000' }: UseWebRTCProps) {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  
+  // Separate media device states
+  const [mediaState, setMediaState] = useState<MediaDeviceState>({
+    audio: { available: false, enabled: false, track: null },
+    video: { available: false, enabled: false, track: null }
+  });
+  
+  const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
+  const localStreamRef = useRef<MediaStream | null>(null);
 
-interface Participant {
-  userId: string
-  isAudioEnabled: boolean
-  isVideoEnabled: boolean
-  avatar?: string
-  stream?: MediaStream
-  userName?: string
-}
-
-interface UseWebRTCProps {
-  roomId: string
-  userId: string
-  avatar?: string
-  serverUrl?: string
-  userName?: string
-}
-
-export function useWebRTC({ roomId, userId, userName, avatar, serverUrl = "http://localhost:3001" }: UseWebRTCProps) {
-  const [socket, setSocket] = useState<Socket | null>(null)
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null)
-  const [participants, setParticipants] = useState<Map<string, Participant>>(new Map())
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true)
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true)
-  const [isConnected, setIsConnected] = useState(false)
-
-  const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map())
-  const localStreamRef = useRef<MediaStream | null>(null)
-
-  // Configuração ICE servers (STUN/TURN)
+  // ICE servers configuration
   const iceServers = {
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
-  }
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+    ]
+  };
 
-  // Inicializar socket
-  useEffect(() => {
-    const newSocket = io(serverUrl)
-    setSocket(newSocket)
-
-    newSocket.on("connect", () => {
-      console.log("Conectado ao servidor Socket.io")
-      setIsConnected(true)
-    })
-
-    newSocket.on("disconnect", () => {
-      console.log("Desconectado do servidor Socket.io")
-      setIsConnected(false)
-    })
-
-    return () => {
-      newSocket.close()
+  // Check device availability
+  const checkDeviceAvailability = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasAudio = devices.some(device => device.kind === 'audioinput');
+      const hasVideo = devices.some(device => device.kind === 'videoinput');
+      
+      console.log('🎤 Audio devices available:', hasAudio);
+      console.log('📹 Video devices available:', hasVideo);
+      
+      return { hasAudio, hasVideo };
+    } catch (error) {
+      console.error('Error checking device availability:', error);
+      return { hasAudio: false, hasVideo: false };
     }
-  }, [serverUrl])
+  }, []);
 
-  // Obter stream local
-  const getLocalStream = useCallback(async () => {
+  // Get audio stream only
+  const getAudioStream = useCallback(async (): Promise<MediaStream | null> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      })
-
-      setLocalStream(stream)
-      localStreamRef.current = stream
-      return stream
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
+      
+      console.log('🎤 Audio stream obtained');
+      return stream;
     } catch (error) {
-      console.error("Erro ao obter stream local:", error)
-      throw error
+      console.error('Error getting audio stream:', error);
+      setError('Não foi possível acessar o microfone');
+      return null;
     }
-  }, [])
+  }, []);
 
-  // Criar peer connection
-  const createPeerConnection = useCallback(
-    (targetUserId: string) => {
-      const peerConnection = new RTCPeerConnection(iceServers)
+  // Get video stream only
+  const getVideoStream = useCallback(async (): Promise<MediaStream | null> => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 }
+        }
+      });
+      
+      console.log('📹 Video stream obtained');
+      return stream;
+    } catch (error) {
+      console.error('Error getting video stream:', error);
+      setError('Não foi possível acessar a câmera');
+      return null;
+    }
+  }, []);
 
-      // Adicionar stream local
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((track) => {
-          peerConnection.addTrack(track, localStreamRef.current!)
-        })
-      }
+  // Initialize media streams independently
+  const initializeMedia = useCallback(async () => {
+    try {
+      setError(null);
+      const { hasAudio, hasVideo } = await checkDeviceAvailability();
+      
+      const combinedStream = new MediaStream();
+      let audioTrack: MediaStreamTrack | null = null;
+      let videoTrack: MediaStreamTrack | null = null;
 
-      // Lidar com stream remoto
-      peerConnection.ontrack = (event) => {
-        const [remoteStream] = event.streams
-        setParticipants((prev) => {
-          const updated = new Map(prev)
-          const participant = updated.get(targetUserId)
-          if (participant) {
-            updated.set(targetUserId, { ...participant, stream: remoteStream })
+      // Try to get audio stream if available
+      if (hasAudio) {
+        try {
+          const audioStream = await getAudioStream();
+          if (audioStream) {
+            audioTrack = audioStream.getAudioTracks()[0];
+            if (audioTrack) {
+              combinedStream.addTrack(audioTrack);
+              console.log('✅ Audio track added to combined stream');
+            }
           }
-          return updated
-        })
-      }
-
-      // Lidar com ICE candidates
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate && socket) {
-          socket.emit("webrtcSignaling", {
-            roomId,
-            targetUserId,
-            signal: event.candidate,
-            type: "ice-candidate",
-          })
+        } catch (error) {
+          console.warn('⚠️ Failed to get audio, continuing without audio:', error);
         }
       }
 
-      peerConnections.current.set(targetUserId, peerConnection)
-      return peerConnection
-    },
-    [roomId, socket]
-  )
+      // Try to get video stream if available
+      if (hasVideo) {
+        try {
+          const videoStream = await getVideoStream();
+          if (videoStream) {
+            videoTrack = videoStream.getVideoTracks()[0];
+            if (videoTrack) {
+              combinedStream.addTrack(videoTrack);
+              console.log('✅ Video track added to combined stream');
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Failed to get video, continuing without video:', error);
+        }
+      }
 
-  // Entrar na sala
+      // Update media state
+      setMediaState({
+        audio: {
+          available: hasAudio && audioTrack !== null,
+          enabled: hasAudio && audioTrack !== null,
+          track: audioTrack
+        },
+        video: {
+          available: hasVideo && videoTrack !== null,
+          enabled: hasVideo && videoTrack !== null,
+          track: videoTrack
+        }
+      });
+
+      // Set the combined stream
+      setLocalStream(combinedStream);
+      localStreamRef.current = combinedStream;
+
+      console.log('🎯 Media initialization complete:', {
+        audioAvailable: hasAudio && audioTrack !== null,
+        videoAvailable: hasVideo && videoTrack !== null,
+        totalTracks: combinedStream.getTracks().length
+      });
+
+      return combinedStream;
+    } catch (error) {
+      console.error('Error initializing media:', error);
+      setError('Erro ao inicializar dispositivos de mídia');
+      
+      // Set all as unavailable on error
+      setMediaState({
+        audio: { available: false, enabled: false, track: null },
+        video: { available: false, enabled: false, track: null }
+      });
+      
+      return null;
+    }
+  }, [checkDeviceAvailability, getAudioStream, getVideoStream]);
+
+  // Initialize socket
+  useEffect(() => {
+    const newSocket = io(serverUrl);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('✅ Connected to Socket.io server');
+      setIsConnected(true);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('❌ Disconnected from Socket.io server');
+      setIsConnected(false);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('Socket error:', error);
+      setError('Erro de conexão com o servidor');
+    });
+
+    return () => {
+      newSocket.close();
+    };
+  }, [serverUrl]);
+
+  // Create peer connection
+  const createPeerConnection = useCallback((targetUserId: string) => {
+    const peerConnection = new RTCPeerConnection(iceServers);
+    
+    // Add local tracks if available
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => {
+        if (localStreamRef.current) {
+          peerConnection.addTrack(track, localStreamRef.current);
+          console.log(`📡 Added ${track.kind} track to peer connection for ${targetUserId}`);
+        }
+      });
+    }
+
+    // Handle remote stream
+    peerConnection.ontrack = (event) => {
+      const [remoteStream] = event.streams;
+      console.log(`📥 Received ${event.track.kind} track from ${targetUserId}`);
+      
+      setParticipants(prev => {
+        const updated = new Map(prev);
+        const participant = updated.get(targetUserId);
+        if (participant) {
+          updated.set(targetUserId, { ...participant, stream: remoteStream });
+        }
+        return updated;
+      });
+    };
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate && socket) {
+        socket.emit('webrtcSignaling', {
+          roomId,
+          targetUserId,
+          signal: event.candidate,
+          type: 'ice-candidate'
+        });
+      }
+    };
+
+    // Handle connection state changes
+    peerConnection.onconnectionstatechange = () => {
+      console.log(`🔗 Connection state with ${targetUserId}:`, peerConnection.connectionState);
+    };
+
+    peerConnections.current.set(targetUserId, peerConnection);
+    return peerConnection;
+  }, [roomId, socket]);
+
+  // Join room
   const joinRoom = useCallback(async () => {
-    if (!socket) return
+    if (!socket) {
+      console.warn('⚠️ Socket not available, cannot join room');
+      return;
+    }
 
     try {
-      await getLocalStream()
-console.log("username",userName)
-      socket.emit("joinRoom", { roomId, userId, avatar, userName})
+      console.log('🚪 Joining room:', roomId);
+      
+      // Initialize media first
+      await initializeMedia();
+      
+      socket.emit('joinRoom', { roomId, userId, avatar });
+      
+      // Handle new participants
+      socket.on('participantJoined', async ({ userId: newUserId, userName, isAudioEnabled, isVideoEnabled, avatar }) => {
+        console.log('👤 New participant joined:', newUserId);
+        
+        setParticipants(prev => {
+          const updated = new Map(prev);
+          updated.set(newUserId, {
+            userId: newUserId,
+            userName,
+            isAudioEnabled,
+            isVideoEnabled,
+            avatar
+          });
+          return updated;
+        });
 
-      // Lidar com novos participantes
-      socket.on(
-        "participantJoined",
-        async ({ userId: newUserId, isAudioEnabled, isVideoEnabled, avatar, userName }) => {
-          console.log("Novo participante:", newUserId, userName)
+        // Create offer for new participant
+        const peerConnection = createPeerConnection(newUserId);
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        socket.emit('webrtcSignaling', {
+          roomId,
+          targetUserId: newUserId,
+          signal: offer,
+          type: 'offer'
+        });
+      });
 
-          setParticipants((prev) => {
-            const updated = new Map(prev)
-            updated.set(newUserId, {
-              userId: newUserId,
-              isAudioEnabled,
-              isVideoEnabled,
-              avatar,
-              userName,
-            })
-            return updated
-          })
-
-          // Criar oferta para o novo participante
-          const peerConnection = createPeerConnection(newUserId)
-          const offer = await peerConnection.createOffer()
-          await peerConnection.setLocalDescription(offer)
-
-          socket.emit("webrtcSignaling", {
-            roomId,
-            targetUserId: newUserId,
-            signal: offer,
-            type: "offer",
-          })
-        }
-      )
-
-      // Lidar com participantes existentes
-      socket.on("roomJoined", ({ participants: existingParticipants }) => {
-        setParticipants((prev) => {
-          const updated = new Map(prev)
+      // Handle existing participants
+      socket.on('roomJoined', ({ participants: existingParticipants }) => {
+        console.log('👥 Existing participants:', existingParticipants.length);
+        setParticipants(prev => {
+          const updated = new Map(prev);
           existingParticipants.forEach((participant: any) => {
-            updated.set(participant.userId, participant)
-          })
-          return updated
-        })
-      })
+            updated.set(participant.userId, participant);
+          });
+          return updated;
+        });
+      });
 
-      // Lidar com sinalização WebRTC
-      socket.on("webrtcSignaling", async ({ fromUserId, signal, type }) => {
-        let peerConnection = peerConnections.current.get(fromUserId)
-
+      // Handle WebRTC signaling
+      socket.on('webrtcSignaling', async ({ fromUserId, signal, type }) => {
+        let peerConnection = peerConnections.current.get(fromUserId);
+        
         if (!peerConnection) {
-          peerConnection = createPeerConnection(fromUserId)
+          peerConnection = createPeerConnection(fromUserId);
         }
 
         try {
-          if (type === "offer") {
-            await peerConnection.setRemoteDescription(signal)
-            const answer = await peerConnection.createAnswer()
-            await peerConnection.setLocalDescription(answer)
-
-            socket.emit("webrtcSignaling", {
+          if (type === 'offer') {
+            await peerConnection.setRemoteDescription(signal);
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            
+            socket.emit('webrtcSignaling', {
               roomId,
               targetUserId: fromUserId,
               signal: answer,
-              type: "answer",
-            })
-          } else if (type === "answer") {
-            await peerConnection.setRemoteDescription(signal)
-          } else if (type === "ice-candidate") {
-            await peerConnection.addIceCandidate(signal)
+              type: 'answer'
+            });
+          } else if (type === 'answer') {
+            await peerConnection.setRemoteDescription(signal);
+          } else if (type === 'ice-candidate') {
+            await peerConnection.addIceCandidate(signal);
           }
         } catch (error) {
-          console.error("Erro na sinalização WebRTC:", error)
+          console.error('❌ WebRTC signaling error:', error);
         }
-      })
+      });
 
-      // Lidar com participantes saindo
-      socket.on("participantLeft", ({ userId: leftUserId }) => {
-        console.log("Participante saiu:", leftUserId)
+      // Handle participants leaving
+      socket.on('participantLeft', ({ userId: leftUserId }) => {
+        console.log('👋 Participant left:', leftUserId);
+        
+        setParticipants(prev => {
+          const updated = new Map(prev);
+          updated.delete(leftUserId);
+          return updated;
+        });
 
-        setParticipants((prev) => {
-          const updated = new Map(prev)
-          updated.delete(leftUserId)
-          return updated
-        })
-
-        const peerConnection = peerConnections.current.get(leftUserId)
+        const peerConnection = peerConnections.current.get(leftUserId);
         if (peerConnection) {
-          peerConnection.close()
-          peerConnections.current.delete(leftUserId)
+          peerConnection.close();
+          peerConnections.current.delete(leftUserId);
         }
-      })
+      });
 
-      // Lidar com status de áudio/vídeo
-      socket.on("participantAudioStatus", ({ userId: participantId, isAudioEnabled }) => {
-        setParticipants((prev) => {
-          const updated = new Map(prev)
-          const participant = updated.get(participantId)
+      // Handle audio/video status updates
+      socket.on('participantAudioStatus', ({ userId: participantId, isAudioEnabled }) => {
+        setParticipants(prev => {
+          const updated = new Map(prev);
+          const participant = updated.get(participantId);
           if (participant) {
-            updated.set(participantId, { ...participant, isAudioEnabled })
+            updated.set(participantId, { ...participant, isAudioEnabled });
           }
-          return updated
-        })
-      })
+          return updated;
+        });
+      });
 
-      socket.on("participantVideoStatus", ({ userId: participantId, isVideoEnabled }) => {
-        setParticipants((prev) => {
-          const updated = new Map(prev)
-          const participant = updated.get(participantId)
+      socket.on('participantVideoStatus', ({ userId: participantId, isVideoEnabled }) => {
+        setParticipants(prev => {
+          const updated = new Map(prev);
+          const participant = updated.get(participantId);
           if (participant) {
-            updated.set(participantId, { ...participant, isVideoEnabled })
+            updated.set(participantId, { ...participant, isVideoEnabled });
           }
-          return updated
-        })
-      })
+          return updated;
+        });
+      });
+
     } catch (error) {
-      console.error("Erro ao entrar na sala:", error)
+      console.error('❌ Error joining room:', error);
+      setError('Erro ao entrar na sala');
     }
-  }, [socket, roomId, userId, avatar, getLocalStream, createPeerConnection])
+  }, [socket, roomId, userId, avatar, initializeMedia, createPeerConnection]);
 
-  // Controlar áudio
+  // Toggle audio independently
   const toggleAudio = useCallback(() => {
-    if (localStreamRef.current) {
-      const audioTrack = localStreamRef.current.getAudioTracks()[0]
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled
-        setIsAudioEnabled(audioTrack.enabled)
-
-        if (socket) {
-          socket.emit("toggleAudio", { roomId, isEnabled: audioTrack.enabled })
-        }
-      }
+    const audioTrack = mediaState.audio.track;
+    
+    if (!mediaState.audio.available) {
+      console.warn('⚠️ Audio not available');
+      setError('Microfone não disponível');
+      return;
     }
-  }, [socket, roomId])
 
-  // Controlar vídeo
+    if (audioTrack) {
+      const newEnabled = !mediaState.audio.enabled;
+      audioTrack.enabled = newEnabled;
+      
+      setMediaState(prev => ({
+        ...prev,
+        audio: { ...prev.audio, enabled: newEnabled }
+      }));
+      
+      if (socket) {
+        socket.emit('toggleAudio', { roomId, isEnabled: newEnabled });
+      }
+      
+      console.log(`🎤 Audio ${newEnabled ? 'enabled' : 'disabled'}`);
+    } else {
+      console.warn('⚠️ No audio track available');
+      setError('Track de áudio não encontrado');
+    }
+  }, [mediaState.audio, socket, roomId]);
+
+  // Toggle video independently
   const toggleVideo = useCallback(() => {
-    if (localStreamRef.current) {
-      const videoTrack = localStreamRef.current.getVideoTracks()[0]
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled
-        setIsVideoEnabled(videoTrack.enabled)
+    const videoTrack = mediaState.video.track;
+    
+    if (!mediaState.video.available) {
+      console.warn('⚠️ Video not available');
+      setError('Câmera não disponível');
+      return;
+    }
 
-        if (socket) {
-          socket.emit("toggleVideo", { roomId, isEnabled: videoTrack.enabled })
-        }
+    if (videoTrack) {
+      const newEnabled = !mediaState.video.enabled;
+      videoTrack.enabled = newEnabled;
+      
+      setMediaState(prev => ({
+        ...prev,
+        video: { ...prev.video, enabled: newEnabled }
+      }));
+      
+      if (socket) {
+        socket.emit('toggleVideo', { roomId, isEnabled: newEnabled });
       }
+      
+      console.log(`📹 Video ${newEnabled ? 'enabled' : 'disabled'}`);
+    } else {
+      console.warn('⚠️ No video track available');
+      setError('Track de vídeo não encontrado');
     }
-  }, [socket, roomId])
+  }, [mediaState.video, socket, roomId]);
 
-  // Sair da sala
+  // Leave room
   const leaveRoom = useCallback(() => {
-    // Emitir evento de saída explícita
+    console.log('🚪 Leaving room:', roomId);
+    
+    // Emit explicit leave event
     if (socket && roomId && userId) {
-      socket.emit("leaveRoom", { roomId, userId })
+      socket.emit('leaveRoom', { roomId, userId });
     }
 
-    // Fechar todas as conexões peer
-    peerConnections.current.forEach((pc) => pc.close())
-    peerConnections.current.clear()
+    // Close all peer connections
+    peerConnections.current.forEach(pc => pc.close());
+    peerConnections.current.clear();
 
-    // Parar stream local
+    // Stop all local tracks
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop())
+      localStreamRef.current.getTracks().forEach(track => {
+        track.stop();
+        console.log(`🛑 Stopped ${track.kind} track`);
+      });
     }
 
-    // Desconectar socket
-    if (socket) {
-      socket.disconnect()
-    }
+    // Reset states
+    setParticipants(new Map());
+    setLocalStream(null);
+    setMediaState({
+      audio: { available: false, enabled: false, track: null },
+      video: { available: false, enabled: false, track: null }
+    });
+    localStreamRef.current = null;
+    setError(null);
+  }, [socket, roomId, userId]);
 
-    setParticipants(new Map())
-    setLocalStream(null)
-    localStreamRef.current = null
-  }, [socket, roomId, userId])
-
-  // Cleanup
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      leaveRoom()
-    }
-  }, [leaveRoom])
+      leaveRoom();
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, []);
 
   return {
     socket,
     localStream,
     participants: Array.from(participants.values()),
-    isAudioEnabled,
-    isVideoEnabled,
+    isAudioEnabled: mediaState.audio.enabled,
+    isVideoEnabled: mediaState.video.enabled,
+    audioAvailable: mediaState.audio.available,
+    videoAvailable: mediaState.video.available,
     isConnected,
+    error,
     joinRoom,
     toggleAudio,
     toggleVideo,
-    leaveRoom,
-  }
+    leaveRoom
+  };
 }
+
