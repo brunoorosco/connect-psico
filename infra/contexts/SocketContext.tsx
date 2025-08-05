@@ -1,26 +1,39 @@
 // contexts/SocketContext.tsx
 "use client"
 
-import { createContext, useContext, useEffect } from "react"
-import { useAuthStore } from "@/infra/stores/useAuthStore"
+import { createContext, useContext, useEffect, useState } from "react"
+import { io, Socket } from "socket.io-client"
 
 interface SocketContextProps {
-  connectSocket: () => void
-  disconnectSocket: () => void
+  socket: Socket | null
 }
 
-const SocketContext = createContext<SocketContextProps | undefined>(undefined)
+const SocketContext = createContext<SocketContextProps>({ socket: null })
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { connectSocket, disconnectSocket, authUser, socket } = useAuthStore()
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   useEffect(() => {
-    if (authUser) connectSocket()
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000", {
+      transports: ["websocket"],
+    })
 
-    return () => disconnectSocket()
-  }, [authUser])
+    setSocket(newSocket)
 
-  return <SocketContext.Provider value={{ connectSocket, disconnectSocket }}>{children}</SocketContext.Provider>
+    newSocket.on("connect", () => {
+      console.log("✅ Socket conectado:", newSocket.id)
+    })
+
+    newSocket.on("disconnect", () => {
+      console.log("❌ Socket desconectado")
+    })
+
+    return () => {
+      newSocket.disconnect()
+    }
+  }, [])
+
+  return <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>
 }
 
 export const useSocket = () => {

@@ -1,9 +1,9 @@
 "use client"
 import { useEffect } from "react"
 import { useSession } from "next-auth/react"
-import ChatContainer from "@/app/(app)/chat/ChatContainer"
-import Sidebar from "@/app/(app)/chat/Sidebar"
-import NoChatSelected from "@/app/(app)/chat/NoChatSelected"
+import ChatContainer from "@components/chat/ChatContainer"
+import Sidebar from "@components/chat/Sidebar"
+import NoChatSelected from "@components/chat/NoChatSelected"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
 

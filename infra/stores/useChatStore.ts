@@ -5,7 +5,7 @@ import { sendMessageApi, getMessageApi, getUserChat, getContactsApi } from "@/ac
 import { UserChat } from "@/domain/model/patient"
 import { User } from "next-auth"
 import { getUserChatProfessionals } from "@/actions/messages/getUserChatProfessional"
-import { TMessage } from "@/app/(app)/chat/ChatContainer"
+import { TMessage } from "@components/chat/ChatContainer"
 
 type TMessageSend = Omit<TMessage, "_id" | "createdAt">
 type State = {
