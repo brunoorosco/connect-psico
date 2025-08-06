@@ -13,6 +13,8 @@ import { WaitingMessage } from "@components/videoChat/WaitingMessage"
 import { VideoParticipant } from "@components/videoChat/VideoParticipant"
 import { SettingsDialog } from "@components/videoChat/SettingsDialog"
 import { useCurrentUser } from "@hooks/use-current-user"
+import { MobileControls } from "@components/videoChat/MobileControls"
+import { HeaderControls } from "@components/videoChat/HeaderControls"
 
 export default function VideoCallPage() {
   const params = useParams()
@@ -41,7 +43,7 @@ export default function VideoCallPage() {
     toggleAudio,
     toggleVideo,
     leaveRoom,
-    socket
+    socket,
   } = useWebRTC({
     roomId,
     userId,
@@ -127,93 +129,23 @@ export default function VideoCallPage() {
   return (
     <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
       {/* Header Controls */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold text-white">Sala: {roomId}</h1>
-
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <Users className="w-4 h-4" />
-              <span>
-                {participants.length + 1} participante{participants.length !== 0 ? "s" : ""}
-              </span>
-            </div>
-
-            {/* Recording Status */}
-            {isRecording && (
-              <div className="flex items-center space-x-2 bg-red-600/20 text-red-400 px-3 py-1 rounded-full">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-sm font-medium">REC {formatDuration()}</span>
-              </div>
-            )}
-
-            {isUploading && <div className="text-sm text-yellow-400">Enviando áudio...</div>}
-          </div>
-
-          {/* Main Controls */}
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={!audioAvailable ? "outline" : isAudioEnabled ? "secondary" : "destructive"}
-              size="sm"
-              onClick={toggleAudio}
-              disabled={!audioAvailable}
-              title={
-                !audioAvailable
-                  ? "Microfone não disponível"
-                  : isAudioEnabled
-                  ? "Desativar microfone"
-                  : "Ativar microfone"
-              }
-            >
-              {!audioAvailable ? (
-                <MicOff className="w-4 h-4 opacity-50" />
-              ) : isAudioEnabled ? (
-                <Mic className="w-4 h-4" />
-              ) : (
-                <MicOff className="w-4 h-4" />
-              )}
-            </Button>
-
-            <Button
-              variant={!videoAvailable ? "outline" : isVideoEnabled ? "secondary" : "destructive"}
-              size="sm"
-              onClick={toggleVideo}
-              disabled={!videoAvailable}
-              title={!videoAvailable ? "Câmera não disponível" : isVideoEnabled ? "Desativar câmera" : "Ativar câmera"}
-            >
-              {!videoAvailable ? (
-                <VideoOff className="w-4 h-4 opacity-50" />
-              ) : isVideoEnabled ? (
-                <Video className="w-4 h-4" />
-              ) : (
-                <VideoOff className="w-4 h-4" />
-              )}
-            </Button>
-
-            <Button
-              variant={isRecording ? "destructive" : "outline"}
-              size="sm"
-              onClick={handleToggleRecording}
-              title={isRecording ? "Parar gravação" : "Iniciar gravação"}
-            >
-              {isRecording ? <Square className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={() => setIsChatOpen(true)}>
-              <MessageSquare className="w-4 h-4" />
-            </Button>
-
-            <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
-              <Settings className="w-4 h-4" />
-            </Button>
-
-            <Button variant="destructive" size="sm" onClick={handleLeaveCall}>
-              <PhoneOff className="w-4 h-4" />
-              <span className="ml-2">Sair</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <HeaderControls
+        roomId={roomId}
+        participantCount={participants.length + 1}
+        isRecording={isRecording}
+        isUploading={isUploading}
+        isAudioEnabled={isAudioEnabled}
+        isVideoEnabled={isVideoEnabled}
+        audioAvailable={audioAvailable}
+        videoAvailable={videoAvailable}
+        formatDuration={formatDuration}
+        onToggleAudio={toggleAudio}
+        onToggleVideo={toggleVideo}
+        onToggleRecording={handleToggleRecording}
+        onOpenChat={() => setIsChatOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onLeaveCall={handleLeaveCall}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
@@ -239,10 +171,11 @@ export default function VideoCallPage() {
           localVideoRef={localVideoRef}
           connectionStatus={connectionStatus}
           roomId={roomId}
+          className="hidden md:block"
         />
 
         {/* Video Grid */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 relative">
           {showWaitingMessage ? (
             <WaitingMessage
               userName={userName || `User ${userId}`}
@@ -255,33 +188,54 @@ export default function VideoCallPage() {
               localVideoRef={localVideoRef}
             />
           ) : (
-            <div className="h-full">
-              {/* Participants Grid */}
-              <div
-                className={`grid gap-4 h-full ${
-                  participants.length === 1
-                    ? "grid-cols-1"
-                    : participants.length === 2
-                    ? "grid-cols-2"
-                    : participants.length <= 4
-                    ? "grid-cols-2 grid-rows-2"
-                    : participants.length <= 6
-                    ? "grid-cols-3 grid-rows-2"
-                    : "grid-cols-3 grid-rows-3"
-                }`}
-              >
-                {participants.map((participant) => (
-                  <VideoParticipant
-                    key={participant.userId}
-                    userId={participant.userId}
-                    name={participant.userName || `User ${participant.userId}`}
-                    isAudioEnabled={participant.isAudioEnabled}
-                    isVideoEnabled={participant.isVideoEnabled}
-                    avatar={participant.avatar}
-                    stream={participant.stream}
+            <div className="h-full relative">
+              {/* 📌 Participantes */}
+              {participants.length === 1 ? (
+                <VideoParticipant
+                  key={participants[0].userId}
+                  userId={participants[0].userId}
+                  name={participants[0].userName || `User ${participants[0].userId}`}
+                  isAudioEnabled={participants[0].isAudioEnabled}
+                  isVideoEnabled={participants[0].isVideoEnabled}
+                  avatar={participants[0].avatar}
+                  stream={participants[0].stream}
+                  isSingleParticipant={true}
+                  isLocal={false}
+                />
+              ) : (
+                <div
+                  className={`grid gap-2 h-full ${
+                    participants.length === 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2"
+                  }`}
+                >
+                  {participants.map((participant) => (
+                    <VideoParticipant
+                      key={participant.userId}
+                      userId={participant.userId}
+                      name={participant.userName || `User ${participant.userId}`}
+                      isAudioEnabled={participant.isAudioEnabled}
+                      isVideoEnabled={participant.isVideoEnabled}
+                      avatar={participant.avatar}
+                      stream={participant.stream}
+                      isSingleParticipant={false}
+                      isLocal={false}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* 👤 Seu vídeo local no canto inferior direito */}
+              {isVideoEnabled && (
+                <div className="absolute bottom-4 right-4 w-40 h-24 bg-black rounded-md overflow-hidden shadow-lg border border-white/20">
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover rounded-md"
                   />
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -320,32 +274,47 @@ export default function VideoCallPage() {
       />
 
       {/* Error Messages */}
-      {webrtcError && (
-        <div className="fixed bottom-4 left-4 bg-red-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
-          <div className="font-semibold">Erro de Mídia</div>
-          <div className="text-sm">{webrtcError}</div>
-        </div>
-      )}
+      <div className="hidden">
+        {webrtcError && (
+          <div className="fixed bottom-4 left-4 bg-red-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
+            <div className="font-semibold">Erro de Mídia</div>
+            <div className="text-sm">{webrtcError}</div>
+          </div>
+        )}
 
-      {recordingError && (
-        <div className="fixed bottom-16 left-30 bg-yellow-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
-          <div className="font-semibold">Erro de Gravação</div>
-          <div className="text-sm">{recordingError}</div>
-        </div>
-      )}
+        {recordingError && (
+          <div className="fixed bottom-16 left-30 bg-yellow-600 text-white p-4 rounded-lg shadow-lg max-w-sm">
+            <div className="font-semibold">Erro de Gravação</div>
+            <div className="text-sm">{recordingError}</div>
+          </div>
+        )}
 
-      {/* Device Status Indicators */}
-      {!audioAvailable && (
-        <div className="fixed bottom-4 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
-          <div className="text-sm">⚠️ Microfone não disponível</div>
-        </div>
-      )}
+        {/* Device Status Indicators */}
+        {!audioAvailable && (
+          <div className="fixed bottom-4 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
+            <div className="text-sm">⚠️ Microfone não disponível</div>
+          </div>
+        )}
 
-      {!videoAvailable && (
-        <div className="fixed bottom-16 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
-          <div className="text-sm">⚠️ Câmera não disponível</div>
-        </div>
-      )}
+        {!videoAvailable && (
+          <div className="fixed bottom-16 right-4 bg-orange-600 text-white p-3 rounded-lg shadow-lg">
+            <div className="text-sm">⚠️ Câmera não disponível</div>
+          </div>
+        )}
+      </div>
+      <MobileControls
+        isAudioEnabled={isAudioEnabled}
+        isVideoEnabled={isVideoEnabled}
+        isRecording={isRecording}
+        audioAvailable={audioAvailable}
+        videoAvailable={videoAvailable}
+        onToggleAudio={toggleAudio}
+        onToggleVideo={toggleVideo}
+        onToggleRecording={handleToggleRecording}
+        onOpenChat={() => setIsChatOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onLeaveCall={handleLeaveCall}
+      />
     </div>
   )
 }

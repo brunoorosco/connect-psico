@@ -345,6 +345,7 @@ export function ChatOverlay({
             </div>
           </div>
         </div>
+       <div className="block sm:hidden h-12" />
       </div>
     </div>
   );
