@@ -15,6 +15,7 @@ import { SettingsDialog } from "@components/videoChat/SettingsDialog"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { MobileControls } from "@components/videoChat/MobileControls"
 import { HeaderControls } from "@components/videoChat/HeaderControls"
+import { env } from "@/config/application"
 
 export default function VideoCallPage() {
   const params = useParams()
@@ -48,7 +49,7 @@ export default function VideoCallPage() {
     roomId,
     userId,
     avatar,
-    serverUrl: process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+    serverUrl: env.baseUrlPsicomaisApi                                                                                                                                                                                                                      || "http://localhost:4000",
   })
 
   // Initialize Chat
