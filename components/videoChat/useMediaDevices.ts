@@ -77,7 +77,7 @@ export function useMediaDevices() {
       const audioGranted = audioPermission.state === 'granted';
       const videoGranted = videoPermission.state === 'granted';
 
-      console.log('🔐 Permissions check:', { audio: audioGranted, video: videoGranted });
+      // console.log('🔐 Permissions check:', { audio: audioGranted, video: videoGranted });
 
       return { audio: audioGranted, video: videoGranted };
     } catch (error) {
@@ -95,7 +95,7 @@ export function useMediaDevices() {
       if (audio) constraints.audio = true;
       if (video) constraints.video = true;
 
-      console.log('🔑 Requesting permissions:', constraints);
+      // console.log('🔑 Requesting permissions:', constraints);
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
@@ -111,7 +111,7 @@ export function useMediaDevices() {
         isLoading: false
       }));
 
-      console.log('✅ Permissions granted:', permissions);
+      // console.log('✅ Permissions granted:', permissions);
       return permissions;
     } catch (error) {
       console.error('❌ Error requesting permissions:', error);
@@ -145,7 +145,7 @@ export function useMediaDevices() {
       // Select default devices if needed
       const finalPrefs = deviceStorage.selectDefaultDevices(storedDevices);
 
-      console.log('📖 Loaded preferences:', finalPrefs);
+      // console.log('📖 Loaded preferences:', finalPrefs);
 
       return finalPrefs;
     } catch (error) {
@@ -266,7 +266,7 @@ export function useMediaDevices() {
       stream.getTracks().forEach(track => track.stop());
       audioContext.close();
 
-      console.log('✅ Audio device test passed');
+      // console.log('✅ Audio device test passed');
       return true;
     } catch (error) {
       console.error('❌ Audio device test failed:', error);
@@ -291,7 +291,7 @@ export function useMediaDevices() {
       // Clean up
       stream.getTracks().forEach(track => track.stop());
 
-      console.log('✅ Video device test passed');
+      // console.log('✅ Video device test passed');
       return hasVideo;
     } catch (error) {
       console.error('❌ Video device test failed:', error);
@@ -306,7 +306,7 @@ export function useMediaDevices() {
     // Save to localStorage
     deviceStorage.saveDevicePreferences({ audioInputId: deviceId });
     
-    console.log('🎤 Selected audio input:', deviceId);
+    // console.log('🎤 Selected audio input:', deviceId);
   }, []);
 
   // Select video input device and save to localStorage
@@ -316,7 +316,7 @@ export function useMediaDevices() {
     // Save to localStorage
     deviceStorage.saveDevicePreferences({ videoInputId: deviceId });
     
-    console.log('📹 Selected video input:', deviceId);
+    // console.log('📹 Selected video input:', deviceId);
   }, []);
 
   // Select audio output device and save to localStorage
@@ -326,7 +326,7 @@ export function useMediaDevices() {
     // Save to localStorage
     deviceStorage.saveDevicePreferences({ audioOutputId: deviceId });
     
-    console.log('🔊 Selected audio output:', deviceId);
+    // console.log('🔊 Selected audio output:', deviceId);
   }, []);
 
   // Get device capabilities summary
@@ -379,7 +379,7 @@ export function useMediaDevices() {
         mediaConstraints.video = true;
       }
 
-      console.log('🎥 Getting media stream with constraints:', mediaConstraints);
+      // console.log('🎥 Getting media stream with constraints:', mediaConstraints);
       
       const stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
       return stream;
@@ -421,7 +421,7 @@ export function useMediaDevices() {
     if (!isSupported()) return;
 
     const handleDeviceChange = () => {
-      console.log('🔄 Device change detected');
+      // console.log('🔄 Device change detected');
       enumerateDevices();
     };
 

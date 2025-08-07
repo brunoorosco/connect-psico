@@ -83,7 +83,7 @@ class DeviceStorageManager {
         return this.getDefaultPreferences();
       }
 
-      console.log('📖 Preferências carregadas:', preferences);
+      // console.log('📖 Preferências carregadas:', preferences);
       return preferences;
     } catch (error) {
       console.error('❌ Erro ao carregar preferências:', error);

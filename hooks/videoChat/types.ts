@@ -14,6 +14,7 @@ export type UseWebRTCProps = {
   userId: string
   avatar?: string
   serverUrl?: string
+  userName: string
 }
 
 export type MediaDeviceState = {

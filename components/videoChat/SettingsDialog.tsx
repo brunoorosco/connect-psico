@@ -112,7 +112,7 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
         setLocalSelectedAudioOutput(finalPrefs.audioOutputId)
       }
 
-      console.log("📖 Preferências carregadas e aplicadas:", finalPrefs)
+      // console.log("📖 Preferências carregadas e aplicadas:", finalPrefs)
     } catch (error) {
       console.error("❌ Erro ao carregar preferências:", error)
     }

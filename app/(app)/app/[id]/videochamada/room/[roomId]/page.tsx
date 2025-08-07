@@ -49,7 +49,8 @@ export default function VideoCallPage() {
     roomId,
     userId,
     avatar,
-    serverUrl: env.baseUrlPsicomaisApi                                                                                                                                                                                                                      || "http://localhost:4000",
+    userName: String(userName),
+    serverUrl: env.baseUrlPsicomaisApi || "http://localhost:4000",
   })
 
   // Initialize Chat
@@ -57,7 +58,7 @@ export default function VideoCallPage() {
     socket,
     roomId,
     userId,
-    userName: userName || `User ${userId}`,
+    userName: String(userName),
   })
 
   // Initialize Audio Recording
@@ -126,7 +127,6 @@ export default function VideoCallPage() {
   }
   // Show waiting message if no participants
   const showWaitingMessage = participants.length === 0
-
   return (
     <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
       {/* Header Controls */}
@@ -153,11 +153,11 @@ export default function VideoCallPage() {
         {/* Sidebar Menu */}
         <SidebarMenu
           currentUserId={userId}
-          currentUserName={userName || `User ${userId}`}
+          currentUserName={String(userName)}
           currentUserAvatar={avatar}
           participants={participants.map((p) => ({
             userId: p.userId,
-            userName: p.userName || `User ${p.userId}`,
+            userName: String(p.userName),
             isAudioEnabled: p.isAudioEnabled,
             isVideoEnabled: p.isVideoEnabled,
             avatar: p.avatar,
@@ -179,7 +179,7 @@ export default function VideoCallPage() {
         <div className="flex-1 p-4 relative">
           {showWaitingMessage ? (
             <WaitingMessage
-              userName={userName || `User ${userId}`}
+              userName={String(userName)}
               roomId={roomId}
               isAudioEnabled={isAudioEnabled}
               isVideoEnabled={isVideoEnabled}
@@ -195,7 +195,7 @@ export default function VideoCallPage() {
                 <VideoParticipant
                   key={participants[0].userId}
                   userId={participants[0].userId}
-                  name={participants[0].userName || `User ${participants[0].userId}`}
+                  name={participants[0].userName}
                   isAudioEnabled={participants[0].isAudioEnabled}
                   isVideoEnabled={participants[0].isVideoEnabled}
                   avatar={participants[0].avatar}
@@ -213,7 +213,7 @@ export default function VideoCallPage() {
                     <VideoParticipant
                       key={participant.userId}
                       userId={participant.userId}
-                      name={participant.userName || `User ${participant.userId}`}
+                      name={participant.userName}
                       isAudioEnabled={participant.isAudioEnabled}
                       isVideoEnabled={participant.isVideoEnabled}
                       avatar={participant.avatar}
@@ -256,12 +256,12 @@ export default function VideoCallPage() {
         }))}
         participants={participants.map((p) => ({
           userId: p.userId,
-          userName: p.userName || `User ${p.userId}`,
+          userName: String(p.userName),
           avatar: p.avatar,
           isConnected: true,
         }))}
         currentUserId={userId}
-        currentUserName={userName || `User ${userId}`}
+        currentUserName={String(userName)}
         currentUserAvatar={avatar}
         onSendMessage={handleSendMessage}
         roomId={roomId}

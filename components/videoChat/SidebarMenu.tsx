@@ -65,8 +65,7 @@ export function SidebarMenu({
 }: SidebarMenuProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const miniVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Copy local video stream to mini video
+   // Copy local video stream to mini video
   useEffect(() => {
     if (localVideoRef?.current && miniVideoRef.current) {
       const localVideo = localVideoRef.current;
@@ -199,9 +198,9 @@ export function SidebarMenu({
               <div className="text-sm font-medium text-white truncate">
                 {currentUserName} (Você)
               </div>
-              <div className="text-xs text-gray-400">
+              {/* <div className="text-xs text-gray-400">
                 Organizador
-              </div>
+              </div> */}
             </div>
           )}
 
