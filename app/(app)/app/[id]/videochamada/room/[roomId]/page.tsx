@@ -74,7 +74,7 @@ export default function VideoCallPage() {
     roomId,
     userId,
     socket,
-    autoStart: true, // Start recording automatically when joining
+    autoStart: false, // Start recording automatically when joining
   })
 
   // Update connection status
