@@ -1,7 +1,8 @@
 "use client"
 
 import { useSocket } from "@/infra/contexts/SocketContext"
-import { useState, useRef, useCallback, useEffect } from "react"
+import { axiosInstance } from "@/infra/httpClient/psicomaisApiMessage"
+import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import { io, Socket } from "socket.io-client"
 
 interface AudioRecordingState {
@@ -27,10 +28,9 @@ export function useAudioRecording({
   autoStart = false,
   chunkDuration = 10000,
 }: UseAudioRecordingProps) {
-
   const { socket: contextSocket } = useSocket()
   const socket = externalSocket || contextSocket
-  
+
   const [state, setState] = useState<AudioRecordingState>({
     isRecording: false,
     isUploading: false,
@@ -65,10 +65,36 @@ export function useAudioRecording({
   }, [state.isRecording])
 
   useEffect(() => {
+    if (!socket) return
+
+    socket.on("recordingStarted", ({ userId }) => {
+      setState((prev) => ({
+        ...prev,
+        isRecording: true,
+      }))
+      console.log(`Usuário ${userId} começou a gravar`)
+    })
+
+    socket.on("recordingStopped", ({ userId }) => {
+      setState((prev) => ({
+        ...prev,
+        isRecording: false,
+        recordingDuration: 0,
+      }))
+      console.log(`Usuário ${userId} parou de gravar`)
+    })
+
+    return () => {
+      socket.off("recordingStarted")
+      socket.off("recordingStopped")
+    }
+  }, [socket])
+
+  useEffect(() => {
     if (autoStart && !state.isRecording) {
       startRecording()
     }
-  }, [autoStart])
+  }, [autoStart, state.isRecording])
 
   const uploadAudioChunk = useCallback(
     async (audioBlob: Blob, chunkIndex: number) => {
@@ -77,16 +103,17 @@ export function useAudioRecording({
       try {
         if (socket) {
           const arrayBuffer = await audioBlob.arrayBuffer()
-          const uint8Array = new Uint8Array(arrayBuffer)
           socket.emit("audioChunk", {
             roomId,
             userId,
-            chunkData: Array.from(uint8Array),
+            chunkCountRef,
+            chunkData: arrayBuffer,
             mimeType: audioBlob.type,
           })
 
           await new Promise<void>((resolve, reject) => {
             const timeout = setTimeout(() => reject(new Error("Upload timeout")), 30000)
+
             socket.once("chunkReceived", (response) => {
               clearTimeout(timeout)
               response.success ? resolve() : reject(new Error(response.error || "Upload failed"))
@@ -100,13 +127,12 @@ export function useAudioRecording({
           formData.append("chunkIndex", chunkIndex.toString())
           formData.append("mimeType", audioBlob.type)
 
-          const response = await fetch("/api/upload-audio-chunk", {
-            method: "POST",
-            body: formData,
+          const response = await axiosInstance.post("/upload-audio-chunk", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
           })
 
-          const result = await response.json()
-          if (!response.ok || !result.success) throw new Error(result.error || "Upload failed")
+          const result = await response.data
+          // if (!response. || !result) throw new Error(result.error || "Upload failed")
         }
       } finally {
         setState((prev) => ({ ...prev, isUploading: false }))
@@ -132,12 +158,16 @@ export function useAudioRecording({
       audioChunksRef.current = []
       chunkCountRef.current = 0
 
+      // const mimeType = useMemo(() => {
+      //   if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) return "audio/webm;codecs=opus"
+      //   if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm"
+      //   return "audio/mp4"
+      // }, [])
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
         : "audio/mp4"
-
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
         audioBitsPerSecond: 128000,
@@ -167,6 +197,7 @@ export function useAudioRecording({
         setState((prev) => ({ ...prev, isRecording: false }))
         streamRef.current?.getTracks().forEach((track) => track.stop())
         streamRef.current = null
+        mediaRecorderRef.current = null
       }
 
       mediaRecorder.onerror = () => {
@@ -210,6 +241,20 @@ export function useAudioRecording({
       intervalRef.current && clearInterval(intervalRef.current)
     }
   }, [])
+
+  // if (socket) {
+  //   socket.on("recordingStarted", ({ userId }) => {
+  //     startRecording()
+  //     console.log(`Usuário ${userId} começou a gravar`)
+  //     // Exibir badge ou ícone indicando que o usuário está gravando
+  //   })
+
+  //   socket.on("recordingStopped", ({ userId }) => {
+  //     stopRecording()
+  //     console.log(`Usuário ${userId} parou de gravar`)
+  //     // Remover o ícone de gravação
+  //   })
+  // }
 
   const formatDuration = useCallback((ms: number) => {
     const seconds = Math.floor(ms / 1000)
