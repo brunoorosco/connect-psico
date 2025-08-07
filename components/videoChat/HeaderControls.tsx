@@ -2,18 +2,7 @@
 
 import React from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Users,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Square,
-  CircleDot,
-  MessageSquare,
-  Settings,
-  PhoneOff,
-} from "lucide-react"
+import { Users, Mic, MicOff, Video, VideoOff, Square, CircleDot, MessageSquare, Settings, PhoneOff } from "lucide-react"
 
 interface HeaderControlsProps {
   roomId: string
@@ -24,6 +13,7 @@ interface HeaderControlsProps {
   isVideoEnabled: boolean
   audioAvailable: boolean
   videoAvailable: boolean
+  btnRecorder: boolean
   formatDuration: () => string
   onToggleAudio: () => void
   onToggleVideo: () => void
@@ -42,6 +32,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
   isVideoEnabled,
   audioAvailable,
   videoAvailable,
+  btnRecorder,
   formatDuration,
   onToggleAudio,
   onToggleVideo,
@@ -82,11 +73,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
             onClick={onToggleAudio}
             disabled={!audioAvailable}
             title={
-              !audioAvailable
-                ? "Microfone não disponível"
-                : isAudioEnabled
-                ? "Desativar microfone"
-                : "Ativar microfone"
+              !audioAvailable ? "Microfone não disponível" : isAudioEnabled ? "Desativar microfone" : "Ativar microfone"
             }
           >
             {!audioAvailable ? (
@@ -103,13 +90,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
             size="sm"
             onClick={onToggleVideo}
             disabled={!videoAvailable}
-            title={
-              !videoAvailable
-                ? "Câmera não disponível"
-                : isVideoEnabled
-                ? "Desativar câmera"
-                : "Ativar câmera"
-            }
+            title={!videoAvailable ? "Câmera não disponível" : isVideoEnabled ? "Desativar câmera" : "Ativar câmera"}
           >
             {!videoAvailable ? (
               <VideoOff className="w-4 h-4 opacity-50" />
@@ -120,14 +101,16 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
             )}
           </Button>
 
-          <Button
-            variant={isRecording ? "destructive" : "outline"}
-            size="sm"
-            onClick={onToggleRecording}
-            title={isRecording ? "Parar gravação" : "Iniciar gravação"}
-          >
-            {isRecording ? <Square className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
-          </Button>
+          {btnRecorder && (
+            <Button
+              variant={isRecording ? "destructive" : "outline"}
+              size="sm"
+              onClick={onToggleRecording}
+              title={isRecording ? "Parar gravação" : "Iniciar gravação"}
+            >
+              {isRecording ? <Square className="w-4 h-4" /> : <CircleDot className="w-4 h-4" />}
+            </Button>
+          )}
 
           <Button variant="outline" size="sm" onClick={onOpenChat}>
             <MessageSquare className="w-4 h-4" />

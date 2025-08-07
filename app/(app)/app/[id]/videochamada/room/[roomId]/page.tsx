@@ -131,6 +131,7 @@ export default function VideoCallPage() {
     <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
       {/* Header Controls */}
       <HeaderControls
+        btnRecorder={user?.role !== "DEFAULT"}
         roomId={roomId}
         participantCount={participants.length + 1}
         isRecording={isRecording}
