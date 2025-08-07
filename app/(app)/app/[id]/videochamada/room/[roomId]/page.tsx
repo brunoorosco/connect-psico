@@ -306,6 +306,7 @@ export default function VideoCallPage() {
       </div>
       <MobileControls
         isAudioEnabled={isAudioEnabled}
+         btnRecorder={user?.role !== "DEFAULT"}
         isVideoEnabled={isVideoEnabled}
         isRecording={isRecording}
         audioAvailable={audioAvailable}

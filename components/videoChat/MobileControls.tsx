@@ -11,6 +11,7 @@ interface MobileControlsProps {
   isRecording: boolean
   audioAvailable: boolean
   videoAvailable: boolean
+  btnRecorder: boolean
   onToggleAudio: () => void
   onToggleVideo: () => void
   onToggleRecording: () => void
@@ -23,6 +24,7 @@ export const MobileControls: React.FC<MobileControlsProps> = ({
   isAudioEnabled,
   isVideoEnabled,
   isRecording,
+  btnRecorder,
   audioAvailable,
   videoAvailable,
   onToggleAudio,
@@ -64,10 +66,11 @@ export const MobileControls: React.FC<MobileControlsProps> = ({
         )}
       </Button>
 
-      <Button variant={isRecording ? "destructive" : "outline"} size="icon" onClick={onToggleRecording}>
-        {isRecording ? <Square className="w-5 h-5" /> : <CircleDot className="w-5 h-5" />}
-      </Button>
-
+      {btnRecorder ?? (
+        <Button variant={isRecording ? "destructive" : "outline"} size="icon" onClick={onToggleRecording}>
+          {isRecording ? <Square className="w-5 h-5" /> : <CircleDot className="w-5 h-5" />}
+        </Button>
+      )}
       <Button variant="outline" size="icon" onClick={onOpenChat}>
         <MessageSquare className="w-5 h-5" />
       </Button>
