@@ -46,7 +46,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
   const testVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Carregar preferências salvas quando o diálogo abrir
   useEffect(() => {
     if (isOpen) {
       loadSavedPreferences()
@@ -54,7 +53,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     }
   }, [isOpen])
 
-  // Sincronizar com as seleções do hook quando os dispositivos mudarem
   useEffect(() => {
     if (selectedAudioInput && !localSelectedAudioInput) {
       setLocalSelectedAudioInput(selectedAudioInput)
@@ -74,7 +72,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     localSelectedAudioOutput,
   ])
 
-  // Limpar stream de teste quando fechar o diálogo
   useEffect(() => {
     if (!isOpen && testStream) {
       testStream.getTracks().forEach((track) => track.stop())
@@ -85,23 +82,16 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
   const loadSavedPreferences = () => {
     try {
-      // Converter dispositivos atuais para o formato StoredDevice
       const currentDevices: StoredDevice[] = [
         ...audioInputs.map((d) => ({ deviceId: d.deviceId, label: d.label, kind: d.kind as MediaDeviceKind })),
         ...videoInputs.map((d) => ({ deviceId: d.deviceId, label: d.label, kind: d.kind as MediaDeviceKind })),
         ...audioOutputs.map((d) => ({ deviceId: d.deviceId, label: d.label, kind: d.kind as MediaDeviceKind })),
       ]
 
-      // Salvar dispositivos disponíveis
       deviceStorage.saveAvailableDevices(currentDevices)
-
-      // Limpar preferências inválidas
-      const cleanedPrefs = deviceStorage.cleanupPreferences(currentDevices)
-
-      // Selecionar dispositivos padrão se necessário
+      deviceStorage.cleanupPreferences(currentDevices)
       const finalPrefs = deviceStorage.selectDefaultDevices(currentDevices)
 
-      // Aplicar preferências carregadas
       if (finalPrefs.audioInputId) {
         setLocalSelectedAudioInput(finalPrefs.audioInputId)
       }
@@ -111,8 +101,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
       if (finalPrefs.audioOutputId) {
         setLocalSelectedAudioOutput(finalPrefs.audioOutputId)
       }
-
-      // console.log("📖 Preferências carregadas e aplicadas:", finalPrefs)
     } catch (error) {
       console.error("❌ Erro ao carregar preferências:", error)
     }
@@ -137,22 +125,16 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
     try {
       setIsTesting((prev) => ({ ...prev, audio: true }))
-
-      // Parar stream anterior se existir
       if (testStream) {
         testStream.getTracks().forEach((track) => track.stop())
         setTestStream(null)
       }
-
       const deviceId = localSelectedAudioInput || undefined
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: deviceId ? { deviceId: { exact: deviceId } } : true,
         video: false,
       })
-
       setTestStream(stream)
-
-      // Parar o teste após 3 segundos
       setTimeout(() => {
         stream.getTracks().forEach((track) => track.stop())
         setTestStream(null)
@@ -169,27 +151,19 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
     try {
       setIsTesting((prev) => ({ ...prev, video: true }))
-
-      // Parar stream anterior se existir
       if (testStream) {
         testStream.getTracks().forEach((track) => track.stop())
         setTestStream(null)
       }
-
       const deviceId = localSelectedVideoInput || undefined
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: deviceId ? { deviceId: { exact: deviceId } } : true,
       })
-
       setTestStream(stream)
-
-      // Conectar ao elemento de vídeo
       if (testVideoRef.current) {
         testVideoRef.current.srcObject = stream
       }
-
-      // Parar o teste após 5 segundos
       setTimeout(() => {
         stream.getTracks().forEach((track) => track.stop())
         setTestStream(null)
@@ -206,41 +180,26 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
   const handleSave = () => {
     try {
-      // Salvar preferências no localStorage
       const preferences: Partial<DevicePreferences> = {}
-
       if (localSelectedAudioInput) {
         preferences.audioInputId = localSelectedAudioInput
         selectAudioInput(localSelectedAudioInput)
       }
-
       if (localSelectedVideoInput) {
         preferences.videoInputId = localSelectedVideoInput
         selectVideoInput(localSelectedVideoInput)
       }
-
       if (localSelectedAudioOutput) {
         preferences.audioOutputId = localSelectedAudioOutput
         selectAudioOutput(localSelectedAudioOutput)
       }
-
       deviceStorage.saveDevicePreferences(preferences)
-
-      // Notificar componente pai sobre mudanças
       if (onDeviceChange) {
-        if (localSelectedAudioInput) {
-          onDeviceChange(localSelectedAudioInput, "audioinput")
-        }
-        if (localSelectedVideoInput) {
-          onDeviceChange(localSelectedVideoInput, "videoinput")
-        }
-        if (localSelectedAudioOutput) {
-          onDeviceChange(localSelectedAudioOutput, "audiooutput")
-        }
+        if (localSelectedAudioInput) onDeviceChange(localSelectedAudioInput, "audioinput")
+        if (localSelectedVideoInput) onDeviceChange(localSelectedVideoInput, "videoinput")
+        if (localSelectedAudioOutput) onDeviceChange(localSelectedAudioOutput, "audiooutput")
       }
-
       updateStorageStats()
-      console.log("💾 Configurações salvas com sucesso")
       onClose()
     } catch (error) {
       console.error("❌ Erro ao salvar configurações:", error)
@@ -253,7 +212,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     setLocalSelectedVideoInput("")
     setLocalSelectedAudioOutput("")
     updateStorageStats()
-    console.log("🗑️ Preferências limpas")
   }
 
   const handleRefreshDevices = async () => {
@@ -274,7 +232,7 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Status e Permissões */}
+          {/* Status */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium">Status dos Dispositivos</h3>
@@ -283,32 +241,16 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
                 Atualizar
               </Button>
             </div>
-
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Microfone:</span>
-                <span className={`ml-2 ${hasAudioPermission ? "text-green-600" : "text-red-600"}`}>
-                  {hasAudioPermission ? "✅ Permitido" : "❌ Sem permissão"}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Câmera:</span>
-                <span className={`ml-2 ${hasVideoPermission ? "text-green-600" : "text-red-600"}`}>
-                  {hasVideoPermission ? "✅ Permitido" : "❌ Sem permissão"}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Dispositivos:</span>
-                <span className="ml-2">
-                  {audioInputs.length + videoInputs.length + audioOutputs.length} encontrados
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Preferências:</span>
-                <span className="ml-2">{storageStats.hasPreferences ? "💾 Salvas" : "🆕 Padrão"}</span>
-              </div>
+              <div>Microfone: <span className={hasAudioPermission ? "text-green-600" : "text-red-600"}>
+                {hasAudioPermission ? "✅ Permitido" : "❌ Sem permissão"}
+              </span></div>
+              <div>Câmera: <span className={hasVideoPermission ? "text-green-600" : "text-red-600"}>
+                {hasVideoPermission ? "✅ Permitido" : "❌ Sem permissão"}
+              </span></div>
+              <div>Dispositivos: {audioInputs.length + videoInputs.length + audioOutputs.length}</div>
+              <div>Preferências: {storageStats.hasPreferences ? "💾 Salvas" : "🆕 Padrão"}</div>
             </div>
-
             {(!hasAudioPermission || !hasVideoPermission) && (
               <Button onClick={handleRequestPermissions} className="w-full mt-3" variant="outline">
                 Solicitar Permissões
@@ -325,141 +267,59 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
             </div>
           )}
 
-          {/* Configurações de Áudio */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Mic className="w-5 h-5" />
-              <h3 className="text-lg font-medium">Áudio</h3>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="audio-input">Microfone ({audioInputs.length} disponível)</Label>
-                <Select value={localSelectedAudioInput} onValueChange={setLocalSelectedAudioInput}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um microfone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {audioInputs.map((device) => (
-                      <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="audio-output">Alto-falante ({audioOutputs.length} disponível)</Label>
-                <Select value={localSelectedAudioOutput} onValueChange={setLocalSelectedAudioOutput}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um alto-falante" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {audioOutputs.map((device) => (
-                      <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                onClick={handleTestAudio}
-                variant="outline"
-                size="sm"
-                disabled={!localSelectedAudioInput || isTesting.audio || !hasAudioPermission}
-              >
-                <Volume2 className="w-4 h-4 mr-2" />
-                {isTesting.audio ? "Testando..." : "Testar Áudio"}
-              </Button>
-            </div>
+          {/* Áudio */}
+          <div>
+            <Label>Microfone ({audioInputs.length} disponível)</Label>
+            <Select value={localSelectedAudioInput || ""} onValueChange={setLocalSelectedAudioInput}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um microfone" />
+              </SelectTrigger>
+              <SelectContent>
+                {audioInputs.map((device) => (
+                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
+                    {device.label || `Dispositivo ${device.deviceId}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <Separator />
-
-          {/* Configurações de Vídeo */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Video className="w-5 h-5" />
-              <h3 className="text-lg font-medium">Vídeo</h3>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="video-input">Câmera ({videoInputs.length} disponível)</Label>
-                <Select value={localSelectedVideoInput} onValueChange={setLocalSelectedVideoInput}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma câmera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {videoInputs.map((device) => (
-                      <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                onClick={handleTestVideo}
-                variant="outline"
-                size="sm"
-                disabled={!localSelectedVideoInput || isTesting.video || !hasVideoPermission}
-              >
-                <Video className="w-4 h-4 mr-2" />
-                {isTesting.video ? "Testando..." : "Testar Vídeo"}
-              </Button>
-            </div>
+          <div>
+            <Label>Alto-falante ({audioOutputs.length} disponível)</Label>
+            <Select value={localSelectedAudioOutput || ""} onValueChange={setLocalSelectedAudioOutput}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um alto-falante" />
+              </SelectTrigger>
+              <SelectContent>
+                {audioOutputs.map((device) => (
+                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
+                    {device.label || `Dispositivo ${device.deviceId}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Preview do teste */}
-          {testStream && (
-            <div className="space-y-2">
-              <Label>Preview do Teste</Label>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center">
-                {testStream.getVideoTracks().length > 0 ? (
-                  <video ref={testVideoRef} autoPlay muted playsInline className="w-full max-w-xs mx-auto rounded" />
-                ) : (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    🎤 Testando áudio... Fale no microfone.
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Informações de Storage */}
-          {storageStats.hasPreferences && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Info className="w-4 h-4 text-blue-600 mr-2" />
-                  <span className="text-sm text-blue-700 dark:text-blue-300">
-                    Preferências salvas{" "}
-                    {storageStats.lastUpdated && `em ${storageStats.lastUpdated.toLocaleDateString()}`}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearPreferences}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Limpar
-                </Button>
-              </div>
-            </div>
-          )}
+          {/* Vídeo */}
+          <div>
+            <Label>Câmera ({videoInputs.length} disponível)</Label>
+            <Select value={localSelectedVideoInput || ""} onValueChange={setLocalSelectedVideoInput}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma câmera" />
+              </SelectTrigger>
+              <SelectContent>
+                {videoInputs.map((device) => (
+                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
+                    {device.label || `Dispositivo ${device.deviceId}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
           <Button onClick={handleSave}>Salvar Configurações</Button>
         </div>
       </DialogContent>

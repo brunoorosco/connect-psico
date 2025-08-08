@@ -2,20 +2,22 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
-
-import { PhoneOff, Mic, MicOff, Video, VideoOff, Settings, MessageSquare, Users, CircleDot, Square } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import dynamic from "next/dynamic"
 import { useChat, useWebRTC } from "@hooks/videoChat"
 import { useAudioRecording } from "@components/videoChat/useAudioRecording"
 import { ChatOverlay } from "@components/videoChat/ChatOverlay"
 import { SidebarMenu } from "@components/videoChat/SidebarMenu"
 import { WaitingMessage } from "@components/videoChat/WaitingMessage"
 import { VideoParticipant } from "@components/videoChat/VideoParticipant"
-import { SettingsDialog } from "@components/videoChat/SettingsDialog"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { MobileControls } from "@components/videoChat/MobileControls"
 import { HeaderControls } from "@components/videoChat/HeaderControls"
 import { env } from "@/config/application"
+import { useMixedAudioRecording } from "@hooks/videoChat/useMixedAudioRecording"
+
+export const SettingsDialog = dynamic(() => import("@components/videoChat/SettingsDialog").then(m => m.SettingsDialog), {
+  ssr: false
+})
 
 export default function VideoCallPage() {
   const params = useParams()
@@ -50,7 +52,7 @@ export default function VideoCallPage() {
     userId,
     avatar,
     userName: String(userName),
-    serverUrl: env.baseUrlPsicomaisApi || "http://localhost:4000",
+    serverUrl: env.baseUrlPsicomaisApi,
   })
 
   // Initialize Chat
@@ -111,14 +113,24 @@ export default function VideoCallPage() {
     }
     window.location.href = "../"
   }
+  const remoteStreams = participants.map((p) => p.stream).filter((s): s is MediaStream => s !== undefined && s !== null)
+
+  // Usa o hook para gravar o áudio mixado
+  const {
+    isRecording: isMixedRecording,
+    recordedChunks,
+    startRecording: startMixedRecording,
+    stopRecording: stopMixedRecording,
+  } = useMixedAudioRecording(localStream, remoteStreams)
 
   const handleToggleRecording = () => {
-    if (isRecording) {
-      stopRecording()
+    if (isMixedRecording) {
+      stopMixedRecording()
     } else {
-      startRecording()
+      startMixedRecording()
     }
   }
+  const audioURL = recordedChunks.length > 0 ? URL.createObjectURL(new Blob(recordedChunks)) : null
 
   const handleDeviceChange = (deviceId: string, kind: MediaDeviceKind) => {
     console.log("Dispositivo alterado:", deviceId, kind)
@@ -134,7 +146,7 @@ export default function VideoCallPage() {
         btnRecorder={user?.role !== "DEFAULT"}
         roomId={roomId}
         participantCount={participants.length + 1}
-        isRecording={isRecording}
+           isRecording={isMixedRecording}
         isUploading={isUploading}
         isAudioEnabled={isAudioEnabled}
         isVideoEnabled={isVideoEnabled}
@@ -148,6 +160,11 @@ export default function VideoCallPage() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onLeaveCall={handleLeaveCall}
       />
+       {audioURL && (
+        <div className="fixed bottom-20 left-4 bg-gray-800 p-2 rounded">
+          <audio controls src={audioURL} />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
@@ -306,7 +323,7 @@ export default function VideoCallPage() {
       </div>
       <MobileControls
         isAudioEnabled={isAudioEnabled}
-         btnRecorder={user?.role !== "DEFAULT"}
+        btnRecorder={user?.role !== "DEFAULT"}
         isVideoEnabled={isVideoEnabled}
         isRecording={isRecording}
         audioAvailable={audioAvailable}
