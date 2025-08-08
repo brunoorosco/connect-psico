@@ -108,6 +108,7 @@ export default function VideoCallPage() {
     if (isRecording) {
       stopRecording()
     }
+    setHasJoined(false)
     window.location.href = "../"
   }
   const remoteStreams = participants.map((p) => p.stream).filter((s): s is MediaStream => s !== undefined && s !== null)
@@ -148,7 +149,7 @@ export default function VideoCallPage() {
         btnRecorder={user?.role !== "DEFAULT"}
         roomId={roomId}
         participantCount={participants.length + 1}
-           isRecording={isMixedRecording}
+        isRecording={isMixedRecording}
         isUploading={isUploading}
         isAudioEnabled={isAudioEnabled}
         isVideoEnabled={isVideoEnabled}
@@ -162,7 +163,7 @@ export default function VideoCallPage() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onLeaveCall={handleLeaveCall}
       />
-       {audioURL && (
+      {audioURL && (
         <div className="fixed bottom-20 left-4 bg-gray-800 p-2 rounded">
           <audio controls src={audioURL} />
         </div>
@@ -199,6 +200,7 @@ export default function VideoCallPage() {
         <div className="flex-1 p-4 relative">
           {showWaitingMessage ? (
             <WaitingMessage
+              isWaiting={hasJoined}
               userName={String(userName)}
               onJoinRoom={handleJoinRoom}
               roomId={roomId}
