@@ -26,7 +26,7 @@ export function WaitingMessage({
   onJoinRoom
 }: WaitingMessageProps) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+    <div className="flex sm:items-center justify-center min-h-screen bg-gray-900">
       <div className="text-center max-w-md mx-auto p-8">
         {/* Animated Icon */}
         <div className="relative mb-8">
@@ -69,7 +69,7 @@ export function WaitingMessage({
         </div> */}
 
         {/* Media Controls */}
-        <div className="flex justify-center space-x-4 mb-6">
+        <div className="flex justify-center space-x-4 mb-6 hidden">
           <Button variant={isAudioEnabled ? "secondary" : "destructive"} size="icon" onClick={onToggleAudio}>
             {isAudioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
           </Button>
@@ -83,10 +83,10 @@ export function WaitingMessage({
 
         {/* Tips */}
         <div className="space-y-3 text-sm text-gray-400">
-          <div className="flex items-center justify-center space-x-2">
+          {/* <div className="flex items-center justify-center space-x-2">
             <Clock className="w-4 h-4" />
             <span>Compartilhe o ID da sala com outros participantes</span>
-          </div>
+          </div> */}
           
           <Button className="w-full mt-4" variant="default" onClick={onJoinRoom}>
             Ingressar na Sala
