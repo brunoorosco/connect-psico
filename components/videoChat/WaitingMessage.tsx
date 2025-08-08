@@ -64,9 +64,9 @@ export function WaitingMessage({
         </div>
 
         {/* Local Video Preview (Optional) */}
-        <div className="w-32 h-24 mx-auto mb-4 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+        {/* <div className="w-32 h-24 mx-auto mb-4 rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
           <video ref={localVideoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
-        </div>
+        </div> */}
 
         {/* Media Controls */}
         <div className="flex justify-center space-x-4 mb-6">
