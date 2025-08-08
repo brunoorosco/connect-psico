@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { io, Socket } from "socket.io-client"
 import { MediaDeviceState, Participant, UseWebRTCProps } from "./types"
+import { env } from "@/config/application"
 
-export function useWebRTC({ roomId, userId, userName, avatar, serverUrl = "http://localhost:4000" }: UseWebRTCProps) {
+export function useWebRTC({ roomId, userId, userName, avatar, serverUrl = env.baseUrlPsicomaisApi }: UseWebRTCProps) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [localStream, setLocalStream] = useState<MediaStream | null>(null)
   const [participants, setParticipants] = useState<Map<string, Participant>>(new Map())
