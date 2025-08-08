@@ -1,12 +1,11 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@components/ui/dialog"
 import { Button } from "@components/ui/button"
 import { Label } from "@components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
-import { Separator } from "@components/ui/separator"
-import { Mic, Video, Volume2, RefreshCw, Trash2, Info } from "lucide-react"
+import { RefreshCw, Info } from "lucide-react"
 import { useMediaDevices } from "./useMediaDevices"
 import { deviceStorage, type DevicePreferences, type StoredDevice } from "@/infra/storage/deviceStorage"
 
@@ -29,22 +28,18 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     isLoading,
     error,
     requestPermissions,
-    testAudioDevice,
-    testVideoDevice,
     selectAudioInput,
     selectVideoInput,
     selectAudioOutput,
     refreshDevices,
   } = useMediaDevices()
 
-  const [localSelectedAudioInput, setLocalSelectedAudioInput] = useState<string>("")
-  const [localSelectedVideoInput, setLocalSelectedVideoInput] = useState<string>("")
-  const [localSelectedAudioOutput, setLocalSelectedAudioOutput] = useState<string>("")
-  const [testStream, setTestStream] = useState<MediaStream | null>(null)
-  const [isTesting, setIsTesting] = useState<{ audio: boolean; video: boolean }>({ audio: false, video: false })
+  const [localSelectedAudioInput, setLocalSelectedAudioInput] = useState<string | null>(null)
+  const [localSelectedVideoInput, setLocalSelectedVideoInput] = useState<string | null>(null)
+  const [localSelectedAudioOutput, setLocalSelectedAudioOutput] = useState<string | null>(null)
   const [storageStats, setStorageStats] = useState(deviceStorage.getStorageStats())
 
-  const testVideoRef = useRef<HTMLVideoElement>(null)
+  const testStream = useRef<MediaStream | null>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -73,12 +68,13 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
   ])
 
   useEffect(() => {
-    if (!isOpen && testStream) {
-      testStream.getTracks().forEach((track) => track.stop())
-      setTestStream(null)
-      setIsTesting({ audio: false, video: false })
+    return () => {
+      if (testStream.current) {
+        testStream.current.getTracks().forEach((track) => track.stop())
+        testStream.current = null
+      }
     }
-  }, [isOpen, testStream])
+  }, [])
 
   const loadSavedPreferences = () => {
     try {
@@ -120,64 +116,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     }
   }
 
-  const handleTestAudio = async () => {
-    if (isTesting.audio) return
-
-    try {
-      setIsTesting((prev) => ({ ...prev, audio: true }))
-      if (testStream) {
-        testStream.getTracks().forEach((track) => track.stop())
-        setTestStream(null)
-      }
-      const deviceId = localSelectedAudioInput || undefined
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
-        video: false,
-      })
-      setTestStream(stream)
-      setTimeout(() => {
-        stream.getTracks().forEach((track) => track.stop())
-        setTestStream(null)
-        setIsTesting((prev) => ({ ...prev, audio: false }))
-      }, 3000)
-    } catch (error) {
-      console.error("❌ Erro ao testar áudio:", error)
-      setIsTesting((prev) => ({ ...prev, audio: false }))
-    }
-  }
-
-  const handleTestVideo = async () => {
-    if (isTesting.video) return
-
-    try {
-      setIsTesting((prev) => ({ ...prev, video: true }))
-      if (testStream) {
-        testStream.getTracks().forEach((track) => track.stop())
-        setTestStream(null)
-      }
-      const deviceId = localSelectedVideoInput || undefined
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: deviceId ? { deviceId: { exact: deviceId } } : true,
-      })
-      setTestStream(stream)
-      if (testVideoRef.current) {
-        testVideoRef.current.srcObject = stream
-      }
-      setTimeout(() => {
-        stream.getTracks().forEach((track) => track.stop())
-        setTestStream(null)
-        setIsTesting((prev) => ({ ...prev, video: false }))
-        if (testVideoRef.current) {
-          testVideoRef.current.srcObject = null
-        }
-      }, 5000)
-    } catch (error) {
-      console.error("❌ Erro ao testar vídeo:", error)
-      setIsTesting((prev) => ({ ...prev, video: false }))
-    }
-  }
-
   const handleSave = () => {
     try {
       const preferences: Partial<DevicePreferences> = {}
@@ -206,14 +144,6 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
     }
   }
 
-  const handleClearPreferences = () => {
-    deviceStorage.clearAll()
-    setLocalSelectedAudioInput("")
-    setLocalSelectedVideoInput("")
-    setLocalSelectedAudioOutput("")
-    updateStorageStats()
-  }
-
   const handleRefreshDevices = async () => {
     try {
       await refreshDevices()
@@ -229,10 +159,10 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configurações de Áudio e Vídeo</DialogTitle>
+          <DialogDescription>Escolha seus dispositivos antes de ingressar na chamada.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Status */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium">Status dos Dispositivos</h3>
@@ -242,12 +172,18 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>Microfone: <span className={hasAudioPermission ? "text-green-600" : "text-red-600"}>
-                {hasAudioPermission ? "✅ Permitido" : "❌ Sem permissão"}
-              </span></div>
-              <div>Câmera: <span className={hasVideoPermission ? "text-green-600" : "text-red-600"}>
-                {hasVideoPermission ? "✅ Permitido" : "❌ Sem permissão"}
-              </span></div>
+              <div>
+                Microfone:{" "}
+                <span className={hasAudioPermission ? "text-green-600" : "text-red-600"}>
+                  {hasAudioPermission ? "✅ Permitido" : "❌ Sem permissão"}
+                </span>
+              </div>
+              <div>
+                Câmera:{" "}
+                <span className={hasVideoPermission ? "text-green-600" : "text-red-600"}>
+                  {hasVideoPermission ? "✅ Permitido" : "❌ Sem permissão"}
+                </span>
+              </div>
               <div>Dispositivos: {audioInputs.length + videoInputs.length + audioOutputs.length}</div>
               <div>Preferências: {storageStats.hasPreferences ? "💾 Salvas" : "🆕 Padrão"}</div>
             </div>
@@ -267,52 +203,62 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
             </div>
           )}
 
-          {/* Áudio */}
+          {/* Microfone */}
           <div>
             <Label>Microfone ({audioInputs.length} disponível)</Label>
-            <Select value={localSelectedAudioInput || ""} onValueChange={setLocalSelectedAudioInput}>
+            <Select value={localSelectedAudioInput || undefined} onValueChange={setLocalSelectedAudioInput}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um microfone" />
               </SelectTrigger>
               <SelectContent>
-                {audioInputs.map((device) => (
-                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
-                    {device.label || `Dispositivo ${device.deviceId}`}
-                  </SelectItem>
-                ))}
+                {audioInputs.map(
+                  (device) =>
+                    device.deviceId && (
+                      <SelectItem key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Dispositivo ${device.deviceId}`}
+                      </SelectItem>
+                    )
+                )}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Alto-falante */}
           <div>
             <Label>Alto-falante ({audioOutputs.length} disponível)</Label>
-            <Select value={localSelectedAudioOutput || ""} onValueChange={setLocalSelectedAudioOutput}>
+            <Select value={localSelectedAudioOutput || undefined} onValueChange={setLocalSelectedAudioOutput}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um alto-falante" />
               </SelectTrigger>
               <SelectContent>
-                {audioOutputs.map((device) => (
-                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
-                    {device.label || `Dispositivo ${device.deviceId}`}
-                  </SelectItem>
-                ))}
+                {audioOutputs.map(
+                  (device) =>
+                    device.deviceId && (
+                      <SelectItem key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Dispositivo ${device.deviceId}`}
+                      </SelectItem>
+                    )
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Vídeo */}
+          {/* Câmera */}
           <div>
             <Label>Câmera ({videoInputs.length} disponível)</Label>
-            <Select value={localSelectedVideoInput || ""} onValueChange={setLocalSelectedVideoInput}>
+            <Select value={localSelectedVideoInput || undefined} onValueChange={setLocalSelectedVideoInput}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma câmera" />
               </SelectTrigger>
               <SelectContent>
-                {videoInputs.map((device) => (
-                  <SelectItem key={device.deviceId} value={device.deviceId || ""}>
-                    {device.label || `Dispositivo ${device.deviceId}`}
-                  </SelectItem>
-                ))}
+                {videoInputs.map(
+                  (device) =>
+                    device.deviceId && (
+                      <SelectItem key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Dispositivo ${device.deviceId}`}
+                      </SelectItem>
+                    )
+                )}
               </SelectContent>
             </Select>
           </div>
