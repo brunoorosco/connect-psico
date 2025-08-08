@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
-import dynamic from "next/dynamic"
 import { useChat, useWebRTC } from "@hooks/videoChat"
 import { useAudioRecording } from "@components/videoChat/useAudioRecording"
 import { ChatOverlay } from "@components/videoChat/ChatOverlay"
@@ -14,10 +13,7 @@ import { MobileControls } from "@components/videoChat/MobileControls"
 import { HeaderControls } from "@components/videoChat/HeaderControls"
 import { env } from "@/config/application"
 import { useMixedAudioRecording } from "@hooks/videoChat/useMixedAudioRecording"
-
-export const SettingsDialog = dynamic(() => import("@components/videoChat/SettingsDialog").then(m => m.SettingsDialog), {
-  ssr: false
-})
+import { SettingsDialogDynamic as SettingsDialog } from "@components/videoChat/SettingsDialogDynamic"
 
 export default function VideoCallPage() {
   const params = useParams()

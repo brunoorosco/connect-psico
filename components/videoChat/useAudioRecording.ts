@@ -26,7 +26,7 @@ export function useAudioRecording({
   userId,
   socket: externalSocket,
   autoStart = false,
-  chunkDuration = 10000,
+  chunkDuration = 30000,
 }: UseAudioRecordingProps) {
   const { socket: contextSocket } = useSocket()
   const socket = externalSocket || contextSocket
