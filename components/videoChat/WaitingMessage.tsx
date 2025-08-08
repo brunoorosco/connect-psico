@@ -87,10 +87,7 @@ export function WaitingMessage({
             <Clock className="w-4 h-4" />
             <span>Compartilhe o ID da sala com outros participantes</span>
           </div>
-
-          <div className="text-xs text-gray-500">
-            A videochamada iniciará automaticamente quando outros participantes entrarem
-          </div>
+          
           <Button className="w-full mt-4" variant="default" onClick={onJoinRoom}>
             Ingressar na Sala
           </Button>
