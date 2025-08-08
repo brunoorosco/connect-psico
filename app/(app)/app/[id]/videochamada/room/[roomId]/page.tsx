@@ -26,6 +26,7 @@ export default function VideoCallPage() {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting")
+  const [hasJoined, setHasJoined] = useState(false)
 
   const localVideoRef = useRef<HTMLVideoElement>(null)
   // Initialize WebRTC
@@ -85,11 +86,11 @@ export default function VideoCallPage() {
   }, [isConnected])
 
   // Join room on mount
-  useEffect(() => {
-    if (roomId && userId) {
-      joinRoom()
-    }
-  }, [roomId, userId, joinRoom])
+  // useEffect(() => {
+  //   if (roomId && userId) {
+  //     joinRoom()
+  //   }
+  // }, [roomId, userId, joinRoom])
 
   // Set up local video stream
   useEffect(() => {
@@ -110,6 +111,11 @@ export default function VideoCallPage() {
     window.location.href = "../"
   }
   const remoteStreams = participants.map((p) => p.stream).filter((s): s is MediaStream => s !== undefined && s !== null)
+
+  const handleJoinRoom = () => {
+    joinRoom()
+    setHasJoined(true)
+  }
 
   // Usa o hook para gravar o áudio mixado
   const {
@@ -194,6 +200,7 @@ export default function VideoCallPage() {
           {showWaitingMessage ? (
             <WaitingMessage
               userName={String(userName)}
+              onJoinRoom={handleJoinRoom}
               roomId={roomId}
               isAudioEnabled={isAudioEnabled}
               isVideoEnabled={isVideoEnabled}

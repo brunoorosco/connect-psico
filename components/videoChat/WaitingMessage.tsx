@@ -1,17 +1,17 @@
-
-import React, { RefObject } from 'react';
-import { Users, Clock, Wifi, Mic, MicOff, Video, VideoOff, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { RefObject } from "react"
+import { Users, Clock, Wifi, Mic, MicOff, Video, VideoOff, Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface WaitingMessageProps {
-  roomId: string;
-  userName?: string;
-  isAudioEnabled: boolean;
-  isVideoEnabled: boolean;
-  onToggleAudio: () => void;
-  onToggleVideo: () => void;
-  onOpenSettings: () => void;
-  localVideoRef: RefObject<HTMLVideoElement>;
+  roomId: string
+  userName?: string
+  isAudioEnabled: boolean
+  isVideoEnabled: boolean
+  onToggleAudio: () => void
+  onToggleVideo: () => void
+  onOpenSettings: () => void
+  onJoinRoom: () => void
+  localVideoRef: RefObject<HTMLVideoElement>
 }
 
 export function WaitingMessage({
@@ -22,7 +22,8 @@ export function WaitingMessage({
   onToggleAudio,
   onToggleVideo,
   onOpenSettings,
-  localVideoRef
+  localVideoRef,
+  onJoinRoom
 }: WaitingMessageProps) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -32,7 +33,7 @@ export function WaitingMessage({
           <div className="w-24 h-24 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center">
             <Users className="w-12 h-12 text-blue-400" />
           </div>
-          
+
           {/* Pulse Circles */}
           <div className="absolute inset-0 w-24 h-24 mx-auto">
             <div className="w-full h-full bg-blue-500/30 rounded-full animate-ping"></div>
@@ -43,12 +44,10 @@ export function WaitingMessage({
         </div>
 
         {/* Main Message */}
-        <h1 className="text-3xl font-bold text-white mb-4">
-          Aguardando outros participantes
-        </h1>
-        
+        <h1 className="text-3xl font-bold text-white mb-4">Aguardando outros participantes</h1>
+
         <p className="text-gray-300 text-lg mb-6">
-          {userName ? `Olá, ${userName}! ` : ''}
+          {userName ? `Olá, ${userName}! ` : ""}
           Você está na sala e aguardando outros participantes se juntarem à videochamada.
         </p>
 
@@ -58,7 +57,7 @@ export function WaitingMessage({
             <Wifi className="w-4 h-4" />
             <span className="text-sm">Conectado</span>
           </div>
-          
+
           <div className="text-white font-medium">
             Sala: <span className="text-blue-400">{roomId}</span>
           </div>
@@ -71,25 +70,13 @@ export function WaitingMessage({
 
         {/* Media Controls */}
         <div className="flex justify-center space-x-4 mb-6">
-          <Button
-            variant={isAudioEnabled ? "secondary" : "destructive"}
-            size="icon"
-            onClick={onToggleAudio}
-          >
+          <Button variant={isAudioEnabled ? "secondary" : "destructive"} size="icon" onClick={onToggleAudio}>
             {isAudioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
           </Button>
-          <Button
-            variant={isVideoEnabled ? "secondary" : "destructive"}
-            size="icon"
-            onClick={onToggleVideo}
-          >
+          <Button variant={isVideoEnabled ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo}>
             {isVideoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onOpenSettings}
-          >
+          <Button variant="outline" size="icon" onClick={onOpenSettings}>
             <Settings className="w-5 h-5" />
           </Button>
         </div>
@@ -100,10 +87,13 @@ export function WaitingMessage({
             <Clock className="w-4 h-4" />
             <span>Compartilhe o ID da sala com outros participantes</span>
           </div>
-          
+
           <div className="text-xs text-gray-500">
             A videochamada iniciará automaticamente quando outros participantes entrarem
           </div>
+          <Button className="w-full mt-4" variant="default" onClick={onJoinRoom}>
+            Ingressar na Sala
+          </Button>
         </div>
 
         {/* Loading Indicator */}
@@ -116,7 +106,5 @@ export function WaitingMessage({
         </div>
       </div>
     </div>
-  );
+  )
 }
-
-
