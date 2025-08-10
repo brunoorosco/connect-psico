@@ -7,7 +7,7 @@ interface WaitingMessageProps {
   userName?: string
   isAudioEnabled: boolean
   isVideoEnabled: boolean
-  isWaiting:boolean
+  isWaiting: boolean
   onToggleAudio: () => void
   onToggleVideo: () => void
   onOpenSettings: () => void
@@ -25,7 +25,7 @@ export function WaitingMessage({
   onOpenSettings,
   localVideoRef,
   isWaiting,
-  onJoinRoom
+  onJoinRoom,
 }: WaitingMessageProps) {
   return (
     <div className="flex sm:items-center justify-center min-h-screen bg-gray-900">
@@ -71,7 +71,7 @@ export function WaitingMessage({
         </div> */}
 
         {/* Media Controls */}
-        <div className="flex justify-center space-x-4 mb-6">
+        <div className="justify-center space-x-4 mb-6 hidden sm:flex">
           <Button variant={isAudioEnabled ? "secondary" : "destructive"} size="icon" onClick={onToggleAudio}>
             {isAudioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
           </Button>
@@ -89,7 +89,7 @@ export function WaitingMessage({
             <Clock className="w-4 h-4" />
             <span>Compartilhe o ID da sala com outros participantes</span>
           </div> */}
-          
+
           <Button className="w-full mt-4" variant="default" onClick={onJoinRoom}>
             {!isWaiting ? "Ingressar na Sala" : " Aguardando Participantes"}
           </Button>
