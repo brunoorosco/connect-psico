@@ -77,12 +77,14 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
   // Inicia preview de câmera
   const startVideoPreview = async (deviceId?: string) => {
     try {
-      stopTestStream()
-
-      if (!deviceId) return
+      // Parar stream anterior
+      if (testStream.current) {
+        testStream.current.getTracks().forEach((track) => track.stop())
+        testStream.current = null
+      }
 
       const constraints: MediaStreamConstraints = {
-        video: { deviceId: { exact: deviceId } },
+        video: deviceId ? { deviceId: { exact: deviceId } } : true,
         audio: false,
       }
 
@@ -94,14 +96,14 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
         await videoPreviewRef.current.play().catch(() => {})
       }
     } catch (err) {
-      console.error("❌ Erro ao iniciar preview da câmera:", err)
+      console.error("Erro ao iniciar preview da câmera:", err)
     }
   }
 
   // Para o preview
   const stopTestStream = () => {
     if (testStream.current) {
-      testStream.current.getTracks().forEach(track => track.stop())
+      testStream.current.getTracks().forEach((track) => track.stop())
       testStream.current = null
     }
   }
@@ -299,20 +301,16 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
             {localSelectedVideoInput && (
               <div className="mt-4">
                 <Label>Pré-visualização</Label>
-                <video
-                  ref={videoPreviewRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="w-full rounded-lg bg-black mt-2"
-                />
+                <video ref={videoPreviewRef} autoPlay muted playsInline className="w-full rounded-lg bg-black mt-2" />
               </div>
             )}
           </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
           <Button onClick={handleSave}>Salvar Configurações</Button>
         </div>
       </DialogContent>
