@@ -51,7 +51,9 @@ export default function VideoCallPage() {
     userName: String(userName),
     serverUrl: env.baseUrlPsicomaisApi,
   })
-
+  const remoteStreams = participants
+    .map((p) => p.stream)
+    .filter((s): s is MediaStream => s !== undefined && s !== null && s !== localStream)
   // Initialize Chat
   const { messages, sendMessage } = useChat({
     socket,
@@ -72,6 +74,8 @@ export default function VideoCallPage() {
   } = useAudioRecording({
     roomId,
     userId,
+    localStream, // stream do próprio microfone
+    remoteStreams,
     socket,
     autoStart: false, // Start recording automatically when joining
   })
@@ -111,7 +115,6 @@ export default function VideoCallPage() {
     setHasJoined(false)
     window.location.href = "../"
   }
-  const remoteStreams = participants.map((p) => p.stream).filter((s): s is MediaStream => s !== undefined && s !== null)
 
   const handleJoinRoom = () => {
     joinRoom()
@@ -129,7 +132,9 @@ export default function VideoCallPage() {
   const handleToggleRecording = () => {
     if (isMixedRecording) {
       stopMixedRecording()
+      stopRecording()
     } else {
+      startRecording()
       startMixedRecording()
     }
   }
@@ -163,11 +168,11 @@ export default function VideoCallPage() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onLeaveCall={handleLeaveCall}
       />
-      {audioURL && (
-        <div className="fixed bottom-20 left-4 bg-gray-800 p-2 rounded">
+      {/* {audioURL && (
+        <div className="fixed bottom-20 left-45 bg-gray-800 p-2 rounded">
           <audio controls src={audioURL} />
         </div>
-      )}
+      )} */}
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
