@@ -40,6 +40,7 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
   const [storageStats, setStorageStats] = useState(deviceStorage.getStorageStats())
 
   const testStream = useRef<MediaStream | null>(null)
+  const videoPreviewRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -69,13 +70,50 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
 
   useEffect(() => {
     return () => {
-      if (testStream.current) {
-        testStream.current.getTracks().forEach((track) => track.stop())
-        testStream.current = null
-      }
+      stopTestStream()
     }
   }, [])
 
+  // Inicia preview de câmera
+  const startVideoPreview = async (deviceId?: string) => {
+    try {
+      stopTestStream()
+
+      if (!deviceId) return
+
+      const constraints: MediaStreamConstraints = {
+        video: { deviceId: { exact: deviceId } },
+        audio: false,
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      testStream.current = stream
+
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream
+        await videoPreviewRef.current.play().catch(() => {})
+      }
+    } catch (err) {
+      console.error("❌ Erro ao iniciar preview da câmera:", err)
+    }
+  }
+
+  // Para o preview
+  const stopTestStream = () => {
+    if (testStream.current) {
+      testStream.current.getTracks().forEach(track => track.stop())
+      testStream.current = null
+    }
+  }
+
+  // Quando trocar de câmera, atualiza preview
+  useEffect(() => {
+    if (localSelectedVideoInput && isOpen) {
+      startVideoPreview(localSelectedVideoInput)
+    }
+  }, [localSelectedVideoInput, isOpen])
+
+  // Carrega preferências salvas
   const loadSavedPreferences = () => {
     try {
       const currentDevices: StoredDevice[] = [
@@ -88,15 +126,9 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
       deviceStorage.cleanupPreferences(currentDevices)
       const finalPrefs = deviceStorage.selectDefaultDevices(currentDevices)
 
-      if (finalPrefs.audioInputId) {
-        setLocalSelectedAudioInput(finalPrefs.audioInputId)
-      }
-      if (finalPrefs.videoInputId) {
-        setLocalSelectedVideoInput(finalPrefs.videoInputId)
-      }
-      if (finalPrefs.audioOutputId) {
-        setLocalSelectedAudioOutput(finalPrefs.audioOutputId)
-      }
+      if (finalPrefs.audioInputId) setLocalSelectedAudioInput(finalPrefs.audioInputId)
+      if (finalPrefs.videoInputId) setLocalSelectedVideoInput(finalPrefs.videoInputId)
+      if (finalPrefs.audioOutputId) setLocalSelectedAudioOutput(finalPrefs.audioOutputId)
     } catch (error) {
       console.error("❌ Erro ao carregar preferências:", error)
     }
@@ -159,10 +191,11 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configurações de Áudio e Vídeo</DialogTitle>
-          <DialogDescription>Escolha seus dispositivos antes de ingressar na chamada.</DialogDescription>
+          <DialogDescription>Escolha e teste seus dispositivos antes de ingressar na chamada.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Status */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium">Status dos Dispositivos</h3>
@@ -261,6 +294,20 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
                 )}
               </SelectContent>
             </Select>
+
+            {/* Preview da câmera */}
+            {localSelectedVideoInput && (
+              <div className="mt-4">
+                <Label>Pré-visualização</Label>
+                <video
+                  ref={videoPreviewRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full rounded-lg bg-black mt-2"
+                />
+              </div>
+            )}
           </div>
         </div>
 
