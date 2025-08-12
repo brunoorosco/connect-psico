@@ -36,18 +36,18 @@ export function useProfessionalsFetcher() {
   return { professionals, total, loading, fetchProfessionals };
 }
 
-export function useProfessionalsAvaliabilitiesFetcher() {
-  const [professional, setProfessional] = useState<any>([]);
-  const [loading, startTransition] = useTransition();
+// export function useProfessionalsAvaliabilitiesFetcher() {
+//   const [professional, setProfessional] = useState<any>([]);
+//   const [loading, startTransition] = useTransition();
 
-  const fetchProfessional = async (userId: string) => {
-    startTransition(async () => {
-      const res = await getProfessionalAvailabilities(userId);
-      setProfessional(res);
-    });
-  };
-  return { disponibilidadeProfissional:professional, loading, fetchProfessional };
-}
+//   const fetchProfessional = async (userId: string) => {
+//     startTransition(async () => {
+//       const res = await getProfessionalAvailabilities(userId);
+//       setProfessional(res);
+//     });
+//   };
+//   return { disponibilidadeProfissional:professional, loading, fetchProfessional };
+// }
 
 export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
   return await getProfessionalSchedule(userId, date);

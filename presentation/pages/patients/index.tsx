@@ -26,8 +26,8 @@ export function PatientsPage() {
   } = usePatientManager();
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden px-2 py-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-4">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden px-2 py-2 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-2">
         {/* Título e botão responsivos */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <h1 className="text-2xl font-bold text-medical text-center sm:text-left">
@@ -46,7 +46,7 @@ export function PatientsPage() {
           {showForm ? (
             <Card className="w-full overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">
+                <CardTitle className="text-xs sm:text-xl">
                   {editingPatient ? 'Editar Paciente' : 'Novo Paciente'}
                 </CardTitle>
               </CardHeader>
