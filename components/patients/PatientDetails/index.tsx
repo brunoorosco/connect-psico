@@ -12,7 +12,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
     usePatientDetails(patient);
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PatientHeader
         patient={patient}
         onBack={onBack}
@@ -37,7 +37,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         </TabsContent>
 
         <TabsContent value="records">
-          <PatientRecordsTab />
+          <PatientRecordsTab patientId={patient.id} />
         </TabsContent>
       </Tabs>
     </div>

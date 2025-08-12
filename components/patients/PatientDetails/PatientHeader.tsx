@@ -23,7 +23,7 @@ export const PatientHeader: React.FC<IPatientHeader> = ({
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <CardTitle className="text-2xl">{patient.name}</CardTitle>
+              <CardTitle className="text-xl">{patient.name}</CardTitle>
               <p className="text-gray-600">
                 {patient.medicalRecordId && `Prontuário: ${patient.medicalRecordId}`}
               </p>

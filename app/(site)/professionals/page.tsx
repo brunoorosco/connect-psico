@@ -1,12 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import { TherapistFilter } from "@/components/profissional/TherapistFilter"
 import { ProfessionalCard } from "@/components/profissional/TherapistCard"
 import { ProfessionalDetailsModal } from "@/components/profissional/TherapistDetails"
-import { useSession } from "next-auth/react"
 import { useProfessionalsFetcher } from "@/hooks/useProfissionals"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
 import { Button } from "@components/ui/button"
