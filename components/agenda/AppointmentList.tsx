@@ -95,7 +95,11 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ appointments, selecte
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-0">
                       <div className="text-xs text-gray-500 flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
-                        {appointment.appointmentDate.toISOString().substring(11, 16)}
+                        {new Date(appointment.appointmentDate).toLocaleString("pt-BR", {
+                          timeZone: "America/Sao_Paulo",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                       <div className="flex flex-col">
                         <span className="font-medium text-sm">{appointment.patient.name}</span>
