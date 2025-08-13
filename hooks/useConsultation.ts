@@ -58,7 +58,7 @@ type RecordItem = NotePatient & { professional: { name: string } }
 
 type PropsUsePatientRecords = {
   records: RecordItem[]
-  fetchPatientRecords: (patientId: number) => Promise<void>
+  fetchPatientRecords: (patientId: string) => Promise<void>
   loading: boolean
 }
 
@@ -66,7 +66,7 @@ export function usePatientRecords(): PropsUsePatientRecords {
   const [records, setRecords] = useState<RecordItem[]>([])
   const [loading, startTransition] = useTransition()
 
-  const fetchPatientRecords = async (patientId: number) => {
+  const fetchPatientRecords = async (patientId: string) => {
     try {
       startTransition(() => {
         getConsultaltionByPatientId(patientId).then((res) => {

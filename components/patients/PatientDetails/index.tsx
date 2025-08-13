@@ -36,7 +36,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         </TabsContent>
 
         <TabsContent value="records">
-          <PatientRecordsTab patientId={patient.id} />
+          <PatientRecordsTab patientId={patient.userId} />
         </TabsContent>
       </Tabs>
     </div>

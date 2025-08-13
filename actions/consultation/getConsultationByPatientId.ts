@@ -3,11 +3,11 @@
 import { prisma } from "@/lib/db"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
-export const getConsultaltionByPatientId = async (patientId: number) => {
+export const getConsultaltionByPatientId = async (patientId: string) => {
   try {
     const notePatient = await prisma.notePatient.findMany({
       where: {
-        patientId: patientId,
+        patients: { patientId },
       },
       include: {
         professional: {

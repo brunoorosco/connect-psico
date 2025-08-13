@@ -7,7 +7,7 @@ import { usePatientRecords } from "@hooks/useConsultation"
 import { NotePatient } from "@/domain/model/notePatient"
 
 type PatientRecordsTabProps = {
-  patientId: number
+  patientId: string
 }
 
 type RecordItem = NotePatient & { professional: { name: string } }
