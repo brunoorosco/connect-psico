@@ -2,7 +2,6 @@
 
 import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
-import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
 import { useState, useTransition } from "react";
 import { Patient } from "@/types/appointment";
 import { usePatientAppointments } from "./useAppointments";
@@ -21,19 +20,6 @@ export function usePatientsFetcher() {
   };
   return { professionals: userDefault.data, total, loading, fetchProfessionals };
 }
-
-// export function useProfessionalsAvaliabilitiesFetcher() {
-//   const [professional, setProfessional] = useState<any>([]);
-//   const [loading, startTransition] = useTransition();
-
-//   const fetchProfessional = async (userId: string) => {
-//     startTransition(async () => {
-//       const res = await getProfessionalAvailabilities(userId);
-//       setProfessional(res);
-//     });
-//   };
-//   return { disponibilidadeProfissional: professional, loading, fetchProfessional };
-// }
 
 export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
   return await getProfessionalSchedule(userId, date);

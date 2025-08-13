@@ -28,7 +28,6 @@
 // import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 // import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 // import { toast } from '@/components/ui/use-toast';
-// import { mockPatients } from './mockData';
 // import { User } from '@/domain/model/user';
 // import { Appointment } from '@/domain/model/appointment';
 

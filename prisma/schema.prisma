@@ -94,7 +94,7 @@ model Account {
 
 model Pacientes {
   id               Int           @id @default(autoincrement())
-  birthDate        DateTime?     @map("birth_date")
+  birthDate        String?     @map("birth_date")
   emergencyContact String?       @map("emergency_contact")
   address          String?
   medicalRecordId  String        @unique @map("prontuario_id")

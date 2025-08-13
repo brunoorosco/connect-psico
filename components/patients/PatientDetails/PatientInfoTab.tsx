@@ -1,31 +1,21 @@
 "use client"
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IPatient } from './types';
+import React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { IPatient } from "./types"
+import { format, parseISO } from "date-fns"
 
 export const PatientInfoTab: React.FC<IPatient> = (props) => {
-  const { patient } = props || {};
+  const { patient } = props || {}
 
   if (!patient) {
-    return <p>Carregando informações do paciente...</p>;
+    return <p>Carregando informações do paciente...</p>
   }
 
-  const {
-    email,
-    phone,
-    birthDate,
-    emergencyContact,
-    street,
-    number,
-    neighborhood,
-    city,
-    state,
-    cep,
-    notes,
-  } = patient;
+  const { email, phone, birthDate, emergencyContact, street, number, neighborhood, city, state, cep, notes } = patient
 
-  const formattedAddress = `${street}, ${number} - ${neighborhood}, ${city} - ${state}, ${cep}`;
-  const formattedDate = birthDate ? new Date(birthDate).toLocaleDateString("pt-BR") : "-";
+  const formattedAddress = `${street}, ${number} - ${neighborhood}, ${city} - ${state}, ${cep}`
+  const parsedDate = birthDate ? parseISO(birthDate) : ''
+  const formattedDate = format(parsedDate, "dd/MM/yyyy")
 
   return (
     <Card>
@@ -43,11 +33,11 @@ export const PatientInfoTab: React.FC<IPatient> = (props) => {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 const InfoField = ({ label, value, fullWidth = false }: { label: string; value?: string; fullWidth?: boolean }) => (
-  <div className={fullWidth ? 'md:col-span-2' : ''}>
+  <div className={fullWidth ? "md:col-span-2" : ""}>
     <label className="text-sm font-medium text-gray-500">{label}</label>
-    <p>{value || '-'}</p>
+    <p>{value || "-"}</p>
   </div>
-);
+)

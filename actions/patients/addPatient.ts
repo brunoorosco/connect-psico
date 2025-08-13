@@ -39,7 +39,7 @@ export const createPatient = async (params: any) => {
         patientUser: {
           create: {
             medicalRecordId: validPatient.data.medicalRecordId,
-            birthDate: validPatient.data.birthDate ? new Date(validPatient.data.birthDate) : null,
+            birthDate: validPatient.data.birthDate,
             emergencyContact: validPatient.data.emergencyContact || null,
             notes: validPatient.data.notes || null,
             cep: validPatient.data.cep || null,

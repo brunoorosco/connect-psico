@@ -1,16 +1,15 @@
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PatientHeader } from "./PatientHeader";
-import { PatientInfoTab } from "./PatientInfoTab";
-import { PatientAppointmentsTab } from "./PatientAppointmentsTab";
-import { PatientRecordsTab } from "./PatientRecordsTab";
-import { usePatientDetails } from "@hooks/usePatients";
-import { IPatientDetails } from "./types";
+import React from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PatientHeader } from "./PatientHeader"
+import { PatientInfoTab } from "./PatientInfoTab"
+import { PatientAppointmentsTab } from "./PatientAppointmentsTab"
+import { PatientRecordsTab } from "./PatientRecordsTab"
+import { usePatientDetails } from "@hooks/usePatients"
+import { IPatientDetails } from "./types"
 
 export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onEdit }) => {
-  const { patientAppointments, handleSendMessage, handleScheduleAppointment } =
-    usePatientDetails(patient);
-  
+  const { patientAppointments, handleSendMessage, handleScheduleAppointment } = usePatientDetails(patient)
+
   return (
     <div className="space-y-4">
       <PatientHeader
@@ -41,7 +40,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         </TabsContent>
       </Tabs>
     </div>
-  );
-};
+  )
+}
 
-export default PatientDetails;
+export default PatientDetails

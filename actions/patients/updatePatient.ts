@@ -11,8 +11,9 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
     return await prisma.pacientes.update({
       where: { medicalRecordId: prontuarioId },
       data: {
+        patient:{update:{phone:result.data.phone}},
         cep: result.data.cep,
-        birthDate: result.data.birthDate ? new Date(result.data.birthDate) : null,
+        birthDate: result.data.birthDate,
         emergencyContact: result.data.emergencyContact || null,
         notes: result.data.notes || null,
         street: result.data.street || null,

@@ -4,6 +4,8 @@ import { startTransition, useEffect, useState } from "react"
 import { deletePatient, getPatientsByProfessionalId } from "@/actions/patients"
 import { Patient } from "@/types/appointment"
 import { toast } from "sonner"
+import { getPatientsByIdProfessionalById } from "@/actions/patients/getPatientsByIdProfessionalById"
+import { PatientFormData } from "./usePatientForm"
 
 export function usePatientManager() {
   const [patients, setPatients] = useState<Patient[]>([])
@@ -27,12 +29,26 @@ export function usePatientManager() {
       }
     })
   }
+  const fetchPatientById = async (patientId: string) => {
+    try {
+      const result = await getPatientsByIdProfessionalById(patientId)
+      if ("error" in result) {
+        toast.error("Erro ao carregar paciente")
+        console.error("Erro no carregamento:", result?.error)
+        return
+      }
+      setSelectedPatient(result[0]) // Agora seta o paciente único
+    } catch (err) {
+      toast.error("Erro inesperado")
+      console.error("Erro na requisição:", err)
+    }
+  }
 
   useEffect(() => {
     fetchPatients()
   }, [])
 
-  const handleAddPatient = (patient: Omit<Patient, "id">) => {
+  const handleAddPatient = (patient: any) => {
     const newPatient: Patient = {
       ...patient,
       id: parseInt(Math.random().toString().substring(2, 9)),
@@ -41,7 +57,7 @@ export function usePatientManager() {
     setShowForm(false)
   }
 
-  const handleEditPatient = (patientData: Omit<Patient, "id">) => {
+  const handleEditPatient = (patientData: any) => {
     if (!editingPatient) return
     setPatients((prev) => prev.map((p) => (p.id === editingPatient.id ? { ...editingPatient, ...patientData } : p)))
     setEditingPatient(null)
@@ -107,5 +123,7 @@ export function usePatientManager() {
     backToList,
     setShowForm,
     handleAppointmentCreate,
+    fetchPatientById,
+    fetchPatients
   }
 }

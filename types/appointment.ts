@@ -14,7 +14,7 @@ export type Patient = User & {
   street: string;
   neighborhood: string;
   emergencyContact: string;
-  birthDate?: Date; // ISO string format
+  birthDate?: string;
   city: string;
   number: string;
   notes: string;

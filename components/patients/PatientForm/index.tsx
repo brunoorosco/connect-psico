@@ -1,39 +1,91 @@
-// components/patients/PatientForm.tsx
-'use client';
+"use client"
 
-import React from 'react';
-import { usePatientForm } from '@/hooks/usePatientForm';
-import { Patient } from '@/types/appointment';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import InputMask from 'react-input-mask';
+import React, { useEffect, useState } from "react"
+import { PatientFormData } from "@/hooks/usePatientForm"
+import { Patient } from "@/types/appointment"
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import InputMask from "react-input-mask"
+import { useCurrentUser } from "@hooks/use-current-user"
+import { UseFormReturn } from "react-hook-form"
+import { customAlphabet } from "nanoid"
+const nanoid = customAlphabet("1234567890", 5)
 
 type Props = {
-  patient?: Patient | null;
-  onSubmit: (data: Omit<Patient, 'id'>) => void;
-  onCancel: () => void;
-};
+  patient?: Patient | null
+  onSubmit: (data: PatientFormData) => void | Promise<void>
+  onCancel: () => void
+  form: UseFormReturn<PatientFormData>
+  handleCepChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
+  isEdit: boolean
+  reset: (values?: PatientFormData) => void
+}
 
-export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) => {
-  const {
-    form,
-    handleCepChange,
-    handleSubmit,
-    isEdit,
-  } = usePatientForm({ patient, onSubmit });
+export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form, handleCepChange, isEdit, reset }) => {
+  const user = useCurrentUser()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+useEffect(() => {
+  if (patient) {
+    const birthDateFormatted =
+      patient.birthDate && typeof patient.birthDate !== "string"
+        ? new Date(patient.birthDate).toISOString().substring(0, 10)
+        : patient.birthDate || ""
+
+    reset({
+      name: patient.name || "",
+      email: patient.email || "",
+      phone: patient.phone || "",
+      medicalRecordId: patient.medicalRecordId || "",
+      birthDate: birthDateFormatted || "",
+      emergencyContact: patient.emergencyContact || "",
+      notes: patient.notes || "",
+      cep: patient.cep || "",
+      street: patient.street || "",
+      neighborhood: patient.neighborhood || "",
+      city: patient.city || "",
+      state: patient.state || "",
+      number: patient.number || "",
+      profissionalId: user?.id,
+    })
+  } else {
+    reset({
+      name: "",
+      email: "",
+      phone: "",
+      medicalRecordId: `PR-${nanoid()}`,  // Gera novo ID aqui
+      birthDate: "",
+      emergencyContact: "",
+      notes: "",
+      cep: "",
+      street: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+      number: "",
+      profissionalId: user?.id,
+    })
+  }
+}, [patient, reset, user?.id])
+
+  const internalSubmit = async (data: PatientFormData) => {
+    setIsSubmitting(true)
+    try {
+      await onSubmit(data)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  if (!form) {
+    return <div>Loading...</div>
+  }
 
   return (
- <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(internalSubmit)} className="space-y-4">
+        {/* Linha 1 */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
@@ -42,13 +94,12 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               <FormItem className="col-span-1 md:col-span-3">
                 <FormLabel>Nome Completo *</FormLabel>
                 <FormControl>
-                  <Input className='uppercase' placeholder="Nome do paciente" {...field} />
+                  <Input className="uppercase" placeholder="Nome do paciente" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="email"
@@ -62,7 +113,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="phone"
@@ -70,12 +120,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               <FormItem className="col-span-1 md:col-span-1">
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
-                  <InputMask
-                    mask="(99) 99999-9999"
-                    placeholder="(99) 99999-9999"
-                    {...field}
-                    onChange={field.onChange}
-                  >
+                  <InputMask mask="(99) 99999-9999" placeholder="(99) 99999-9999" {...field} onChange={field.onChange}>
                     {(inputProps: any) => <Input {...inputProps} />}
                   </InputMask>
                 </FormControl>
@@ -85,7 +130,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
           />
         </div>
 
-        {/* Linha 2: Data de nascimento, Contato, Prontuário */}
+        {/* Linha 2 */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
@@ -100,7 +145,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="emergencyContact"
@@ -114,7 +158,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="medicalRecordId"
@@ -130,7 +173,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
           />
         </div>
 
-        {/* Endereço - Linha 3 */}
+        {/* Linha 3 */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
@@ -152,7 +195,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="street"
@@ -166,7 +208,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="number"
@@ -182,7 +223,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
           />
         </div>
 
-        {/* Endereço - Linha 4 */}
+        {/* Linha 4 */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <FormField
             control={form.control}
@@ -197,7 +238,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="city"
@@ -211,7 +251,6 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="state"
@@ -235,11 +274,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
             <FormItem>
               <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Observações adicionais sobre o paciente"
-                  className="min-h-[100px]"
-                  {...field}
-                />
+                <Textarea placeholder="Observações adicionais sobre o paciente" className="min-h-[100px]" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -248,14 +283,17 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel }) =>
 
         {/* Botões */}
         <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button type="submit">{patient ? "Atualizar" : "Criar"} Paciente</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {" "}
+            {isEdit ? "Atualizar" : "Criar"} Paciente
+          </Button>
         </div>
       </form>
     </Form>
-  );
-};
+  )
+}
 
-export default PatientForm;
+export default PatientForm
