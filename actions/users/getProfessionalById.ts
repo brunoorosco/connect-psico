@@ -1,27 +1,35 @@
 "use server"
+import { User } from "@/domain/model/user"
 import { prisma } from "@/lib/db"
+import { Professional } from "@/types/appointment"
 
-export const getProfessioanlById = async (id: string): Promise<any> => {
+type GetProfessionalByIdResult = Pick<
+  User,
+  "id" | "name" | "email" | "active" | "phone" | "createdAt" | "updatedAt"
+> &
+  Partial<Professional>
+
+export const getProfessionalById = async (id: string): Promise<GetProfessionalByIdResult | null> => {
   const user = await prisma.user.findUnique({
     where: { id, active: true },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      active: true,
+      createdAt: true,
+      updatedAt: true,
+      phone: true,
       Professional: true,
     },
-    omit: {
-      password: true,
-      emailVerified: true,
-      isTwoFactorAuthEnabled: true,
-      twoFactorAuthVerified: true,
-    },
   })
-  if (!user) {
-    return { error: "Usuário não encontrado" }
-  }
+
+  if (!user) return null
+
   const { Professional, ...restUser } = user
-  // Pega o primeiro professional, caso exista
-  const professionalData = Professional ?? {}
+
   return {
     ...restUser,
-    ...professionalData,
-  }
+    ...(Professional || {}),
+  } as GetProfessionalByIdResult
 }

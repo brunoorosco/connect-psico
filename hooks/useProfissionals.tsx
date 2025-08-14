@@ -3,7 +3,7 @@
 import { getProfessionalUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { getProfessionalAvailabilities } from "@/actions/users/getProfessionalAvailabities";
-import { getProfessioanlById } from "@/actions/users/getProfessionalById";
+import { getProfessionalById } from "@/actions/users/getProfessionalById";
 import { ProfessionalModel } from "@/domain/model/professional";
 import { Professional } from "@/types/appointment";
 import { useCallback, useState, useTransition } from "react";
@@ -54,7 +54,7 @@ export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
 };
 
 
-const fetchProfessional = (userId: string) => getProfessioanlById(userId);
+const fetchProfessional = (userId: string) => getProfessionalById(userId);
 
 export function useGetProfessionalById(userId?: string) {
   const { data, error, isLoading, mutate } = useSWR(
