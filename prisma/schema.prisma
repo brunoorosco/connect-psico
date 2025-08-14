@@ -240,6 +240,14 @@ model VideoCallParticipant {
   @@unique([userId, roomId])
 }
 
+model NotifyDigest {
+  receiverId   String   @id
+  firstEventAt DateTime @default(now())
+  lastEventAt  DateTime @default(now())
+  windowEndAt  DateTime
+  msgCount     Int      @default(0)
+}
+
 enum UserRole {
   DEFAULT
   ADMIN
