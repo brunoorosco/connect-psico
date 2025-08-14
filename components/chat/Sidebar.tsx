@@ -1,76 +1,143 @@
 "use client"
-import { useEffect, useState } from "react"
 
+import { useEffect, useMemo, useState } from "react"
 import SidebarSkeleton from "./SidebarSkeleton"
-import { Users } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { AlertCircle, Users } from "lucide-react"
 import { UserChat } from "@/domain/model/patient"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
 import { useChatStore } from "@/infra/stores/useChatStore"
+import { useCurrentUser } from "@hooks/use-current-user"
 
-const Sidebar = () => {
+const SidebarChat = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore()
-
   const { onlineUsers } = useAuthStore()
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false)
-  const { data: session } = useSession()
-  useEffect(() => {
-    if (session?.user?.id) {
-      getUsers(session.user)
-    }
-  }, [])
 
-  const filteredUsers = showOnlineOnly ? users.filter((user: UserChat) => onlineUsers.includes(user.userId)) : users
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false)
+  const currentUser = useCurrentUser()
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      // carregamos os usuários do chat para o usuário atual
+      getUsers(currentUser)
+    }
+  }, [currentUser?.id, getUsers])
+
+  // Se a store retornar algo que não seja array (ex.: objeto de erro),
+  // tratamos como erro mas mantemos o componente funcionando.
+  const errorMessage = useMemo(() => {
+    if (isUsersLoading) return null
+    if (Array.isArray(users)) return null
+    // tenta extrair uma mensagem vinda da store/req, senão usa uma padrão
+    return (users as any)?.error || "Falha ao carregar contatos. Tente novamente."
+  }, [users, isUsersLoading])
+
+  // Garante que trabalharemos sempre com um array para renderização
+  const safeUsers: UserChat[] = useMemo(() => {
+    return Array.isArray(users) ? users : []
+  }, [users])
+
+  const filteredUsers = useMemo(() => {
+    if (showOnlineOnly) {
+      return safeUsers.filter((u: UserChat) => onlineUsers.includes(u.userId))
+    }
+    return safeUsers
+  }, [safeUsers, showOnlineOnly, onlineUsers])
 
   if (isUsersLoading) return <SidebarSkeleton />
 
   return (
-    <aside className="h-fullmax-w-[16rem] xl:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full max-w-[16rem] xl:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200">
+      {/* Cabeçalho */}
       <div className="border-b border-gray-200 w-full p-5">
-        <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contatos</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Users className="size-6" />
+            <span className="font-medium hidden lg:block">Contatos</span>
+          </div>
+
+          {!errorMessage && (
+            <label className="hidden lg:inline-flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                checked={showOnlineOnly}
+                onChange={(e) => setShowOnlineOnly(e.target.checked)}
+              />
+              <span>Online</span>
+            </label>
+          )}
         </div>
       </div>
 
+      {/* Banner de erro dentro do sidebar, sem dar return */}
+      {errorMessage && (
+        <div className="px-4 pt-3">
+          <div className="w-full rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 flex flex-col gap-2">
+            {/* Linha com ícone e título */}
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span className="font-medium">Não foi possível carregar os contatos</span>
+            </div>
+
+            {/* Mensagem e botão */}
+            <div className=" items-center justify-between">
+              <p className="text-red-600/90 text-sm">{errorMessage}</p>
+              <button
+                type="button"
+                className="text-xs font-medium text-red-700 hover:text-red-800 underline disabled:opacity-50"
+                disabled={isUsersLoading}
+                onClick={() => {
+                  if (currentUser?.id) getUsers(currentUser)
+                }}
+              >
+                {isUsersLoading ? "Carregando..." : "Tentar novamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista */}
       <div className="overflow-y-auto w-full py-3">
-        {filteredUsers?.map((user: UserChat) => {
-          const isSelected = selectedUser?.userId === user.userId
+        {filteredUsers.map((u: UserChat) => {
+          const isSelected = selectedUser?.userId === u.userId
+          const isOnline = onlineUsers.includes(u.userId)
 
           return (
             <button
-              key={user.userId}
-              onClick={() => setSelectedUser(user)}
+              key={u.userId}
+              onClick={() => setSelectedUser(u)}
               className={`
-          w-full p-3 flex items-center gap-3
-          ${isSelected ? "bg-gray-200" : "hover:bg-[#9b87f555]"}
-          transition-colors rounded-md
-        `}
+                w-full p-3 flex items-center gap-3
+                ${isSelected ? "bg-gray-200" : "hover:bg-[#9b87f555]"}
+                transition-colors rounded-md
+              `}
             >
               <div className="relative">
                 <img
-                  className="w-12 h-12 rounded-full"
-                  src={typeof user.image === "string" ? user.image : "/avatar.png"}
-                  alt={user.name}
+                  className="w-12 h-12 rounded-full object-cover"
+                  src={typeof u.image === "string" ? u.image : "/avatar.png"}
+                  alt={u.name}
                 />
-                {onlineUsers.includes(user.userId) && (
+                {isOnline && (
                   <span className="top-0 left-9 absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 )}
               </div>
 
               <div className="hidden lg:block text-left min-w-0">
-                <div className="font-medium truncate">{user.name}</div>
-                <div className="text-sm text-zinc-400">{onlineUsers.includes(user.userId) ? "Online" : "Offline"}</div>
+                <div className="font-medium truncate">{u.name}</div>
+                <div className="text-sm text-zinc-400">{isOnline ? "Online" : "Offline"}</div>
               </div>
             </button>
           )
         })}
 
-        {filteredUsers.length === 0 && (
+        {filteredUsers.length === 0 && !errorMessage && (
           <div className="text-center text-zinc-500 py-4">Nenhuma conversa encontrada</div>
         )}
       </div>
     </aside>
   )
 }
-export default Sidebar
+
+export default SidebarChat
