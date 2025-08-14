@@ -11,7 +11,7 @@ export type User = {
   name: string
   email: string
   image: File | string | null
-  telefone?: string
+  phone?: string
   password: string
   role: UserRole
   active: boolean

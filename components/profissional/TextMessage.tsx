@@ -1,12 +1,12 @@
-import React, { startTransition, useState } from "react"
+import React, { useState } from "react"
 import { TabsContent } from "@/components/ui/tabs"
 import { MessageCircle } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { ProfessionalModel } from "@/domain/model/professional"
-import { sendMessageApi } from "@/actions/messages"
 import { useSession } from "next-auth/react"
+import { sendMessageService } from "@services/messageService"
 
 interface ProfessionalProps {
   professional: ProfessionalModel
@@ -14,18 +14,21 @@ interface ProfessionalProps {
 
 export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
   const [message, setMessage] = useState("")
+  const [isSending, setIsSending] = useState(false)
   const { data: session, status } = useSession()
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message || message.trim() === "" || !professional) return
 
-    startTransition(async () => {
+    setIsSending(true)
+    try {
       const textMessage = {
         senderId: session?.user.id as string,
         text: message.trim(),
         receiverId: professional.userId,
       }
-      const result = await sendMessageApi(professional.userId, textMessage)
+      const result = await sendMessageService(professional.userId, textMessage)
+
       if (result.error) {
         toast.error("Erro ao enviar mensagem", {
           description: result.error,
@@ -38,8 +41,11 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
       })
 
       setMessage("")
-    })
+    } finally {
+      setIsSending(false)
+    }
   }
+
   return (
     <TabsContent value="message" className="pt-4 space-y-4">
       <h4 className="text-sm font-medium">Envie uma mensagem para {professional.name}:</h4>
@@ -49,16 +55,25 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         maxLength={500}
+        disabled={isSending}
       />
       <div className="flex justify-between items-center">
         <p className="text-xs text-muted-foreground">{message.length}/500 caracteres</p>
         <Button
           className="bg-therapy-primary hover:bg-therapy-tertiary"
           onClick={handleSendMessage}
-          disabled={!message || message.trim() === "" || status !== "authenticated"}
+          disabled={
+            !message || message.trim() === "" || status !== "authenticated" || isSending
+          }
         >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Enviar mensagem
+          {isSending ? (
+            <>Enviando...</>
+          ) : (
+            <>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Enviar mensagem
+            </>
+          )}
         </Button>
       </div>
     </TabsContent>
