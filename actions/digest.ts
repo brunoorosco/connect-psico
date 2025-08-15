@@ -1,7 +1,6 @@
-import { prisma } from "@/lib/db";
-import { DIGEST_MINUTES } from "@/lib/digest-config";
-import { addMinutesISO, inQuietHours, nextQuietEndISO } from "@/lib/time";
-
+import { prisma } from "@/lib/db"
+import { DIGEST_MINUTES } from "@/lib/digest-config"
+import { addMinutesISO, inQuietHours, nextQuietEndISO } from "@/lib/time"
 
 /**
  * Empilha evento no digest do receiverId.
@@ -9,9 +8,9 @@ import { addMinutesISO, inQuietHours, nextQuietEndISO } from "@/lib/time";
  * - Mantém a janela original; se a janela já expirou, reabre conforme regra
  */
 export async function ingestDigest(receiverId: string) {
-  if (!receiverId) return;
+  if (!receiverId) return
 
-  const windowEndAt = inQuietHours() ? nextQuietEndISO() : addMinutesISO(DIGEST_MINUTES);
+  const windowEndAt = inQuietHours() ? nextQuietEndISO() : addMinutesISO(DIGEST_MINUTES)
 
   await prisma.notifyDigest.upsert({
     where: { receiverId },
@@ -23,12 +22,13 @@ export async function ingestDigest(receiverId: string) {
     update: {
       msgCount: { increment: 1 },
       lastEventAt: new Date(),
-      windowEndAt: (await prisma.notifyDigest.findUnique({ where: { receiverId }, select: { windowEndAt: true } }))
-        ?.windowEndAt! < new Date()
-        ? new Date(windowEndAt) // se já expirou, reabre
-        : undefined,            // caso contrário, mantém
+      windowEndAt:
+        (await prisma.notifyDigest.findUnique({ where: { receiverId }, select: { windowEndAt: true } }))?.windowEndAt! <
+        new Date()
+          ? new Date(windowEndAt) // se já expirou, reabre
+          : undefined, // caso contrário, mantém
     },
-  });
+  })
 }
 
 /**
@@ -36,26 +36,26 @@ export async function ingestDigest(receiverId: string) {
  * Obs.: Em ambientes com muita concorrência, ideal seria lock. Para Vercel + cron, isso é suficiente.
  */
 export async function takeDueDigests(limit: number) {
-  const now = new Date();
+  const now = new Date()
 
   return await prisma.$transaction(async (tx) => {
     const rows = await tx.notifyDigest.findMany({
       where: { windowEndAt: { lte: now } },
       orderBy: { windowEndAt: "asc" },
       take: limit,
-    });
+    })
 
-    if (!rows.length) return [] as typeof rows;
+    if (!rows.length) return [] as typeof rows
 
     await tx.notifyDigest.deleteMany({
       where: {
-        receiverId: { in: rows.map(r => r.receiverId) },
+        receiverId: { in: rows.map((r) => r.receiverId) },
         windowEndAt: { lte: now }, // garante que só apaga o que está vencido
       },
-    });
-
-    return rows;
-  });
+    })
+    console.log(rows.length)
+    return rows
+  })
 }
 
 /**
@@ -74,5 +74,5 @@ export async function reopenWindow(receiverId: string, extraCount: number, minut
       lastEventAt: new Date(),
       windowEndAt: new Date(addMinutesISO(minutes)),
     },
-  });
+  })
 }
