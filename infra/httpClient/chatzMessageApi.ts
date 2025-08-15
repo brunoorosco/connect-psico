@@ -9,6 +9,7 @@ export const axiosInstanceChatz = axios.create({
 
 axiosInstanceChatz.interceptors.request.use(
   async (config) => {
+    console.log(config)
     config.headers.Authorization = env.apiKeyChatz
     return config
   },
