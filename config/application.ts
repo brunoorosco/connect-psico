@@ -11,6 +11,6 @@ export const env = {
   nodemailerUser: process.env.NODEMAILER_USER,
   nodemailerPassword: process.env.NODEMAILER_PASS,
   baseUrlPsicomaisApi: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS as string,
-  baseUrlChatzApi: process.env.NEXT_PUBLIC_BASE_URL_API_CHATZ as string,
+  baseUrlChatzApi: process.env.URL_API_CHATZ as string,
   apiKeyChatz: process.env.API_KEY_CHATZ,
 }
