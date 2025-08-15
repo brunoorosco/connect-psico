@@ -46,11 +46,11 @@ export const PatientHeader: React.FC<IPatientHeader> = ({ patient, onEdit, onSen
             </div>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={onSendMessage}>
+            <Button onClick={onSendMessage}>
               <MessageSquare className="h-4 w-4 mr-2" />
               Mensagem
             </Button>
-            <Button variant="outline" onClick={onSchedule}>
+            <Button onClick={onSchedule}>
               <Calendar className="h-4 w-4 mr-2" />
               Agendar
             </Button>

@@ -1,13 +1,9 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Edit, Trash2, MessageSquare, SquarePlay } from "lucide-react"
 import { usePatientList } from "@/hooks/usePatientList"
 import { IPatientList } from "./types"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { usePatientStore } from "@/infra/stores/usePatientStore"
 import { Patient } from "@/types/appointment"
 import {
@@ -23,6 +19,8 @@ import { formatMessageTime } from "@/utils/formatMessageTime"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { ChatFooter } from "./chatFooter"
+import { PatientActions } from "./buttonsActions"
+import { MessageDialog } from "../DialogMessagePatient"
 
 export default function PatientList({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) {
   const { handleView, handleEdit, handleDelete } = usePatientList({
@@ -111,131 +109,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
           <div className="text-center py-8 text-gray-500">Nenhum paciente cadastrado ainda.</div>
         )}
       </CardContent>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl w-full h-[70vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Enviar Mensagem</DialogTitle>
-            <DialogDescription>Enviar mensagem para {selectedPatient?.name}</DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto border rounded-md p-4 space-y-4 bg-muted">
-            {messages &&
-              messages
-                .filter((msg) => msg.receiverId === selectedPatient?.userId || msg.senderId === selectedPatient?.userId)
-                .map((msg) => {
-                  const isCurrentUser = msg.senderId === user?.id
-                  return (
-                    <div key={msg._id} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
-                      <div className="bg-white p-2 rounded-md shadow-sm max-w-[70%]">
-                        <p className="text-sm">{msg.text}</p>
-                        <time className="block text-xs text-muted-foreground mt-1">
-                          {formatMessageTime(msg.createdAt)}
-                        </time>
-                      </div>
-                    </div>
-                  )
-                })}
-          </div>
-
-          <div className="pt-4 space-y-2">
-            <ChatFooter receiverId={selectedPatient?.userId as string} />
-            <DialogFooter></DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MessageDialog patient={selectedPatient} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </Card>
-  )
-}
-
-function PatientActions({
-  item,
-  onStart,
-  onEdit,
-  onDelete,
-  onSendMessage,
-}: {
-  item: Patient
-  onStart: (item: Patient) => void
-  onEdit: (item: Patient) => void
-  onDelete: (id: number) => void
-  onSendMessage: (item: Patient) => void
-}) {
-  const router = useRouter()
-
-  return (
-    <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onStart(item)
-              router.push(`./pacientes/${item.userId}/consulta`)
-            }}
-          >
-            <SquarePlay className="h-5 w-5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Iniciar Consulta</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onEdit(item)
-            }}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Editar Paciente</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onSendMessage(item)
-            }}
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Enviar Mensagem</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(item.id) // item.id agora é number
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Excluir Paciente</p>
-        </TooltipContent>
-      </Tooltip>
-    </>
   )
 }

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PatientHeader } from "./PatientHeader"
 import { PatientInfoTab } from "./PatientInfoTab"
@@ -6,9 +6,15 @@ import { PatientAppointmentsTab } from "./PatientAppointmentsTab"
 import { PatientRecordsTab } from "./PatientRecordsTab"
 import { usePatientDetails } from "@hooks/usePatients"
 import { IPatientDetails } from "./types"
+import { MessageDialog } from "../DialogMessagePatient"
 
 export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onEdit }) => {
-  const { patientAppointments, handleSendMessage, handleScheduleAppointment } = usePatientDetails(patient)
+  const { patientAppointments,  handleScheduleAppointment } = usePatientDetails(patient)
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const handleSendMessage = () => {
+    setIsDialogOpen(true)
+  }
 
   return (
     <div className="space-y-4">
@@ -39,6 +45,11 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
           <PatientRecordsTab patientId={patient.userId} />
         </TabsContent>
       </Tabs>
+        <MessageDialog
+        patient={patient}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   )
 }
