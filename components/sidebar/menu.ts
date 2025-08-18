@@ -11,6 +11,7 @@ import {
   Users,
   WebcamIcon,
   ShieldCheckIcon,
+  Settings2Icon,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -101,6 +102,12 @@ export const menus = [
     title: "Relatório",
     url: `/app/professional/{userId}/report`,
     icon: FilePieChartIcon,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Configurações",
+    url: `/app/{userId}/settings`,
+    icon: Settings2Icon,
     rules: ["SUPERVISOR"],
   },
   {
