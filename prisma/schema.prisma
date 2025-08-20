@@ -39,6 +39,7 @@ model User {
   Account                  Account[]
   NotePatient              NotePatient[]          @relation("NotePatientProfessional")
   VideoCallParticipant     VideoCallParticipant[]
+  CertificateConfig        CertificateConfig?
 
   @@index([id])
   @@map("users")
@@ -94,7 +95,7 @@ model Account {
 
 model Pacientes {
   id               Int           @id @default(autoincrement())
-  birthDate        String?     @map("birth_date")
+  birthDate        String?       @map("birth_date")
   emergencyContact String?       @map("emergency_contact")
   address          String?
   medicalRecordId  String        @unique @map("prontuario_id")
@@ -246,6 +247,29 @@ model NotifyDigest {
   lastEventAt  DateTime @default(now())
   windowEndAt  DateTime
   msgCount     Int      @default(0)
+}
+
+model CertificateConfig {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  logoUrl      String?
+  logoPosition String  @default("header") // "header" | "footer"
+  watermarkUrl String? // marca d'água
+
+  footerText  String?
+  footerColor String  @default("#000000")
+  footerAlign String  @default("center") // "left" | "center" | "right"
+
+  companyName    String?
+  companyAddress String?
+  companyPhone   String?
+
+  paperSize String @default("A4") // "A4" | "A3"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRole {
