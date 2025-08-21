@@ -4,6 +4,7 @@ import { useState } from "react"
 import Head from "next/head"
 import Link from "next/link"
 import { FaFileMedical, FaUserMd, FaClinicMedical, FaStethoscope, FaCog } from "react-icons/fa"
+import { useCurrentUser } from "@hooks/use-current-user"
 
 interface SettingsCardProps {
   title: string
@@ -51,37 +52,10 @@ const SettingsCard: React.FC<SettingsCardProps> = ({ title, description, icon, h
 
 export default function SettingsScreen() {
   const [activeTab, setActiveTab] = useState("settings")
+  const user = useCurrentUser()
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head>
-        <title>Configurações - Telemedicina</title>
-      </Head>
-
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
-          <div className="flex space-x-4">
-            <button
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                activeTab === "settings" ? "bg-indigo-100 text-indigo-700" : "text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("settings")}
-            >
-              Configurações
-            </button>
-            <button
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                activeTab === "account" ? "bg-indigo-100 text-indigo-700" : "text-gray-500 hover:text-gray-700"
-              }`}
-              onClick={() => setActiveTab("account")}
-            >
-              Minha Conta
-            </button>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {activeTab === "settings" && (
           <div>
@@ -99,10 +73,10 @@ export default function SettingsScreen() {
                 title="Perfil do Profissional"
                 description="Gerencie suas informações profissionais, especialidades e horários de atendimento"
                 icon={<FaUserMd className="text-2xl" />}
-                href="/settings/doctor-profile"
+                href={`/app/professional/${user?.id}/profile`}
               />
 
-              <SettingsCard
+              {/* <SettingsCard
                 title="Configurações da Clínica"
                 description="Configure informações da clínica, endereço, contato e serviços oferecidos"
                 icon={<FaClinicMedical className="text-2xl" />}
@@ -128,7 +102,7 @@ export default function SettingsScreen() {
                 description="Ajustes de sistema, notificações e preferências de uso"
                 icon={<FaCog className="text-2xl" />}
                 href="/settings/general"
-              />
+              /> */}
             </div>
           </div>
         )}
