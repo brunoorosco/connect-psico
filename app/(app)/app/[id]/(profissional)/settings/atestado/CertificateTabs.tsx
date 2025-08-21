@@ -3,6 +3,7 @@ import HeaderConfig from "./HeaderConfig";
 import BodyConfig from "./BodyConfig";
 import FooterConfig from "./FooterConfig";
 import { CertificateConfig } from "./types";
+import BackgroundConfig from "./BackgroundConfig"; 
 
 interface Props {
   config: CertificateConfig;
@@ -17,6 +18,7 @@ export default function CertificateTabs({ config, onChange, onFile }: Props) {
         <TabsTrigger value="header">Cabeçalho</TabsTrigger>
         <TabsTrigger value="body">Corpo</TabsTrigger>
         <TabsTrigger value="footer">Rodapé</TabsTrigger>
+        <TabsTrigger value="background">Fundo</TabsTrigger> {/* ✅ nova aba */}
       </TabsList>
 
       <TabsContent value="header">
@@ -27,6 +29,9 @@ export default function CertificateTabs({ config, onChange, onFile }: Props) {
       </TabsContent>
       <TabsContent value="footer">
         <FooterConfig config={config} onChange={onChange} onFile={onFile} />
+      </TabsContent>
+      <TabsContent value="background">{/* ✅ conteúdo da nova aba */}
+        <BackgroundConfig config={config} onChange={onChange} onFile={onFile} />
       </TabsContent>
     </Tabs>
   );
