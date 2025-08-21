@@ -17,8 +17,10 @@ export default function CertificatePreview({ config, user }: Props) {
     paciente: "Nome do Paciente",
     rg: "000000000-0",
     data: format(new Date(), "dd/MM/yyyy", { locale: ptBR }),
+    // data: new Date(),
     dias: 3,
   })
+  const renderedBodyUnescaped = renderedBody.replaceAll("&#x2F;", "/")
 
   function hexToRgba(hex: string) {
     const m8 = /^#([0-9A-F]{8})$/i.exec(hex)
@@ -70,7 +72,7 @@ export default function CertificatePreview({ config, user }: Props) {
             textAlign: config.headerPosition as any,
             justifyContent: justifyByAlign[config.headerAlign as "top" | "middle" | "bottom"],
             alignItems: alignItemsByPosition[config.headerPosition as "left" | "center" | "right"],
-            fontFamily: (headerFontStacks as any)?.[config.headerFontFamily] ?? 'inherit', // opcional
+            fontFamily: (headerFontStacks as any)?.[config.headerFontFamily] ?? "inherit", // opcional
           }}
         >
           {config.headerLogoUrl && <img src={config.headerLogoUrl} className="max-h-16 object-contain my-1" />}
@@ -91,7 +93,7 @@ export default function CertificatePreview({ config, user }: Props) {
             justifyContent: justifyByAlign[config.footerAlign as "top" | "middle" | "bottom"],
             // eixo cruzado (horizontal):
             alignItems: alignItemsByPosition[config.footerPosition as "left" | "center" | "right"],
-            fontFamily: (headerFontStacks as any)?.[config.footerFontFamily] ?? 'inherit', // opcional
+            fontFamily: (headerFontStacks as any)?.[config.footerFontFamily] ?? "inherit", // opcional
             textAlign: config.footerPosition as any, // ⬅️ antes usava footerAlign (errado)
           }}
         >
@@ -156,10 +158,19 @@ export default function CertificatePreview({ config, user }: Props) {
         }}
       >
         <div className="text-center mb-4">
-          <h1 className="text-2xl font-bold mb-2">ATESTADO MÉDICO</h1>
+          <h1
+            className="mb-2"
+            style={{
+              fontSize: `${config.titleFontSize}px`,
+              fontFamily: headerFontStacks[config.titleFontFamily] ?? "serif",
+              fontWeight: "bold",
+            }}
+          >
+            ATESTADO MÉDICO
+          </h1>
           <div className="border-b w-1/3 mx-auto"></div>
         </div>
-        <div className="space-y-4 mb-6 whitespace-pre-wrap">{renderedBody}</div>
+        <div className="space-y-4 mb-6 whitespace-pre-wrap">{renderedBodyUnescaped}</div>
         <div className="text-right mt-6">
           <p>{format(new Date(), "dd/MM/yyyy", { locale: ptBR })}</p>
           <p className="mt-2">____________________________________</p>

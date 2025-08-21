@@ -250,24 +250,11 @@ model NotifyDigest {
 }
 
 model CertificateConfig {
-  id     String @id @default(cuid())
+  id     Int @id @default(autoincrement())
   user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
+  userId String @unique @map("user_id")
 
-  logoUrl      String?
-  logoPosition String  @default("header") // "header" | "footer"
-  watermarkUrl String? // marca d'água
-
-  footerText  String?
-  footerColor String  @default("#000000")
-  footerAlign String  @default("center") // "left" | "center" | "right"
-
-  companyName    String?
-  companyAddress String?
-  companyPhone   String?
-
-  paperSize String @default("A4") // "A4" | "A3"
-
+  configJson Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

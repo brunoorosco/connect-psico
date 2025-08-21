@@ -19,6 +19,8 @@ export interface CertificateConfig {
   bodyTemplate: string
   bodyTextColor: string
   bodyFontSize: number
+  titleFontSize: number     
+  titleFontFamily: string
 
   showFooter: boolean
   footerHeight: number
@@ -95,6 +97,8 @@ export const DEFAULT_CONFIG: CertificateConfig = {
     "Eu, Dr(a). {{medico}}, CRM {{crm}}, atesto para os devidos fins que {{paciente}}, RG {{rg}}, foi examinado(a) em {{data}} e necessita de afastamento de {{dias}} dias.",
   bodyTextColor: "#000000",
   bodyFontSize: 16,
+  titleFontSize: 28,
+  titleFontFamily: "verdana",
 
   watermarkUrl: "",
   watermarkOpacity: 0.1,
