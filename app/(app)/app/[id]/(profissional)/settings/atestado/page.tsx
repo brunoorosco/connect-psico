@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import CertificatePreview from "./CertificatePreview"
-import CertificateTabs from "./CertificateTabs"
-import { CertificateConfig, DEFAULT_CONFIG } from "./types"
+
 import { Button } from "@components/ui"
 import { toast } from "sonner"
+import { CertificateConfig, DEFAULT_CONFIG } from "@components/settings/atestado/types"
+import CertificateTabs from "@components/settings/atestado/CertificateTabs"
+import CertificatePreview from "@components/settings/atestado/CertificatePreview"
 
 export default function MedicalCertificate() {
   const [config, setConfig] = useState<CertificateConfig>(DEFAULT_CONFIG)
