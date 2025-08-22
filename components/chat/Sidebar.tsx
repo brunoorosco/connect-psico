@@ -7,6 +7,8 @@ import { UserChat } from "@/domain/model/patient"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
+import { getInitials } from "@/utils/getInitialsName"
 
 const SidebarChat = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore()
@@ -22,8 +24,6 @@ const SidebarChat = () => {
     }
   }, [currentUser?.id, getUsers])
 
-  // Se a store retornar algo que não seja array (ex.: objeto de erro),
-  // tratamos como erro mas mantemos o componente funcionando.
   const errorMessage = useMemo(() => {
     if (isUsersLoading) return null
     if (Array.isArray(users)) return null
@@ -114,13 +114,12 @@ const SidebarChat = () => {
               `}
             >
               <div className="relative">
-                <img
-                  className="w-12 h-12 rounded-full object-cover"
-                  src={typeof u.image === "string" ? u.image : "/avatar.png"}
-                  alt={u.name}
-                />
+                <Avatar>
+                  <AvatarImage src={u.image || ""} />
+                  <AvatarFallback className="bg-therapy-primary text-white">{getInitials(u.name || "")}</AvatarFallback>
+                </Avatar>
                 {isOnline && (
-                  <span className="top-0 left-9 absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                  <span className="top-0 left-[30px] absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
                 )}
               </div>
 

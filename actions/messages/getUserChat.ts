@@ -28,6 +28,7 @@ export const getUserChat = async (): Promise<{userId:string}[] | { error: string
         },
       },
     })
+    console.log(users)
     const userMapped = users.map((item) => ({
       // id: item.id,
       userId: item.patient.id,
@@ -36,6 +37,7 @@ export const getUserChat = async (): Promise<{userId:string}[] | { error: string
       // isOnline: false,
       // role: item.patient.role,
     }))
+    console.log(userMapped)
     return userMapped as UserChat[]
   } catch (error) {
     console.error("Erro ao buscar pacientes:", error)

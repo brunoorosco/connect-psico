@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Menu } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getInitials } from "@/utils/getInitialsName"
 
 const MobileDrawer = () => {
   const navigate = useRouter()
@@ -19,15 +20,6 @@ const MobileDrawer = () => {
     startTransition(() => {
       navigate.push(url)
     })
-  }
-
-  const getInitials = (name?: string) => {
-    if (!name) return "?"
-    const nameParts = name.trim().split(" ")
-    if (nameParts.length > 1) {
-      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
-    }
-    return name.substring(0, 2).toUpperCase()
   }
 
   const renderUserInfo = () => {

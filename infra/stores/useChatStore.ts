@@ -31,29 +31,41 @@ export const useChatStore = create<State>((set, get) => ({
 
   getUsers: async (user: User): Promise<void> => {
     set({ isUsersLoading: true })
-    let users
-    let usersChat
+
     try {
-      // if (user.role === "SUPERVISOR") {
-      //   usersChat = await getUserChat()
-      //   if (!users) {
-      //     toast.error("Erro ao buscar usuários")
-      //     return
-      //   }
-      // }
-      // const messageIds = usersChat?.map((item) => item)
-      const usershat = await getContactsApi()
-      console.log(usershat)
-      const users = await getUserChatProfessionals(usershat as string[])
+      const [usersChat, usershat] = await Promise.all([
+        user.role === "SUPERVISOR" ? getUserChat() : Promise.resolve([]),
+        getContactsApi(), // retorna string[]
+      ])
+
+      let chatIds: Set<string> = new Set()
+
+      if (Array.isArray(usersChat)) {
+        chatIds = new Set(usersChat.map((u: { userId: string }) => u.userId))
+      }
+
+      const usershatSafe: string[] = Array.isArray(usershat) ? usershat : []
+      const contactIds = new Set<string>(usershatSafe)
+
+      const unionIds = Array.from(new Set([...contactIds, ...Array.from(chatIds)]))
+
+      // 3) Busca dados completos dos usuários
+      // Troque "intersectIds" por "unionIds" se optar pela união.
+      if (unionIds.length === 0) {
+        set({ users: [] })
+        return
+      }
+
+      const users = await getUserChatProfessionals(unionIds)
 
       if (!users) {
         toast.error("Erro ao buscar usuários")
         return
       }
-      // @ts-ignore
+      //@ts-ignore
       set({ users })
-    } catch (error: Error | any) {
-      toast.error(error.response?.data?.message || "Erro ao buscar usuários")
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erro ao buscar usuários")
     } finally {
       set({ isUsersLoading: false })
     }
