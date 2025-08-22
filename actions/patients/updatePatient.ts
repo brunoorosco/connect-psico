@@ -1,17 +1,17 @@
-"use server";
-import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
-import { patientSchema } from "@/domain/model/patient";
+"use server"
+import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
+import { patientSchema } from "@/domain/model/patient"
 
 export const updatePatient = async (prontuarioId: string, data: any) => {
   try {
-    const result = patientSchema.safeParse(data);
+    const result = patientSchema.safeParse(data)
     if (!result.success) {
-      throw new Error("Dados inválidos");
+      throw new Error("Dados inválidos")
     }
     return await prisma.pacientes.update({
       where: { medicalRecordId: prontuarioId },
       data: {
-        patient:{update:{phone:result.data.phone}},
+        patient: { update: { phone: result.data.phone, name: result.data.name.trim() } },
         cep: result.data.cep,
         birthDate: result.data.birthDate,
         emergencyContact: result.data.emergencyContact || null,
@@ -22,9 +22,9 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
         state: result.data.state || null,
         number: result.data.number || null,
       },
-    });
+    })
   } catch (error) {
-    console.error("error", error);
-    throw new Error("Error patient updated");
+    console.error("error", error)
+    throw new Error("Error patient updated")
   }
-};
+}

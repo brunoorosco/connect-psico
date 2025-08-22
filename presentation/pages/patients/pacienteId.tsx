@@ -1,11 +1,9 @@
 "use client"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PatientDetails } from "@/components/patients/PatientDetails"
 import { usePatientManager } from "@/hooks/usePatientManager"
 import { useParams } from "next/navigation"
 import { useEffect } from "react"
-import { Plus } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import PatientForm from "@components/patients/PatientForm"
 import useSWR from "swr"
@@ -16,18 +14,20 @@ export function PatientsIdPage() {
   const {
     selectedPatient,
     showForm,
-    setShowForm,
     backToList,
     editingPatient,
     handleEditClick,
-    handleEditPatient,
     fetchPatientById,
     cancelForm,
   } = usePatientManager()
-  const { data: patientData, mutate } = useSWR(patientId ? `patients/${patientId}` : null, () =>
+  
+  const { mutate } = useSWR(patientId ? `patients/${patientId}` : null, () =>
     fetchPatientById(patientId!)
   )
-  const patientFormHook = usePatientForm({ patient: selectedPatient, mutate })
+  const patientFormHook = usePatientForm({
+    patient: editingPatient ?? selectedPatient,
+    mutate,
+  })
 
   useEffect(() => {
     if (patientId) {
@@ -71,7 +71,7 @@ export function PatientsIdPage() {
               </CardHeader>
               <CardContent>
                 <PatientForm
-                  patient={editingPatient}
+                   patient={editingPatient ?? selectedPatient}
                   onSubmit={patientFormHook.handleSubmit}
                   onCancel={cancelForm}
                   form={patientFormHook.form}

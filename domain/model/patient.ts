@@ -13,7 +13,8 @@ export const patientSchema = z.object({
   state: z.string().optional(),
   number: z.string().optional(),
   notes: z.string().optional(),
-  phone: z.string().optional()
+  phone: z.string().optional(),
+  name: z.string()
 })
 
 export type PatientInput = z.infer<typeof patientSchema>

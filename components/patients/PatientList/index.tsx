@@ -6,19 +6,9 @@ import { usePatientList } from "@/hooks/usePatientList"
 import { IPatientList } from "./types"
 import { usePatientStore } from "@/infra/stores/usePatientStore"
 import { Patient } from "@/types/appointment"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog"
 import { useState } from "react"
-import { formatMessageTime } from "@/utils/formatMessageTime"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
-import { ChatFooter } from "./chatFooter"
 import { PatientActions } from "./buttonsActions"
 import { MessageDialog } from "../DialogMessagePatient"
 

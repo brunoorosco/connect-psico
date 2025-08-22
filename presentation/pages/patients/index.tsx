@@ -14,7 +14,6 @@ export function PatientsPage() {
   const {
     patients,
     showForm,
-    selectedPatient,
     editingPatient,
     handleDeletePatient,
     handleViewPatient,
@@ -27,15 +26,14 @@ export function PatientsPage() {
 
   const router = useRouter()
 
-  // Função para redirecionar ao clicar em um paciente
   const handleViewAndRedirect = (patient: Patient) => {
     handleViewPatient(patient)
     router.push(`./pacientes/${patient.userId}`)
   }
   const patientFormHook = usePatientForm({
-    patient: selectedPatient,
+    patient: editingPatient,
     mutate: async () => {
-      await fetchPatients
+      await fetchPatients()
     },
   })
 
@@ -58,7 +56,9 @@ export function PatientsPage() {
           {showForm ? (
             <Card className="w-full overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-xs sm:text-xl">Novo Paciente</CardTitle>
+                <CardTitle className="text-xs sm:text-xl">
+                  {patientFormHook.isEdit ? "Editar Paciente" : "Novo Paciente"}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <PatientForm
