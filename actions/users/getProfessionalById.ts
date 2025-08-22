@@ -5,7 +5,7 @@ import { Professional } from "@/types/appointment"
 
 type GetProfessionalByIdResult = Pick<
   User,
-  "id" | "name" | "email" | "active" | "phone" | "createdAt" | "updatedAt"
+  "id" | "name" | "email" | "active" | "phone" | "createdAt" | "updatedAt" | "image"
 > &
   Partial<Professional>
 
@@ -21,6 +21,7 @@ export const getProfessionalById = async (id: string): Promise<GetProfessionalBy
       updatedAt: true,
       phone: true,
       Professional: true,
+      image: true,
     },
   })
 
