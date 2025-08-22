@@ -8,6 +8,7 @@ export const countPatientsByProfessionalId = async (): Promise<{ total: number }
   const patients = await prisma.pacientes.count({
     where: {
       professionalId: session?.user.id,
+      deletedAt: null
     },
   });
   return { total: patients };
