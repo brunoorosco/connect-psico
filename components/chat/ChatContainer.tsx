@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react"
 import ChatHeader from "./ChatHeader"
 import MessageInput from "./MessageInput"
 import { formatMessageTime } from "@/utils/formatMessageTime"
-import { useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useChatStore } from "@/infra/stores/useChatStore"
+import { useCurrentUser } from "@hooks/use-current-user"
+import { getInitials } from "@/utils/getInitialsName"
 
 export type TMessage = {
   _id: string
@@ -18,7 +19,7 @@ export type TMessage = {
 }
 
 const ChatContainer = () => {
-  const { data: session } = useSession()
+  const user = useCurrentUser()
   const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages } =
     useChatStore()
 
@@ -57,7 +58,9 @@ const ChatContainer = () => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message: TMessage) => {
-          const isCurrentUser = message.senderId === session?.user?.id
+          const isCurrentUser = message.senderId === user?.id
+          const avatarSrc = isCurrentUser ? (user?.image as string) : selectedUser?.image || ""
+          const nameSrc = isCurrentUser ? (user?.name as string) : selectedUser?.name || ""
 
           return (
             <div
@@ -66,11 +69,8 @@ const ChatContainer = () => {
               ref={messageEndRef}
             >
               <Avatar>
-                <AvatarImage
-                  src={isCurrentUser ? session?.user?.image || "/avatar.png" : selectedUser?.image || "/avatar.png"}
-                  alt="User Avatar"
-                />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarImage src={avatarSrc} alt="User Avatar" />
+                <AvatarFallback>{getInitials(nameSrc)}</AvatarFallback>
               </Avatar>
 
               <div className="flex flex-col">

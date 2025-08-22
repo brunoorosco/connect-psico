@@ -3,6 +3,7 @@ import { X } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
 import { useAuthStore } from "@/infra/stores/useAuthStore"
 import { useChatStore } from "@/infra/stores/useChatStore"
+import { getInitials } from "@/utils/getInitialsName"
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore()
@@ -18,8 +19,8 @@ const ChatHeader = () => {
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <Avatar className="w-12 h-12">
-            <AvatarImage src={selectedUser.image || "/avatar.png"} alt={selectedUser.name} />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage src={selectedUser.image || ""} alt={selectedUser.name} />
+            <AvatarFallback>{getInitials(selectedUser?.name || "")}</AvatarFallback>
           </Avatar>
           {/* User info */}
           <div>

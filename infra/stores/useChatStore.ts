@@ -49,15 +49,13 @@ export const useChatStore = create<State>((set, get) => ({
 
       const unionIds = Array.from(new Set([...contactIds, ...Array.from(chatIds)]))
 
-      // 3) Busca dados completos dos usuários
-      // Troque "intersectIds" por "unionIds" se optar pela união.
       if (unionIds.length === 0) {
         set({ users: [] })
         return
       }
 
       const users = await getUserChatProfessionals(unionIds)
-
+      console.log("[useChatStore.ts:58]", users)
       if (!users) {
         toast.error("Erro ao buscar usuários")
         return
@@ -74,6 +72,7 @@ export const useChatStore = create<State>((set, get) => ({
   getMessages: async (userId: string) => {
     set({ isMessagesLoading: true })
     try {
+      console.log("[useChatStore.ts:76]", userId)
       const res = await getMessageApi(userId) // ou use axiosInstance.get(`/messages/${userId}`);
       set({ messages: res })
     } catch (error: Error | any) {
@@ -117,6 +116,7 @@ export const useChatStore = create<State>((set, get) => ({
     socket.off("newMessage")
   },
   setSelectedUser: (user: UserChat) => {
+    console.log('[useChatStore.ts:119]', user);
     set({ selectedUser: user, messages: [] }) // limpa mensagens ao trocar de usuário
   },
 }))

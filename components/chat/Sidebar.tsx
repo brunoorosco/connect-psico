@@ -22,7 +22,7 @@ const SidebarChat = () => {
       // carregamos os usuários do chat para o usuário atual
       getUsers(currentUser)
     }
-  }, [currentUser?.id, getUsers])
+  }, [currentUser?.id])
 
   const errorMessage = useMemo(() => {
     if (isUsersLoading) return null
@@ -44,6 +44,7 @@ const SidebarChat = () => {
   }, [safeUsers, showOnlineOnly, onlineUsers])
 
   if (isUsersLoading) return <SidebarSkeleton />
+  console.log("[Sidebar.tsx:47]", safeUsers)
 
   return (
     <aside className="h-full max-w-[16rem] xl:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200">
@@ -119,7 +120,7 @@ const SidebarChat = () => {
                   <AvatarFallback className="bg-therapy-primary text-white">{getInitials(u.name || "")}</AvatarFallback>
                 </Avatar>
                 {isOnline && (
-                  <span className="top-0 left-[30px] absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 )}
               </div>
 
