@@ -2,7 +2,7 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import Mustache from "mustache"
 
-import { CertificateConfig } from "./types"
+import { CertificateConfig, CertificateType } from "./types"
 import { alignItemsByPosition, headerFontStacks, justifyByAlign, selfByPosition } from "./constants"
 import { templates, titles } from "./templates"
 
@@ -12,8 +12,9 @@ interface Props {
 }
 
 export default function CertificatePreview({ config, user }: Props) {
-  const template = config.bodyTemplates?.[config?.type || "atestado"] ?? templates[config?.type || "atestado"] ?? ""
-  const title = config.bodyTitles?.[config?.type || "atestado"] ?? titles[config?.type || "atestado"] ?? ""
+  const type: CertificateType = config?.type || "atestado";
+  const title = (config.bodyTitle?.trim()?.length ? config.bodyTitle : titles[type]) ?? "";
+  const template = (config.bodyTemplate?.trim()?.length ? config.bodyTemplate : templates[type]) ?? "";
   const dataExtenso = format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
 
   function safeTemplate(template: string) {

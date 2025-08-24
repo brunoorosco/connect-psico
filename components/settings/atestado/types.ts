@@ -3,10 +3,11 @@ import { templates, titles } from "./templates"
 export type Align = "top" | "middle" | "bottom"
 export type Position = "left" | "center" | "right"
 export type Paper = "A4" | "A5"
+export type CertificateType = "atestado" | "comparecimento" | "acompanhamento" | "encaminhamento" | "relatorio";
 
 export interface CertificateConfig {
   paperSize: Paper
-  type: "atestado" | "comparecimento" | "acompanhamento" | "encaminhamento" | "relatorio"
+  type?: CertificateType
   showHeader: boolean
   headerHeight: number
   headerBgColor: string
@@ -18,8 +19,8 @@ export interface CertificateConfig {
   headerFontSize: number // ex: "18px" | "1.25rem"
   headerFontFamily: string // ex: "inter", "times", ...
 
-  bodyTemplates: Record<string, string>
-  bodyTitles: Record<string, string>
+  bodyTemplate: string
+  bodyTitle: string
   bodyTextColor: string
   bodyFontSize: number
   titleFontSize: number
@@ -58,27 +59,6 @@ export interface CertificateConfig {
   watermarkLeftPct?: number // 0..100 (default 50)
 }
 
-// export interface TemplateItem {
-//   id: string
-//   name: string
-//   isGlobal: boolean
-//   bodyTemplate: string
-//   bodyTextColor: string
-//   bodyFontSize: number
-//   headerText?: string | null
-//   headerAlign: Align
-//   headerPosition: Position
-//   headerTextColor: string
-//   footerText?: string | null
-//   footerAlign: Align
-//   footerTextColor: string
-//   backgroundColor: string
-//   backgroundImage?: string | null
-//   backgroundOpacity: number
-//   watermarkUrl?: string | null
-//   watermarkOpacity: number
-// }
-
 export const DEFAULT_CONFIG: CertificateConfig = {
   paperSize: "A5",
   type: "atestado",
@@ -98,20 +78,8 @@ export const DEFAULT_CONFIG: CertificateConfig = {
   headerFontSize: 18,
   headerFontFamily: "inter", // qualquer chave sua (ver map no preview)
 
-  bodyTemplates: {
-    atestado: templates["atestado"],
-    comparecimento: templates["comparecimento"],
-    acompanhamento: templates["acompanhamento"],
-    encaminhamento: templates["encaminhamento"],
-    relatorio: templates["relatorio"],
-  },
-  bodyTitles: {
-    atestado: titles["atestado"],
-    comparecimento: titles["comparecimento"],
-    acompanhamento: titles["acompanhamento"],
-    encaminhamento: titles["encaminhamento"],
-    relatorio: titles["relatorio"],
-  },
+  bodyTemplate: templates["atestado"],
+  bodyTitle: titles["atestado"],
   bodyTextColor: "#000000",
   bodyFontSize: 16,
   titleFontSize: 28,

@@ -39,7 +39,7 @@ model User {
   Account                  Account[]
   NotePatient              NotePatient[]          @relation("NotePatientProfessional")
   VideoCallParticipant     VideoCallParticipant[]
-  CertificateConfig        CertificateConfig?
+  CertificateConfig        CertificateConfig[]
 
   @@index([id])
   @@map("users")
@@ -250,13 +250,17 @@ model NotifyDigest {
 }
 
 model CertificateConfig {
-  id     Int @id @default(autoincrement())
+  id     Int    @id @default(autoincrement())
   user   User   @relation(fields: [userId], references: [id])
-  userId String @unique @map("user_id")
+  userId String @map("user_id")
+  name   String
 
   configJson Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@map("certificate_config")
 }
 
 enum UserRole {

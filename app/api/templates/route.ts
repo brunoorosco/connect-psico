@@ -9,7 +9,7 @@ export async function GET() {
 
   const items = await prisma.certificateConfig.findMany({
     where: { userId: session?.user.id },
-    select: { id: true, configJson:true },
+    select: { id: true, configJson: true },
     orderBy: { updatedAt: "desc" },
   })
   return NextResponse.json(items[0])
@@ -18,14 +18,20 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await auth()
   const body = await req.json()
-  const parsed = CertificateConfigSchema.safeParse(body.configJson)
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
-  }
+
+  // const parsed = CertificateConfigSchema.safeParse(body.configJson)
+  // const type = CertificateConfigSchema.safeParse(body.type)
+  // if (!parsed.success) {
+  //   return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+  // }
+  // if (!type.success) {
+  //   return NextResponse.json({ error: type.error.format() }, { status: 400 })
+  // }
   const created = await prisma.certificateConfig.create({
     data: {
       userId: session?.user.id as string,
-      configJson: parsed.data,
+      configJson: body.configJson,
+      name: body.type,
     },
   })
   return NextResponse.json(created, { status: 201 })
