@@ -66,20 +66,20 @@ export default function MedicalCertificate() {
       console.log("page.tsx:66", config)
       const payload = { name: "Modelo Atestado", configJson: config }
       const isUpdate = Boolean(templateId)
-      // const res = await fetch(isUpdate ? `/api/templates/${templateId}` : `/api/templates`, {
-      //   method: isUpdate ? "PUT" : "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload),
-      // })
-      // if (!res.ok) throw new Error(await res.text())
-      // const data = await res.json()
-      // if (!templateId && data?.id) {
-      //   setTemplateId(data.id)
-      //   // Atualiza a URL para incluir ?id=...
-      //   const url = new URL(window.location.href)
-      //   url.searchParams.set("id", data.id)
-      //   window.history.replaceState(null, "", url.toString())
-      // }
+      const res = await fetch(isUpdate ? `/api/templates/${templateId}` : `/api/templates`, {
+        method: isUpdate ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      if (!templateId && data?.id) {
+        setTemplateId(data.id)
+        // Atualiza a URL para incluir ?id=...
+        const url = new URL(window.location.href)
+        url.searchParams.set("id", data.id)
+        window.history.replaceState(null, "", url.toString())
+      }
       toast.success("Configuração salva!")
     } catch (err) {
       console.error("Erro ao salvar:", err)

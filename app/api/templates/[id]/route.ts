@@ -7,7 +7,6 @@ import { auth } from "@/auth"
 type Params = { params: { id: number } }
 
 export async function GET(_: Request, { params }: Params) {
-  console.log(params)
   const session = await auth()
   const item = await prisma.certificateConfig.findFirst({
     where: { id: params.id, userId: session?.user.id },
@@ -23,11 +22,9 @@ export async function PUT(req: Request, { params }: Params) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
   }
-  // opcional: validar name (string) se vier
   const updated = await prisma.certificateConfig.update({
-    where: { id: params.id },
+    where: { id: Number(params.id), userId: session?.user.id },
     data: {
-      userId: session?.user?.id,
       configJson: parsed.data,
     },
   })
