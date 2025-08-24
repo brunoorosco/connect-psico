@@ -73,7 +73,7 @@ export const {
         token.isProfileCompleted = isProfileComplete
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
-        token.crm = userDb?.Professional?.numConselho + "/" + userDb?.Professional?.ufConselho
+        token.crm = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
       }
 
       return token

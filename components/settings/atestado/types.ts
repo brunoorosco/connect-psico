@@ -1,10 +1,12 @@
+import { templates, titles } from "./templates"
+
 export type Align = "top" | "middle" | "bottom"
 export type Position = "left" | "center" | "right"
 export type Paper = "A4" | "A5"
 
 export interface CertificateConfig {
   paperSize: Paper
-
+  type: "atestado" | "comparecimento" | "acompanhamento" | "encaminhamento" | "relatorio"
   showHeader: boolean
   headerHeight: number
   headerBgColor: string
@@ -16,10 +18,11 @@ export interface CertificateConfig {
   headerFontSize: number // ex: "18px" | "1.25rem"
   headerFontFamily: string // ex: "inter", "times", ...
 
-  bodyTemplate: string
+  bodyTemplates: Record<string, string>
+  bodyTitles: Record<string, string>
   bodyTextColor: string
   bodyFontSize: number
-  titleFontSize: number     
+  titleFontSize: number
   titleFontFamily: string
 
   showFooter: boolean
@@ -40,7 +43,7 @@ export interface CertificateConfig {
   qrCodeValue: string
   qrCodeColor: string // hex ex: #000000
   qrCodeBgColor: string // hex ex: #FFFFFF
-  qrCodeSizeCm?: number;
+  qrCodeSizeCm?: number
 
   // Fundo
   backgroundColor: string
@@ -55,29 +58,31 @@ export interface CertificateConfig {
   watermarkLeftPct?: number // 0..100 (default 50)
 }
 
-export interface TemplateItem {
-  id: string
-  name: string
-  isGlobal: boolean
-  bodyTemplate: string
-  bodyTextColor: string
-  bodyFontSize: number
-  headerText?: string | null
-  headerAlign: Align
-  headerPosition: Position
-  headerTextColor: string
-  footerText?: string | null
-  footerAlign: Align
-  footerTextColor: string
-  backgroundColor: string
-  backgroundImage?: string | null
-  backgroundOpacity: number
-  watermarkUrl?: string | null
-  watermarkOpacity: number
-}
+// export interface TemplateItem {
+//   id: string
+//   name: string
+//   isGlobal: boolean
+//   bodyTemplate: string
+//   bodyTextColor: string
+//   bodyFontSize: number
+//   headerText?: string | null
+//   headerAlign: Align
+//   headerPosition: Position
+//   headerTextColor: string
+//   footerText?: string | null
+//   footerAlign: Align
+//   footerTextColor: string
+//   backgroundColor: string
+//   backgroundImage?: string | null
+//   backgroundOpacity: number
+//   watermarkUrl?: string | null
+//   watermarkOpacity: number
+// }
 
 export const DEFAULT_CONFIG: CertificateConfig = {
   paperSize: "A5",
+  type: "atestado",
+
   backgroundColor: "#FFFFFF",
   backgroundImage: "",
   backgroundOpacity: 1,
@@ -93,8 +98,20 @@ export const DEFAULT_CONFIG: CertificateConfig = {
   headerFontSize: 18,
   headerFontFamily: "inter", // qualquer chave sua (ver map no preview)
 
-  bodyTemplate:
-    "Eu, Dr(a). {{medico}}, CRM {{crm}}, atesto para os devidos fins que {{paciente}}, RG {{rg}}, foi examinado(a) em {{data}} e necessita de afastamento de {{dias}} dias.",
+  bodyTemplates: {
+    atestado: templates["atestado"],
+    comparecimento: templates["comparecimento"],
+    acompanhamento: templates["acompanhamento"],
+    encaminhamento: templates["encaminhamento"],
+    relatorio: templates["relatorio"],
+  },
+  bodyTitles: {
+    atestado: titles["atestado"],
+    comparecimento: titles["comparecimento"],
+    acompanhamento: titles["acompanhamento"],
+    encaminhamento: titles["encaminhamento"],
+    relatorio: titles["relatorio"],
+  },
   bodyTextColor: "#000000",
   bodyFontSize: 16,
   titleFontSize: 28,

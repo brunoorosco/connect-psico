@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-
 import { Button } from "@components/ui"
 import { toast } from "sonner"
+import { useCurrentUser } from "@hooks/use-current-user"
 import { CertificateConfig, DEFAULT_CONFIG } from "@components/settings/atestado/types"
 import CertificateTabs from "@components/settings/atestado/CertificateTabs"
 import CertificatePreview from "@components/settings/atestado/CertificatePreview"
@@ -12,6 +12,7 @@ export default function MedicalCertificate() {
   const [config, setConfig] = useState<CertificateConfig>(DEFAULT_CONFIG)
   const [templateId, setTemplateId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const user = useCurrentUser()
 
   // Carrega template por ?id=...
   useEffect(() => {
@@ -62,22 +63,23 @@ export default function MedicalCertificate() {
   const handleSave = useCallback(async () => {
     setSaving(true)
     try {
+      console.log("page.tsx:66", config)
       const payload = { name: "Modelo Atestado", configJson: config }
       const isUpdate = Boolean(templateId)
-      const res = await fetch(isUpdate ? `/api/templates/${templateId}` : `/api/templates`, {
-        method: isUpdate ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      const data = await res.json()
-      if (!templateId && data?.id) {
-        setTemplateId(data.id)
-        // Atualiza a URL para incluir ?id=...
-        const url = new URL(window.location.href)
-        url.searchParams.set("id", data.id)
-        window.history.replaceState(null, "", url.toString())
-      }
+      // const res = await fetch(isUpdate ? `/api/templates/${templateId}` : `/api/templates`, {
+      //   method: isUpdate ? "PUT" : "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload),
+      // })
+      // if (!res.ok) throw new Error(await res.text())
+      // const data = await res.json()
+      // if (!templateId && data?.id) {
+      //   setTemplateId(data.id)
+      //   // Atualiza a URL para incluir ?id=...
+      //   const url = new URL(window.location.href)
+      //   url.searchParams.set("id", data.id)
+      //   window.history.replaceState(null, "", url.toString())
+      // }
       toast.success("Configuração salva!")
     } catch (err) {
       console.error("Erro ao salvar:", err)
@@ -92,7 +94,7 @@ export default function MedicalCertificate() {
       {/* Top bar fixa */}
       <div className="sticky top-0 z-50 bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/40 border-b">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-          <h1 className="text-sm font-medium">Configuração do Certificado</h1>
+          <h1 className="text-sm font-medium">Configuração de Documentos</h1>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Salvando..." : "Salvar configurações"}
           </Button>
@@ -104,7 +106,7 @@ export default function MedicalCertificate() {
           <CertificateTabs config={config} onChange={onChange} onFile={onFile} />
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <CertificatePreview config={config} user={{ name: "Dr. Fulano", crm: "12345" }} />
+          <CertificatePreview config={config} user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }} />
         </div>
       </main>
     </div>

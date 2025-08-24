@@ -4,23 +4,44 @@ import Mustache from "mustache"
 
 import { CertificateConfig } from "./types"
 import { alignItemsByPosition, headerFontStacks, justifyByAlign, selfByPosition } from "./constants"
+import { templates, titles } from "./templates"
 
 interface Props {
   config: CertificateConfig
-  user?: { name?: string; crm?: string }
+  user?: { name?: string; crp?: string }
 }
 
 export default function CertificatePreview({ config, user }: Props) {
-  const renderedBody = Mustache.render(config.bodyTemplate, {
+  const template = config.bodyTemplates?.[config?.type || "atestado"] ?? templates[config?.type || "atestado"] ?? ""
+  const title = config.bodyTitles?.[config?.type || "atestado"] ?? titles[config?.type || "atestado"] ?? ""
+  const dataExtenso = format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
+
+  function safeTemplate(template: string) {
+    // Substitui aberturas ou fechamentos soltos por texto literal
+    return template.replace(/{{(?!\s*[\w\.]+\s*}})/g, "&#123;&#123;").replace(/(?<!{{\s*[\w\.]+\s*)}}/g, "&#125;&#125;")
+  }
+
+  const safe = safeTemplate(template)
+
+  const renderedBody = Mustache.render(safe, {
     medico: user?.name ?? "",
-    crm: user?.crm ?? "",
+    crm: user?.crp ?? "",
     paciente: "Nome do Paciente",
     rg: "000000000-0",
     data: format(new Date(), "dd/MM/yyyy", { locale: ptBR }),
-    // data: new Date(),
+    dataExtenso,
     dias: 3,
-  })
-  const renderedBodyUnescaped = renderedBody.replaceAll("&#x2F;", "/")
+    inicio: "04/2022",
+    horario: "08:00hrs",
+    sintomas: "ansiedade intensa, humor deprimido",
+    cid: "F41",
+    cpf: "000.000.000-00",
+    idade: 30,
+    modalidade: "online",
+    queixa: "crises de ansiedade",
+    tratamento: "crises de ansiedade",
+    observacoes: "relatou alteração de sono e humor",
+  }).replaceAll("&#x2F;", "/")
 
   function hexToRgba(hex: string) {
     const m8 = /^#([0-9A-F]{8})$/i.exec(hex)
@@ -113,7 +134,7 @@ export default function CertificatePreview({ config, user }: Props) {
             >
               {config.companyName && <p className="font-semibold">{config.companyName}</p>}
               {config.companyAddress && <p>{config.companyAddress}</p>}
-              {config.companyPhone && <p>Tel: {config.companyPhone}</p>}
+              {config.companyPhone && <p>{config.companyPhone}</p>}
             </div>
           )}
 
@@ -155,27 +176,24 @@ export default function CertificatePreview({ config, user }: Props) {
           paddingBottom: `calc(${config.showFooter ? `${config.footerHeight}cm` : "0px"} + 16px)`,
           color: config.bodyTextColor,
           fontSize: `${config.bodyFontSize}px`,
+          fontFamily: headerFontStacks[config.titleFontFamily] ?? "serif",
         }}
       >
-        <div className="text-center mb-4">
-          <h1
-            className="mb-2"
-            style={{
-              fontSize: `${config.titleFontSize}px`,
-              fontFamily: headerFontStacks[config.titleFontFamily] ?? "serif",
-              fontWeight: "bold",
-            }}
-          >
-            ATESTADO MÉDICO
-          </h1>
-          <div className="border-b w-1/3 mx-auto"></div>
+        <div
+          className="text-center mb-4"
+          style={{
+            fontSize: `${config.titleFontSize}px`,
+            fontWeight: "",
+          }}
+        >
+          {title}
         </div>
-        <div className="space-y-4 mb-6 whitespace-pre-wrap">{renderedBodyUnescaped}</div>
+        <div className="space-y-4 mb-6 whitespace-pre-wrap text-justify">{renderedBody}</div>
         <div className="text-right mt-6">
-          <p>{format(new Date(), "dd/MM/yyyy", { locale: ptBR })}</p>
+          {/* <p>{format(new Date(), "dd/MM/yyyy", { locale: ptBR })}</p> */}
           <p className="mt-2">____________________________________</p>
           <p className="mt-1">{user?.name || "Médico(a)"}</p>
-          <p>CRM: {user?.crm}</p>
+          <p>CRP: {user?.crp}</p>
         </div>
       </div>
     </div>
