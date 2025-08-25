@@ -105,7 +105,7 @@ export default function CertificatePreview({ config, user }: Props) {
       {/* Footer */}
       {config.showFooter && (
         <div
-          className="absolute left-0 w-full px-8 flex flex-col justify-center border-t z-10" // ⬅️ tiramos items-center
+          className="absolute left-0 w-full px-8 flex flex-col justify-center z-10" // ⬅️ tiramos items-center
           style={{
             bottom: 0,
             height: `${config.footerHeight}cm`,

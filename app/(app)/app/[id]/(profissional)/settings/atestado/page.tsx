@@ -171,7 +171,7 @@ export default function MedicalCertificate() {
       {/* Top bar fixa */}
       <div className="sticky top-0 z-50 bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/40 border-b">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-          <h1 className="text-sm font-medium">Configuração de Documentos</h1>
+          <h1 className="text-xl font-medium">Modelos de Documentos</h1>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Salvando..." : `Salvar ${currentLabel}`}
           </Button>
