@@ -4,16 +4,11 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@components/ui"
 import { toast } from "sonner"
 import { useCurrentUser } from "@hooks/use-current-user"
-import {
-  CertificateConfig,
-  CertificateType,
-  DEFAULT_CONFIG,
-} from "@components/settings/atestado/types"
+import { CertificateConfig, CertificateType, DEFAULT_CONFIG } from "@components/settings/atestado/types"
 import CertificateTabs from "@components/settings/atestado/CertificateTabs"
 import CertificatePreview from "@components/settings/atestado/CertificatePreview"
 import { templates, titles } from "@components/settings/atestado/templates"
 
-// rótulo para o botão salvar
 const LABEL_BY_TYPE: Record<CertificateType, string> = {
   atestado: "Atestado",
   comparecimento: "Declaração de Comparecimento",
@@ -22,10 +17,9 @@ const LABEL_BY_TYPE: Record<CertificateType, string> = {
   relatorio: "Relatório Psicológico",
 }
 
-// título “efetivo”: se o usuário digitou bodyTitle usa ele, senão cai no default por tipo
 function effectiveTitle(cfg: CertificateConfig): string {
   const t: CertificateType = cfg.type ?? "atestado"
-  return (cfg.bodyTitle?.trim() || titles[t] || LABEL_BY_TYPE[t] || "Documento")
+  return cfg.bodyTitle?.trim() || titles[t] || LABEL_BY_TYPE[t] || "Documento"
 }
 
 // cria um modelo novo baseado no template default do tipo
@@ -48,41 +42,31 @@ type TemplateItem = {
 export default function MedicalCertificate() {
   const user = useCurrentUser()
 
-  // estado do modelo “atual” (o que a UI está editando)
   const [config, setConfig] = useState<CertificateConfig>(DEFAULT_CONFIG)
-
-  // mapeia IDs por tipo (para saber se faz PUT ou POST)
   const [idsByType, setIdsByType] = useState<Partial<Record<CertificateType, string>>>({})
 
-  // cache local de todos os modelos do usuário (por tipo)
-  const [modelsByType, setModelsByType] = useState<
-    Partial<Record<CertificateType, CertificateConfig>>
-  >({})
+  const [modelsByType, setModelsByType] = useState<Partial<Record<CertificateType, CertificateConfig>>>({})
 
   const [saving, setSaving] = useState(false)
 
-  // Carrega TODOS os modelos do usuário
   useEffect(() => {
     const ac = new AbortController()
     ;(async () => {
       try {
-        // Ajuste o endpoint conforme sua API.
-        // Esperado: array com itens { id, type, configJson }
+
         const res = await fetch(`/api/templates?scope=all`, { signal: ac.signal })
         if (!res.ok) throw new Error(await res.text())
         const raw = await res.json()
 
-        // Normaliza resposta (suporta array direto ou {items:[]})
         const items: TemplateItem[] = Array.isArray(raw) ? raw : raw?.items ?? []
 
         const nextIds: Partial<Record<CertificateType, string>> = {}
         const nextModels: Partial<Record<CertificateType, CertificateConfig>> = {}
 
         for (const it of items) {
-          const t = (it?.type ?? it?.configJson?.type) as CertificateType | undefined
+          const t = (it?.name ?? it?.configJson?.type) as CertificateType | undefined
           if (!t) continue
           nextIds[t] = it.id
-          // garanta que o config tem type correto
           const cfg = { ...(it.configJson ?? {}), type: t } as CertificateConfig
           nextModels[t] = cfg
         }
@@ -90,9 +74,7 @@ export default function MedicalCertificate() {
         setIdsByType(nextIds)
         setModelsByType(nextModels)
 
-        // define o tipo inicial e o modelo atual
-        const initialType: CertificateType = (nextModels.atestado?.type ||
-          "atestado") as CertificateType
+        const initialType: CertificateType = (nextModels.atestado?.type || "atestado") as CertificateType
 
         setConfig(nextModels[initialType] ?? makeDefaultConfig(initialType))
       } catch (err) {
@@ -106,30 +88,24 @@ export default function MedicalCertificate() {
     })()
 
     return () => ac.abort()
-  }, []) // ← inicial
+  }, [])
 
-  // onChange genérico: intercepta mudança do TIPO para trocar o modelo atual;
-  // demais campos apenas atualizam o modelo atual.
   const onChange = useCallback(
     <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => {
       if (key === "type") {
         const newType = value as CertificateType
         setConfig((prev) => {
-          // se já temos o modelo desse tipo no cache, usa ele;
-          // senão cria um novo a partir do template default
           const next = modelsByType[newType] ?? makeDefaultConfig(newType)
           return next
         })
         return
       }
 
-      // atualização normal de campos do modelo atual
       setConfig((prev) => ({ ...prev, [key]: value }))
     },
     [modelsByType]
   )
 
-  // upload de arquivos (logo, fundo etc.)
   const onFile = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: keyof CertificateConfig) => {
       const file = e.target.files?.[0]
@@ -162,7 +138,7 @@ export default function MedicalCertificate() {
 
       const payload = {
         type: t,
-        name,               // nome amigável salvo no banco (corrige “título não vai pro banco”)
+        name, // nome amigável salvo no banco (corrige “título não vai pro banco”)
         configJson: config, // modelo completo (inclui bodyTitle/bodyTemplate)
       }
 
@@ -188,8 +164,7 @@ export default function MedicalCertificate() {
     }
   }, [config, idsByType])
 
-  const currentLabel =
-    LABEL_BY_TYPE[config.type ?? "atestado"] ?? "Documento"
+  const currentLabel = LABEL_BY_TYPE[config.type ?? "atestado"] ?? "Documento"
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -209,10 +184,7 @@ export default function MedicalCertificate() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <CertificatePreview
-            config={config}
-            user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }}
-          />
+          <CertificatePreview config={config} user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }} />
         </div>
       </main>
     </div>

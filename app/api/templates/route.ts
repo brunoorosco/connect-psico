@@ -9,10 +9,10 @@ export async function GET() {
 
   const items = await prisma.certificateConfig.findMany({
     where: { userId: session?.user.id },
-    select: { id: true, configJson: true },
+    select: { id: true, name: true, configJson: true },
     orderBy: { updatedAt: "desc" },
   })
-  return NextResponse.json(items[0])
+  return NextResponse.json(items)
 }
 
 export async function POST(req: Request) {
