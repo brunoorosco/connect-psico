@@ -96,7 +96,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
     // dedup simples por par start-end
     const seen = new Set<string>()
     const records = []
-
+    console.log("[updateAvailabity.ts:99]", { timeSlots })
     for (const s of timeSlots) {
       const key = `${s.startTime}-${s.endTime}`
       if (seen.has(key)) continue
