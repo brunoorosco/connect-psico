@@ -1,20 +1,17 @@
 // src/components/DayScheduleModal.tsx
-"use client";
+"use client"
 
-import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Save, Trash2 } from "lucide-react";
-import TimeSlotForm from "../TimeSlotForm";
-import { useDayScheduleModal } from "@/hooks/useDayScheduleModal";
-import { IDayScheduleModal } from "./types";
+import React from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { format, getDay } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { Save, Trash2, Info } from "lucide-react"
+import TimeSlotForm from "../TimeSlotForm"
+import { useDayScheduleModal } from "@/hooks/useDayScheduleModal"
+import { IDayScheduleModal } from "./types"
+
+const weekdayPt = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
 
 export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   date,
@@ -31,27 +28,48 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
     handleRemoveTimeSlot,
     hasChanges,
     handleSave,
-  } = useDayScheduleModal(
-    date,
-    isOpen,
-    dayAvailabilities,
-    weeklySchedules,
-    onDayAvailabilityUpdate,
-    onClose
-  );
+    // 👇 importante: usar o flag exposto pelo hook
+    isEditing,
+  } = useDayScheduleModal(date, isOpen, dayAvailabilities, weeklySchedules, onDayAvailabilityUpdate, onClose)
+
+  // (Opcional) ação local para “limpar todos” – usa os handlers do hook
+  const handleClearAll = () => {
+    if (sortedTimeSlots.length === 0) return
+    // remove um a um para reaproveitar a própria atualização do hook
+    for (const s of sortedTimeSlots) handleRemoveTimeSlot(s.id)
+  }
+
+  const titlePrefix = isEditing ? "Editar disponibilidade" : "Nova disponibilidade"
+  const weekdayName = weekdayPt[getDay(date)]
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            Editar Disponibilidade - {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            {titlePrefix} — {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium mb-4">Horários Configurados</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">Horários Configurados</h3>
+
+              {/* mostrar “limpar todos” só quando for edição e houver algo */}
+              {isEditing && sortedTimeSlots.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAll}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Remover todos
+                </Button>
+              )}
+            </div>
+
             {sortedTimeSlots.length === 0 ? (
               <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
                 <p>Nenhum horário definido para este dia</p>
@@ -60,10 +78,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             ) : (
               <div className="space-y-2">
                 {sortedTimeSlots.map((slot) => (
-                  <div
-                    key={slot.id}
-                    className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border"
-                  >
+                  <div key={slot.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
                     <span className="font-medium">
                       {slot.startTime} - {slot.endTime}
                     </span>
@@ -82,7 +97,9 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-4">Adicionar Novo Horário</h3>
+            <h3 className="text-lg font-medium mb-4">
+              {isEditing ? "Adicionar novo horário" : "Definir horários para este dia"}
+            </h3>
             <TimeSlotForm key={date.toISOString()} onAddTimeSlot={handleAddTimeSlot} />
           </div>
 
@@ -92,13 +109,13 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             </Button>
             <Button onClick={handleSave} disabled={!hasChanges}>
               <Save className="h-4 w-4 mr-2" />
-              Salvar Alterações
+              {isEditing ? "Salvar Alterações" : "Criar Disponibilidade"}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default DayScheduleModal;
+export default DayScheduleModal
