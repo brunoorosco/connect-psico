@@ -53,7 +53,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
               <div 
                 key={i} 
                 className={cn(
-                  "flex flex-col border rounded cursor-pointer p-2 h-32 overflow-y-auto",
+                  "flex flex-col border rounded cursor-pointer p-2 h-[calc(90vh-85px)] overflow-y-auto",
                   isToday(day) ? "bg-medical-light border-medical" : ""
                 )}
                 onClick={() => {
