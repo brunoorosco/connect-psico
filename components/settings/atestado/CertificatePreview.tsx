@@ -3,18 +3,21 @@ import { ptBR } from "date-fns/locale"
 import Mustache from "mustache"
 
 import { CertificateConfig, CertificateType } from "./types"
-import { alignItemsByPosition, headerFontStacks, justifyByAlign, selfByPosition } from "./constants"
+import { headerFontStacks } from "./constants"
 import { templates, titles } from "./templates"
+import DraggableLayer, { type AnyLayer, type QrLayer } from "./DraggableLayer"
 
 interface Props {
-  config: CertificateConfig
+  config: CertificateConfig & { layers?: AnyLayer[] }
   user?: { name?: string; crp?: string }
+  editing?: boolean
+  onLayerChange?: (id: string, patch: Partial<AnyLayer>) => void
 }
 
-export default function CertificatePreview({ config, user }: Props) {
-  const type: CertificateType = config?.type || "atestado";
-  const title = (config.bodyTitle?.trim()?.length ? config.bodyTitle : titles[type]) ?? "";
-  const template = (config.bodyTemplate?.trim()?.length ? config.bodyTemplate : templates[type]) ?? "";
+export default function CertificatePreview({ config, user, editing = false, onLayerChange }: Props) {
+  const type: CertificateType = config?.type || "atestado"
+  const title = (config.bodyTitle?.trim()?.length ? config.bodyTitle : titles[type]) ?? ""
+  const template = (config.bodyTemplate?.trim()?.length ? config.bodyTemplate : templates[type]) ?? ""
   const dataExtenso = format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
 
   function safeTemplate(template: string) {
@@ -85,21 +88,12 @@ export default function CertificatePreview({ config, user }: Props) {
       {/* Header */}
       {config.showHeader && (
         <div
-          className="absolute left-0 w-full px-8 flex flex-col items-center justify-center z-10"
+          className="absolute left-0 top-0 w-full h-full flex flex-col z-10"
           style={{
-            top: 0,
             height: `${config.headerHeight}cm`,
             background: hexToRgba(config.headerBgColor),
-            color: config.headerTextColor,
-            textAlign: config.headerPosition as any,
-            justifyContent: justifyByAlign[config.headerAlign as "top" | "middle" | "bottom"],
-            alignItems: alignItemsByPosition[config.headerPosition as "left" | "center" | "right"],
-            fontFamily: (headerFontStacks as any)?.[config.headerFontFamily] ?? "inherit", // opcional
           }}
-        >
-          {config.headerLogoUrl && <img src={config.headerLogoUrl} className="max-h-16 object-contain my-1" />}
-          {config.headerText && <p style={{ fontSize: `${config.headerFontSize}px` }}>{config.headerText}</p>}
-        </div>
+        ></div>
       )}
 
       {/* Footer */}
@@ -110,63 +104,31 @@ export default function CertificatePreview({ config, user }: Props) {
             bottom: 0,
             height: `${config.footerHeight}cm`,
             background: hexToRgba(config.footerBgColor),
-            color: config.footerTextColor,
-            // eixo principal (vertical):
-            justifyContent: justifyByAlign[config.footerAlign as "top" | "middle" | "bottom"],
-            // eixo cruzado (horizontal):
-            alignItems: alignItemsByPosition[config.footerPosition as "left" | "center" | "right"],
-            fontFamily: (headerFontStacks as any)?.[config.footerFontFamily] ?? "inherit", // opcional
-            textAlign: config.footerPosition as any, // ⬅️ antes usava footerAlign (errado)
           }}
-        >
-          {config.footerLogoUrl && <img src={config.footerLogoUrl} className="max-h-16 object-contain my-1" />}
-          {config.footerText && <p className="text-sm">{config.footerText}</p>}
-
-          {(config.companyName || config.companyAddress || config.companyPhone) && (
-            <div
-              className="text-xs text-muted-foreground mt-1"
-              style={{
-                color: config.footerTextColor,
-                // alinhar este bloco individualmente no eixo cruzado:
-                alignSelf: selfByPosition[config.footerPosition as "left" | "center" | "right"],
-                // alinhar o texto dentro do bloco:
-                textAlign: config.footerPosition as any,
-              }}
-            >
-              {config.companyName && <p className="font-semibold">{config.companyName}</p>}
-              {config.companyAddress && <p>{config.companyAddress}</p>}
-              {config.companyPhone && <p>{config.companyPhone}</p>}
-            </div>
-          )}
-
-          {config.qrCodeEnabled && config.qrCodeValue && (
-            <img
-              alt="QR Code"
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=${cmToPx(config.qrCodeSizeCm || 3)}x${cmToPx(
-                config.qrCodeSizeCm || 3
-              )}&data=${encodeURIComponent(config.qrCodeValue)}&color=${config.qrCodeColor
-                ?.replace("#", "")
-                .trim()}&bgcolor=${config.qrCodeBgColor?.replace("#", "").trim()}`}
-            />
-          )}
-        </div>
+        ></div>
       )}
 
-      {/* Marca d'água */}
-      {config.watermarkUrl && (
-        <img
-          src={config.watermarkUrl}
-          alt="Marca d'água"
-          className="absolute -z-0"
-          style={{
-            top: "30%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "60%",
-            opacity: config.watermarkOpacity,
-            pointerEvents: "none",
-          }}
-        />
+      {/* Layers (texto/imagem/QR) */}
+      {Array.isArray(config.layers) && config.layers.length > 0 && (
+        <div id="layers" className={`absolute inset-0 z-50 ${editing ? "pointer-events-auto" : "pointer-events-none"}`}>
+          {config.layers.map((layer) => (
+            <DraggableLayer
+              key={layer.id}
+              layer={layer}
+              boundsSelector="#certificate"
+              editable={editing}
+              onChange={(patch) => onLayerChange?.(layer.id, patch)}
+              renderQr={(qr: QrLayer) => {
+                // Render simples do QR (pode trocar por lib local)
+                const size = Math.max(64, Math.round(Math.min(qr.w ?? 128, qr.h ?? 128)))
+                const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
+                  qr.value
+                )}&color=${(qr.fg ?? "#000000").replace("#", "")}&bgcolor=${(qr.bg ?? "#FFFFFF").replace("#", "")}`
+                return <img src={url} alt="QR" className="w-full h-full pointer-events-none" draggable={false} />
+              }}
+            />
+          ))}
+        </div>
       )}
 
       {/* Conteúdo */}

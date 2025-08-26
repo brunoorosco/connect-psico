@@ -1,10 +1,8 @@
-import { CertificateConfig, Align, Position } from "./types"
+import { CertificateConfig } from "./types"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import ColorField from "./ColorField"
-import ModelFont from "./ModelFont"
 
 interface Props {
   config: CertificateConfig
@@ -14,94 +12,65 @@ interface Props {
 
 export default function HeaderConfig({ config, onChange, onFile }: Props) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <Switch checked={config.showHeader} onCheckedChange={(v) => onChange("showHeader", v)} />
-        <Label>Mostrar Cabeçalho</Label>
-      </div>
-      {config.showHeader && (
-        <div className="grid grid-cols-2 gap-3">
+    <div className="grid-cols-2 grid gap-4">
+      <div className="col-span-1">
+        <div className="flex items-center gap-3">
+          <Switch checked={config.showHeader} onCheckedChange={(v) => onChange("showHeader", v)} />
+          <Label>Mostrar Cabeçalho</Label>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-2">
           <div>
             <Label>Altura</Label>
             <Input
+              disabled={!config.showHeader}
               value={config.headerHeight}
               type="number"
+              step={0.1}
               max={6}
               min={1}
               onChange={(e) => onChange("headerHeight", e.target.valueAsNumber)}
             />
           </div>
           <ColorField
+            disabled={!config.showHeader}
             label="Cor de Fundo"
             value={config.headerBgColor}
             onChange={(v) => onChange("headerBgColor", v)}
-            //   description="Copie/cole o hex (ex.: #FFFFFF) ou ajuste no seletor."
           />
-          <div>
-            <Label>Logo (PNG/JPG/SVG)</Label>
-            <Input type="file" accept="image/*,.svg" onChange={(e) => onFile(e, "headerLogoUrl")} />
-            {config.headerLogoUrl && (
-              <button type="button" className="mt-2 text-sm underline" onClick={() => onChange("headerLogoUrl", "")}>
-                Remover Logo
-              </button>
-            )}
-          </div>
+        </div>
+      </div>
 
-          <ColorField
-            label="Cor do Texto"
-            value={config.headerTextColor}
-            onChange={(v) => onChange("headerTextColor", v)}
-            //   description="Copie/cole o hex (ex.: #FFFFFF) ou ajuste no seletor."
-          />
-          <div className="col-span-2">
-            <Label>Texto</Label>
-            <Input value={config.headerText} onChange={(e) => onChange("headerText", e.target.value)} />
-          </div>
-          {/* Tamanho da fonte (px/rem) */}
+      <div className="col-span-1">
+        <div className="flex items-center gap-3">
+          <Switch checked={config.showFooter} onCheckedChange={(v) => onChange("showFooter", v)} />
+          <Label>Mostrar Rodapé</Label>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-2">
           <div>
-            <Label>Tamanho da Fonte (px)</Label>
+            <Label>Altura (cm)</Label>
             <Input
+              disabled={!config.showFooter}
+              value={config.footerHeight}
               type="number"
-              min={10}
-              max={35}
-              value={config.headerFontSize}
-              onChange={(e) => onChange("headerFontSize", e.target.valueAsNumber)}
+              min={1}
+              max={6}
+              step={0.1}
+              onChange={(e) => onChange("footerHeight", e.target.valueAsNumber)}
             />
           </div>
 
-          {/* Modelos de fonte (5 fixos) */}
-          <div className="col-span-1">
-            <ModelFont value={config.headerFontFamily} onChange={(v) => onChange("headerFontFamily", v)} />
-          </div>
-
-          <div className="col-span-1">
-            <Label>Alinhamento</Label>
-            <Select value={config.headerAlign} onValueChange={(v) => onChange("headerAlign", v as Align)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="top">Cima</SelectItem>
-                <SelectItem value="middle">Meio</SelectItem>
-                <SelectItem value="bottom">Baixo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="col-span-1">
-            <Label>Posição</Label>
-            <Select value={config.headerPosition} onValueChange={(v) => onChange("headerPosition", v as Position)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="left">Esquerda</SelectItem>
-                <SelectItem value="center">Centro</SelectItem>
-                <SelectItem value="right">Direita</SelectItem>
-              </SelectContent>
-            </Select>
+          <div>
+            <ColorField
+              disabled={!config.showFooter}
+              label="Cor de Fundo"
+              value={config.footerBgColor}
+              onChange={(v) => onChange("footerBgColor", v)}
+            />
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

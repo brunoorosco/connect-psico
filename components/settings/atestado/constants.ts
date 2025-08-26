@@ -1,24 +1,3 @@
-import { CertificateConfig } from "./types"
-
-// mapeia seu Align para justify-content
-export const justifyByAlign: Record<CertificateConfig["headerAlign"], React.CSSProperties["justifyContent"]> = {
-  top: "flex-start",
-  middle: "center",
-  bottom: "flex-end",
-}
-
-export const alignItemsByPosition: Record<"left" | "center" | "right", React.CSSProperties["alignItems"]> = {
-  left: "flex-start",
-  center: "center",
-  right: "flex-end",
-}
-
-export const selfByPosition: Record<"left" | "center" | "right", React.CSSProperties["alignSelf"]> = {
-  left: "flex-start",
-  center: "center",
-  right: "flex-end",
-}
-
 // mapeia o "modelo" para a font-family real
 export const headerFontStacks: Record<string, string> = {
   inter:

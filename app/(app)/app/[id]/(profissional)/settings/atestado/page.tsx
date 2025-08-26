@@ -8,6 +8,10 @@ import { CertificateConfig, CertificateType, DEFAULT_CONFIG } from "@components/
 import CertificateTabs from "@components/settings/atestado/CertificateTabs"
 import CertificatePreview from "@components/settings/atestado/CertificatePreview"
 import { templates, titles } from "@components/settings/atestado/templates"
+import LayersPanel from "@components/settings/atestado/LayersPanel"
+import type { AnyLayer } from "@components/settings/atestado/DraggableLayer"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 
 const LABEL_BY_TYPE: Record<CertificateType, string> = {
   atestado: "Atestado",
@@ -42,23 +46,30 @@ type TemplateItem = {
 export default function MedicalCertificate() {
   const user = useCurrentUser()
 
+  // ---- Estados principais primeiro ----
   const [config, setConfig] = useState<CertificateConfig>(DEFAULT_CONFIG)
   const [idsByType, setIdsByType] = useState<Partial<Record<CertificateType, string>>>({})
-
   const [modelsByType, setModelsByType] = useState<Partial<Record<CertificateType, CertificateConfig>>>({})
-
   const [saving, setSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>("body")
+  const isLayersTab = activeTab != "body"
+  const [templates, setTemplates] = useState<TemplateItem[]>([])
 
+  // ---- Edição de camadas ----
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null)
+  const [editLayers, setEditLayers] = useState(true)
+
+  // ---- Carregar modelos do backend ----
   useEffect(() => {
     const ac = new AbortController()
     ;(async () => {
       try {
-
         const res = await fetch(`/api/templates?scope=all`, { signal: ac.signal })
         if (!res.ok) throw new Error(await res.text())
         const raw = await res.json()
 
         const items: TemplateItem[] = Array.isArray(raw) ? raw : raw?.items ?? []
+        setTemplates(items)
 
         const nextIds: Partial<Record<CertificateType, string>> = {}
         const nextModels: Partial<Record<CertificateType, CertificateConfig>> = {}
@@ -75,7 +86,6 @@ export default function MedicalCertificate() {
         setModelsByType(nextModels)
 
         const initialType: CertificateType = (nextModels.atestado?.type || "atestado") as CertificateType
-
         setConfig(nextModels[initialType] ?? makeDefaultConfig(initialType))
       } catch (err) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
@@ -89,23 +99,46 @@ export default function MedicalCertificate() {
 
     return () => ac.abort()
   }, [])
+  const handleLoadTemplate = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/templates/${id}`)
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      // Assumindo payload: { id, name, type, configJson }
+      const loadedType: CertificateType = (data?.type || data?.configJson?.type || "atestado") as CertificateType
+      const loadedConfig = { ...DEFAULT_CONFIG, ...(data?.configJson || {}), type: loadedType } as CertificateConfig
 
+      // Hidrata o editor com o que veio do banco
+      setConfig(loadedConfig)
+
+      // Atualiza caches auxiliares (id por tipo e "modelsByType" local)
+      setIdsByType((prev) => ({ ...prev, [loadedType]: data?.id }))
+      setModelsByType((prev) => ({ ...prev, [loadedType]: loadedConfig }))
+
+      toast.success("Modelo carregado!")
+    } catch (err) {
+      console.error("Falha ao carregar modelo:", err)
+      toast.error("Não foi possível carregar o modelo.")
+    }
+  }, [])
+
+  // ---- onChange centralizado ----
   const onChange = useCallback(
     <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => {
       if (key === "type") {
         const newType = value as CertificateType
-        setConfig((prev) => {
+        setConfig(() => {
           const next = modelsByType[newType] ?? makeDefaultConfig(newType)
           return next
         })
         return
       }
-
       setConfig((prev) => ({ ...prev, [key]: value }))
     },
     [modelsByType]
   )
 
+  // ---- Upload de imagens ----
   const onFile = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, key: keyof CertificateConfig) => {
       const file = e.target.files?.[0]
@@ -123,13 +156,29 @@ export default function MedicalCertificate() {
     [onChange]
   )
 
-  // Salva (upsert) apenas o modelo do TIPO ATUAL
+  // ---- Camadas: setLayers / handleLayerChange ----
+  const setLayers = useCallback(
+    (layers: AnyLayer[]) => {
+      onChange("layers" as any, layers as any)
+    },
+    [onChange]
+  )
+
+  const handleLayerChange = useCallback((id: string, patch: Partial<AnyLayer>) => {
+    // Evita depender do "config" no dependency array
+    setConfig((prev) => {
+      const prevLayers = ((prev as any).layers ?? []) as AnyLayer[]
+      const nextLayers = prevLayers.map((l) => (l.id === id ? { ...l, ...patch } : l))
+      return { ...prev, layers: nextLayers as any }
+    })
+  }, [])
+
+  // ---- Salvar (upsert) apenas o modelo do TIPO ATUAL ----
   const handleSave = useCallback(async () => {
     if (!config.type) {
       toast.error("Selecione um tipo de documento.")
       return
     }
-
     setSaving(true)
     try {
       const t = config.type
@@ -138,9 +187,10 @@ export default function MedicalCertificate() {
 
       const payload = {
         type: t,
-        name, // nome amigável salvo no banco (corrige “título não vai pro banco”)
-        configJson: config, // modelo completo (inclui bodyTitle/bodyTemplate)
+        name, // nome amigável salvo no banco
+        configJson: config, // modelo completo (inclui bodyTitle/bodyTemplate/layers)
       }
+      console.log('[page.tsx:194]', { config });
 
       const res = await fetch(id ? `/api/templates/${id}` : `/api/templates`, {
         method: id ? "PUT" : "POST",
@@ -179,12 +229,35 @@ export default function MedicalCertificate() {
       </div>
 
       <main className="max-w-8xl mx-auto w-full p-4 grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Coluna de Configurações */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <CertificateTabs config={config} onChange={onChange} onFile={onFile} />
+          <CertificateTabs config={config} onChange={onChange} onFile={onFile} onTabChange={setActiveTab} />
+
+          {isLayersTab && (
+            <div className="mt-6 pt-4 border-t">
+              <div className="flex items-center gap-3 mb-3">
+                <Switch checked={editLayers} onCheckedChange={setEditLayers} />
+                <Label>Modo edição de camadas</Label>
+              </div>
+
+              <LayersPanel
+                layers={(config as any).layers as AnyLayer[]}
+                selectedId={selectedLayerId}
+                onChange={setLayers}
+                onSelect={setSelectedLayerId}
+              />
+            </div>
+          )}
         </div>
 
+        {/* Coluna de Preview */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <CertificatePreview config={config} user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }} />
+          <CertificatePreview
+            config={config as any}
+            user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }}
+            editing={editLayers}
+            onLayerChange={handleLayerChange}
+          />
         </div>
       </main>
     </div>

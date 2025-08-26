@@ -1,38 +1,53 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import HeaderConfig from "./HeaderConfig";
-import BodyConfig from "./BodyConfig";
-import FooterConfig from "./FooterConfig";
-import { CertificateConfig } from "./types";
-import BackgroundConfig from "./BackgroundConfig"; 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import HeaderConfig from "./HeaderConfig"
+import BodyConfig from "./BodyConfig"
+import BackgroundConfig from "./BackgroundConfig"
+import { CertificateConfig } from "./types"
+
+type TabKey = "header" | "body" | "background"
 
 interface Props {
-  config: CertificateConfig;
-  onChange: any;
-  onFile: any;
+  config: CertificateConfig
+  onChange: (key: keyof CertificateConfig, value: any) => void
+  onFile: (e: React.ChangeEvent<HTMLInputElement>, key: keyof CertificateConfig) => void
+
+  /** Controlado (opcional) */
+  value?: TabKey
+  /** Notifica mudança de aba (opcional) */
+  onTabChange?: (tab: TabKey) => void
 }
 
-export default function CertificateTabs({ config, onChange, onFile }: Props) {
+/**
+ * Se `value` vier, o componente funciona controlado.
+ * Caso contrário, usa `defaultValue="header"`.
+ */
+export default function CertificateTabs({ config, onChange, onFile, value, onTabChange }: Props) {
+  const isControlled = value !== undefined
+
   return (
-    <Tabs defaultValue="header" className="space-y-4">
+    <Tabs
+      className="space-y-4"
+      value={isControlled ? value : undefined}
+      defaultValue={isControlled ? undefined : "body"}
+      onValueChange={(v) => onTabChange?.(v as TabKey)}
+    >
       <TabsList>
-        <TabsTrigger value="header">Cabeçalho</TabsTrigger>
         <TabsTrigger value="body">Corpo</TabsTrigger>
-        <TabsTrigger value="footer">Rodapé</TabsTrigger>
-        <TabsTrigger value="background">Fundo</TabsTrigger> {/* ✅ nova aba */}
+        <TabsTrigger value="header">Cabeçalho/Rodapé</TabsTrigger>
+        <TabsTrigger value="background">Fundo</TabsTrigger>
       </TabsList>
 
       <TabsContent value="header">
         <HeaderConfig config={config} onChange={onChange} onFile={onFile} />
       </TabsContent>
+
       <TabsContent value="body">
         <BodyConfig config={config} onChange={onChange} />
       </TabsContent>
-      <TabsContent value="footer">
-        <FooterConfig config={config} onChange={onChange} onFile={onFile} />
-      </TabsContent>
-      <TabsContent value="background">{/* ✅ conteúdo da nova aba */}
+
+      <TabsContent value="background">
         <BackgroundConfig config={config} onChange={onChange} onFile={onFile} />
       </TabsContent>
     </Tabs>
-  );
+  )
 }

@@ -7,6 +7,7 @@ type Props = {
   value: string // espera #RRGGBB ou #RRGGBBAA
   onChange: (next: string) => void
   description?: string
+  disabled?: boolean
 }
 
 function normalizeHex(hex: string) {
@@ -33,7 +34,7 @@ function hexForPicker(hex: string) {
   return "#000000"
 }
 
-export default function ColorField({ label, value, onChange, description }: Props) {
+export default function ColorField({ label, value, onChange, description, disabled }: Props) {
   const [text, setText] = React.useState(value || "#000000")
 
   React.useEffect(() => {
@@ -47,12 +48,13 @@ export default function ColorField({ label, value, onChange, description }: Prop
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2.5">
       <Label className="block">{label}</Label>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
       <div className="flex items-center gap-2">
         {/* Picker */}
         <Input
+          disabled={disabled}
           type="color"
           value={hexForPicker(text)}
           onChange={(e) => {
@@ -69,6 +71,7 @@ export default function ColorField({ label, value, onChange, description }: Prop
 
         {/* Campo para copiar/colar o hex */}
         <Input
+          disabled={disabled}
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}

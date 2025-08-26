@@ -20,13 +20,13 @@ function generateCloudinarySignature(params: Record<string, string>, apiSecret: 
 /**
  * Faz upload seguro de imagem para o Cloudinary com assinatura.
  */
-export async function uploadImageToCloudinary(file: File, userId: string): Promise<string> {
+export async function uploadImageToCloudinary(file: File, userId: string, folder ='profile'): Promise<string> {
   const timestamp = Math.floor(Date.now() / 1000).toString();
 
   const params = {
     timestamp,
     public_id: userId,
-    folder: "profile",
+    folder: folder,
   };
 
   const signature = generateCloudinarySignature(params, env.cloudinaryApiSecret as string);
@@ -34,7 +34,7 @@ export async function uploadImageToCloudinary(file: File, userId: string): Promi
   const formData = new FormData();
   formData.append("file", file);
   formData.append("public_id", userId);
-  formData.append("folder", "profile");
+  formData.append("folder", folder);
   formData.append("signature", signature);
   formData.append("api_key", env.cloudinaryApiKey as string);
   formData.append("timestamp", timestamp);
