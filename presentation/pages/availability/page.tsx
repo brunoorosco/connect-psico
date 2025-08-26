@@ -9,6 +9,7 @@ import { useCurrentUser } from "@/hooks/use-current-user"
 import { toast } from "sonner"
 import { AvailabilityCalendar, WeeklyScheduleForm } from "@components/Availability"
 import { DayAvailability, WeeklySchedule } from "./types"
+import { deleteAvailabilityByDate, updateAvailabilityByDate } from "@/actions/availability"
 
 export const AvailabilityPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -39,10 +40,32 @@ export const AvailabilityPage = () => {
   }
 
   const handleDayAvailabilityUpdate = (dayAvailability: DayAvailability) => {
+    startTransition(() => {
+      updateAvailabilityByDate(dayAvailability)
+        .then(async (res) => {
+          if (res?.error) return toast.error(res.error)
+          toast.success(res?.success ?? "Atualizado!")
+          return getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate).then(setDayAvailabilities)
+        })
+        .catch(() => toast.error("Erro ao atualizar disponibilidade"))
+    })
+
     setDayAvailabilities((prev) => {
       const exists = prev.find((d) => d.date === dayAvailability.date)
       if (!exists) return [...prev, dayAvailability]
       return prev.map((d) => (d.date === dayAvailability.date ? dayAvailability : d))
+    })
+  }
+
+  const handleDayAvailabilityDelete = (dateStr: string) => {
+    startTransition(() => {
+      deleteAvailabilityByDate(dateStr)
+        .then(async (res) => {
+          if (res?.error) return toast.error(res.error)
+          toast.success(res?.success ?? "Excluído!")
+          return getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate).then(setDayAvailabilities)
+        })
+        .catch(() => toast.error("Erro ao excluir disponibilidade"))
     })
   }
 
@@ -69,6 +92,7 @@ export const AvailabilityPage = () => {
               weeklySchedules={weeklySchedules}
               dayAvailabilities={dayAvailabilities}
               onDayAvailabilityUpdate={handleDayAvailabilityUpdate}
+              onDayAvailabilityDelete={handleDayAvailabilityDelete}
             />
           </div>
 

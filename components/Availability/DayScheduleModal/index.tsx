@@ -2,11 +2,11 @@
 "use client"
 
 import React from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog" // <- remove DialogDescription
 import { Button } from "@/components/ui/button"
 import { format, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Save, Trash2, Info } from "lucide-react"
+import { Save, Trash2 } from "lucide-react" // <- remove Info
 import TimeSlotForm from "../TimeSlotForm"
 import { useDayScheduleModal } from "@/hooks/useDayScheduleModal"
 import { IDayScheduleModal } from "./types"
@@ -20,27 +20,44 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   dayAvailabilities,
   weeklySchedules,
   onDayAvailabilityUpdate,
+  onDayAvailabilityDelete, // pode ser opcional no tipo
 }) => {
   const {
-    timeSlots,
     sortedTimeSlots,
     handleAddTimeSlot,
     handleRemoveTimeSlot,
     hasChanges,
     handleSave,
-    // 👇 importante: usar o flag exposto pelo hook
     isEditing,
-  } = useDayScheduleModal(date, isOpen, dayAvailabilities, weeklySchedules, onDayAvailabilityUpdate, onClose)
+  } = useDayScheduleModal(
+    date,
+    isOpen,
+    dayAvailabilities,
+    weeklySchedules,
+    onDayAvailabilityUpdate,
+    onClose,
+    onDayAvailabilityDelete // se o hook aceitar como opcional, ok
+  )
 
-  // (Opcional) ação local para “limpar todos” – usa os handlers do hook
   const handleClearAll = () => {
     if (sortedTimeSlots.length === 0) return
-    // remove um a um para reaproveitar a própria atualização do hook
     for (const s of sortedTimeSlots) handleRemoveTimeSlot(s.id)
   }
 
   const titlePrefix = isEditing ? "Editar disponibilidade" : "Nova disponibilidade"
-  const weekdayName = weekdayPt[getDay(date)]
+  // const weekdayName = weekdayPt[getDay(date)] // <- se não usar, remova
+  void weekdayPt[getDay(date)] // (ou remova a linha acima; deixei essa para não quebrar se pretende usar depois)
+
+  // >>> Usa a lógica de deletar quando edição + vazio
+  const onSave = () => {
+    const dateStr = format(date, "yyyy-MM-dd")
+    if (isEditing && sortedTimeSlots.length === 0) {
+      onDayAvailabilityDelete?.(dateStr) // <- optional chaining evita ts(2722)
+      onClose()
+    } else {
+      handleSave()
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -56,7 +73,6 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Horários Configurados</h3>
 
-              {/* mostrar “limpar todos” só quando for edição e houver algo */}
               {isEditing && sortedTimeSlots.length > 0 && (
                 <Button
                   variant="ghost"
@@ -107,7 +123,21 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={!hasChanges}>
+            {isEditing && (
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  const dateStr = format(date, "yyyy-MM-dd")
+                  onDayAvailabilityDelete?.(dateStr) // <- optional chaining
+                  onClose()
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir disponibilidade do dia
+              </Button>
+            )}
+            <Button onClick={onSave} disabled={!hasChanges}>
+              {/* ^^^ usa onSave (e não handleSave) */}
               <Save className="h-4 w-4 mr-2" />
               {isEditing ? "Salvar Alterações" : "Criar Disponibilidade"}
             </Button>

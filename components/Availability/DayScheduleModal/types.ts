@@ -1,9 +1,10 @@
-import { DayAvailability, WeeklySchedule } from "@presentation/pages/availability";
+import { DayAvailability, WeeklySchedule } from "@presentation/pages/availability"
 export interface IDayScheduleModal {
-  date: Date;
-  isOpen: boolean;
-  onClose: () => void;
-  dayAvailabilities: DayAvailability[];
-  weeklySchedules: WeeklySchedule[];
-  onDayAvailabilityUpdate: (dayAvailability: DayAvailability) => void;
+  date: Date
+  isOpen: boolean
+  onClose: () => void
+  dayAvailabilities: DayAvailability[]
+  weeklySchedules: WeeklySchedule[]
+  onDayAvailabilityUpdate: (dayAvailability: DayAvailability) => void
+  onDayAvailabilityDelete: (dateISO: string) => void
 }
