@@ -1,24 +1,42 @@
-"use client"
+"use client";
 
-import { CertificateConfig } from "./types"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import ColorField from "./ColorField"
-import ModelFont from "./ModelFont"
-import { templates, titles } from "./templates"
+import { CertificateConfig, CertificateType } from "./types";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import ColorField from "./ColorField";
+import ModelFont from "./ModelFont";
+import { templates, titles } from "./templates";
 
 interface Props {
-  config: CertificateConfig
-  onChange: <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => void
+  config: CertificateConfig;
+  onChange: <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => void;
 }
 
 export default function BodyConfig({ config, onChange }: Props) {
-  const type = config.type ?? "atestado"
-  const currentTemplate = config.bodyTemplates?.[type] ?? templates[type] ?? ""
-  const currentTitle = config.bodyTitles?.[type] ?? titles[type] ?? ""
-  
+  // 1) NUNCA usar fallback aqui; mantém exatamente o que veio do pai
+  const selectedType: CertificateType | undefined = config.type;
+
+  // 2) Use um baseType SÓ para fallbacks de visualização (título/template)
+  const baseType: CertificateType = selectedType ?? "atestado";
+
+  const title =
+    (config.bodyTitle && config.bodyTitle.trim().length > 0
+      ? config.bodyTitle
+      : titles[baseType]) ?? "";
+
+  const template =
+    (config.bodyTemplate && config.bodyTemplate.trim().length > 0
+      ? config.bodyTemplate
+      : templates[baseType]) ?? "";
+
   return (
     <div className="space-y-3">
       {/* Select + Input lado a lado */}
@@ -26,9 +44,10 @@ export default function BodyConfig({ config, onChange }: Props) {
         <div>
           <Label>Tipo de Documento</Label>
           <Select
-            defaultValue={type}
+            // 3) Controlado pelo valor exato do estado
+            value={selectedType ?? ""}              // quando undefined, usa ""
             onValueChange={(value) => {
-              onChange("type", value as any)
+              onChange("type", value as CertificateType);
             }}
           >
             <SelectTrigger className="w-full">
@@ -48,13 +67,8 @@ export default function BodyConfig({ config, onChange }: Props) {
           <Label>Título do Documento</Label>
           <Input
             type="text"
-            value={currentTitle}
-            onChange={(e) =>
-              onChange("bodyTitles", {
-                ...config.bodyTitles,
-                [type]: e.target.value,
-              })
-            }
+            value={title}
+            onChange={(e) => onChange("bodyTitle", e.currentTarget.value)}
           />
         </div>
       </div>
@@ -62,17 +76,16 @@ export default function BodyConfig({ config, onChange }: Props) {
       {/* Área para edição do conteúdo */}
       <Textarea
         rows={15}
-        value={currentTemplate}
-        onChange={(e) =>
-          onChange("bodyTemplates", {
-            ...config.bodyTemplates,
-            [type]: e.target.value,
-          })
-        }
+        value={template}
+        onChange={(e) => onChange("bodyTemplate", e.currentTarget.value)}
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <ColorField label="Cor do Texto" value={config.bodyTextColor} onChange={(v) => onChange("bodyTextColor", v)} />
+        <ColorField
+          label="Cor do Texto"
+          value={config.bodyTextColor}
+          onChange={(v) => onChange("bodyTextColor", v)}
+        />
         <div>
           <Label>Tamanho da Fonte (px)</Label>
           <Input
@@ -80,7 +93,7 @@ export default function BodyConfig({ config, onChange }: Props) {
             min={10}
             max={32}
             value={config.bodyFontSize}
-            onChange={(e) => onChange("bodyFontSize", e.target.valueAsNumber)}
+            onChange={(e) => onChange("bodyFontSize", e.currentTarget.valueAsNumber)}
           />
         </div>
       </div>
@@ -94,11 +107,14 @@ export default function BodyConfig({ config, onChange }: Props) {
             min={12}
             max={60}
             value={config.titleFontSize}
-            onChange={(e) => onChange("titleFontSize", e.target.valueAsNumber)}
+            onChange={(e) => onChange("titleFontSize", e.currentTarget.valueAsNumber)}
           />
         </div>
-        <ModelFont value={config.titleFontFamily} onChange={(v) => onChange("titleFontFamily", v)} />
+        <ModelFont
+          value={config.titleFontFamily}
+          onChange={(v) => onChange("titleFontFamily", v)}
+        />
       </div>
     </div>
-  )
+  );
 }

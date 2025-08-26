@@ -62,12 +62,12 @@ export default function SettingsScreen() {
             <h2 className="text-2xl font-bold mb-8 text-gray-800">Configurações do Sistema</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <SettingsCard
+              {/* <SettingsCard
                 title="Atestado Médico"
                 description="Configure o modelo de atestado médico, incluindo logo, rodapé e campos personalizados"
                 icon={<FaFileMedical className="text-2xl" />}
                 href="./settings/atestado"
-              />
+              /> */}
 
               <SettingsCard
                 title="Perfil do Profissional"
@@ -81,23 +81,23 @@ export default function SettingsScreen() {
                 description="Configure informações da clínica, endereço, contato e serviços oferecidos"
                 icon={<FaClinicMedical className="text-2xl" />}
                 href="/settings/clinic"
-              />
+              /> */}
 
               <SettingsCard
                 title="Modelos de Documentos"
                 description="Crie e gerencie modelos de documentos personalizados para diferentes tipos de atestados"
                 icon={<FaFileMedical className="text-2xl" />}
-                href="/settings/document-templates"
+                href="./settings/atestado"
               />
 
-              <SettingsCard
+              {/* <SettingsCard
                 title="Integrações"
                 description="Conecte sua conta com outros sistemas e plataformas de saúde"
                 icon={<FaStethoscope className="text-2xl" />}
                 href="/settings/integrations"
-              />
+              /> */}
 
-              <SettingsCard
+              {/* <SettingsCard
                 title="Configurações Gerais"
                 description="Ajustes de sistema, notificações e preferências de uso"
                 icon={<FaCog className="text-2xl" />}

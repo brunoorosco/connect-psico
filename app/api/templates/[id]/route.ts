@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db"
 import { CertificateConfigSchema } from "@/domain/model/certificateConfig"
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
+import { Prisma } from "@prisma/client"
 
 type Params = { params: { id: number } }
 
@@ -18,15 +19,22 @@ export async function GET(_: Request, { params }: Params) {
 export async function PUT(req: Request, { params }: Params) {
   const session = await auth()
   const body = await req.json()
+
   const parsed = CertificateConfigSchema.safeParse(body.configJson)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
   }
+
+  // ✅ sanitiza para JSON puro (sem undefined) e casa com o tipo do Prisma
+  const configJson: Prisma.InputJsonValue = JSON.parse(JSON.stringify(parsed.data))
+
   const updated = await prisma.certificateConfig.update({
     where: { id: Number(params.id), userId: session?.user.id },
     data: {
-      configJson: parsed.data,
+      configJson,
+      name: parsed.data.type, // ok, é string
     },
   })
+
   return NextResponse.json(updated)
 }
