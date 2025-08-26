@@ -29,6 +29,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
     sortedTimeSlots,
     handleAddTimeSlot,
     handleRemoveTimeSlot,
+    hasChanges,
     handleSave,
   } = useDayScheduleModal(
     date,
@@ -89,7 +90,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={timeSlots.length === 0}>
+            <Button onClick={handleSave} disabled={!hasChanges}>
               <Save className="h-4 w-4 mr-2" />
               Salvar Alterações
             </Button>

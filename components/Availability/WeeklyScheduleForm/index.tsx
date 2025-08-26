@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Calendar } from "lucide-react";
-import { daysOfWeek, months } from "@/utils/constants";
-import { useWeeklySchedule } from "@/hooks/useWeeklySchedule";
-import { WeeklyScheduleFormProps } from "./types";
-
+import React, { useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Plus, Trash2, Calendar } from "lucide-react"
+import { daysOfWeek, months } from "@/utils/constants"
+import { useWeeklySchedule } from "@/hooks/useWeeklySchedule"
+import { WeeklyScheduleFormProps } from "./types"
 
 export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
   weeklySchedules,
   onScheduleUpdate,
+  activeMonth,
 }) => {
   const {
     selectedDays,
@@ -27,7 +27,13 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
     setSelectedMonth,
     handleSaveAvailability,
     removeTimeSlot,
-  } = useWeeklySchedule(weeklySchedules, onScheduleUpdate);
+  } = useWeeklySchedule(weeklySchedules, onScheduleUpdate)
+  
+  useEffect(() => {
+    if (activeMonth) {
+      setSelectedMonth(activeMonth.getMonth())
+    }
+  }, [activeMonth, setSelectedMonth])
 
   return (
     <div className="space-y-6">
@@ -57,7 +63,7 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
             </div>
           </div>
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <Label htmlFor="month-select" className="text-sm font-medium mb-2 block">
               Mês de agendamento:
             </Label>
@@ -73,26 +79,16 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="start-time">Horário inicial</Label>
-              <Input
-                id="start-time"
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+              <Input id="start-time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="end-time">Horário final</Label>
-              <Input
-                id="end-time"
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+              <Input id="end-time" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </div>
           </div>
 
@@ -115,40 +111,33 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
           <CardContent>
             <div className="space-y-4">
               {daysOfWeek.map((day) => {
-                const schedule = weeklySchedules.find((s) => s.dayOfWeek === day.value);
-                if (!schedule || schedule.timeSlots.length === 0) return null;
+                const schedule = weeklySchedules.find((s) => s.dayOfWeek === day.value)
+                if (!schedule || schedule.timeSlots.length === 0) return null
 
                 return (
                   <div key={day.value} className="border rounded-lg p-3">
                     <h4 className="font-medium text-sm mb-2">{day.label}</h4>
                     <div className="space-y-2">
                       {schedule.timeSlots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                        >
+                        <div key={slot.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                           <span className="text-sm">
                             {slot.startTime} - {slot.endTime}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeTimeSlot(day.value, slot.id)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => removeTimeSlot(day.value, slot.id)}>
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
                         </div>
                       ))}
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           </CardContent>
         </Card>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default WeeklyScheduleForm;
+export default WeeklyScheduleForm

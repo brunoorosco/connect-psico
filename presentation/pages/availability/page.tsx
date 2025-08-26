@@ -18,9 +18,6 @@ export const AvailabilityPage = () => {
   const professionalId = useCurrentUser();
 
   useEffect(() => {
-    const toastId = "loading-availability";
-
-    // toast.loading("Carregando disponibilidade...", { id: toastId });
     startTransition(() => {
       getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
         .then((data) => {
@@ -78,6 +75,7 @@ export const AvailabilityPage = () => {
             <WeeklyScheduleForm
               weeklySchedules={weeklySchedules}
               onScheduleUpdate={handleWeeklyScheduleUpdate}
+              activeMonth={new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)}
             />
           </div>
         </div>
