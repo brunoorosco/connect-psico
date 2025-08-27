@@ -74,7 +74,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       }
       
       records.push({
-        professionalId: session?.user.id,
+        professionalId: session?.user.id as string,
         dayOfWeek,
         startTime: startDT,
         endTime: endDT,
