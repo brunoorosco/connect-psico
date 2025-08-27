@@ -16,7 +16,7 @@ function makeUtcFromLocal(dateStr: string, hhmm: string, offsetHours = -3) {
 
 // início do dia local (00:00) em UTC e início do próximo dia local (00:00) em UTC
 function dayRangeUtc(dateStr: string) {
-  const startUtc = makeUtcFromLocal(dateStr, "00:00", -3)
+  const startUtc = makeUtcFromLocal(dateStr, "00:00")
   const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000)
   return { startUtc, endUtc }
 }
