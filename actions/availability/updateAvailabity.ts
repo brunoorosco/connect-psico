@@ -54,6 +54,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
     const seen = new Set<string>()
     const records = []
     console.log("[updateAvailabity.ts:99]", { timeSlots })
+    
     for (const s of timeSlots) {
       const key = `${s.startTime}-${s.endTime}`
       if (seen.has(key)) continue
@@ -72,7 +73,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       if (startDT >= endDT) {
         return { error: `Início deve ser menor que fim: ${s.startTime} - ${s.endTime}` }
       }
-
+      
       records.push({
         professionalId: session?.user.id,
         dayOfWeek,
@@ -81,7 +82,8 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
         isAvailable: true, // se o modelo tiver esse campo
       })
     }
-
+    
+    console.log('[updateAvailabity.ts:76]', JSON.stringify(records,null,2));
     if (records.length === 0) {
       return { success: "Disponibilidade do dia atualizada (vazia)", data: { count: 0 } }
     }
