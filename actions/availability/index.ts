@@ -1,3 +1,6 @@
-export { getAvailableDaysWithStatus } from "./getAvailabilityByMonth";
-export { createAvailabilityBulk } from "./createManyAvailabity";
-export { createAvailability } from "./createAvailabity";
+export { getAvailableDaysWithStatus } from "./getAvailabilityByMonth"
+export { getDayAvailabilitiesForMonth } from "./getAvailability"
+export { createAvailabilityBulk } from "./createManyAvailabity"
+export { createAvailability } from "./createAvailabity"
+export { updateAvailabilityByDate } from "./updateAvailabity"
+export { deleteAvailabilityByDate } from "./deleteAvailabity"

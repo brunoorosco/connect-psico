@@ -1,50 +1,73 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState, startTransition } from "react";
-import { Calendar } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { getDayAvailabilitiesForMonth } from "@/actions/availability/getAvailability";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { toast } from "sonner";
-import { AvailabilityCalendar,WeeklyScheduleForm } from "@components/Availability";
-import { DayAvailability, WeeklySchedule } from "./types";
+import React, { useEffect, useState, startTransition } from "react"
+import { Calendar } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { getDayAvailabilitiesForMonth } from "@/actions/availability/getAvailability"
+import { useCurrentUser } from "@/hooks/use-current-user"
+import { toast } from "sonner"
+import { AvailabilityCalendar, WeeklyScheduleForm } from "@components/Availability"
+import { DayAvailability, WeeklySchedule } from "./types"
+import { deleteAvailabilityByDate, updateAvailabilityByDate } from "@/actions/availability"
 
 export const AvailabilityPage = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([]);
-  const [dayAvailabilities, setDayAvailabilities] = useState<DayAvailability[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([])
+  const [dayAvailabilities, setDayAvailabilities] = useState<DayAvailability[]>([])
 
-  const professionalId = useCurrentUser();
+  const professionalId = useCurrentUser()
+  const [visibleMonth, setVisibleMonth] = useState<Date>(
+    new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
+  )
 
   useEffect(() => {
-    const toastId = "loading-availability";
-
-    // toast.loading("Carregando disponibilidade...", { id: toastId });
     startTransition(() => {
       getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
         .then((data) => {
-          setDayAvailabilities(data);
-       //   toast.dismiss(toastId);
+          setDayAvailabilities(data)
+          //   toast.dismiss(toastId);
         })
         .catch(() => {
-         // toast.dismiss(toastId);
-          toast.error("Erro ao carregar disponibilidade");
-        });
-    });
-  }, [selectedDate]);
+          // toast.dismiss(toastId);
+          toast.error("Erro ao carregar disponibilidade")
+        })
+    })
+  }, [selectedDate])
 
   const handleWeeklyScheduleUpdate = (schedules: WeeklySchedule[]) => {
-    setWeeklySchedules(schedules);
-  };
+    setWeeklySchedules(schedules)
+  }
 
   const handleDayAvailabilityUpdate = (dayAvailability: DayAvailability) => {
+    startTransition(() => {
+      updateAvailabilityByDate(dayAvailability)
+        .then(async (res) => {
+          if (res?.error) return toast.error(res.error)
+          toast.success(res?.success ?? "Atualizado!")
+          return getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate).then(setDayAvailabilities)
+        })
+        .catch(() => toast.error("Erro ao atualizar disponibilidade"))
+    })
+
     setDayAvailabilities((prev) => {
-      const exists = prev.find((d) => d.date === dayAvailability.date);
-      if (!exists) return [...prev, dayAvailability];
-      return prev.map((d) => (d.date === dayAvailability.date ? dayAvailability : d));
-    });
-  };
+      const exists = prev.find((d) => d.date === dayAvailability.date)
+      if (!exists) return [...prev, dayAvailability]
+      return prev.map((d) => (d.date === dayAvailability.date ? dayAvailability : d))
+    })
+  }
+
+  const handleDayAvailabilityDelete = (dateStr: string) => {
+    startTransition(() => {
+      deleteAvailabilityByDate(dateStr)
+        .then(async (res) => {
+          if (res?.error) return toast.error(res.error)
+          toast.success(res?.success ?? "Excluído!")
+          return getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate).then(setDayAvailabilities)
+        })
+        .catch(() => toast.error("Erro ao excluir disponibilidade"))
+    })
+  }
 
   return (
     <div className="bg-gray-50 container-full">
@@ -56,9 +79,7 @@ export const AvailabilityPage = () => {
               Sua Disponibilidade
             </h1>
           </div>
-          <div className="text-sm text-gray-600">
-            {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
-          </div>
+          <div className="text-sm text-gray-600">{format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
         </div>
       </div>
 
@@ -71,6 +92,7 @@ export const AvailabilityPage = () => {
               weeklySchedules={weeklySchedules}
               dayAvailabilities={dayAvailabilities}
               onDayAvailabilityUpdate={handleDayAvailabilityUpdate}
+              onDayAvailabilityDelete={handleDayAvailabilityDelete}
             />
           </div>
 
@@ -78,12 +100,13 @@ export const AvailabilityPage = () => {
             <WeeklyScheduleForm
               weeklySchedules={weeklySchedules}
               onScheduleUpdate={handleWeeklyScheduleUpdate}
+              activeMonth={new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)}
             />
           </div>
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default AvailabilityPage;
+export default AvailabilityPage
