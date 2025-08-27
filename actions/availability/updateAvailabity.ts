@@ -53,7 +53,6 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
     // dedup simples por par start-end
     const seen = new Set<string>()
     const records = []
-    console.log("[updateAvailabity.ts:99]", { timeSlots })
     
     for (const s of timeSlots) {
       const key = `${s.startTime}-${s.endTime}`
@@ -88,11 +87,11 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       return { success: "Disponibilidade do dia atualizada (vazia)", data: { count: 0 } }
     }
 
-    // const data = await prisma.availability.createMany({ data: records })
+    await prisma.availability.createMany({ data: records })
 
     return { success: "Disponibilidade do dia atualizada com sucesso" }
   } catch (error) {
-    console.error("", error)
+    console.error("Error Disponibilidade", error)
     if (error instanceof PrismaClientKnownRequestError) {
       return { error: "Erro ao atualizar disponibilidade" }
     }
