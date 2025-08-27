@@ -14,16 +14,20 @@ function makeUtcFromLocal(dateStr: string, hhmm: string, offsetHours = -3) {
   return new Date(Date.UTC(y, m - 1, d, utcHour, mm, 0, 0))
 }
 
+function toUtc(dateStr: string, hhmm: string) {
+  return new Date(`${dateStr}T${hhmm}:00-03:00`)
+}
+
 // início do dia local (00:00) em UTC e início do próximo dia local (00:00) em UTC
 function dayRangeUtc(dateStr: string) {
-  const startUtc = makeUtcFromLocal(dateStr, "00:00")
+  const startUtc = toUtc(dateStr, "00:00")
   const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000)
   return { startUtc, endUtc }
 }
 
 function getDayOfWeek(dateStr: string) {
   // 0=Dom .. 6=Sáb
-  return new Date(dateStr + "T00:00:00").getDay()
+  return new Date(`${dateStr}T00:00:00-03:00`).getUTCDay()
 }
 
 export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvailabilityByDateSchema>) => {
@@ -53,14 +57,14 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
     // dedup simples por par start-end
     const seen = new Set<string>()
     const records = []
-    
+
     for (const s of timeSlots) {
       const key = `${s.startTime}-${s.endTime}`
       if (seen.has(key)) continue
       seen.add(key)
 
-      const startDT = makeUtcFromLocal(date, s.startTime, -3)
-      const endDT = makeUtcFromLocal(date, s.endTime, -3)
+      const startDT = toUtc(date, s.startTime)
+      const endDT = toUtc(date, s.endTime)
 
       // guarda a segurança extra, embora já validado no schema
       if (!(startDT instanceof Date) || isNaN(startDT.valueOf())) {
@@ -72,7 +76,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       if (startDT >= endDT) {
         return { error: `Início deve ser menor que fim: ${s.startTime} - ${s.endTime}` }
       }
-      
+
       records.push({
         professionalId: session?.user.id as string,
         dayOfWeek,
@@ -81,8 +85,8 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
         isAvailable: true, // se o modelo tiver esse campo
       })
     }
-    
-    console.log('[updateAvailabity.ts:76]', JSON.stringify(records,null,2));
+
+    console.log("[updateAvailabity.ts:76]", JSON.stringify(records, null, 2))
     if (records.length === 0) {
       return { success: "Disponibilidade do dia atualizada (vazia)", data: { count: 0 } }
     }
