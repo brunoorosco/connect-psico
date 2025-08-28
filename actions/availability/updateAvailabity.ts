@@ -15,7 +15,7 @@ function makeUtcFromLocal(dateStr: string, hhmm: string, offsetHours = -3) {
 }
 
 function toUtc(dateStr: string, hhmm: string) {
-  return new Date(`${dateStr}T${hhmm}:00-03:00`)
+  return new Date(`${dateStr}T${hhmm}:00Z`) // o "Z" força UTC
 }
 
 // início do dia local (00:00) em UTC e início do próximo dia local (00:00) em UTC
@@ -37,7 +37,9 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
   const { date, timeSlots } = valid.data
 
   try {
+    console.log("updateAvailabity.ts:40", date)
     const { startUtc, endUtc } = dayRangeUtc(date)
+    console.log("updateAvailabity.ts:41", startUtc, endUtc)
 
     // 1) remove tudo do dia (para esse profissional)
     await prisma.availability.deleteMany({
@@ -65,6 +67,7 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
 
       const startDT = toUtc(date, s.startTime)
       const endDT = toUtc(date, s.endTime)
+      console.log("updateAvailabity.ts:70", startDT, endDT)
 
       // guarda a segurança extra, embora já validado no schema
       if (!(startDT instanceof Date) || isNaN(startDT.valueOf())) {
@@ -86,7 +89,6 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       })
     }
 
-    console.log("[updateAvailabity.ts:76]", JSON.stringify(records, null, 2))
     if (records.length === 0) {
       return { success: "Disponibilidade do dia atualizada (vazia)", data: { count: 0 } }
     }
