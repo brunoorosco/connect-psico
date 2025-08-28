@@ -37,10 +37,8 @@ export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
     setEditingDate,
     currentMonth,
     setCurrentMonth,
-    // getAvailabilityForDate (vamos ignorar o do hook e fazer um com "gating" aqui)
   } = useAvailabilityLogic(selectedDate, weeklySchedules, dayAvailabilities)
 
-  // >>> FIX PRINCIPAL: disponibilidade para o DIA respeitando o MÊS VISÍVEL (currentMonth)
   const getAvailabilityForVisibleMonth = useCallback(
     (d: Date) => {
       // 1) Se há registro diário salvo (banco/estado), ele SEMPRE vence
