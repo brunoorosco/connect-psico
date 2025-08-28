@@ -25,6 +25,7 @@ export const AvailabilityPage = () => {
     startTransition(() => {
       getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
         .then((data) => {
+          console.log(data)
           setDayAvailabilities(data)
           //   toast.dismiss(toastId);
         })

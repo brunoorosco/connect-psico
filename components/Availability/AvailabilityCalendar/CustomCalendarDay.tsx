@@ -9,6 +9,7 @@ export function CustomCalendarDay({ date, selectedDate, getAvailabilityForDate, 
 
   const isToday = isSameDay(date, new Date())
   const hasAvailability = timeSlots.length > 0
+  console.log('CustomCalendarDay.tsx:12', timeSlots);
 
   return (
     <div
