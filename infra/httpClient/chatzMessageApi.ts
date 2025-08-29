@@ -9,9 +9,18 @@ export const axiosInstanceChatz = axios.create({
 
 axiosInstanceChatz.interceptors.request.use(
   async (config) => {
-    console.log(env.apiKeyChatz)
     config.headers.Authorization = env.apiKeyChatz
     return config
   },
   (error) => Promise.reject(error)
 )
+
+export const sendMessageApiWhatsapp = async (userId: string, message: string) => {
+//   const user = await getUserPhone(userId)
+
+//   const resp = await axiosInstanceChatz.post("/messages/send", {
+//     // body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
+//     body: `*PsicoMais:*\n ${message}`,
+//     number: "55" + user.phone,
+//   })
+}
