@@ -2,7 +2,10 @@
 
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { fromZonedTime } from "date-fns-tz";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+
+const TZ = "America/Sao_Paulo";
 
 const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
@@ -17,7 +20,8 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
   }
 
   const { professionalId, patientId, appointmentDate } = valid.data;
-
+  const appointmentUtc = fromZonedTime(appointmentDate, TZ);
+  
   try {
     // 1. Verificar disponibilidade do profissional no dia/hora
     const dayOfWeek = appointmentDate.getDay();
@@ -26,8 +30,8 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
         professionalId,
         // dayOfWeek,
         isAvailable: true,
-        startTime: { lte: appointmentDate },
-        endTime: { gte: appointmentDate },
+        startTime: { lte: appointmentUtc },
+        endTime: { gte: appointmentUtc },
       },
     });
 

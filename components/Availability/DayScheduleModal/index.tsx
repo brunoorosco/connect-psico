@@ -1,14 +1,19 @@
 "use client"
 
 import React from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog" // <- remove DialogDescription
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { format, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Save, Trash2 } from "lucide-react" // <- remove Info
+import { Save, Trash2 } from "lucide-react"
 import TimeSlotForm from "../TimeSlotForm"
 import { useDayScheduleModal } from "@/hooks/useDayScheduleModal"
 import { IDayScheduleModal } from "./types"
+
+// ⬇️ ADICIONE
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
+import { toast } from "sonner"
+const TZ = "America/Sao_Paulo"
 
 const weekdayPt = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
 
@@ -19,7 +24,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   dayAvailabilities,
   weeklySchedules,
   onDayAvailabilityUpdate,
-  onDayAvailabilityDelete, // pode ser opcional no tipo
+  onDayAvailabilityDelete,
 }) => {
   const { sortedTimeSlots, handleAddTimeSlot, handleRemoveTimeSlot, hasChanges, handleSave, isEditing } =
     useDayScheduleModal(
@@ -29,7 +34,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
       weeklySchedules,
       onDayAvailabilityUpdate,
       onClose,
-      onDayAvailabilityDelete // se o hook aceitar como opcional, ok
+      onDayAvailabilityDelete
     )
 
   const handleClearAll = () => {
@@ -38,27 +43,70 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   }
 
   const titlePrefix = isEditing ? "Editar disponibilidade" : "Nova disponibilidade"
-  // const weekdayName = weekdayPt[getDay(date)] // <- se não usar, remova
-  void weekdayPt[getDay(date)] // (ou remova a linha acima; deixei essa para não quebrar se pretende usar depois)
+  void weekdayPt[getDay(date)]
+
+  // ⬇️ ADICIONE: helpers de validação
+  function dayRangeUtc(dateObj: Date) {
+    const ymd = formatInTimeZone(dateObj, TZ, "yyyy-MM-dd")
+    const startUtc = fromZonedTime(new Date(`${ymd}T00:00:00.000`), TZ)
+    const endUtc   = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
+    return { startUtc, endUtc }
+  }
+
+  function slotStartUtc(ymd: string, hhmm: string) {
+    return fromZonedTime(new Date(`${ymd}T${hhmm}:00.000`), TZ)
+  }
+
+  // ⬇️ ADICIONE: valida “não pode estar no passado”
+  function validateNotPast(): { ok: boolean; message?: string } {
+    const now = new Date()
+
+    // 1) Se o dia inteiro já passou, bloqueia
+    const { endUtc } = dayRangeUtc(date)
+    if (endUtc < now) {
+      return { ok: false, message: "Não é permitido cadastrar disponibilidade em um dia que já passou." }
+    }
+
+    // 2) Se for hoje, bloqueia apenas slots que começam antes de agora
+    const ymd = formatInTimeZone(date, TZ, "yyyy-MM-dd")
+    const invalid = sortedTimeSlots.filter(s => {
+      const start = slotStartUtc(ymd, s.startTime) // "HH:mm"
+      return start < now
+    })
+
+    if (invalid.length > 0) {
+      const list = invalid.map(s => `${s.startTime}–${s.endTime}`).join(", ")
+      return { ok: false, message: `Há horários no passado: ${list}. Ajuste os horários antes de salvar.` }
+    }
+
+    return { ok: true }
+  }
 
   // >>> Usa a lógica de deletar quando edição + vazio
   const onSave = () => {
     const dateStr = format(date, "yyyy-MM-dd")
+
     if (isEditing && sortedTimeSlots.length === 0) {
-      onDayAvailabilityDelete?.(dateStr) // <- optional chaining evita ts(2722)
+      onDayAvailabilityDelete?.(dateStr)
       onClose()
-    } else {
-      handleSave()
+      return
     }
+
+    // ⬇️ ADICIONE: validação antes de salvar
+    const { ok, message } = validateNotPast()
+    if (!ok) {
+      toast.error(message)
+      return
+    }
+
+    handleSave()
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="max-w-2xl max-h-[80vh] overflow-y-auto"
-      onPointerDownOutside={(e) => {
-    e.preventDefault() // impede fechamento ao clicar fora
-  }}
+        onPointerDownOutside={(e) => { e.preventDefault() }}
       >
         <DialogHeader>
           <DialogTitle className="text-xl">
@@ -126,7 +174,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
                 variant="destructive"
                 onClick={() => {
                   const dateStr = format(date, "yyyy-MM-dd")
-                  onDayAvailabilityDelete?.(dateStr) // <- optional chaining
+                  onDayAvailabilityDelete?.(dateStr)
                   onClose()
                 }}
               >
@@ -135,7 +183,6 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
               </Button>
             )}
             <Button onClick={onSave} disabled={!hasChanges}>
-              {/* ^^^ usa onSave (e não handleSave) */}
               <Save className="h-4 w-4 mr-2" />
               {isEditing ? "Salvar Alterações" : "Criar Disponibilidade"}
             </Button>
