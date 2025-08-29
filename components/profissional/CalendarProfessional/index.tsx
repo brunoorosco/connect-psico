@@ -29,12 +29,17 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
     (date: Date) => {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const dateStr = formatInTimeZone(date, TZ, "yyyy-MM-dd")
-      return date < today || !availableDatesSet.has(dateStr)
+
+      const day = new Date(date)
+      day.setHours(0, 0, 0, 0)
+
+      const dateStr = formatInTimeZone(day, TZ, "yyyy-MM-dd")
+
+      return day < today || !availableDatesSet.has(dateStr)
     },
     [availableDatesSet]
   )
-
+  
   return (
     <TabsContent value="schedule" className="pt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
