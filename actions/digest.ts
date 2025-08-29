@@ -1,3 +1,4 @@
+"use server"
 import { prisma } from "@/lib/db"
 import { DIGEST_MINUTES } from "@/lib/digest-config"
 import { addMinutesISO, inQuietHours, nextQuietEndISO } from "@/lib/time"
@@ -7,6 +8,13 @@ import { addMinutesISO, inQuietHours, nextQuietEndISO } from "@/lib/time"
  * - Cria/atualiza a linha com msgCount++
  * - Mantém a janela original; se a janela já expirou, reabre conforme regra
  */
+
+function toUTCMinus3(date: Date | string) {
+  const d = new Date(date)
+  d.setHours(d.getHours() - 3) // ajusta para UTC-3
+  return d
+}
+
 export async function ingestDigest(receiverId: string) {
   if (!receiverId) return
 
@@ -16,16 +24,17 @@ export async function ingestDigest(receiverId: string) {
     where: { receiverId },
     create: {
       receiverId,
-      windowEndAt: new Date(windowEndAt),
+      windowEndAt: toUTCMinus3(windowEndAt),
       msgCount: 1,
+      firstEventAt: toUTCMinus3(new Date())
     },
     update: {
       msgCount: { increment: 1 },
-      lastEventAt: new Date(),
+      lastEventAt: toUTCMinus3(new Date()),
       windowEndAt:
         (await prisma.notifyDigest.findUnique({ where: { receiverId }, select: { windowEndAt: true } }))?.windowEndAt! <
         new Date()
-          ? new Date(windowEndAt) // se já expirou, reabre
+          ? toUTCMinus3(windowEndAt) // se já expirou, reabre
           : undefined, // caso contrário, mantém
     },
   })

@@ -22,22 +22,16 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   onDayAvailabilityUpdate,
   onDayAvailabilityDelete, // pode ser opcional no tipo
 }) => {
-  const {
-    sortedTimeSlots,
-    handleAddTimeSlot,
-    handleRemoveTimeSlot,
-    hasChanges,
-    handleSave,
-    isEditing,
-  } = useDayScheduleModal(
-    date,
-    isOpen,
-    dayAvailabilities,
-    weeklySchedules,
-    onDayAvailabilityUpdate,
-    onClose,
-    onDayAvailabilityDelete // se o hook aceitar como opcional, ok
-  )
+  const { sortedTimeSlots, handleAddTimeSlot, handleRemoveTimeSlot, hasChanges, handleSave, isEditing } =
+    useDayScheduleModal(
+      date,
+      isOpen,
+      dayAvailabilities,
+      weeklySchedules,
+      onDayAvailabilityUpdate,
+      onClose,
+      onDayAvailabilityDelete // se o hook aceitar como opcional, ok
+    )
 
   const handleClearAll = () => {
     if (sortedTimeSlots.length === 0) return
@@ -61,7 +55,12 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-2xl max-h-[80vh] overflow-y-auto"
+      onPointerDownOutside={(e) => {
+    e.preventDefault() // impede fechamento ao clicar fora
+  }}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl">
             {titlePrefix} — {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}

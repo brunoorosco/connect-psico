@@ -6,6 +6,7 @@ import { UserChat } from "@/domain/model/patient"
 import { User } from "next-auth"
 import { getUserChatProfessionals } from "@/actions/messages/getUserChatProfessional"
 import { TMessage } from "@components/chat/ChatContainer"
+import { ingestDigest } from "@/actions/digest"
 
 type TMessageSend = Omit<TMessage, "_id" | "createdAt">
 type State = {
@@ -55,7 +56,6 @@ export const useChatStore = create<State>((set, get) => ({
       }
 
       const users = await getUserChatProfessionals(unionIds)
-      console.log("[useChatStore.ts:58]", users)
       if (!users) {
         toast.error("Erro ao buscar usuários")
         return
@@ -72,7 +72,6 @@ export const useChatStore = create<State>((set, get) => ({
   getMessages: async (userId: string) => {
     set({ isMessagesLoading: true })
     try {
-      console.log("[useChatStore.ts:76]", userId)
       const res = await getMessageApi(userId) // ou use axiosInstance.get(`/messages/${userId}`);
       set({ messages: res })
     } catch (error: Error | any) {
@@ -88,6 +87,7 @@ export const useChatStore = create<State>((set, get) => ({
     if (!selectedUser) return
     try {
       const resp = await sendMessageApi(selectedUser.userId, messageData)
+      await ingestDigest(selectedUser.userId)
       set({ messages: [...messages, resp] })
     } catch (error: Error | any) {
       console.error(error)
@@ -102,7 +102,6 @@ export const useChatStore = create<State>((set, get) => ({
     if (!selectedUser || !socket) return
 
     socket.on("newMessage", (newMessage: TMessage) => {
-      console.log("new message", newMessage)
       const isFromUser = newMessage.senderId === selectedUser.userId
       if (!isFromUser) return
 
@@ -116,7 +115,6 @@ export const useChatStore = create<State>((set, get) => ({
     socket.off("newMessage")
   },
   setSelectedUser: (user: UserChat) => {
-    console.log('[useChatStore.ts:119]', user);
     set({ selectedUser: user, messages: [] }) // limpa mensagens ao trocar de usuário
   },
 }))

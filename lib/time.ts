@@ -9,7 +9,7 @@ function getNowInTZ() {
 
 export function inQuietHours(date = getNowInTZ()) {
   const h = date.getHours()
-  return h >= 22 || h < 8 // 22:00–07:59
+  return h >= 23 || h < 8 // 22:00–07:59
 }
 
 export function nextQuietEndISO(date = getNowInTZ()) {

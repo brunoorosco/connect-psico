@@ -14,7 +14,6 @@ import {
 import { startTransition, useEffect, useState } from "react";
 import { ScheduleModal } from "./ScheduleModal";
 import { MessageSheet } from "./MessageSheet";
-import { professionalById } from "@/actions/auth/professional";
 
 export type TProfessional = {
   Comentarios: TComentarios[];
