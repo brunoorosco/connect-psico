@@ -18,10 +18,11 @@ export const ProfessionalCard = ({ professional, onSelect }: TProfessionalParams
       <CardHeader>
         <div className="flex items-center gap-4">
           <img
-            src={professional.image as string}
+            src={professional.image as string || './avatar.png'}
             alt={professional.name}
             className="w-20 h-20 bg-slate-300 rounded-full object-cover"
           />
+          
           <div>
             <h3 className="text-lg font-semibold">{professional.name}</h3>
             <p className="text-sm text-muted-foreground">
