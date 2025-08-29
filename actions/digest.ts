@@ -62,7 +62,6 @@ export async function takeDueDigests(limit: number) {
         windowEndAt: { lte: now }, // garante que só apaga o que está vencido
       },
     })
-    console.log(rows.length)
     return rows
   })
 }

@@ -40,12 +40,10 @@ export const createAvailability = async (data: z.infer<typeof CreateAvailability
   if (!valid.success) return { error: "Dados inválidos" }
 
   const { professionalId, dayOfWeek, startTime, endTime } = valid.data
-  console.log("[createAvailabity.ts:43]", { startTime, endTime })
 
   // 1) Extrai "HH:mm" interpretando SEMPRE em America/Sao_Paulo (evita depender do fuso do servidor)
   const startHHmm = formatInTimeZone(startTime, TZ, "HH:mm")
   const endHHmm = formatInTimeZone(endTime, TZ, "HH:mm")
-  console.log("[createAvailabity.ts:48]", { startHHmm, endHHmm })
   // (validação simples: não permitir atravessar meia-noite)
   if (startHHmm >= endHHmm) {
     return { error: "Hora de início deve ser antes da hora de término" }
@@ -55,7 +53,6 @@ export const createAvailability = async (data: z.infer<typeof CreateAvailability
   const anchor = anchorDateForDow(dayOfWeek) // ex.: "1970-01-06" (terça)
   const startUtc = fromZonedTime(new Date(`${anchor}T${startHHmm}:00`), TZ)
   const endUtc = fromZonedTime(new Date(`${anchor}T${endHHmm}:00`), TZ)
-  console.log("[createAvailabity.ts:58]", { startUtc, endUtc })
   try {
     // 3) Verificar sobreposição usando os valores UTC normalizados
     const overlapping = await prisma.availability.findFirst({

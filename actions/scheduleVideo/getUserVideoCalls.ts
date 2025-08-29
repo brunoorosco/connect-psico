@@ -35,7 +35,6 @@ export async function getUserVideoCalls(userId: string) {
       },
     },
   })
-  console.log(resp)
   return Array.from(
   new Map(resp.map((i) => [i.room.id, i.room])).values()
 )

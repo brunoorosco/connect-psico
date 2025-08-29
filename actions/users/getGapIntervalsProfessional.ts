@@ -110,6 +110,5 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
   const slotsOrdened = slotsUnique
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .map((s) => ({ start: s.start.toISOString() })) // enviar ISO UTC ao front (ok)
-  console.log(slotsOrdened)
   return slotsOrdened
 }
