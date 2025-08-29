@@ -36,6 +36,8 @@ export const AvailabilityPage = () => {
     })
   }, [selectedDate])
 
+  console.log("dasds",dayAvailabilities)
+
   const handleWeeklyScheduleUpdate = (schedules: WeeklySchedule[]) => {
     setWeeklySchedules(schedules)
   }

@@ -19,18 +19,9 @@ export function useAvailableSlots(professionalId: number, selectedDate: Date) {
     }
 
     const slots = data.map((interval: { start: string | Date }) => {
-      const d = new Date(interval.start)
-      // monta uma string local sem mudar o horário
-      const local = new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        d.getHours() + 3,
-        d.getMinutes(),
-        d.getSeconds()
-      )
+      const start = new Date(interval.start)
 
-      return { start: local }
+      return { start }
     })
 
     setAvailableSlots(slots)

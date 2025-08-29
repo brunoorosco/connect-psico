@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils"
 import { useSession } from "next-auth/react"
 import { useState, useCallback } from "react"
 import { ptBR } from "date-fns/locale"
-import { format } from "date-fns"
+import { formatInTimeZone } from "date-fns-tz"
 
 import { useAvailableSlots } from "./useAvailableSlots"
 import { AvailableSlots } from "./AvailableSlots"
 import { ScheduleButton } from "./ScheduleButton"
 import { ICalendarProfessional } from "./types"
+
+const TZ = "America/Sao_Paulo"
 
 export const CalendarProfessional = ({ professionalData }: ICalendarProfessional) => {
   const { data: session, status } = useSession()
@@ -27,7 +29,7 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
     (date: Date) => {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const dateStr = format(date, "yyyy-MM-dd")
+      const dateStr = formatInTimeZone(date, TZ, "yyyy-MM-dd")
       return date < today || !availableDatesSet.has(dateStr)
     },
     [availableDatesSet]

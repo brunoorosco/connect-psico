@@ -1,5 +1,8 @@
 "use server"
 import { prisma } from "@/lib/db"
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz"
+
+const TZ = "America/Sao_Paulo"
 
 type Interval = { start: Date; end: Date }
 const DEFAULT_DURATION_MINUTES = 60
@@ -26,17 +29,6 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
   return freeIntervals
 }
 
-function toISOStringWithOffset(date: Date, offsetHours: number): string {
-  const offsetMs = offsetHours * 60 * 60 * 1000
-  const local = new Date(date.getTime() - offsetMs)
-
-  const iso = local.toISOString().replace("Z", "")
-  const sign = offsetHours > 0 ? "-" : "+"
-  const pad = (n: number) => String(Math.abs(n)).padStart(2, "0")
-
-  return `${iso}${sign}${pad(offsetHours)}:00`
-}
-
 export const getProfessionalSchedule = async (userId: number, date: Date) => {
   const dayOfWeek = date.getDay() // 0=domingo, 1=segunda, etc.
   const professional = await prisma.professional.findUnique({
@@ -57,10 +49,11 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     },
   })
 
-  const startOfDay = new Date(date)
-  // startOfDay.setHours(-3, 0, 0, 0)
-  const endOfDay = new Date(date)
-  // endOfDay.setHours(20, 59, 59, 999)
+  // Constrói YYYY-MM-DD da data selecionada, segundo São Paulo
+  const ymd = formatInTimeZone(date, TZ, "yyyy-MM-dd")
+  // 00:00 e 23:59:59.999 em São Paulo, convertidos para UTC (Date)
+  const startOfDay = fromZonedTime(new Date(`${ymd}T00:00:00`), TZ)
+  const endOfDay = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -112,13 +105,11 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
   })
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
     start: new Date(start),
-  }))
+  })) // mantém UTC, sem offset manual
 
   const slotsOrdened = slotsUnique
     .sort((a, b) => a.start.getTime() - b.start.getTime())
-    .map((s) => ({
-      start: s.start.toISOString(), // converte para string ISO
-    }))
+    .map((s) => ({ start: s.start.toISOString() })) // enviar ISO UTC ao front (ok)
   console.log(slotsOrdened)
   return slotsOrdened
 }

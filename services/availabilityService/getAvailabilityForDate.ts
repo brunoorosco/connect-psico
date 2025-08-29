@@ -10,7 +10,6 @@ export function getAvailabilityForDate(
 ) {
   const dateStr = format(date, "yyyy-MM-dd");
   const dayAvailability = dayAvailabilities.find((d) => d.date === dateStr);
-  console.log('getAvailabilityForDate.ts:13', dayAvailability);
   if (dayAvailability) return dayAvailability.timeSlots;
 
   const isSameMonth =
@@ -21,6 +20,5 @@ export function getAvailabilityForDate(
 
   const dayOfWeek = getDay(date);
   const weeklySchedule = weeklySchedules.find((w) => w.dayOfWeek === dayOfWeek);
-  console.log('getAvailabilityForDate.ts:23', weeklySchedule);
   return weeklySchedule?.timeSlots || [];
 }

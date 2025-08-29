@@ -5,46 +5,47 @@ import { z } from "zod"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { auth } from "@/auth"
 import { UpdateAvailabilityByDateSchema } from "./schemas/updateAvalability"
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz"
 
-// cria Date UTC equivalente a 00:00 no fuso -03 + HH:mm
-function makeUtcFromLocal(dateStr: string, hhmm: string, offsetHours = -3) {
-  const [y, m, d] = dateStr.split("-").map(Number)
-  const [hh, mm] = hhmm.split(":").map(Number)
-  const utcHour = hh - offsetHours // se offset=-3 => soma 3h
-  return new Date(Date.UTC(y, m - 1, d, utcHour, mm, 0, 0))
+const TZ = "America/Sao_Paulo"
+
+// Converte "YYYY-MM-DD" + "HH:mm" (parede São Paulo) -> Date em UTC
+function wallTimeToUtc(dateStr: string, hhmm: string) {
+  return fromZonedTime(new Date(`${dateStr}T${hhmm}:00.000`), TZ)
 }
 
-function toUtc(dateStr: string, hhmm: string) {
-  return new Date(`${dateStr}T${hhmm}:00Z`) // o "Z" força UTC
-}
-
-// início do dia local (00:00) em UTC e início do próximo dia local (00:00) em UTC
+// Início/fim do dia local (00:00..23:59:59.999) convertidos para UTC
 function dayRangeUtc(dateStr: string) {
-  const startUtc = toUtc(dateStr, "00:00")
-  const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000)
+  const startUtc = fromZonedTime(new Date(`${dateStr}T00:00:00.000`), TZ)
+  const endUtc   = fromZonedTime(new Date(`${dateStr}T23:59:59.999`), TZ)
   return { startUtc, endUtc }
 }
 
-function getDayOfWeek(dateStr: string) {
-  // 0=Dom .. 6=Sáb
-  return new Date(`${dateStr}T00:00:00-03:00`).getUTCDay()
+// dayOfWeek (0=Dom .. 6=Sáb) no calendário de São Paulo
+function getDayOfWeekLocal(dateStr: string) {
+  // UTC equivalente à meia-noite local
+  const startUtc = fromZonedTime(new Date(`${dateStr}T00:00:00.000`), TZ)
+  // 'i' = ISO day of week (1=Seg .. 7=Dom). Mapeia para 0=Dom..6=Sáb
+  const iso = Number(formatInTimeZone(startUtc, TZ, "i")) // 1..7
+  return iso % 7 // 7->0 (Dom), 1->1 (Seg), ..., 6->6 (Sáb)
 }
 
 export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvailabilityByDateSchema>) => {
   const valid = await UpdateAvailabilityByDateSchema.safeParseAsync(params)
   if (!valid.success) return { error: "Dados inválidos" }
+
   const session = await auth()
+  if (!session?.user?.id) return { error: "Usuário não autenticado" }
+
   const { date, timeSlots } = valid.data
 
   try {
-    console.log("updateAvailabity.ts:40", date)
     const { startUtc, endUtc } = dayRangeUtc(date)
-    console.log("updateAvailabity.ts:41", startUtc, endUtc)
 
     // 1) remove tudo do dia (para esse profissional)
     await prisma.availability.deleteMany({
       where: {
-        professionalId: session?.user.id,
+        professionalId: session.user.id,
         startTime: { gte: startUtc, lt: endUtc },
       },
     })
@@ -55,19 +56,26 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
     }
 
     // 3) recria os slots
-    const dayOfWeek = getDayOfWeek(date)
+    const dayOfWeek = getDayOfWeekLocal(date)
+
     // dedup simples por par start-end
     const seen = new Set<string>()
-    const records = []
+    const records: Array<{
+      professionalId: string
+      dayOfWeek: number
+      startTime: Date
+      endTime: Date
+      isAvailable: boolean
+    }> = []
 
     for (const s of timeSlots) {
       const key = `${s.startTime}-${s.endTime}`
       if (seen.has(key)) continue
       seen.add(key)
 
-      const startDT = toUtc(date, s.startTime)
-      const endDT = toUtc(date, s.endTime)
-      console.log("updateAvailabity.ts:70", startDT, endDT)
+      // Converte os horários de parede (São Paulo) para UTC correto
+      const startDT = wallTimeToUtc(date, s.startTime)
+      const endDT   = wallTimeToUtc(date, s.endTime)
 
       // guarda a segurança extra, embora já validado no schema
       if (!(startDT instanceof Date) || isNaN(startDT.valueOf())) {
@@ -81,11 +89,11 @@ export const updateAvailabilityByDate = async (params: z.infer<typeof UpdateAvai
       }
 
       records.push({
-        professionalId: session?.user.id as string,
+        professionalId: session.user.id,
         dayOfWeek,
-        startTime: startDT,
-        endTime: endDT,
-        isAvailable: true, // se o modelo tiver esse campo
+        startTime: startDT, // UTC no banco
+        endTime: endDT,     // UTC no banco
+        isAvailable: true,
       })
     }
 

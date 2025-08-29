@@ -2,13 +2,12 @@
 "use server"
 
 import { prisma } from "@/lib/db"
-import { endOfMonth, startOfMonth, format } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
 
 export interface TimeSlot {
   id: string
-  startTime: string // formato: "HH:mm"
-  endTime: string // formato: "HH:mm"
+  startTime: string // "HH:mm" em America/Sao_Paulo
+  endTime: string // "HH:mm" em America/Sao_Paulo
 }
 
 export interface WeeklySchedule {
@@ -17,55 +16,57 @@ export interface WeeklySchedule {
 }
 
 export interface DayAvailability {
-  date: string // formato: "yyyy-MM-dd"
+  date: string // "yyyy-MM-dd" em America/Sao_Paulo
   timeSlots: TimeSlot[]
 }
 
-function toLocalTime(date: Date): string {
-  const local = new Date(date.getTime() - 3 * 60 * 60 * 1000) // força -3h
-  return local.toISOString().substring(11, 16) // HH:mm
+const TZ = "America/Sao_Paulo"
+
+// Calcula [início do mês local 00:00, início do próximo mês local 00:00) em UTC
+function monthLocalUtcRange(dateRef: Date) {
+  const y = dateRef.getFullYear()
+  const m = dateRef.getMonth() // 0..11
+
+  const firstLocal = new Date(y, m, 1)
+  const nextLocal = new Date(y, m + 1, 1)
+
+  const firstLocalYMD = formatInTimeZone(firstLocal, TZ, "yyyy-MM-dd")
+  const nextLocalYMD = formatInTimeZone(nextLocal, TZ, "yyyy-MM-dd")
+
+  const startUtc = fromZonedTime(new Date(`${firstLocalYMD}T00:00:00.000`), TZ)
+  const endUtc = fromZonedTime(new Date(`${nextLocalYMD}T00:00:00.000`), TZ)
+
+  return { startUtc, endUtc }
 }
 
-export async function getDayAvailabilitiesForMonth(
-  professionalId: string,
-  dateRef: Date // <- mês selecionado
-): Promise<DayAvailability[]> {
-  const start = startOfMonth(dateRef)
-  const end = endOfMonth(dateRef)
+export async function getDayAvailabilitiesForMonth(professionalId: string, dateRef: Date): Promise<DayAvailability[]> {
+  const { startUtc, endUtc } = monthLocalUtcRange(dateRef)
 
-  const raw = await prisma.availability.findMany({
+  const rows = await prisma.availability.findMany({
     where: {
       professionalId,
-      startTime: {
-        gte: start,
-        lte: end,
-      },
+      isAvailable: true,
+      startTime: { gte: startUtc, lt: endUtc }, // limite superior exclusivo evita duplicações
+    },
+    select: {
+      id: true,
+      startTime: true, // Date (UTC)
+      endTime: true, // Date (UTC)
     },
     orderBy: { startTime: "asc" },
   })
 
-  console.log("getAvailability.ts:37", raw)
+  // Agrupa por dia LOCAL (São Paulo) e formata HH:mm LOCAL
+  const byDay: Record<string, TimeSlot[]> = {}
 
-  const groupedByDate = raw.reduce((acc, item) => {
-    // 🔹 Agrupa pela data no timezone do servidor
-    const dateKey = format(item.startTime, "yyyy-MM-dd", { locale: ptBR })
+  for (const r of rows) {
+    const dateKey = formatInTimeZone(r.startTime, TZ, "yyyy-MM-dd")
+    const startHHmm = formatInTimeZone(r.startTime, TZ, "HH:mm")
+    const endHHmm = formatInTimeZone(r.endTime, TZ, "HH:mm")
 
-    if (!acc[dateKey]) acc[dateKey] = []
+    const slot: TimeSlot = { id: String(r.id), startTime: startHHmm, endTime: endHHmm }
+    ;(byDay[dateKey] ||= []).push(slot)
+  }
 
-    const timeSlot: TimeSlot = {
-      id: `${item.id}`,
-      startTime: item.startTime.toISOString().split("T")[1].slice(0, 5), // "HH:mm"
-      endTime: item.endTime.toISOString().split("T")[1].slice(0, 5), // "HH:mm"
-    }
-    console.log("teste:", format(item.startTime, "HH:mm"), item.startTime)
-    acc[dateKey].push(timeSlot)
-    return acc
-  }, {} as Record<string, TimeSlot[]>)
-
-  const response = Object.entries(groupedByDate).map(([date, timeSlots]) => ({
-    date,
-    timeSlots,
-  }))
-
-  return response
+  return Object.entries(byDay).map(([date, timeSlots]) => ({ date, timeSlots }))
 }
