@@ -24,9 +24,7 @@ export async function GET() {
     for (const row of rows) {
       try {
         const user = await getProfessionalById(row.receiverId)
-        console.log(user)
         const phoneRaw = user?.phone ? String(user.phone).replace(/\D/g, "") : ""
-        console.log(phoneRaw)
         if (!user || !phoneRaw) continue
 
         const firstName = String(user.name || "").split(" ")[0] ?? ""
@@ -34,7 +32,6 @@ export async function GET() {
           body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
           number: "55" + phoneRaw,
         })
-        console.log(resp)
         processed++
       } catch (e) {
         console.error("Falha no envio api.chatz")

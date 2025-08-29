@@ -66,6 +66,6 @@ export async function getDayAvailabilitiesForMonth(
     date,
     timeSlots,
   }))
-  console.log("getAvailability.ts:66", response)
+
   return response
 }

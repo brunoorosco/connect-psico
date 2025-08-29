@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/db"
 
 type Interval = { start: Date; end: Date }
-const DEFAULT_DURATION_MINUTES = 60 // Duração padrão de 30 minutos para os slots
+const DEFAULT_DURATION_MINUTES = 60
 
 function getFreeIntervals(availability: Interval, appointments: Interval[]): Interval[] {
   let freeIntervals: Interval[] = []
@@ -26,6 +26,17 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
   return freeIntervals
 }
 
+function toISOStringWithOffset(date: Date, offsetHours: number): string {
+  const offsetMs = offsetHours * 60 * 60 * 1000
+  const local = new Date(date.getTime() - offsetMs)
+
+  const iso = local.toISOString().replace("Z", "")
+  const sign = offsetHours > 0 ? "-" : "+"
+  const pad = (n: number) => String(Math.abs(n)).padStart(2, "0")
+
+  return `${iso}${sign}${pad(offsetHours)}:00`
+}
+
 export const getProfessionalSchedule = async (userId: number, date: Date) => {
   const dayOfWeek = date.getDay() // 0=domingo, 1=segunda, etc.
   const professional = await prisma.professional.findUnique({
@@ -47,9 +58,9 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
   })
 
   const startOfDay = new Date(date)
-  startOfDay.setHours(-3, 0, 0, 0)
+  // startOfDay.setHours(-3, 0, 0, 0)
   const endOfDay = new Date(date)
-  endOfDay.setHours(20, 59, 59, 999)
+  // endOfDay.setHours(20, 59, 59, 999)
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -69,7 +80,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
   // Transformar appointments em Interval[]
   const appointmentIntervals = appointments.map((app) => {
     const start = app.appointmentDate
-    const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // Ex: 30 minutos de duração fixa
+    const end = new Date(start.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // Ex: 60 minutos de duração fixa
     return { start, end }
   })
 
@@ -87,7 +98,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     return getFreeIntervals({ start, end }, appointmentIntervals)
   })
 
-  // Explodir em slots de 30 minutos
+  // Explodir em slots de 60 minutos
   const slots = freeIntervals.flatMap((interval) => {
     const slotsInInterval: { start: Date }[] = []
     let current = new Date(interval.start)
@@ -95,12 +106,19 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
 
     while (current < end) {
       slotsInInterval.push({ start: new Date(current) })
-      current = new Date(current.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // adiciona 30 min
+      current = new Date(current.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000) // adiciona 60 min
     }
     return slotsInInterval
   })
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
     start: new Date(start),
   }))
-  return slotsUnique.sort((a, b) => a.start.getTime() - b.start.getTime()) // Ordena por data/hora;
+
+  const slotsOrdened = slotsUnique
+    .sort((a, b) => a.start.getTime() - b.start.getTime())
+    .map((s) => ({
+      start: s.start.toISOString(), // converte para string ISO
+    }))
+  console.log(slotsOrdened)
+  return slotsOrdened
 }
