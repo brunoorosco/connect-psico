@@ -1,6 +1,5 @@
 'use server'
 
-import { PsychologistProfileProps } from '@/components/PsychoProfile'
 import { prisma } from '@/lib/db'
 
 export const professionalById = async (id: string): Promise<any> => {
