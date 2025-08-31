@@ -26,6 +26,7 @@ export const getAppointmentsByPatient = async ({ page = 1, limit = 10 }: Paginat
       select: {
         id: true,
         appointmentDate: true,
+        roomId:true,
         professional: {
           select: {
             name: true,

@@ -1,40 +1,35 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import DashboardHeader from "./DashboardHeader"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAppointmentsByPatient } from "@/hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
 import { getSession } from "next-auth/react"
-
-// Mock data for the patient dashboard
-interface ProgressNote {
-  id: number
-  date: string
-  title: string
-  content: string
-}
+import { useCurrentUser } from "@hooks/use-current-user"
 
 const PatientDashboard: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date())
   const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient()
+  const user = useCurrentUser()
 
   useEffect(() => {
     getSession()
     fetchAppointments()
   }, [])
 
-  // Filter past appointments
-  // @ts-ignore
-  const pastAppointments = appointments?.filter((app: AppointmentModel) => app.appointmentDate < new Date())
-  const nextAppointments = appointments?.filter((app: AppointmentModel) => app.appointmentDate >= new Date())
+  const HOUR = 60 * 60 * 1000
+  const now = Date.now()
 
-  // Filter future appointments
-  const futureAppointments = appointments
-    ?.map((app: AppointmentModel) => ({
-      ...app,
-      id: app.id,
-    }))
-    .filter((app: AppointmentModel) => app.status === "PENDING")
+  // helper pra garantir sempre timestamp UTC
+  const toMs = (d: Date | string | number) => (d instanceof Date ? d.getTime() : new Date(d).getTime())
+
+  const list = Array.isArray(appointments) ? appointments : []
+
+  const pastAppointments = list.filter((app: AppointmentModel) => toMs(app.appointmentDate) < now - HOUR)
+
+  const nextAppointments = list.filter((app: AppointmentModel) => {
+    const appTime = toMs(app.appointmentDate)
+    return appTime >= now - HOUR && appTime <= now + HOUR
+  })
 
   return (
     <div className="space-y-4 mt-4 px-4 sm:px-6 lg:px-6">
@@ -51,21 +46,21 @@ const PatientDashboard: React.FC = () => {
               userRole="DEFAULT"
             /> */}
             {nextAppointments &&
-              nextAppointments.map((consulta: any) => (
+              nextAppointments.map((consulta: AppointmentModel) => (
                 <Card key={consulta.id} className="therapy-card border-l-4 border-l-green-400 mb-2">
                   <CardContent className="p-2 pl-4">
                     <div className="flex justify-between items-start text-sm">
                       {/* Lado esquerdo: Nome + Local ou Link */}
                       <div className="flex flex-col">
+                        <pre>{JSON.stringify(consulta, null, 2)}</pre>
                         <div className="font-medium">
                           Consulta com: <b>{consulta.professional.name}</b>
                         </div>
-                        {consulta.tipo === "local" ? (
-                          <p className="text-green-600 font-medium">Local: {consulta.endereco}</p>
+                        {consulta.tipoAtendimento === "presencial" ? (
+                          <p className="text-green-600 font-medium">Local: --</p>
                         ) : (
                           <a
-                            href={consulta.link || "#"}
-                            target="_blank"
+                            href={`./app/${user?.id}/videochamada/room/${consulta.roomId}`}
                             rel="noopener noreferrer"
                             className="text-blue-600 underline font-medium"
                           >
@@ -75,7 +70,7 @@ const PatientDashboard: React.FC = () => {
                       </div>
 
                       {/* Lado direito: Data e Horário */}
-                      <WrapperDateTime consulta={consulta.appointmentDate}/>
+                      <WrapperDateTime consulta={consulta.appointmentDate} />
                     </div>
                   </CardContent>
                 </Card>
@@ -94,7 +89,7 @@ const PatientDashboard: React.FC = () => {
                           Consulta com {appointment.professional.name || "Nome do Médico"}
                         </h3>
                       </div>
-                     <WrapperDateTime consulta={appointment.appointmentDate}/>
+                      <WrapperDateTime consulta={appointment.appointmentDate} />
                     </div>
                     {appointment.notes && (
                       <div className="mt-2 text-sm bg-gray-50 p-2 rounded">{appointment.notes}</div>
@@ -139,22 +134,20 @@ export default PatientDashboard
 type TProps = {
   consulta: Date
 }
-const WrapperDateTime = ({consulta}: TProps) => {
+const WrapperDateTime = ({ consulta }: TProps) => {
   return (
     <div className="text-right font-xs">
       <div className="">
         <label className="text-sm text-muted-foreground mr-1">Data:</label>
         <label className="text-gray-600 font-semibold">
-          {String(consulta.getUTCDate()).padStart(2, "0")}/
-          {String(consulta.getUTCMonth() + 1).padStart(2, "0")}/
+          {String(consulta.getUTCDate()).padStart(2, "0")}/{String(consulta.getUTCMonth() + 1).padStart(2, "0")}/
           {consulta.getUTCFullYear()}
         </label>
       </div>
       <div className="">
         <label className="text-sm text-muted-foreground mr-1">Horário:</label>
         <label className="text-gray-600 font-semibold">
-          {String(consulta.getUTCHours() - 3).padStart(2, "0")}h
-          {String(consulta.getUTCMinutes()).padStart(2, "0")}m
+          {String(consulta.getUTCHours() - 3).padStart(2, "0")}h{String(consulta.getUTCMinutes()).padStart(2, "0")}m
         </label>
       </div>
     </div>
