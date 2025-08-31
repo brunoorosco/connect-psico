@@ -52,7 +52,6 @@ const PatientDashboard: React.FC = () => {
                     <div className="flex justify-between items-start text-sm">
                       {/* Lado esquerdo: Nome + Local ou Link */}
                       <div className="flex flex-col">
-                        <pre>{JSON.stringify(consulta, null, 2)}</pre>
                         <div className="font-medium">
                           Consulta com: <b>{consulta.professional.name}</b>
                         </div>
