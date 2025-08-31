@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale"
 import { createAppointment } from "@/actions/appointments"
 import { IScheduleButton } from "./types"
 import { formatInTimeZone } from "date-fns-tz"
+import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
 const TZ = "America/Sao_Paulo"
 
 export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }: IScheduleButton) {
@@ -24,12 +25,18 @@ export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }
       }
 
       toast.success("Agendamento solicitado!", {
-        description: `Consulta ... para ${formatInTimeZone(selectedSlot.start, TZ, "dd/MM/yyyy")} às ${formatInTimeZone(
+        description: `Consulta para ${formatInTimeZone(selectedSlot.start, TZ, "dd/MM/yyyy")} às ${formatInTimeZone(
           selectedSlot.start,
           TZ,
           "HH:mm"
         )}.`,
       })
+
+      sendMessageApiWhatsapp(
+        professional.phone,
+        `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
+          `Confira sua agenda na plataforma para maiores detalhes. 😉`
+      )
 
       onSuccess()
     } finally {
