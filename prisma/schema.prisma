@@ -28,7 +28,6 @@ model User {
   patientAppointments      Appointment[]          @relation("PatientAppointments")
   professionalAppointments Appointment[]          @relation("ProfessionalAppointments")
   availabilities           Availability[]
-  Comentarios              Comentarios[]
   receivedMessages         Message[]              @relation("ReceivedMessages")
   sentMessages             Message[]              @relation("SentMessages")
   Message                  Message[]
@@ -40,33 +39,34 @@ model User {
   NotePatient              NotePatient[]          @relation("NotePatientProfessional")
   VideoCallParticipant     VideoCallParticipant[]
   CertificateConfig        CertificateConfig[]
+  ComentariosProfessional  Comentarios[]          @relation("ReviewsProfessional")
+  ComentariosUser          Comentarios[]          @relation("ReviewsUser")
 
   @@index([id])
   @@map("users")
 }
 
 model Professional {
-  id                 Int           @id @default(autoincrement())
-  numConselho        String?       @map("num_conselho") @db.VarChar(8)
-  ufConselho         String?       @map("uf_conselho") @db.VarChar(2)
-  publicoAlvo        String[]      @map("publico_alvo")
+  id                 Int       @id @default(autoincrement())
+  numConselho        String?   @map("num_conselho") @db.VarChar(8)
+  ufConselho         String?   @map("uf_conselho") @db.VarChar(2)
+  publicoAlvo        String[]  @map("publico_alvo")
   especialidade      String[]
   abordagem          String?
-  tituloAcademico    String?       @map("(titulo_academico)")
+  tituloAcademico    String?   @map("(titulo_academico)")
   education          String?
-  tipoAtendimento    String?       @default("ambos") @map("tipo_atendimento")
+  tipoAtendimento    String?   @default("ambos") @map("tipo_atendimento")
   bio                String?
-  valorAtendimento   Int?          @default(0) @map("valor_atendimento")
-  tempoConsulta      Int?          @default(60) @map("tempo_consulta")
-  visivel            Boolean       @default(true) @map("visivel")
-  userId             String        @unique
-  Comentarios        Comentarios[]
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  deletedAt          DateTime?     @map("deleted_at")
-  isProfileCompleted Boolean       @default(false) @map("is_profile_completed")
-  experiencia        Int           @default(0) @map("experiencia")
+  valorAtendimento   Int?      @default(0) @map("valor_atendimento")
+  tempoConsulta      Int?      @default(60) @map("tempo_consulta")
+  visivel            Boolean   @default(true) @map("visivel")
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime? @map("deleted_at")
+  isProfileCompleted Boolean   @default(false) @map("is_profile_completed")
+  experiencia        Int       @default(0) @map("experiencia")
 
   @@index([id])
   @@map("professionals")
@@ -130,13 +130,16 @@ model NotePatient {
 }
 
 model Comentarios {
-  id             Int          @id @default(autoincrement())
-  content        String
-  rating         String
+  id             Int         @id @default(autoincrement())
+  comment        String
+  rating         Int
   userId         String
-  professionalId Int
-  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointmentId  Int         @map("appointment_id")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  professionalId String
+  professional   User        @relation("ReviewsProfessional", fields: [professionalId], references: [id], onDelete: Cascade)
+  appointment    Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  user           User        @relation("ReviewsUser", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([id])
   @@map("comentarios")
@@ -180,16 +183,17 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  id              Int      @id @default(autoincrement())
-  professionalId  String   @map("professional_id")
-  patientId       String   @map("patient_id")
-  appointmentDate DateTime @map("appointment_date")
-  status          Status   @default(PENDING)
-  tipoAtendimento String?  @default("ambos") @map("tipo_atendimento")
-  roomId          String?  @default(cuid()) @map("room_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  patient         User     @relation("PatientAppointments", fields: [patientId], references: [id])
-  professional    User     @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  id              Int           @id @default(autoincrement())
+  professionalId  String        @map("professional_id")
+  patientId       String        @map("patient_id")
+  appointmentDate DateTime      @map("appointment_date")
+  status          Status        @default(PENDING)
+  tipoAtendimento String?       @default("ambos") @map("tipo_atendimento")
+  roomId          String?       @default(cuid()) @map("room_id")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  patient         User          @relation("PatientAppointments", fields: [patientId], references: [id])
+  professional    User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  Comentarios     Comentarios[]
 
   @@map("appointments")
 }
