@@ -1,6 +1,6 @@
 export type Review = {
   id: string
-  profissionalId: string
+  professionalId: string
   appointmentId: string
   rating: number
   comment: string

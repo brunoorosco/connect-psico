@@ -9,9 +9,12 @@ import ReviewList from "./ReviewList"
 import { Review } from "@/domain/model/review"
 import { getReviewsByUserIdService, reviewOpenByAppointmentService } from "@services/review"
 
+type Profissional = { id: string; name: string }
+type ReviewWithName = Review & { professionalName: string }
+
 const ReviewsPage = () => {
-  const [profissional, setProfissional] = useState<any[]>([])
-  const [reviews, setReviews] = useState<Review[]>([])
+  const [profissional, setProfissional] = useState<Profissional[]>([])
+  const [reviews, setReviews] = useState<ReviewWithName[]>([])
   const [showForm, setShowForm] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
@@ -30,11 +33,8 @@ const ReviewsPage = () => {
       setProfissional(profissional)
 
       if (reviewsData) {
-        const withNames = reviewsData.map((review) => ({
-          ...review,
-          profissionalName: profissional.find((t) => t.id === review.profissionalId)?.name || "Desconhecido",
-        }))
-        setReviews(withNames)
+        setReviews(reviewsData)
+        console.log(reviewsData)
       }
     } catch (error) {
       console.error(error)
@@ -54,7 +54,11 @@ const ReviewsPage = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <ReviewsHeader onToggleForm={() => setShowForm(!showForm)} showForm={showForm} />
+      <ReviewsHeader
+        onToggleForm={() => setShowForm(!showForm)}
+        showForm={showForm}
+        professional={profissional.length > 0}
+      />
 
       {showForm && (
         <Card className="mb-6">

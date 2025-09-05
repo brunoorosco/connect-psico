@@ -1,23 +1,16 @@
 import RatingStars from "./RatingStars"
+import { ReviewPage } from "./types"
 
-interface Review {
-  id: string
-  profissionalName?: string
-  rating: number
-  comment: string
-  createdAt: string
-}
+type Props = { review: ReviewPage }
 
-const ReviewCard = ({ review }: { review: Review }) => (
+const ReviewCard = ({ review }: Props) => (
   <div className="border rounded-lg p-4">
     <div className="flex justify-between items-start mb-2">
       <div>
-        <h3 className="font-semibold">{review.profissionalName}</h3>
+        <h3 className="font-semibold">{review.professionalName}</h3>
         <div className="flex items-center gap-2 mt-1">
           <RatingStars rating={review.rating} />
-          <span className="text-sm text-muted-foreground">
-            {new Date(review.createdAt).toLocaleDateString()}
-          </span>
+          <span className="text-sm text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
     </div>

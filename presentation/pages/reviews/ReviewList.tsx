@@ -1,16 +1,8 @@
 import { CardHeader, CardContent } from "@/components/ui/card"
 import ReviewCard from "./ReviewCard"
+import { ReviewPage } from "./types"
 
-type ReviewWithName = {
-  id: string
-  rating: number
-  comment: string
-  createdAt: string
-  profissionalId: string
-  profissionalName: string
-}
-
-type Props = { reviews: ReviewWithName[] }
+type Props = { reviews: ReviewPage[] }
 
 const ReviewList = ({ reviews }: Props) => (
   <>
@@ -23,7 +15,7 @@ const ReviewList = ({ reviews }: Props) => (
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={ review } />
+            <ReviewCard key={review.id} review={review} />
           ))}
         </div>
       )}

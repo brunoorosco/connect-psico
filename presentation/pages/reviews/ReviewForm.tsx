@@ -8,12 +8,12 @@ import { CardHeader, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@hooks/useToast"
 import RatingStars from "./RatingStars"
 import { ReviewFormData, reviewSchema } from "./types"
-import { createReviewService } from "@services/review"
+import { createReviewAction } from "@/actions/review/create"
+import { toast } from "sonner"
 
-type Profissional = { name: string; id: string }
+type Profissional = { id: string; name: string }
 
 interface Props {
   profissional: Profissional[]
@@ -22,7 +22,6 @@ interface Props {
 }
 
 export default function ReviewForm({ profissional, onSuccess, onCancel }: Props) {
-  const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
 
   const form = useForm<ReviewFormData>({
@@ -33,20 +32,22 @@ export default function ReviewForm({ profissional, onSuccess, onCancel }: Props)
   const onSubmit = (values: ReviewFormData) => {
     startTransition(async () => {
       try {
-        await createReviewService({
+        const resp = await createReviewAction({
           profissionalId: values.profissionalId,
           rating: values.rating,
           comment: values.comment,
         })
-        toast({ title: "Sucesso", description: "Avaliação enviada com sucesso!" })
+        if (!resp.id) {
+          toast.error("Erro", {
+            description: "Não foi possível enviar a avaliação.",
+          })
+        }
+        toast.success("Sucesso", { description: "Avaliação enviada com sucesso!" })
         form.reset()
         onSuccess()
       } catch (err: any) {
-        console.error(err)
-        toast({
-          title: "Erro",
+        toast.error("Erro", {
           description: err?.message ?? "Não foi possível enviar a avaliação.",
-          variant: "destructive",
         })
       }
     })
@@ -66,7 +67,7 @@ export default function ReviewForm({ profissional, onSuccess, onCancel }: Props)
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Terapeuta</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isPending}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o terapeuta" />
@@ -107,8 +108,8 @@ export default function ReviewForm({ profissional, onSuccess, onCancel }: Props)
                   <FormLabel>Comentário</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Compartilhe sua experiência..."
                       className="min-h-[100px]"
+                      placeholder="Compartilhe sua experiência..."
                       {...field}
                       disabled={isPending}
                     />

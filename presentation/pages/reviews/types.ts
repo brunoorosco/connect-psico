@@ -9,6 +9,6 @@ export const reviewSchema = z.object({
 
 export type ReviewFormData = z.infer<typeof reviewSchema>
 
-export type ReviewPage = { review: Review & { profissinallName: string } }
+export type ReviewPage = Review & { professionalName: string }
 
 export type ProfissionalReview = { id: string; name: string }

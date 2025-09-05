@@ -2,22 +2,22 @@
 
 import { Review } from "@/domain/model/review"
 import { prisma } from "@/lib/db"
-import { parseIntStrict, toReview } from "./helpers"
+import {  toReview } from "./helpers"
 
 export type CreateReviewDTO = {
     userId: string
     professionalId: string
-    appointmentId: number | string
+    appointmentId: number
     rating: number
     comment: string
   }
 
-export async function createReview(input: CreateReviewDTO): Promise<Review> {
+export async function createReviewRepository(input: CreateReviewDTO): Promise<Review> {
     const created = await prisma.comentarios.create({
       data: {
         userId: input.userId,
         professionalId: input.professionalId,
-        appointmentId: parseIntStrict(input.appointmentId),
+        appointmentId: input.appointmentId,
         rating: input.rating,
         comment: input.comment,
       },

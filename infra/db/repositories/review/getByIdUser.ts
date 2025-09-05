@@ -5,8 +5,9 @@ import type { Review } from "@/domain/model/review"
 import { Prisma } from "@prisma/client"
 import { toReview } from "./helpers"
 
+type ReviewWithName = Review & { professionalName: string }
 type Response = {
-  data: Review[]
+  data: ReviewWithName[]
   total: number
   page: number
   pageSize: number
@@ -33,6 +34,7 @@ export async function getByIdUser(userId: string, params?: { page?: number; page
         rating: true,
         comment: true,
         createdAt: true,
+        professional: { select: { name: true, id: true } },
       },
     }),
     prisma.comentarios.count({ where }),

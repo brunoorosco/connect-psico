@@ -1,19 +1,22 @@
 import type { Review } from "@/domain/model/review"
 
+export type ReviewWithName = Review & { professionalName: string }
 // =========================
 // Helpers
 // =========================
 export function toReview(row: {
   id: number
+  professional: { name: string }
   professionalId: string
   appointmentId: number
   rating: number
   comment: string
   createdAt: Date
-}): Review {
+}): ReviewWithName {
   return {
     id: String(row.id),
-    profissionalId: row.professionalId,
+    professionalId: row.professionalId,
+    professionalName: row.professional.name,
     appointmentId: String(row.appointmentId),
     rating: row.rating,
     comment: row.comment,
