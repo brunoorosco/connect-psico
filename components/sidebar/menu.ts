@@ -12,6 +12,7 @@ import {
   WebcamIcon,
   ShieldCheckIcon,
   Settings2Icon,
+  StarIcon,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -113,7 +114,7 @@ export const menus = [
   {
     title: "Comentários",
     url: `/app/{userId}/reviews`,
-    icon: Settings2Icon,
+    icon: StarIcon,
     rules: ["DEFAULT"],
   },
   {
