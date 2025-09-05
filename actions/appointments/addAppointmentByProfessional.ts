@@ -5,6 +5,8 @@ import { z } from "zod"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { TIME_REGEX } from "@/utils/formatMessageTime"
 import { auth } from "@/auth"
+import { createPixForAppointment } from "../payment/createPixForAppointment"
+import { randomUUID } from "crypto"
 
 const CreateAppointmentSchema = z.object({
   patientId: z.string(),
@@ -47,9 +49,17 @@ export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAp
 
     if (!professionalId) return
 
-   
     const appointment = await prisma.appointment.create({
       data: { professionalId, patientId, appointmentDate },
+      select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
+    })
+ 
+    const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
+    console.log('[addAppointmentByProfessional.ts:58]', { idempotency });
+    await createPixForAppointment({
+      amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+      appointmentId: appointment.id,
+      idempotencyKey: idempotency.key,
     })
 
     return {

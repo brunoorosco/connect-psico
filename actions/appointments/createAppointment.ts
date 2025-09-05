@@ -5,6 +5,9 @@ import { z } from "zod"
 import { fromZonedTime } from "date-fns-tz"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { endOfDay, startOfDay } from "date-fns"
+import { randomUUID } from "crypto"
+import { createPixForAppointment } from "../payment/createPixForAppointment"
+import { auth } from "@/auth"
 
 const TZ = "America/Sao_Paulo"
 
@@ -22,6 +25,8 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
 
   const { professionalId, patientId, appointmentDate } = valid.data
   const appointmentUtc = fromZonedTime(appointmentDate, TZ)
+
+  const session = await auth()
 
   try {
     // 1. Verificar disponibilidade do profissional no dia/hora
@@ -59,8 +64,19 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     // 3. Criar agendamento
     const appointment = await prisma.appointment.create({
       data: { professionalId, patientId, appointmentDate },
+      select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
     })
 
+    const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
+
+    await createPixForAppointment({
+      amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+      appointmentId: appointment.id,
+      idempotencyKey: idempotency.key,
+      patient: { name: session?.user.name as string, email: session?.user.email as string, cellphone: "" },
+    })
+
+    console.log("[createAppointment.ts:63]", { appointment })
     return { success: "Agendamento realizado com sucesso", data: appointment }
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
