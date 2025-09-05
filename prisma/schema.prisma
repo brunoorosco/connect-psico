@@ -190,6 +190,7 @@ model Appointment {
   status          Status        @default(PENDING)
   tipoAtendimento String?       @default("ambos") @map("tipo_atendimento")
   roomId          String?       @default(cuid()) @map("room_id")
+  review          Boolean       @default(false)
   createdAt       DateTime      @default(now()) @map("created_at")
   patient         User          @relation("PatientAppointments", fields: [patientId], references: [id])
   professional    User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])

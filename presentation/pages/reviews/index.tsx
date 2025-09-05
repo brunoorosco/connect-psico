@@ -6,10 +6,11 @@ import { useCurrentUser } from "@hooks/use-current-user"
 import ReviewsHeader from "./ReviewsHeader"
 import ReviewForm from "./ReviewForm"
 import ReviewList from "./ReviewList"
-import { Review, Therapist } from "./types"
+import { Review } from "@/domain/model/review"
+import { getReviewsByUserIdService, reviewOpenByAppointmentService } from "@services/review"
 
 const ReviewsPage = () => {
-  const [therapists, setTherapists] = useState<Therapist[]>([])
+  const [profissional, setProfissional] = useState<any[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
   const [showForm, setShowForm] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -17,31 +18,21 @@ const ReviewsPage = () => {
   const user = useCurrentUser()
 
   useEffect(() => {
-    fetchTherapistsAndReviews()
+    fetchProfissionalAndReviews()
   }, [])
 
-  const fetchTherapistsAndReviews = async () => {
+  const fetchProfissionalAndReviews = async () => {
     try {
       if (!user) return
 
-      // mock para exemplo
-      const therapistData: Therapist[] = [
-        { id: "00000000-0000-0000-0000-000000000001", name: "Dra. Maria Silva" },
-        { id: "00000000-0000-0000-0000-000000000002", name: "Dr. João Santos" },
-      ]
-      setTherapists(therapistData)
-
-      // buscar reviews
-      const { data: reviewsData } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("patient_id", user?.id)
-        .order("created_at", { ascending: false })
+      const { appointments, profissional } = await reviewOpenByAppointmentService(user.id as string)
+      const { data: reviewsData } = await getReviewsByUserIdService(user?.id as string)
+      setProfissional(profissional)
 
       if (reviewsData) {
         const withNames = reviewsData.map((review) => ({
           ...review,
-          therapist_name: therapistData.find((t) => t.id === review.therapist_id)?.name || "Desconhecido",
+          profissionalName: profissional.find((t) => t.id === review.profissionalId)?.name || "Desconhecido",
         }))
         setReviews(withNames)
       }
@@ -68,10 +59,10 @@ const ReviewsPage = () => {
       {showForm && (
         <Card className="mb-6">
           <ReviewForm
-            therapists={therapists}
+            profissional={profissional}
             onSuccess={() => {
               setShowForm(false)
-              fetchTherapistsAndReviews()
+              fetchProfissionalAndReviews()
             }}
             onCancel={() => setShowForm(false)}
           />

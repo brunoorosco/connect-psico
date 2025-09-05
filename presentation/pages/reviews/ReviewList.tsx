@@ -1,17 +1,16 @@
 import { CardHeader, CardContent } from "@/components/ui/card"
 import ReviewCard from "./ReviewCard"
 
-interface Review {
+type ReviewWithName = {
   id: string
-  therapist_name?: string
   rating: number
   comment: string
-  created_at: string
+  createdAt: string
+  profissionalId: string
+  profissionalName: string
 }
 
-interface Props {
-  reviews: Review[]
-}
+type Props = { reviews: ReviewWithName[] }
 
 const ReviewList = ({ reviews }: Props) => (
   <>
@@ -24,7 +23,7 @@ const ReviewList = ({ reviews }: Props) => (
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review.id} review={ review } />
           ))}
         </div>
       )}

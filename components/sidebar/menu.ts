@@ -111,6 +111,12 @@ export const menus = [
     rules: ["SUPERVISOR"],
   },
   {
+    title: "Comentários",
+    url: `/app/{userId}/reviews`,
+    icon: Settings2Icon,
+    rules: ["SUPERVISOR", "DEFAULT"],
+  },
+  {
     title: "Permissão",
     url: "/app/admin/permitions",
     icon: ShieldCheckIcon,

@@ -1,3 +1,6 @@
+"use client"
+
+import { useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
@@ -8,49 +11,45 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@hooks/useToast"
 import RatingStars from "./RatingStars"
 import { ReviewFormData, reviewSchema } from "./types"
+import { createReviewService } from "@services/review"
 
-interface Therapist {
-  id: string
-  name: string
-}
+type Profissional = { name: string; id: string }
 
 interface Props {
-  therapists: Therapist[]
+  profissional: Profissional[]
   onSuccess: () => void
   onCancel: () => void
 }
 
-const ReviewForm = ({ therapists, onSuccess, onCancel }: Props) => {
+export default function ReviewForm({ profissional, onSuccess, onCancel }: Props) {
   const { toast } = useToast()
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm<ReviewFormData>({
     resolver: zodResolver(reviewSchema),
-    defaultValues: { therapist_id: "", rating: 0, comment: "" },
+    defaultValues: { profissionalId: "", rating: 0, comment: "" },
   })
 
-  const onSubmit = async (data: ReviewFormData) => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) return
-
-      const { error } = await supabase.from("reviews").insert({
-        patient_id: session.user.id,
-        therapist_id: data.therapist_id,
-        rating: data.rating,
-        comment: data.comment,
-      })
-
-      if (error) throw error
-
-      toast({ title: "Sucesso", description: "Avaliação enviada com sucesso!" })
-      form.reset()
-      onSuccess()
-    } catch (error) {
-      console.error(error)
-      toast({ title: "Erro", description: "Não foi possível enviar a avaliação.", variant: "destructive" })
-    }
+  const onSubmit = (values: ReviewFormData) => {
+    startTransition(async () => {
+      try {
+        await createReviewService({
+          profissionalId: values.profissionalId,
+          rating: values.rating,
+          comment: values.comment,
+        })
+        toast({ title: "Sucesso", description: "Avaliação enviada com sucesso!" })
+        form.reset()
+        onSuccess()
+      } catch (err: any) {
+        console.error(err)
+        toast({
+          title: "Erro",
+          description: err?.message ?? "Não foi possível enviar a avaliação.",
+          variant: "destructive",
+        })
+      }
+    })
   }
 
   return (
@@ -63,18 +62,18 @@ const ReviewForm = ({ therapists, onSuccess, onCancel }: Props) => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="therapist_id"
+              name="profissionalId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Terapeuta</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o terapeuta" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {therapists.map((t) => (
+                      {profissional.map((t) => (
                         <SelectItem key={t.id} value={t.id}>
                           {t.name}
                         </SelectItem>
@@ -107,7 +106,12 @@ const ReviewForm = ({ therapists, onSuccess, onCancel }: Props) => {
                 <FormItem>
                   <FormLabel>Comentário</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Compartilhe sua experiência..." className="min-h-[100px]" {...field} />
+                    <Textarea
+                      placeholder="Compartilhe sua experiência..."
+                      className="min-h-[100px]"
+                      {...field}
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,8 +119,10 @@ const ReviewForm = ({ therapists, onSuccess, onCancel }: Props) => {
             />
 
             <div className="flex gap-2">
-              <Button type="submit">Enviar Avaliação</Button>
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Enviando..." : "Enviar Avaliação"}
+              </Button>
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
                 Cancelar
               </Button>
             </div>
@@ -126,5 +132,3 @@ const ReviewForm = ({ therapists, onSuccess, onCancel }: Props) => {
     </>
   )
 }
-
-export default ReviewForm
