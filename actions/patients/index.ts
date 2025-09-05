@@ -1,6 +1,6 @@
-export * from './getPatientsByProfessionalId'
-export * from './addPatient'
-export * from './getPatientById'
-export * from './updatePatient'
-export * from './getPatientByUserId'
-export * from './deletePatient'
+export { getPatientsByProfessionalId } from "./getPatientsByProfessionalId"
+export { createPatient } from "./addPatient"
+export { getPatientById } from "./getPatientById"
+export { updatePatient } from "./updatePatient"
+export { getPatientByUserId } from "./getPatientByUserId"
+export { deletePatient } from "./deletePatient"

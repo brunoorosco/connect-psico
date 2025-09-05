@@ -1,2 +1,2 @@
-export * from './addConsultation'
-export * from './getConsultationByPatientId'
+export { createConsultation } from "./addConsultation"
+export { getConsultaltionByPatientId } from "./getConsultationByPatientId"

@@ -1,3 +1,3 @@
-export * from './create'
-export * from './getByIdProfessional'
-export * from './getByIdUser'
+export { createReviewRepository } from "./create"
+export { getByIdProfessional } from "./getByIdProfessional"
+export { getByIdUser } from "./getByIdUser"
