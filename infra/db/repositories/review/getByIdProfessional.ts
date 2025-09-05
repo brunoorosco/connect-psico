@@ -37,6 +37,7 @@ export async function getByIdProfessional(
         rating: true,
         comment: true,
         createdAt: true,
+        professional: { select: { name: true } },
       },
     }),
     prisma.comentarios.count({ where }),
