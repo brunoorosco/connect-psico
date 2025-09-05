@@ -94,6 +94,8 @@ export function useAppointmentForm({
       notes: values.notes,
       duration,
       isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId,
+      review: false,
+      tipoAtendimento: "ambos"
     }
 
     onSubmit(newAppointment)

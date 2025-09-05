@@ -1,7 +1,7 @@
-export * from './addMessage'
-export * from './getMessages'
-export * from './sendMessageApi'
-export * from './getMessageApi'
-export * from './getUserChat'
-export * from './getContactsApi'
-export * from './getUserChatProfessional'
+export { createMessage } from "./addMessage"
+export { getMessages } from "./getMessages"
+export { sendMessageApi } from "./sendMessageApi"
+export { getMessageApi } from "./getMessageApi"
+export { getUserChat } from "./getUserChat"
+export { getContactsApi } from "./getContactsApi"
+export { getUserChatProfessionals } from "./getUserChatProfessional"
