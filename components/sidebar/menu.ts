@@ -114,7 +114,7 @@ export const menus = [
     title: "Comentários",
     url: `/app/{userId}/reviews`,
     icon: Settings2Icon,
-    rules: ["SUPERVISOR", "DEFAULT"],
+    rules: ["DEFAULT"],
   },
   {
     title: "Permissão",

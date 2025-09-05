@@ -10,7 +10,7 @@ export type AppointmentModel = {
   roomId?: string
   tipoAtendimento?: "ambos" | "remoto" | "presencial"
   duration?: number
-  reviwe: boolean
+  review: boolean
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date
   patient: { id: string; name: string; telefone: string; email: string }
