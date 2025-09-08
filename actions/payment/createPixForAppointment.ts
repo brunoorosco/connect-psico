@@ -35,7 +35,7 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
     const resp = await abacatePay.createPixCharge({
       amountCents,
       metadata: { appointmentId: app.id },
-      customer: { cellphone: "", email: "", name: "", taxId: "" },
+      customer: { cellphone: patient.cellphone, email: patient.email, name: patient.name, taxId: "" },
     }) // { id, checkoutUrl, qrCodeText, expiresAt }
 
     await prisma.payment.create({

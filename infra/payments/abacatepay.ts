@@ -71,10 +71,10 @@ export const abacatePay = {
       amount: input.amountCents,
       expiresIn: input.expiresInSec ?? 1800,
       description: input.description ?? "Consulta psicológica",
-      customer: input.customer,
-      metadata: input.metadata ?? {},
+      // customer: input.customer,
+      metadata: input.customer ?? {},
     }
-
+    console.log(payload)
     return api<{
       id: string
       qrCodeText: string

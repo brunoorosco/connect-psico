@@ -68,12 +68,16 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     })
 
     const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
-
+    console.log("createAppointment.ts:71", session?.user)
     await createPixForAppointment({
       amountBRL: appointment.professional.Professional?.valorAtendimento as number,
       appointmentId: appointment.id,
       idempotencyKey: idempotency.key,
-      patient: { name: session?.user.name as string, email: session?.user.email as string, cellphone: "" },
+      patient: {
+        name: session?.user.name as string,
+        email: session?.user.email as string,
+        cellphone: session?.user.phone as string,
+      },
     })
 
     console.log("[createAppointment.ts:63]", { appointment })

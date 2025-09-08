@@ -43,6 +43,7 @@ export const {
       return true
     },
     async jwt({ token, user, trigger, session }) {
+      console.log(user)
       if (trigger === "update") {
         return {
           ...token,
@@ -53,6 +54,7 @@ export const {
             isProfileCompleted: session.isProfileCompleted ?? token.isProfileCompleted,
             isNewProfile: session.isNewProfile ?? token.isNewProfile,
             crm: session.crm,
+            phone: session.phone
           },
         }
       }
@@ -89,6 +91,7 @@ export const {
           isProfileCompleted: token.isProfileCompleted,
           isNewProfile: token.isNewProfile,
           crm: token.crm,
+          phone: session.user.phone
         },
       }
     },
