@@ -6,15 +6,17 @@ import { CertificateConfig, CertificateType } from "./types"
 import { headerFontStacks } from "./constants"
 import { templates, titles } from "./templates"
 import DraggableLayer, { type AnyLayer, type QrLayer } from "./DraggableLayer"
+import { hexToRgba } from "@/utils/paper"
 
 interface Props {
   config: CertificateConfig & { layers?: AnyLayer[] }
   user?: { name?: string; crp?: string }
   editing?: boolean
   onLayerChange?: (id: string, patch: Partial<AnyLayer>) => void
+  data?: Record<string, any> // 👈 NOVO
 }
 
-export default function CertificatePreview({ config, user, editing = false, onLayerChange }: Props) {
+export default function CertificatePreview({ config, user, editing = false, onLayerChange,data}: Props) {
   const type: CertificateType = config?.type || "atestado"
   const title = (config.bodyTitle?.trim()?.length ? config.bodyTitle : titles[type]) ?? ""
   const template = (config.bodyTemplate?.trim()?.length ? config.bodyTemplate : templates[type]) ?? ""
@@ -45,25 +47,9 @@ export default function CertificatePreview({ config, user, editing = false, onLa
     queixa: "crises de ansiedade",
     tratamento: "crises de ansiedade",
     observacoes: "relatou alteração de sono e humor",
+    ...(data ?? {}),
   }).replaceAll("&#x2F;", "/")
 
-  function hexToRgba(hex: string) {
-    const m8 = /^#([0-9A-F]{8})$/i.exec(hex)
-    const m6 = /^#([0-9A-F]{6})$/i.exec(hex)
-    if (m8) {
-      const r = parseInt(m8[1].slice(0, 2), 16)
-      const g = parseInt(m8[1].slice(2, 4), 16)
-      const b = parseInt(m8[1].slice(4, 6), 16)
-      const a = parseInt(m8[1].slice(6, 8), 16) / 255
-      return `rgba(${r}, ${g}, ${b}, ${a})`
-    }
-    if (m6) return hex // #RRGGBB normal
-    return hex
-  }
-
-  function cmToPx(cm: number) {
-    return Math.round((cm * 96) / 2.54) // 96 dpi
-  }
 
   return (
     <div

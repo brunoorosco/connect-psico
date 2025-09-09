@@ -15,3 +15,4 @@ export function hexToRgba(hex: string) {
 export function cmToPx(cm: number) {
     return Math.round((cm * 96) / 2.54) // 96 dpi
   }
+
