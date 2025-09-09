@@ -43,7 +43,6 @@ export const {
       return true
     },
     async jwt({ token, user, trigger, session }) {
-      console.log(user)
       if (trigger === "update") {
         return {
           ...token,
@@ -54,7 +53,7 @@ export const {
             isProfileCompleted: session.isProfileCompleted ?? token.isProfileCompleted,
             isNewProfile: session.isNewProfile ?? token.isNewProfile,
             crm: session.crm,
-            phone: session.phone
+            phone: session.phone,
           },
         }
       }
@@ -67,15 +66,21 @@ export const {
 
         const userDb = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { role: true, isNewProfile: true, Professional: { select: { numConselho: true, ufConselho: true } } },
+          select: {
+            role: true,
+            isNewProfile: true,
+            Professional: { select: { numConselho: true, ufConselho: true } },
+            phone: true,
+          },
         })
-
+    
         token.id = user.id
         token.role = userDb?.role || UserRole.DEFAULT
         token.isProfileCompleted = isProfileComplete
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
         token.crm = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
+        token.phone = userDb?.phone || ''
       }
 
       return token
@@ -91,7 +96,7 @@ export const {
           isProfileCompleted: token.isProfileCompleted,
           isNewProfile: token.isNewProfile,
           crm: token.crm,
-          phone: session.user.phone
+          phone: token?.phone,
         },
       }
     },

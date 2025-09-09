@@ -8,17 +8,31 @@ import { withIdem } from "@/infra/db/repositories/idempotency"
 
 export async function POST(req: NextRequest) {
   const raw = await req.text()
-  const sig = req.headers.get("x-abacatepay-signature") || ""
+  const url = new URL(req.url)
+  const secret = url.searchParams.get("webhookSecret")
 
-  if (!verifyAbacateSignature(raw, sig)) {
+  if (!verifyAbacateSignature(secret as string)) {
     return new NextResponse("invalid signature", { status: 401 })
   }
 
-  const evt = JSON.parse(raw) as { id: string; type: string; data: any; createdAt: string }
+  const evt = JSON.parse(raw) as {
+    event: string
+    data: {
+      payment: { amount: number; fee: number; method: string }
+      pixQrCode: {
+        amount: number
+        id: string
+        kind: string
+        metadata: { cellphone: string; email: string; name: string; taxId: string }
+        status: string
+      }
+    }
+    devMode: boolean
+  }
 
-  await withIdem(`abacate:${evt.id}`, async () => {
-    if (evt.type === "payment.paid") {
-      const providerPaymentId = evt.data.id as string
+  await withIdem(`abacate:${evt.data.pixQrCode.id}`, async () => {
+    if (evt.event === "billing.paid" && evt.data.pixQrCode.status === "PAID") {
+      const providerPaymentId = evt.data.pixQrCode.id
 
       const payment = await prisma.payment.findFirst({
         where: { providerPaymentId },
@@ -31,7 +45,7 @@ export async function POST(req: NextRequest) {
         await prisma.$transaction(async (tx) => {
           await tx.payment.update({
             where: { id: payment.id },
-            data: { status: "PAID", paidAt: new Date(evt.createdAt) },
+            data: { status: "PAID", paidAt: new Date() },
           })
           await tx.appointment.update({
             where: { id: payment.appointmentId },
@@ -40,25 +54,26 @@ export async function POST(req: NextRequest) {
         })
 
         const app = payment.appointment
-        const date = app.appointmentDate.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+        const date = app.appointmentDate.toLocaleString("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+        })
 
         // notifica profissional
-        // await sendEmail(app.professional.email, "Nova consulta confirmada", `<p>Consulta em ${date}</p>`)
-        if (app.professional.phone)
-          await sendMessageApiWhatsapp(app.professional.phone, `Consulta confirmada em ${date}.`)
+        if (app.professional.phone) {
+          await sendMessageApiWhatsapp(app.professional.phone, `✅ Consulta confirmada em ${date}.`)
+        }
 
         // notifica paciente
-        // await sendEmail(
-        //   app.patient.email,
-        //   "Pagamento confirmado",
-        //   `<p>Seu pagamento foi confirmado. Consulta em ${date}.</p>`
-        // )
-        if (app.patient.phone)
-          await sendMessageApiWhatsapp(app.patient.phone, `Pagamento confirmado! Consulta em ${date}.`)
+        if (app.patient.phone) {
+          await sendMessageApiWhatsapp(
+            app.patient.phone,
+            `🎉 Pagamento confirmado! Sua consulta está agendada para ${date}.`
+          )
+        }
       }
     }
 
-    // você pode tratar: payment.refunded, payout.paid, etc.
+    // se precisar, tratar outros eventos: billing.refunded, billing.failed, etc.
   })
 
   return NextResponse.json({ ok: true })

@@ -13,6 +13,20 @@ type PixChargeResp = {
   qrCodeText: string
   expiresAt?: string
 }
+type TRespChargeResp = {
+  error: string
+  data: {
+    id: string
+    amount: number
+    status: string
+    method: string
+    brCode: string
+    brCodeBase64: string
+    expiresAt: string
+    createdAt: string
+    description: string
+  }
+}
 
 type RefundInput = {
   providerPaymentId: string
@@ -70,18 +84,11 @@ export const abacatePay = {
     const payload = {
       amount: input.amountCents,
       expiresIn: input.expiresInSec ?? 1800,
-      description: input.description ?? "Consulta psicológica",
+      description: input.description ?? "Terapia",
       // customer: input.customer,
       metadata: input.customer ?? {},
     }
-    console.log(payload)
-    return api<{
-      id: string
-      qrCodeText: string
-      qrCodeBase64: string
-      expiresAt: string
-      checkoutUrl: string
-    }>("/v1/pixQrCode/create", {
+    return api<TRespChargeResp>("/v1/pixQrCode/create", {
       method: "POST",
       body: JSON.stringify(payload),
     })
@@ -125,17 +132,16 @@ export const abacatePay = {
   },
 }
 
-export function verifyAbacateSignature(rawBody: string, signatureHeader: string): boolean {
+export function verifyAbacateSignature(secret: string): boolean {
   if (!ABACATE_WEBHOOK_SECRET) {
     console.warn("[abacatepay] ABACATEPAY_WEBHOOK_SECRET não configurado — aceitando sempre (dev).")
     return true
   }
   try {
-    // Supondo assinatura HMAC-SHA256 no header: x-abacatepay-signature
-    const hmac = crypto.createHmac("sha256", ABACATE_WEBHOOK_SECRET)
-    const digest = "sha256=" + hmac.update(rawBody, "utf8").digest("hex")
-    // comparação tempo-constante
-    return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signatureHeader))
+    if (secret !== ABACATE_WEBHOOK_SECRET) {
+      return false
+    }
+    return true
   } catch {
     return false
   }

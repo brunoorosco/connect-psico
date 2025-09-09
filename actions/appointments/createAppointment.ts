@@ -63,12 +63,12 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     }
     // 3. Criar agendamento
     const appointment = await prisma.appointment.create({
-      data: { professionalId, patientId, appointmentDate },
+      data: { professionalId, patientId, appointmentDate, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
       select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
     })
 
     const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
-    console.log("createAppointment.ts:71", session?.user)
+
     await createPixForAppointment({
       amountBRL: appointment.professional.Professional?.valorAtendimento as number,
       appointmentId: appointment.id,
@@ -80,7 +80,6 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
       },
     })
 
-    console.log("[createAppointment.ts:63]", { appointment })
     return { success: "Agendamento realizado com sucesso", data: appointment }
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {

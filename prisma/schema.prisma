@@ -194,6 +194,7 @@ model Appointment {
   createdAt       DateTime @default(now()) @map("created_at")
   priceCents      Int      @default(0)
   payment         Payment?
+  expiresAt       DateTime?
 
   patient      User          @relation("PatientAppointments", fields: [patientId], references: [id])
   professional User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
@@ -347,6 +348,7 @@ model Payout {
   updatedAt        DateTime  @updatedAt
 
   appointment Appointment @relation(fields: [appointmentId], references: [id])
+
   @@map("payout")
 }
 

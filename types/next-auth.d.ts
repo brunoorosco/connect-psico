@@ -18,11 +18,13 @@ declare module "next-auth" {
     isProfileCompleted?: boolean
     isTwoFactorEnabled?: boolean
     crm?: string
+    phone?: string
   }
   interface JWT {
     role: string
     isProfileCompleted?: boolean
     isTwoFactorEnabled?: boolean
+    phone?: string
   }
 }
 
@@ -36,5 +38,6 @@ declare module "next-auth/jwt" {
     isTwoFactorEnabled?: boolean
     isProfileCompleted?: boolean
     crm?: string
+    phone?: string
   }
 }
