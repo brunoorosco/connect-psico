@@ -349,7 +349,10 @@ export async function generateCertificatePdf(
   }
 
   const pdfBytes = await doc.save()
-  const blob = new Blob([pdfBytes], { type: "application/pdf" })
-  const url = URL.createObjectURL(blob)
-  window.open(url, "_blank", "noopener,noreferrer")
+  if (typeof window !== "undefined") {
+    //@ts-ignore
+    const blob = new Blob([pdfBytes], { type: "application/pdf" })
+    const url = URL.createObjectURL(blob)
+    window.open(url, "_blank", "noopener,noreferrer")
+  }
 }
