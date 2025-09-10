@@ -52,7 +52,7 @@ export const {
             isTwoFactorEnabled: session.isTwoFactorEnabled ?? token.isTwoFactorEnabled,
             isProfileCompleted: session.isProfileCompleted ?? token.isProfileCompleted,
             isNewProfile: session.isNewProfile ?? token.isNewProfile,
-            crm: session.crm,
+            crp: session.crp,
           },
         }
       }
@@ -73,7 +73,7 @@ export const {
         token.isProfileCompleted = isProfileComplete
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
-        token.crm = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
+        token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
       }
 
       return token
@@ -88,7 +88,7 @@ export const {
           isTwoFactorEnabled: token.isTwoFactorEnabled,
           isProfileCompleted: token.isProfileCompleted,
           isNewProfile: token.isNewProfile,
-          crm: token.crm,
+          crp: token.crp,
         },
       }
     },

@@ -14,6 +14,7 @@ import {
 import ColorField from "./ColorField";
 import ModelFont from "./ModelFont";
 import { templates, titles } from "./templates";
+import TemplateHelp from "./ToolTipHelp";
 
 interface Props {
   config: CertificateConfig;
@@ -72,6 +73,7 @@ export default function BodyConfig({ config, onChange }: Props) {
           />
         </div>
       </div>
+      <TemplateHelp/>
 
       {/* Área para edição do conteúdo */}
       <Textarea

@@ -91,7 +91,7 @@ export default function PatientPage({ params }: { params: { id: string } }) {
 
   function handleGenerate() {
     if (!selectedConfig) return
-    const professional = { name: user?.name as string, crp: user?.crm as string }
+    const professional = { name: user?.name as string, crp: user?.crp as string }
     // Gera PDF e abre em nova aba
     generateCertificatePdf(selectedConfig, professional, basePatient)
   }

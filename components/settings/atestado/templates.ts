@@ -8,7 +8,7 @@ export const titles: Record<keyof typeof templates, string> = {
 }
 
 export const templates = {
-  atestado: `Atesto, para fins de afastamento das atividades laborais, que o(a) Sr(a) {{paciente}}, RG: {{rg}}, realizou consulta com o(a) Psicólogo(a) {{medico}} - CRM {{crm}}.
+  atestado: `Atesto, para fins de afastamento das atividades laborais, que o(a) Sr(a) {{paciente}}, RG: {{rg}}, realizou consulta com o(a) Psicólogo(a) {{nome}} - CRP {{crp}}.
 Apresenta {{sintomas}}, sendo necessário acompanhamento psicológico.
 
 CID: {{cid}}.
@@ -27,7 +27,7 @@ Dia {{data}} às {{horario}}
                                           São Paulo, {{dataExtenso}}
 `,
 
-  acompanhamento: `Declaro para os devidos fins que {{paciente}}, CPF: {{cpf}}, encontra-se em acompanhamento psicológico, sob responsabilidade do(a) Psicólogo(a) {{medico}}, CRM {{crm}}.
+  acompanhamento: `Declaro para os devidos fins que {{paciente}}, CPF: {{cpf}}, encontra-se em acompanhamento psicológico, sob responsabilidade do(a) Psicólogo(a) {{nome}}, CRP {{crp}}.
 
 O acompanhamento teve início em {{inicio}} e tem como objetivo obter como hipótese diagnóstica CID {{cid}}. 
 As sessões ocorrem semanalmente e seguem as diretrizes éticas e profissionais da Psicologia.

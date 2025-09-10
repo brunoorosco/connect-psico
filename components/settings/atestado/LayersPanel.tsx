@@ -127,7 +127,7 @@ export default function LayersPanel({
       gapLineToName: 8,
       gapNameToCrp: 4,
       name: user?.name || "Profissional",
-      crp: user?.crm || user?.crm || "CRP 00/00000",
+      crp: user?.crp || user?.crp || "CRP 00/00000",
       z: 50,
     }
     onChange([...(layers || []), l])

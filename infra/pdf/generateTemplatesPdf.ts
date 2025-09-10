@@ -4,7 +4,7 @@ import fontkit from "@pdf-lib/fontkit"
 import QRCode from "qrcode"
 
 type CertificateConfig = any
-type User = { name?: string; crp?: string; crm?: string }
+type User = { name?: string; crp?: string }
 
 type PdfFontPack = { regular: any; bold?: any }
 type FontMap = Record<string, PdfFontPack>
@@ -309,9 +309,8 @@ export async function generateCertificatePdf(
   const paraGap = typeof config.bodyParagraphSpacing === "number" ? config.bodyParagraphSpacing : cm(0.2)
 
   const raw = Mustache.render(config.bodyTemplate ?? "", {
-    medico: user?.name ?? "",
-    crp: user?.crp ?? user?.crm ?? "",
-    crm: user?.crm ?? user?.crp ?? "",
+    nome: user?.name ?? "",
+    crp: user?.crp ?? "",
     ...(data || {}),
   })
   const rendered = raw.replaceAll("&#x2F;", "/")
@@ -351,7 +350,7 @@ export async function generateCertificatePdf(
   //   font: bodyFont,
   //   color: bodyColor,
   // })
-  // const cr = user?.crp ? `CRP: ${user.crp}` : user?.crm ? `CPM: ${user.crm}` : ""
+  // const cr = user?.crp ? `CRP: ${user.crp}` : user?.crp ? `CPM: ${user.crp}` : ""
   // if (cr) {
   //   page.drawText(cr, {
   //     x: paper.w - contentX - cm(6),
@@ -369,40 +368,40 @@ export async function generateCertificatePdf(
 
     for (const layer of layers) {
       // TEXT
+      // ---------- TEXT (corrigido: Y usa base da caixa + alinhamento) ----------
       if (layer?.type === "text" && typeof layer.text === "string") {
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
 
-        // font-size px -> pt e escalona como o resto
+        // tamanho em px -> pt (e aplica escala da página)
         const sPt = pxToPt(Number(layer.fontSize) || 12)
         const s = sPt * scaleY
 
         const c = hexToRgb(layer.color || "#000000")
         const txt = String(layer.text ?? "")
 
-        // caixa em pt escalonado
+        // dimensões da caixa em pt já escaladas
         const wBox = (layer.w != null ? pxToPt(layer.w) : f.widthOfTextAtSize(txt, sPt)) * scaleX
         const hBox = (layer.h != null ? pxToPt(layer.h) : sPt) * scaleY
 
-        // x/y de topo-esquerda do editor → PDF (origem em baixo)
+        // X inicial no canto esquerdo da caixa
         let x = pxToPt(layer.x) * scaleX + LAYER_TWEAK_X_PT
-        let yTop = paper.h - pxToPt(layer.y) * scaleY - LAYER_TWEAK_Y_PT
 
-        // largura real do texto com o tamanho final (s)
+        // largura real do texto no tamanho final
         const wTxt = f.widthOfTextAtSize(txt, s)
-
-        // alinhar por topo: baseline = topo - (altura usada)
-        // aqui usamos "s" como aprox. da altura de linha para manter topo visual
-        let yBaseline = yTop - s
 
         // alinhamento horizontal dentro da caixa
         if (layer.align === "center") x += (wBox - wTxt) / 2
         if (layer.align === "right") x += wBox - wTxt
 
-        // clamp simples pra não “cair” fora
-        if (yBaseline < 2) yBaseline = 2
+        // Y no PDF: base da caixa (converter top->bottom e subtrair altura da caixa)
+        const yBottom = paper.h - pxToPt(Number(layer.y)) * scaleY - hBox - LAYER_TWEAK_Y_PT
 
-        page.drawText(txt, { x, y: yBaseline, size: s, font: f, color: c })
+        // preview usa flex + alignItems:center -> centralizar verticalmente
+        // baseline = centro da caixa + metade da altura da linha (aprox. s*0.8 de ascendência)
+        const baseline = yBottom + (hBox - s) / 2 + s * 0.8
+
+        page.drawText(txt, { x, y: baseline, size: s, font: f, color: c })
       }
 
       // IMAGE

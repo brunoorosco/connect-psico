@@ -230,7 +230,7 @@ export default function MedicalCertificate() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <CertificatePreview
             config={config as any}
-            user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }}
+            user={{ name: user?.name || "Psicologo", crp: user?.crp || "123456" }}
             editing={editLayers}
             onLayerChange={handleLayerChange}
           />

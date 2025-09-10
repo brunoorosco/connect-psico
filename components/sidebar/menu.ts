@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
   Settings2Icon,
   StarIcon,
+  InfoIcon,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -109,6 +110,12 @@ export const menus = [
     title: "Configurações",
     url: `/app/{userId}/settings`,
     icon: Settings2Icon,
+    rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Ajuda",
+    url: `/app/{userId}/help`,
+    icon: InfoIcon,
     rules: ["SUPERVISOR"],
   },
   {

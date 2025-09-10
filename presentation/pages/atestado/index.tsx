@@ -356,8 +356,8 @@ export default function AtestadoPage() {
             {/* Conteúdo */}
             <div className="space-y-4 mb-8">
               <p>
-                Eu, <span className="font-semibold">{user?.name}</span>, CRM{" "}
-                <span className="font-semibold">{user?.crm}</span>, declaro para os devidos fins que
+                Eu, <span className="font-semibold">{user?.name}</span>, CRP{" "}
+                <span className="font-semibold">{user?.crp}</span>, declaro para os devidos fins que
                 o(a) paciente <span className="font-semibold">{certificateData.patientName || "—"}</span>, portador(a)
                 do CPF <span className="font-semibold">{certificateData.patientCPF || "—"}</span>, nascido(a) em{" "}
                 <span className="font-semibold">{toBR(certificateData.patientBirthDateISO) || "DD/MM/AAAA"}</span>, foi
@@ -392,7 +392,7 @@ export default function AtestadoPage() {
               <p>{toBR(certificateData.issueDateISO) || "DD/MM/AAAA"}</p>
               <p className="mt-2">____________________________________</p>
               <p className="mt-1">{certificateData.doctorName || user?.name || "Médico(a) responsável"}</p>
-              <p>CRM: {certificateData.doctorCRM || "—"}</p>
+              <p>CRP: {certificateData.doctorCRM || "—"}</p>
             </div>
 
             {/* Rodapé personalizado */}

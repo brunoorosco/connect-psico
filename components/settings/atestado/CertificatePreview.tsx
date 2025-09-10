@@ -10,7 +10,7 @@ import { headerFontStacks } from "./constants"
 import { templates, titles } from "./templates"
 import DraggableLayer, { type AnyLayer, type QrLayer } from "./DraggableLayer"
 import { hexToRgba } from "@/utils/paper"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 interface Props {
   config: CertificateConfig & { layers?: AnyLayer[] }
@@ -32,9 +32,7 @@ export default function CertificatePreview({
     (config.bodyTitle?.trim()?.length ? config.bodyTitle : titles[type]) ?? ""
   const template =
     (config.bodyTemplate?.trim()?.length ? config.bodyTemplate : templates[type]) ?? ""
-  const dataExtenso = format(new Date(), "d 'de' MMMM 'de' yyyy", {
-    locale: ptBR,
-  })
+  const dataExtenso = format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
 
   function safeTemplate(template: string) {
     return template
@@ -44,26 +42,30 @@ export default function CertificatePreview({
 
   const safe = safeTemplate(template)
 
-  const renderedBody = Mustache.render(safe, {
-    medico: user?.name ?? "",
-    crm: user?.crp ?? "",
-    paciente: "Nome do Paciente",
-    rg: "000000000-0",
-    data: format(new Date(), "dd/MM/yyyy", { locale: ptBR }),
-    dataExtenso,
-    dias: 3,
-    inicio: "04/2022",
-    horario: "08:00hrs",
-    sintomas: "ansiedade intensa, humor deprimido",
-    cid: "F41",
-    cpf: "000.000.000-00",
-    idade: 30,
-    modalidade: "online",
-    queixa: "crises de ansiedade",
-    tratamento: "crises de ansiedade",
-    observacoes: "relatou alteração de sono e humor",
-    ...(data ?? {}),
-  }).replaceAll("&#x2F;", "/")
+  const renderedBody = useMemo(
+    () =>
+      Mustache.render(safe, {
+        nome: user?.name ?? "",
+        crp: user?.crp ?? "",
+        paciente: "Nome do Paciente",
+        rg: "000000000-0",
+        data: format(new Date(), "dd/MM/yyyy", { locale: ptBR }),
+        dataExtenso,
+        dias: 3,
+        inicio: "04/2022",
+        horario: "08:00hrs",
+        sintomas: "ansiedade intensa, humor deprimido",
+        cid: "F41",
+        cpf: "000.000.000-00",
+        idade: 30,
+        modalidade: "online",
+        queixa: "crises de ansiedade",
+        tratamento: "crises de ansiedade",
+        observacoes: "relatou alteração de sono e humor",
+        ...(data ?? {}),
+      }).replaceAll("&#x2F;", "/"),
+    [safe, user?.name, user?.crp, data, dataExtenso]
+  )
 
   // ------- QRCode renderer usando qrcode -------
   function QrRenderer({ qr }: { qr: QrLayer }) {
@@ -103,25 +105,46 @@ export default function CertificatePreview({
     )
   }
 
-  // ------- Layout principal -------
-  const PX_TO_PT = 72 / 96
-  const pxToPt = (px: number) => px * PX_TO_PT
+  // --------- Preview 1:1 em PX ----------
+  const PT_TO_PX = 96 / 72
+  const CM_TO_PX = 96 / 2.54 // 37.79527559
+
   const A4_PT = { w: 595.28, h: 841.89 }
   const A5_PT = { w: 419.53, h: 595.28 }
-  const paper =
+  const paperPt =
     (config.paperSize || "a5").toString().toLowerCase() === "a4" ? A4_PT : A5_PT
+  const paperPx = {
+    w: Math.round(paperPt.w * PT_TO_PX),
+    h: Math.round(paperPt.h * PT_TO_PX),
+  }
 
-  const H_PAD_PT = pxToPt(32)
-  const V_EXTRA_PT = pxToPt(16)
+  // paddings do conteúdo (iguais ao PDF-preview)
+  const H_PAD_PX = 32 // px-8
+  const V_EXTRA_PX = 16 // +16px
+
+  // header/footer em PX (sem usar cm no CSS pra evitar arredondamento diferente)
+  const headerPx = config.showHeader ? (Number(config.headerHeight) || 0) * CM_TO_PX : 0
+  const footerPx = config.showFooter ? (Number(config.footerHeight) || 0) * CM_TO_PX : 0
+
+  const bodyFontFamily =
+    (config as any).bodyFontFamily
+      ? headerFontStacks[(config as any).bodyFontFamily] ?? (config as any).bodyFontFamily
+      : headerFontStacks[config.titleFontFamily] ?? "serif"
+
+  const bodyLineHeight = (config as any).bodyLineHeight ?? 1.5 // mesmo default do PDF
 
   return (
     <div className="relative">
       <div
         id="certificate"
-        className="relative border rounded-md bg-white overflow-hidden print:shadow-none"
+        className="relative rounded-md bg-white overflow-hidden print:shadow-none mx-auto"
         style={{
-          width: `${paper.w}pt`,
-          height: `${paper.h}pt`,
+          // width/height do papel em PX
+          width: `${paperPx.w}px`,
+          height: `${paperPx.h}px`,
+          // usar outline (não influi no conteúdo como a border)
+          outline: "1px solid rgba(0,0,0,0.1)",
+          boxSizing: "content-box",
         }}
         data-size={config.paperSize}
       >
@@ -130,9 +153,7 @@ export default function CertificatePreview({
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundColor: hexToRgba(config.backgroundColor),
-            backgroundImage: config.backgroundImage
-              ? `url(${config.backgroundImage})`
-              : undefined,
+            backgroundImage: config.backgroundImage ? `url(${config.backgroundImage})` : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -142,24 +163,26 @@ export default function CertificatePreview({
         />
 
         {/* Header */}
-        {config.showHeader && (
+        {config.showHeader && headerPx > 0 && (
           <div
             className="absolute left-0 top-0 w-full flex flex-col z-10"
             style={{
-              height: `${config.headerHeight}cm`,
+              height: `${headerPx}px`,
               background: hexToRgba(config.headerBgColor),
             }}
           />
         )}
 
         {/* Footer */}
-        {config.showFooter && (
+        {config.showFooter && footerPx > 0 && (
           <div
-            className="absolute left-0 w-full px-8 flex flex-col justify-center z-10"
+            className="absolute left-0 w-full flex flex-col justify-center z-10"
             style={{
               bottom: 0,
-              height: `${config.footerHeight}cm`,
+              height: `${footerPx}px`,
               background: hexToRgba(config.footerBgColor),
+              paddingLeft: `${H_PAD_PX}px`,
+              paddingRight: `${H_PAD_PX}px`,
             }}
           />
         )}
@@ -168,9 +191,7 @@ export default function CertificatePreview({
         {Array.isArray(config.layers) && config.layers.length > 0 && (
           <div
             id="layers"
-            className={`absolute inset-0 z-50 ${
-              editing ? "pointer-events-auto" : "pointer-events-none"
-            }`}
+            className={`absolute inset-0 z-50 ${editing ? "pointer-events-auto" : "pointer-events-none"}`}
           >
             {config.layers.map((layer) => (
               <DraggableLayer
@@ -185,21 +206,18 @@ export default function CertificatePreview({
           </div>
         )}
 
-        {/* Conteúdo */}
+        {/* Conteúdo (texto mustache) */}
         <div
           className="relative z-10"
           style={{
-            paddingLeft: `${H_PAD_PT}pt`,
-            paddingRight: `${H_PAD_PT}pt`,
-            paddingTop: `calc(${
-              config.showHeader ? `${config.headerHeight}cm` : "0cm"
-            } + ${V_EXTRA_PT}pt)`,
-            paddingBottom: `calc(${
-              config.showFooter ? `${config.footerHeight}cm` : "0cm"
-            } + ${V_EXTRA_PT}pt)`,
+            paddingLeft: `${H_PAD_PX}px`,
+            paddingRight: `${H_PAD_PX}px`,
+            paddingTop: `${headerPx + V_EXTRA_PX}px`,
+            paddingBottom: `${footerPx + V_EXTRA_PX}px`,
             color: config.bodyTextColor,
             fontSize: `${config.bodyFontSize}px`,
-            fontFamily: headerFontStacks[config.titleFontFamily] ?? "serif",
+            fontFamily: bodyFontFamily,
+            lineHeight: bodyLineHeight,
           }}
         >
           <div
@@ -207,15 +225,13 @@ export default function CertificatePreview({
             style={{
               fontSize: `${config.titleFontSize}px`,
               marginBottom: "16px",
+              fontFamily: headerFontStacks[config.titleFontFamily] ?? bodyFontFamily,
             }}
           >
             {title}
           </div>
 
-          <div
-            className="mb-6 whitespace-pre-wrap text-justify"
-            style={{ lineHeight: 1.5 }}
-          >
+          <div className="mb-6 whitespace-pre-wrap text-justify">
             {renderedBody}
           </div>
         </div>
