@@ -14,7 +14,8 @@ import {
 import ColorField from "./ColorField";
 import ModelFont from "./ModelFont";
 import { templates, titles } from "./templates";
-import TemplateHelp from "./ToolTipHelp";
+import TemplateHelp from "./TooltipHelp";
+
 
 interface Props {
   config: CertificateConfig;
