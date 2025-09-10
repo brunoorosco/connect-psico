@@ -1,6 +1,7 @@
 import { PDFDocument, rgb } from "pdf-lib"
 import Mustache from "mustache"
 import fontkit from "@pdf-lib/fontkit"
+import QRCode from "qrcode"
 
 type CertificateConfig = any
 type User = { name?: string; crp?: string; crm?: string }
@@ -131,6 +132,36 @@ function drawAlignedText(
     if (i < words.length - 1) x += extra
   }
 }
+// ----------- IMAGES -----------
+// Detecta PNG vs JPG a partir do src
+function isPngSrc(src: string) {
+  return src.startsWith("data:image/png") || /\.png(\?|#|$)/i.test(src)
+}
+
+// Embute imagem automaticamente (png/jpg)
+async function embedImageAuto(doc: PDFDocument, src: string) {
+  const bytes = await fetchAsBytes(src)
+  return isPngSrc(src) ? doc.embedPng(bytes) : doc.embedJpg(bytes)
+}
+
+// Desenha imagem com object-fit (cover/contain) dentro de uma caixa
+function drawImageWithObjectFit(
+  page: any,
+  img: any,
+  box: { x: number; y: number; w: number; h: number },
+  fit: "cover" | "contain" = "contain",
+  opacity = 1
+) {
+  const { width: iw, height: ih } = img.scale(1)
+  const scaleContain = Math.min(box.w / iw, box.h / ih)
+  const scaleCover = Math.max(box.w / iw, box.h / ih)
+  const s = fit === "cover" ? scaleCover : scaleContain
+  const w = iw * s
+  const h = ih * s
+  const x = box.x + (box.w - w) / 2
+  const y = box.y + (box.h - h) / 2
+  page.drawImage(img, { x, y, width: w, height: h, opacity })
+}
 
 // ---------- GERADOR ----------
 export async function generateCertificatePdf(
@@ -140,6 +171,22 @@ export async function generateCertificatePdf(
 ) {
   const paperRaw = (config.paperSize || "a5").toString().toLowerCase()
   const paper = paperRaw === "a4" ? A4 : A5
+
+  // Base do editor em px (A5/A4 @96dpi, equivalentes ao seu cmToPx)
+  const DESIGN =
+    paperRaw === "a4"
+      ? { wPx: 794, hPx: 1123 } // 21×29.7 cm -> ~794×1123 px
+      : { wPx: 559, hPx: 794 } // 14.8×21 cm -> ~559×794 px
+
+  // Converte a base de px -> pt e calcula scales exatos
+  const designWpt = pxToPt(DESIGN.wPx) // px * 0.75
+  const designHpt = pxToPt(DESIGN.hPx)
+  const scaleX = paper.w / designWpt
+  const scaleY = paper.h / designHpt
+
+  // (Opcional) microajustes finos se ainda notar drift de 1px:
+  const LAYER_TWEAK_X_PT = 0 // ex.: 0.25
+  const LAYER_TWEAK_Y_PT = 0 // ex.: 0.25
 
   const doc = await PDFDocument.create()
   const pageAdd = () => doc.addPage([paper.w, paper.h])
@@ -285,66 +332,200 @@ export async function generateCertificatePdf(
     }
   }
 
-  // ---------- ASSINATURA ----------
-  const sigFs = Math.max(12, fs)
-  const signNeed = cm(1.2) + sigFs * 2
-  ensureSpace(signNeed)
+  // // ---------- ASSINATURA ----------
+  // const sigFs = Math.max(12, fs)
+  // const signNeed = cm(1.2) + sigFs * 2
+  // ensureSpace(signNeed)
 
-  const signY = Math.max(y - cm(1.2), cm(3))
-  page.drawLine({
-    start: { x: paper.w - contentX - cm(6), y: signY },
-    end: { x: paper.w - contentX, y: signY },
-    thickness: 0.8,
-    color: rgb(0, 0, 0),
-  })
-  page.drawText(user?.name || "Profissional", {
-    x: paper.w - contentX - cm(6),
-    y: signY - cm(0.5),
-    size: sigFs,
-    font: bodyFont,
-    color: bodyColor,
-  })
-  const cr = user?.crp ? `CRP: ${user.crp}` : user?.crm ? `CRM: ${user.crm}` : ""
-  if (cr) {
-    page.drawText(cr, {
-      x: paper.w - contentX - cm(6),
-      y: signY - cm(1.0),
-      size: sigFs,
-      font: bodyFont,
-      color: bodyColor,
-    })
-  }
+  // const signY = Math.max(y - cm(1.2), cm(3))
+  // page.drawLine({
+  //   start: { x: paper.w - contentX - cm(6), y: signY },
+  //   end: { x: paper.w - contentX, y: signY },
+  //   thickness: 0.8,
+  //   color: rgb(0, 0, 0),
+  // })
+  // page.drawText(user?.name || "Profissional", {
+  //   x: paper.w - contentX - cm(6),
+  //   y: signY - cm(0.5),
+  //   size: sigFs,
+  //   font: bodyFont,
+  //   color: bodyColor,
+  // })
+  // const cr = user?.crp ? `CRP: ${user.crp}` : user?.crm ? `CPM: ${user.crm}` : ""
+  // if (cr) {
+  //   page.drawText(cr, {
+  //     x: paper.w - contentX - cm(6),
+  //     y: signY - cm(1.0),
+  //     size: sigFs,
+  //     font: bodyFont,
+  //     color: bodyColor,
+  //   })
+  // }
 
-  // ---------- (Opcional) LAYERS de texto básicos ----------
-  if (Array.isArray(config.layers)) {
-    for (const layer of config.layers) {
+  // ---------- LAYERS (text | image | qr) ----------
+  if (Array.isArray(config.layers) && config.layers.length) {
+    // desenha respeitando z (opcional)
+    const layers = [...config.layers].sort((a: any, b: any) => (a.z ?? 0) - (b.z ?? 0))
+
+    for (const layer of layers) {
+      // TEXT
       if (layer?.type === "text" && typeof layer.text === "string") {
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
 
-        const sPx = Number(layer.fontSize) || 12
-        const s = pxToPt(sPx)
+        // font-size px -> pt e escalona como o resto
+        const sPt = pxToPt(Number(layer.fontSize) || 12)
+        const s = sPt * scaleY
 
         const c = hexToRgb(layer.color || "#000000")
-        const txt = layer.text
+        const txt = String(layer.text ?? "")
 
+        // caixa em pt escalonado
+        const wBox = (layer.w != null ? pxToPt(layer.w) : f.widthOfTextAtSize(txt, sPt)) * scaleX
+        const hBox = (layer.h != null ? pxToPt(layer.h) : sPt) * scaleY
+
+        // x/y de topo-esquerda do editor → PDF (origem em baixo)
+        let x = pxToPt(layer.x) * scaleX + LAYER_TWEAK_X_PT
+        let yTop = paper.h - pxToPt(layer.y) * scaleY - LAYER_TWEAK_Y_PT
+
+        // largura real do texto com o tamanho final (s)
         const wTxt = f.widthOfTextAtSize(txt, s)
-        const wBox = layer.w != null ? pxToPt(layer.w) : wTxt
 
-        let x = pxToPt(layer.x)
-        if (layer.align === "center") x = pxToPt(layer.x) + (wBox - wTxt) / 2
-        if (layer.align === "right") x = pxToPt(layer.x) + (wBox - wTxt)
+        // alinhar por topo: baseline = topo - (altura usada)
+        // aqui usamos "s" como aprox. da altura de linha para manter topo visual
+        let yBaseline = yTop - s
 
-        const baselineShift = s // aprox. topo->baseline
-        const hBox = layer.h != null ? pxToPt(layer.h) : lineHeightFor(f, s, 1.1)
-        // centraliza baseline dentro da caixa
-        let yPdf = paper.h - pxToPt(layer.y) - (hBox - s) / 3 - s
-        yPdf = Math.max(yPdf, 2)
+        // alinhamento horizontal dentro da caixa
+        if (layer.align === "center") x += (wBox - wTxt) / 2
+        if (layer.align === "right") x += wBox - wTxt
 
-        page.drawText(txt, { x, y: yPdf, size: s, font: f, color: c })
+        // clamp simples pra não “cair” fora
+        if (yBaseline < 2) yBaseline = 2
+
+        page.drawText(txt, { x, y: yBaseline, size: s, font: f, color: c })
       }
 
-      // (QR/imagens podem ser adicionados se quiser 1:1 com o editor)
+      // IMAGE
+      if (layer?.type === "image" && layer.src) {
+        try {
+          const img = await embedImageAuto(doc, layer.src)
+
+          const w = pxToPt(Number(layer.w) || img.width) * scaleX
+          const h = pxToPt(Number(layer.h) || img.height) * scaleY
+          const x = pxToPt(Number(layer.x) || 0) * scaleX + LAYER_TWEAK_X_PT
+          const y = paper.h - pxToPt(Number(layer.y) || 0) * scaleY - h - LAYER_TWEAK_Y_PT
+
+          drawImageWithObjectFit(
+            page,
+            img,
+            { x, y, w, h },
+            (layer.objectFit as "cover" | "contain") || "contain",
+            typeof layer.opacity === "number" ? layer.opacity : 1
+          )
+        } catch (e) {
+          console.warn("Falha ao embutir imagem da layer:", e)
+        }
+      }
+
+      // QR
+      if (layer?.type === "qr" && layer.value) {
+        try {
+          const boxW = pxToPt(Number(layer.w) || 96) * scaleX
+          const boxH = pxToPt(Number(layer.h) || 96) * scaleY
+
+          const sizePx = Math.round(Math.min(Number(layer.w) || 128, Number(layer.h) || 128))
+          const dataUrl = await QRCode.toDataURL(String(layer.value), {
+            width: sizePx,
+            margin: 0,
+            color: { dark: layer.fg || "#000000", light: layer.bg || "#FFFFFF" },
+          })
+          const img = await doc.embedPng(await fetchAsBytes(dataUrl))
+
+          const x = pxToPt(Number(layer.x) || 0) * scaleX + LAYER_TWEAK_X_PT
+          const y = paper.h - pxToPt(Number(layer.y) || 0) * scaleY - boxH - LAYER_TWEAK_Y_PT
+
+          drawImageWithObjectFit(page, img, { x, y, w: boxW, h: boxH }, "contain", 1)
+        } catch (e) {
+          console.warn("Falha ao gerar QR da layer:", e)
+        }
+      }
+      // SIGNATURE
+      if (layer?.type === "signature") {
+        const fam = layer.fontFamily ?? config.titleFontFamily
+        const f = pickFont(fonts, fam, "regular")
+
+        // caixa (px -> pt) com escalas
+        const wBox = pxToPt(Number(layer.w) || 220) * scaleX
+        const hBox = pxToPt(Number(layer.h) || 70) * scaleY
+        const xBox = pxToPt(Number(layer.x) || 0) * scaleX + LAYER_TWEAK_X_PT
+        const yTop = paper.h - pxToPt(Number(layer.y) || 0) * scaleY - LAYER_TWEAK_Y_PT // topo da caixa
+
+        // estilo / defaults
+        const fontSizePx = Number(layer.fontSize) || 14
+        const s = pxToPt(fontSizePx) * scaleY
+        const color = hexToRgb(layer.color || "#000000")
+        const align = (layer.align as "left" | "center" | "right") || "right"
+        const showLine = layer.line !== false
+        const lineThicknessPt = pxToPt(Number(layer.lineThickness) || 1) * ((scaleX + scaleY) / 2)
+
+        // 0..100 do editor -> 0..250% com a proporção 2.5
+        const pct = Math.max(0, Math.min(100, Number(layer.lineWidthPct ?? 100)))
+        const lw = ((pct * 2.5) / 100) * wBox // largura real da linha em pt
+
+        // posição X da linha conforme alinhamento
+        let lineLeftOffset = 0
+        if (align === "center") lineLeftOffset = (wBox - lw) / 2
+        if (align === "right") lineLeftOffset = wBox - lw
+
+        // posição Y da linha dentro da caixa (relativa ao topo da caixa)
+        // usamos uma heurística estável: ~65% da altura, mas garantindo espaço p/ textos
+        const maxBelow = hBox - s * 2.2
+        const preferred = hBox * 0.65
+        const lineOffsetFromTop = Math.min(Math.max(s, preferred), Math.max(0, maxBelow))
+        const lineY = yTop - lineOffsetFromTop
+
+        // desenha a linha
+        if (showLine && lw > 0) {
+          page.drawLine({
+            start: { x: xBox + lineLeftOffset, y: lineY },
+            end: { x: xBox + lineLeftOffset + lw, y: lineY },
+            thickness: Math.max(0.5, lineThicknessPt),
+            color: rgb(0, 0, 0),
+          })
+        }
+
+        // textos (nome / CRP)
+        const gapLineToName = pxToPt(Number(layer.gapLineToName) ?? 8) * scaleY
+        const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * scaleY
+
+        const nameText = String(layer.name || "Profissional")
+        const crpText = layer.crp ? `CRP: ${layer.crp}` : ""
+
+        const nameW = f.widthOfTextAtSize(nameText, s)
+        const crpW = crpText ? f.widthOfTextAtSize(crpText, s) : 0
+
+        // base X para textos conforme alinhamento (alinhar pelos mesmos limites da linha)
+        const textBoxLeft = xBox
+        const textBoxWidth = wBox
+
+        let nameX = textBoxLeft
+        let crpX = textBoxLeft
+        if (align === "center") {
+          nameX = textBoxLeft + (textBoxWidth - nameW) / 2
+          crpX = textBoxLeft + (textBoxWidth - crpW) / 2
+        } else if (align === "right") {
+          nameX = textBoxLeft + (textBoxWidth - nameW)
+          crpX = textBoxLeft + (textBoxWidth - crpW)
+        }
+
+        const nameY = lineY - gapLineToName - s
+        const crpY = nameY - gapNameToCrp - s
+
+        if (nameText) page.drawText(nameText, { x: nameX, y: nameY, size: s, font: f, color })
+        if (crpText) page.drawText(crpText, { x: crpX, y: crpY, size: s, font: f, color })
+
+        continue
+      }
     }
   }
 

@@ -99,7 +99,7 @@ export default function MedicalCertificate() {
 
     return () => ac.abort()
   }, [])
- 
+
   // ---- onChange centralizado ----
   const onChange = useCallback(
     <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => {
@@ -168,8 +168,6 @@ export default function MedicalCertificate() {
         name, // nome amigável salvo no banco
         configJson: config, // modelo completo (inclui bodyTitle/bodyTemplate/layers)
       }
-      console.log('[page.tsx:194]', { config });
-
       const res = await fetch(id ? `/api/templates/${id}` : `/api/templates`, {
         method: id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },

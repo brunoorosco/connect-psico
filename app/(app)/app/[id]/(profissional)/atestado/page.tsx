@@ -130,6 +130,7 @@ export default function PatientPage({ params }: { params: { id: string } }) {
 
       {loading && <p>Carregando modelos…</p>}
       {error && <p className="text-red-600">{error}</p>}
+      {/* <pre>{JSON.stringify(selectedConfig,null,2)}</pre> */}
     </main>
   )
 }
