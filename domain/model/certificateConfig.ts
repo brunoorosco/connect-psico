@@ -75,7 +75,7 @@ export const CertificateConfigSchema = z
   .object({
     type: CertTypeSchema.default("atestado"),
 
-    paperSize: PaperSizeSchema.default("A4"),
+    paperSize: PaperSizeSchema.default("A5"),
     backgroundColor: z.string().default("#ffffff"),
     backgroundOpacity: z.number().min(0).max(1).default(1),
 
@@ -87,17 +87,12 @@ export const CertificateConfigSchema = z
     footerHeight: z.number().min(0).default(3), // cm
     footerBgColor: z.string().default("#ffffff"),
 
-    companyName: z.string().default(""),
-    companyAddress: z.string().default(""),
-    companyPhone: z.string().default(""),
-
-    watermarkUrl: z.string().url().optional().or(z.literal("")).default(""),
-    watermarkOpacity: z.number().min(0).max(1).default(0.06),
-
     bodyTitle: z.string().default(""),
     bodyTemplate: z.string().default(""),
     bodyTextColor: z.string().default("#000000"),
     bodyFontSize: z.number().min(1).default(14),
+    bodyCityDate: z.string().optional(),
+    bodyDateAlign: z.string().default("left"),
     titleFontSize: z.number().min(1).default(20),
     titleFontFamily: z.string().default("serif"),
 

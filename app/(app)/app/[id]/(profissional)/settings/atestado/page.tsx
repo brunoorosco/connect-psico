@@ -162,7 +162,7 @@ export default function MedicalCertificate() {
       const t = config.type
       const id = idsByType[t] ?? null
       const name = effectiveTitle(config) // título “efetivo”
-
+console.log('[page.tsx:165]', { config });
       const payload = {
         type: t,
         name, // nome amigável salvo no banco

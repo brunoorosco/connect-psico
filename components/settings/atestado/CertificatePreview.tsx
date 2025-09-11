@@ -234,6 +234,9 @@ export default function CertificatePreview({
           <div className="mb-6 whitespace-pre-wrap text-justify">
             {renderedBody}
           </div>
+          <div style={{textAlign: config.bodyDateAlign}}>
+            {config.bodyCityDate ? config.bodyCityDate + ", " + dataExtenso : "" }
+          </div>
         </div>
       </div>
     </div>

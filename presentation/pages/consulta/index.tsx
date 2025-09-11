@@ -57,6 +57,7 @@ export const ConsultationStart = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clinicalEvolution, setClinicalEvolution] = useState("")
   const [prescription, setPrescription] = useState("")
+  const [sintomas, setSintomas] = useState("")
 
   const { form, handleSubmit } = useConsultationForm({})
 
@@ -268,8 +269,8 @@ export const ConsultationStart = () => {
 
           <div className="grid gap-4 py-2">
             {/* Tipo */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label className="text-right">Tipo</Label>
+            <div className="grid gap-1">
+              <Label className="">Tipo</Label>
               <div className="col-span-3">
                 <Select
                   value={docType}
@@ -290,75 +291,80 @@ export const ConsultationStart = () => {
               </div>
             </div>
 
-            {/* RG */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="rg" className="text-right">
-                RG
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="rg"
-                  value={rg}
-                  onChange={(e) => setRg(e.currentTarget.value)}
-                  placeholder="Ex.: 12.345.678-9"
-                />
+            <div className="grid grid-cols-2 gap-2">
+              {/* RG */}
+              <div className="grid gap-1">
+                <Label htmlFor="rg">RG</Label>
+                <div className="col-span-3">
+                  <Input
+                    id="rg"
+                    value={rg}
+                    onChange={(e) => setRg(e.currentTarget.value)}
+                    placeholder="Ex.: 12.345.678-9"
+                  />
+                </div>
+              </div>
+
+              {/* CPF */}
+              <div className="grid gap-1">
+                <Label htmlFor="cpf">CPF</Label>
+                <div className="col-span-3">
+                  <Input
+                    id="cpf"
+                    value={cpf}
+                    onChange={(e) => setCpf(e.currentTarget.value)}
+                    placeholder="Ex.: 123.456.789-00"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* CPF */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="cpf" className="text-right">
-                CPF
+            <div className="grid gap-1">
+              <Label htmlFor="cpf" className="">
+                Sintomas/Avaliação
               </Label>
               <div className="col-span-3">
                 <Input
                   id="cpf"
-                  value={cpf}
+                  value={sintomas}
                   onChange={(e) => setCpf(e.currentTarget.value)}
-                  placeholder="Ex.: 123.456.789-00"
+                  placeholder="Sintomas/Avaliação"
                 />
               </div>
             </div>
-
-            {/* CID */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="cid" className="text-right">
-                CID
-              </Label>
-              <div className="col-span-3">
+            <div className="grid grid-cols-3 gap-2">
+              {/* CID */}
+              <div className="grid gap-1">
+                <Label htmlFor="cid">CID</Label>
                 <Input id="cid" value={cid} onChange={(e) => setCid(e.currentTarget.value)} placeholder="Ex.: F41" />
               </div>
-            </div>
 
-            {/* Dias */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="dias" className="text-right">
-                Dias
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="dias"
-                  type="number"
-                  min={0}
-                  value={days}
-                  onChange={(e) => setDays(e.currentTarget.valueAsNumber || 0)}
-                  placeholder="Ex.: 3"
-                />
+              {/* Dias */}
+              <div className="grid gap-1">
+                <Label htmlFor="dias">Dias</Label>
+                <div className="col-span-3">
+                  <Input
+                    id="dias"
+                    type="number"
+                    min={0}
+                    value={days}
+                    onChange={(e) => setDays(e.currentTarget.valueAsNumber || 0)}
+                    placeholder="Ex.: 3"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Horário */}
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="horario" className="text-right">
-                Horário
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="horario"
-                  value={timeStr}
-                  onChange={(e) => setTimeStr(e.currentTarget.value)}
-                  placeholder="Ex.: 08:00"
-                />
+              {/* Horário */}
+              <div className="grid gap-1">
+                <Label htmlFor="horario">Horário</Label>
+                <div className="col-span-3">
+                  <Input
+                    id="horario"
+                    value={timeStr}
+                    onChange={(e) => setTimeStr(e.currentTarget.value)}
+                    placeholder="Ex.: 08:00"
+                  />
+                </div>
               </div>
             </div>
           </div>

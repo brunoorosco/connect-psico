@@ -315,22 +315,97 @@ export async function generateCertificatePdf(
     crp: user?.crp ?? "",
     ...(data || {}),
   })
-  const rendered = raw.replaceAll("&#x2F;", "/")
+  const rendered = raw.replaceAll("&#x2F;", "/").replace(/^\s+/gm, "")
 
-  const paragraphs = rendered.split(/\n{2,}/) // quebra de parágrafo por linhas em branco
-  for (let p = 0; p < paragraphs.length; p++) {
-    const para = paragraphs[p]
-    const lines = wrapParagraph(para, contentW, (s) => bodyFont.widthOfTextAtSize(s, fs))
-    for (let i = 0; i < lines.length; i++) {
+  const renderedTrim = rendered
+
+  const text = renderedTrim.replace(/\r\n?/g, "\n")
+  const rawLines = text.split("\n")
+
+  // wrap que preserva espaços internos, mas nunca
+  // deixa linha terminar/começar com espaço por causa da quebra
+  function wrapKeepSpaces(line: string, maxW: number, measure: (s: string) => number) {
+    // tokens alternando grupos de espaços e de não-espaços
+    const tokens = line.match(/(\s+|\S+)/g) ?? [""]
+    const out: string[] = []
+    let cur = ""
+
+    const rtrim = (s: string) => s.replace(/\s+$/g, "")
+    const ltrim = (s: string) => s.replace(/^\s+/g, "")
+
+    for (const tok of tokens) {
+      const candidate = cur + tok
+      if (cur && measure(candidate) > maxW) {
+        // fecha a linha atual SEM espaço à direita
+        out.push(rtrim(cur))
+        // inicia a próxima removendo espaço à esquerda
+        cur = ltrim(tok)
+        // pode ainda acontecer do tok "puro" já estourar, então laça enquanto precisar
+        while (cur && measure(cur) > maxW) {
+          // quebra forçada no meio do token (palavra enorme)
+          // tenta encontrar um ponto de corte por caracteres
+          let k = cur.length - 1
+          while (k > 0 && measure(cur.slice(0, k)) > maxW) k--
+          if (k <= 0) break
+          out.push(cur.slice(0, k))
+          cur = cur.slice(k)
+          // nunca começar com espaços após quebra
+          cur = ltrim(cur)
+        }
+      } else {
+        cur = candidate
+      }
+    }
+
+    // empilha o resto (sem espaço à direita)
+    if (cur) out.push(rtrim(cur))
+    // se a linha original era só espaços, ainda assim gere uma linha vazia
+    if (out.length === 0) out.push("")
+    return out
+  }
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i]
+
+    // Linha vazia -> pular uma linha (preserva linhas em branco internas)
+    if (line === "") {
       ensureSpace(lh)
       y -= lh
-      const isLast = i === lines.length - 1
-      drawAlignedText(page, lines[i].text, contentX, y, contentW, bodyFont, fs, bodyColor, bodyAlign, isLast)
+      continue
     }
-    if (p < paragraphs.length - 1) {
-      ensureSpace(paraGap)
-      y -= paraGap
+
+    const subs = wrapKeepSpaces(line, contentW, (s) => bodyFont.widthOfTextAtSize(s, fs))
+    for (let j = 0; j < subs.length; j++) {
+      ensureSpace(lh)
+      y -= lh
+      const isLast = j === subs.length - 1
+      drawAlignedText(page, subs[j], contentX, y, contentW, bodyFont, fs, bodyColor, bodyAlign, isLast)
     }
+  }
+  // ---------- LINHA "Cidade, data por extenso" (igual ao preview) ----------
+  const city =
+    (config as any).bodyCityDate && String((config as any).bodyCityDate).trim().length > 0
+      ? (config as any).bodyCityDate
+      : "São Paulo"
+
+  // pegue do 'data' se você já calculou no front (recomendado),
+  // senão passe uma string vazia (ou monte no back com date-fns, se quiser)
+  const dataExtensoStr: string = (data as any)?.dataExtenso ?? ""
+
+  // se tiver conteúdo, desenha
+  const dateLine = city && dataExtensoStr ? `${city}, ${dataExtensoStr}` : ""
+  if (dateLine) {
+    const align: "left" | "center" | "right" =
+      ((config as any).bodyDateAlign as any) ?? ((config as any).bodyDatePosition?.align as any) ?? "right"
+
+    const wDate = bodyFont.widthOfTextAtSize(dateLine, fs)
+    let xDate = contentX
+    if (align === "center") xDate = contentX + (contentW - wDate) / 2
+    if (align === "right") xDate = contentX + (contentW - wDate)
+
+    ensureSpace(lh)
+    y -= lh
+    page.drawText(dateLine, { x: xDate, y, size: fs, font: bodyFont, color: bodyColor })
   }
 
   // ---------- LAYERS (text | image | qr) ----------
@@ -435,125 +510,129 @@ export async function generateCertificatePdf(
       if (layer?.type === "signature") {
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
-      
+
         // base do box a partir do layer (mínimo)
         const wBase = pxToPt(Number(layer.w) || 220) * S
-        const hBox  = pxToPt(Number(layer.h) || 70)  * S
-      
+        const hBox = pxToPt(Number(layer.h) || 70) * S
+
         // posição base (antes do ajuste de ancoragem)
         const xBase = pxToPt(Number(layer.x) || 0) * S + LAYER_TWEAK_X_PT
-        const yTop  = paper.h - pxToPt(Number(layer.y) || 0) * S - LAYER_TWEAK_Y_PT
-      
+        const yTop = paper.h - pxToPt(Number(layer.y) || 0) * S - LAYER_TWEAK_Y_PT
+
         // estilo / defaults
-        const s         = pxToPt(Number(layer.fontSize) || 14) * S
-        const color     = hexToRgb(layer.color || "#000000")
-        const align     = (layer.align as "left" | "center" | "right") || "right"
-        const showLine  = layer.line !== false
+        const s = pxToPt(Number(layer.fontSize) || 14) * S
+        const color = hexToRgb(layer.color || "#000000")
+        const align = (layer.align as "left" | "center" | "right") || "right"
+        const showLine = layer.line !== false
         const lineThicknessPt = Math.max(0.5, pxToPt(Number(layer.lineThickness) || 1) * S)
-      
+
         // LARGURA DA LINHA (0..100% da caixa) com multiplicador opcional
         const pct = Math.max(0, Math.min(100, Number(layer.lineWidthPct ?? 100)))
         const maxMultiplier = Number(layer.maxLineWidthMultiplier ?? 1.0) // 1.0=100%, 2.0=200%...
-      
+
         // Referência é a largura nominal do box
-        const lwNominal = (wBase * (pct / 100)) * maxMultiplier
-      
+        const lwNominal = wBase * (pct / 100) * maxMultiplier
+
         // Se mediu no preview, priorize a medida
-        const lwMeasured =
-          typeof layer.measuredLineWidthPx === "number"
-            ? pxToPt(layer.measuredLineWidthPx) * S
-            : null
-      
+        const lwMeasured = typeof layer.measuredLineWidthPx === "number" ? pxToPt(layer.measuredLineWidthPx) * S : null
+
         const lw = lwMeasured ?? lwNominal // largura final da linha
-      
+
         // DEFINIÇÃO DA LARGURA DO BOX
         const boxFollowsLine = Boolean(layer.boxFollowsLine) // se true, box acompanha a linha
         // modo 1: box = max(base, linha) -> nunca menor que o base
         // modo 2: box = linha (se quiser exatamente a largura da linha, troque por: const wBox = lw)
         const wBox = boxFollowsLine ? Math.max(wBase, lw) : wBase
-      
+
         // ANCORAGEM DO BOX para não “andar” quando a largura variar
         const boxAnchor = (layer.boxAnchor as "left" | "center" | "right") || "left"
         let xBox = xBase
         if (boxAnchor === "center") xBox = xBase - wBox / 2
-        if (boxAnchor === "right")  xBox = xBase - wBox
-      
+        if (boxAnchor === "right") xBox = xBase - wBox
+
         // POSIÇÃO DA LINHA DENTRO DO BOX (alinhamento horizontal bruto)
         let lineLeftOffset = 0
         if (align === "center") lineLeftOffset = (wBox - lw) / 2
-        if (align === "right")  lineLeftOffset =  wBox - lw
-      
+        if (align === "right") lineLeftOffset = wBox - lw
+
         // posição Y da linha (heurística estável)
         const preferred = hBox * 0.65
-        const maxBelow  = hBox - s * 2.2
+        const maxBelow = hBox - s * 2.2
         const lineOffsetFromTop = Math.min(Math.max(s, preferred), Math.max(0, maxBelow))
         const lineY = yTop - lineOffsetFromTop
-      
+
         // ------------- CLAMP PARA NÃO VAZAR A PÁGINA -------------
         // Use as mesmas margens horizontais do conteúdo:
-        const pageLeft  = H_PAD_PT
+        const pageLeft = H_PAD_PT
         const pageRight = paper.w - H_PAD_PT
-      
+
         // Limites para lineLeftOffset dentro do box, respeitando página
         // Queremos: xBox + lineLeftOffset >= pageLeft  e  xBox + lineLeftOffset + lw <= pageRight
         const minLeftOffset = Math.max(0, pageLeft - xBox)
         const maxLeftOffset = Math.min(wBox - lw, pageRight - xBox - lw)
-      
+
         // Aplica clamp (se já encostou numa lateral, só cresce "para dentro")
         lineLeftOffset = Math.min(Math.max(lineLeftOffset, minLeftOffset), maxLeftOffset)
-      
+
         // desenha a linha
         if (showLine && lw > 0) {
           page.drawLine({
-            start: { x: xBox + lineLeftOffset,     y: lineY },
-            end:   { x: xBox + lineLeftOffset + lw, y: lineY },
+            start: { x: xBox + lineLeftOffset, y: lineY },
+            end: { x: xBox + lineLeftOffset + lw, y: lineY },
             thickness: lineThicknessPt,
             color: rgb(0, 0, 0),
           })
         }
-      
+
         // textos (nome / CRP)
         const gapLineToName = pxToPt(Number(layer.gapLineToName) ?? 8) * S
-        const gapNameToCrp  = pxToPt(Number(layer.gapNameToCrp)  ?? 4) * S
-      
+        const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * S
+
         const nameText = String(layer.name || "Profissional")
-        const crpText  = layer.crp ? `${layer.crp}` : ""
-      
+        const crpText = layer.crp ? `${layer.crp}` : ""
+
         // Medida do texto (usa preview se disponível)
         const nameW =
           typeof layer.measuredNameWidthPx === "number"
             ? pxToPt(layer.measuredNameWidthPx) * S
             : f.widthOfTextAtSize(nameText, s)
-      
+
         const crpW =
           crpText && typeof layer.measuredCrpWidthPx === "number"
             ? pxToPt(layer.measuredCrpWidthPx) * S
-            : (crpText ? f.widthOfTextAtSize(crpText, s) : 0)
-      
+            : crpText
+            ? f.widthOfTextAtSize(crpText, s)
+            : 0
+
         let nameX = xBox
-        let crpX  = xBox
+        let crpX = xBox
         if (align === "center") {
           nameX = xBox + (wBox - nameW) / 2
-          crpX  = xBox + (wBox - crpW)  / 2
+          crpX = xBox + (wBox - crpW) / 2
         } else if (align === "right") {
           nameX = xBox + (wBox - nameW)
-          crpX  = xBox + (wBox - crpW)
+          crpX = xBox + (wBox - crpW)
         }
-      
+
         const nameY = lineY - gapLineToName - s
-        const crpY  = nameY - gapNameToCrp  - s
-      
+        const crpY = nameY - gapNameToCrp - s
+
         if (nameText) page.drawText(nameText, { x: nameX, y: nameY, size: s, font: f, color })
-        if (crpText)  page.drawText(crpText,  { x: crpX,  y: crpY, size: s, font: f, color })
-      
+        if (crpText) page.drawText(crpText, { x: crpX, y: crpY, size: s, font: f, color })
+
         // --- DEBUG opcional ---
-        if ( __DEBUG__ ) {
+        if (__DEBUG__) {
           page.drawRectangle({ x: xBox, y: yTop - hBox, width: wBox, height: hBox, color: rgb(0, 1, 0), opacity: 0.12 })
           page.drawRectangle({ x: xBox + lineLeftOffset - 1, y: lineY - 1, width: 2, height: 2, color: rgb(1, 0, 0) })
-          page.drawRectangle({ x: xBox + lineLeftOffset + lw - 1, y: lineY - 1, width: 2, height: 2, color: rgb(0, 0, 1) })
+          page.drawRectangle({
+            x: xBox + lineLeftOffset + lw - 1,
+            y: lineY - 1,
+            width: 2,
+            height: 2,
+            color: rgb(0, 0, 1),
+          })
         }
       }
-      
     }
   }
 
