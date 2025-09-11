@@ -61,7 +61,7 @@ export const ConsultationStart = () => {
   const { form, handleSubmit } = useConsultationForm({})
   
   const currentUser = useCurrentUser()
-  const [canIssueDocument, setCanIssueDocument] = useState(true)
+  const [canIssueDocument, setCanIssueDocument] = useState(false)
   const [issueOpen, setIssueOpen] = useState(false)
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
