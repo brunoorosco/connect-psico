@@ -1,4 +1,4 @@
-import { memo, CSSProperties, useMemo } from "react"
+import { memo, CSSProperties, useMemo, useRef, useState, useLayoutEffect } from "react"
 import { Rnd } from "react-rnd"
 
 export type BaseLayer = {
@@ -86,28 +86,57 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
     gapNameToCrp = 4,
   } = layer
 
+  const containerRef = useRef<HTMLDivElement>(null) // ⬅️ novo
+  const [clamp, setClamp] = useState({ minLeft: 0, maxLeft: Math.max(0, w) })
+
   const lineY = useMemo(() => {
     const safe = Math.max(0, h - fontSize * 2.2)
     return Math.min(safe, Math.max(fontSize, h * 0.65))
   }, [h, fontSize])
 
-  // ✅ cálculo correto da largura da linha
   const pct = Math.max(0, Math.min(100, Number(lineWidthPct ?? 100)))
-  const maxMultiplier = 1.0 // deixe 1.0 se quiser limitar a 100% do box; aumente p/ 2.0 se quiser até 200%
+  const maxMultiplier = 1.0 // mude para 2.0 se quiser permitir linha até 200% do box
   const lw = w * (pct / 100) * maxMultiplier
 
-  // se quiser que o box “acompanhe” a linha (pelo menos não menor que ela):
+  // largura efetiva do "box interno" (opcional manter >= linha)
   const effectiveBoxW = Math.max(w, lw)
 
-  const lineLeft = align === "center" ? (effectiveBoxW - lw) / 2 : align === "right" ? effectiveBoxW - lw : 0
+  // posição bruta por alinhamento (antes do clamp)
+  const rawLeft = align === "center" ? (effectiveBoxW - lw) / 2 : align === "right" ? effectiveBoxW - lw : 0
+
+  // Recalcula limites de clamp sempre que container/larguras mudarem
+  useLayoutEffect(() => {
+    const cert = document.getElementById("certificate")
+    const el = containerRef.current
+    if (!cert || !el) return
+
+    const certRect = cert.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+
+    // Queremos garantir:
+    // elRect.left + computedLeft >= certRect.left
+    // elRect.left + computedLeft + lw <= certRect.right
+    const minLeft = Math.max(0, certRect.left - elRect.left)
+    const maxLeft = Math.min(effectiveBoxW - lw, certRect.right - elRect.left - lw)
+
+    setClamp({
+      minLeft: isFinite(minLeft) ? Math.max(0, minLeft) : 0,
+      maxLeft: isFinite(maxLeft) ? Math.max(0, maxLeft) : Math.max(0, effectiveBoxW - lw),
+    })
+  }, [w, lw, effectiveBoxW])
+
+  // aplica clamp (cresce "para dentro" quando encosta)
+  const lineLeft = Math.min(Math.max(rawLeft, clamp.minLeft), clamp.maxLeft)
 
   const textAlign = align === "center" ? "center" : align === "right" ? "right" : "left"
 
   return (
-    <div className="w-full h-full relative select-none" style={{ fontFamily }}>
-      {/* Conteúdo interno com largura efetiva acompanhando a linha */}
+    <div
+      ref={containerRef} // ⬅️ importante
+      className="w-full h-full relative select-none"
+      style={{ fontFamily }}
+    >
       <div style={{ position: "absolute", inset: 0, width: effectiveBoxW, height: h }}>
-        {/* Linha de assinatura */}
         {showLine && (
           <div
             style={{
@@ -121,7 +150,6 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
           />
         )}
 
-        {/* Nome */}
         <div
           style={{
             position: "absolute",
@@ -137,7 +165,6 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
           {layer.name || "Profissional"}
         </div>
 
-        {/* CRP */}
         {layer.crp ? (
           <div
             style={{

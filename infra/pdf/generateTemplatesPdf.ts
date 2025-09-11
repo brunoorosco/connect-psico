@@ -436,119 +436,125 @@ export async function generateCertificatePdf(
       if (layer?.type === "signature") {
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
-
+      
         // base do box a partir do layer (mínimo)
         const wBase = pxToPt(Number(layer.w) || 220) * S
-        const hBox = pxToPt(Number(layer.h) || 70) * S
-
+        const hBox  = pxToPt(Number(layer.h) || 70)  * S
+      
         // posição base (antes do ajuste de ancoragem)
         const xBase = pxToPt(Number(layer.x) || 0) * S + LAYER_TWEAK_X_PT
-        const yTop = paper.h - pxToPt(Number(layer.y) || 0) * S - LAYER_TWEAK_Y_PT
-
+        const yTop  = paper.h - pxToPt(Number(layer.y) || 0) * S - LAYER_TWEAK_Y_PT
+      
         // estilo / defaults
-        const s = pxToPt(Number(layer.fontSize) || 14) * S
-        const color = hexToRgb(layer.color || "#000000")
-        const align = (layer.align as "left" | "center" | "right") || "right"
-        const showLine = layer.line !== false
+        const s         = pxToPt(Number(layer.fontSize) || 14) * S
+        const color     = hexToRgb(layer.color || "#000000")
+        const align     = (layer.align as "left" | "center" | "right") || "right"
+        const showLine  = layer.line !== false
         const lineThicknessPt = Math.max(0.5, pxToPt(Number(layer.lineThickness) || 1) * S)
-
-        // LARGURA DA LINHA
+      
+        // LARGURA DA LINHA (0..100% da caixa) com multiplicador opcional
         const pct = Math.max(0, Math.min(100, Number(layer.lineWidthPct ?? 100)))
-
-        // permite esticar além de 100% mantendo a escala 0..100% coerente
-        const maxMultiplier = Number(layer.maxLineWidthMultiplier ?? 2.0) // 1.0 = 100%, 2.0 = 200%, etc.
-
-        // wBase é a referência “tamanho nominal da caixa”
-        const lwNominal = (pct / 100) * (wBase * maxMultiplier)
-
-        // Se você já mediu a linha no preview e salvou (opcional), priorize a medida:
-        const lwMeasured = typeof layer.measuredLineWidthPx === "number" ? pxToPt(layer.measuredLineWidthPx) * S : null
-
+        const maxMultiplier = Number(layer.maxLineWidthMultiplier ?? 1.0) // 1.0=100%, 2.0=200%...
+      
+        // Referência é a largura nominal do box
+        const lwNominal = (wBase * (pct / 100)) * maxMultiplier
+      
+        // Se mediu no preview, priorize a medida
+        const lwMeasured =
+          typeof layer.measuredLineWidthPx === "number"
+            ? pxToPt(layer.measuredLineWidthPx) * S
+            : null
+      
         const lw = lwMeasured ?? lwNominal // largura final da linha
-
+      
         // DEFINIÇÃO DA LARGURA DO BOX
         const boxFollowsLine = Boolean(layer.boxFollowsLine) // se true, box acompanha a linha
         // modo 1: box = max(base, linha) -> nunca menor que o base
-        // modo 2: box = linha (se preferir, troque a linha abaixo por: const wBox = lw)
+        // modo 2: box = linha (se quiser exatamente a largura da linha, troque por: const wBox = lw)
         const wBox = boxFollowsLine ? Math.max(wBase, lw) : wBase
-
+      
         // ANCORAGEM DO BOX para não “andar” quando a largura variar
         const boxAnchor = (layer.boxAnchor as "left" | "center" | "right") || "left"
         let xBox = xBase
         if (boxAnchor === "center") xBox = xBase - wBox / 2
-        if (boxAnchor === "right") xBox = xBase - wBox
-
-        // POSIÇÃO DA LINHA DENTRO DO BOX (alinhamento horizontal)
+        if (boxAnchor === "right")  xBox = xBase - wBox
+      
+        // POSIÇÃO DA LINHA DENTRO DO BOX (alinhamento horizontal bruto)
         let lineLeftOffset = 0
         if (align === "center") lineLeftOffset = (wBox - lw) / 2
-        if (align === "right") lineLeftOffset = wBox - lw
-
-        // posição Y da linha (mesma heurística)
+        if (align === "right")  lineLeftOffset =  wBox - lw
+      
+        // posição Y da linha (heurística estável)
         const preferred = hBox * 0.65
-        const maxBelow = hBox - s * 2.2
+        const maxBelow  = hBox - s * 2.2
         const lineOffsetFromTop = Math.min(Math.max(s, preferred), Math.max(0, maxBelow))
         const lineY = yTop - lineOffsetFromTop
-
+      
+        // ------------- CLAMP PARA NÃO VAZAR A PÁGINA -------------
+        // Use as mesmas margens horizontais do conteúdo:
+        const pageLeft  = H_PAD_PT
+        const pageRight = paper.w - H_PAD_PT
+      
+        // Limites para lineLeftOffset dentro do box, respeitando página
+        // Queremos: xBox + lineLeftOffset >= pageLeft  e  xBox + lineLeftOffset + lw <= pageRight
+        const minLeftOffset = Math.max(0, pageLeft - xBox)
+        const maxLeftOffset = Math.min(wBox - lw, pageRight - xBox - lw)
+      
+        // Aplica clamp (se já encostou numa lateral, só cresce "para dentro")
+        lineLeftOffset = Math.min(Math.max(lineLeftOffset, minLeftOffset), maxLeftOffset)
+      
         // desenha a linha
         if (showLine && lw > 0) {
           page.drawLine({
-            start: { x: xBox + lineLeftOffset, y: lineY },
-            end: { x: xBox + lineLeftOffset + lw, y: lineY },
+            start: { x: xBox + lineLeftOffset,     y: lineY },
+            end:   { x: xBox + lineLeftOffset + lw, y: lineY },
             thickness: lineThicknessPt,
             color: rgb(0, 0, 0),
           })
         }
-
+      
         // textos (nome / CRP)
         const gapLineToName = pxToPt(Number(layer.gapLineToName) ?? 8) * S
-        const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * S
-
+        const gapNameToCrp  = pxToPt(Number(layer.gapNameToCrp)  ?? 4) * S
+      
         const nameText = String(layer.name || "Profissional")
-        const crpText = layer.crp ? `${layer.crp}` : ""
-
-        // Se você medir no preview, use as medidas; senão, calcule pela fonte
+        const crpText  = layer.crp ? `${layer.crp}` : ""
+      
+        // Medida do texto (usa preview se disponível)
         const nameW =
           typeof layer.measuredNameWidthPx === "number"
             ? pxToPt(layer.measuredNameWidthPx) * S
             : f.widthOfTextAtSize(nameText, s)
+      
         const crpW =
           crpText && typeof layer.measuredCrpWidthPx === "number"
             ? pxToPt(layer.measuredCrpWidthPx) * S
-            : crpText
-            ? f.widthOfTextAtSize(crpText, s)
-            : 0
-
+            : (crpText ? f.widthOfTextAtSize(crpText, s) : 0)
+      
         let nameX = xBox
-        let crpX = xBox
+        let crpX  = xBox
         if (align === "center") {
           nameX = xBox + (wBox - nameW) / 2
-          crpX = xBox + (wBox - crpW) / 2
+          crpX  = xBox + (wBox - crpW)  / 2
         } else if (align === "right") {
           nameX = xBox + (wBox - nameW)
-          crpX = xBox + (wBox - crpW)
+          crpX  = xBox + (wBox - crpW)
         }
-
+      
         const nameY = lineY - gapLineToName - s
-        const crpY = nameY - gapNameToCrp - s
-
+        const crpY  = nameY - gapNameToCrp  - s
+      
         if (nameText) page.drawText(nameText, { x: nameX, y: nameY, size: s, font: f, color })
-        if (crpText) page.drawText(crpText, { x: crpX, y: crpY, size: s, font: f, color })
-
+        if (crpText)  page.drawText(crpText,  { x: crpX,  y: crpY, size: s, font: f, color })
+      
         // --- DEBUG opcional ---
         if (false /* __DEBUG__ */) {
-          // Caixa efetiva
           page.drawRectangle({ x: xBox, y: yTop - hBox, width: wBox, height: hBox, color: rgb(0, 1, 0), opacity: 0.12 })
-          // Linha início/fim
           page.drawRectangle({ x: xBox + lineLeftOffset - 1, y: lineY - 1, width: 2, height: 2, color: rgb(1, 0, 0) })
-          page.drawRectangle({
-            x: xBox + lineLeftOffset + lw - 1,
-            y: lineY - 1,
-            width: 2,
-            height: 2,
-            color: rgb(0, 0, 1),
-          })
+          page.drawRectangle({ x: xBox + lineLeftOffset + lw - 1, y: lineY - 1, width: 2, height: 2, color: rgb(0, 0, 1) })
         }
       }
+      
     }
   }
 
