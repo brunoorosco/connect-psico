@@ -72,7 +72,6 @@ type Props = {
 }
 
 function SignatureView({ layer }: { layer: SignatureLayer }) {
-  // defaults “agradáveis”
   const {
     w = 220,
     h = 70,
@@ -81,74 +80,81 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
     color = "#111",
     align = "right",
     showLine = true,
-    lineWidthPct = 50,
+    lineWidthPct = 50, // 0..100
     lineThickness = 1,
     gapLineToName = 8,
     gapNameToCrp = 4,
   } = layer
 
-  // posição vertical: coloca a linha relativamente “próxima” do fundo,
-  // deixando espaço para nome e CRP abaixo da linha
-  // (linhaY é medido a partir do topo da caixa da layer)
   const lineY = useMemo(() => {
-    const safe = Math.max(0, h - fontSize * 2.2) // ~2 linhas de espaço
-    return Math.min(safe, Math.max(fontSize, h * 0.65)) // clamp razoável
+    const safe = Math.max(0, h - fontSize * 2.2)
+    return Math.min(safe, Math.max(fontSize, h * 0.65))
   }, [h, fontSize])
 
-  const lw = (Math.max(1, Math.min(200, lineWidthPct * 2)) / 100) * w
-  const lineLeft = align === "center" ? (w - lw) / 2 : align === "right" ? w - lw : 0
+  // ✅ cálculo correto da largura da linha
+  const pct = Math.max(0, Math.min(100, Number(lineWidthPct ?? 100)))
+  const maxMultiplier = 1.0 // deixe 1.0 se quiser limitar a 100% do box; aumente p/ 2.0 se quiser até 200%
+  const lw = w * (pct / 100) * maxMultiplier
+
+  // se quiser que o box “acompanhe” a linha (pelo menos não menor que ela):
+  const effectiveBoxW = Math.max(w, lw)
+
+  const lineLeft = align === "center" ? (effectiveBoxW - lw) / 2 : align === "right" ? effectiveBoxW - lw : 0
 
   const textAlign = align === "center" ? "center" : align === "right" ? "right" : "left"
 
   return (
     <div className="w-full h-full relative select-none" style={{ fontFamily }}>
-      {/* Linha de assinatura */}
-      {showLine && (
-        <div
-          style={{
-            position: "absolute",
-            left: lineLeft,
-            top: lineY,
-            width: lw,
-            height: 0,
-            borderBottom: `${lineThickness}px solid #000`,
-          }}
-        />
-      )}
+      {/* Conteúdo interno com largura efetiva acompanhando a linha */}
+      <div style={{ position: "absolute", inset: 0, width: effectiveBoxW, height: h }}>
+        {/* Linha de assinatura */}
+        {showLine && (
+          <div
+            style={{
+              position: "absolute",
+              left: lineLeft,
+              top: lineY,
+              width: lw,
+              height: 0,
+              borderBottom: `${lineThickness}px solid #000`,
+            }}
+          />
+        )}
 
-      {/* Nome */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: lineY + gapLineToName,
-          width: "100%",
-          textAlign,
-          fontSize,
-          color,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {layer.name || "Profissional"}
-      </div>
-
-      {/* CRP (se houver) */}
-      {layer.crp ? (
+        {/* Nome */}
         <div
           style={{
             position: "absolute",
             left: 0,
-            top: lineY + gapLineToName + fontSize + gapNameToCrp,
-            width: "100%",
+            top: lineY + gapLineToName,
+            width: effectiveBoxW,
             textAlign,
             fontSize,
             color,
             whiteSpace: "nowrap",
           }}
         >
-          {layer.crp}
+          {layer.name || "Profissional"}
         </div>
-      ) : null}
+
+        {/* CRP */}
+        {layer.crp ? (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: lineY + gapLineToName + fontSize + gapNameToCrp,
+              width: effectiveBoxW,
+              textAlign,
+              fontSize,
+              color,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {layer.crp}
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

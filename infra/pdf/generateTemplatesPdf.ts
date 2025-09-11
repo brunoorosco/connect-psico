@@ -15,6 +15,7 @@ const A5 = { w: 419.53, h: 595.28 }
 const cm = (n: number) => n * CM_TO_PT
 const PX_TO_PT = 72 / 96 // 0.75
 const pxToPt = (px: number) => px * PX_TO_PT
+const __DEBUG__ = true
 
 const hexToRgb = (hex?: string) => {
   const m = hex?.match(/^#?([0-9a-f]{6})$/i)
@@ -184,6 +185,7 @@ export async function generateCertificatePdf(
   const scaleX = paper.w / designWpt
   const scaleY = paper.h / designHpt
 
+  const S = paper.w / designWpt // usa a largura como referência
   // (Opcional) microajustes finos se ainda notar drift de 1px:
   const LAYER_TWEAK_X_PT = 0 // ex.: 0.25
   const LAYER_TWEAK_Y_PT = 0 // ex.: 0.25
@@ -331,36 +333,6 @@ export async function generateCertificatePdf(
     }
   }
 
-  // // ---------- ASSINATURA ----------
-  // const sigFs = Math.max(12, fs)
-  // const signNeed = cm(1.2) + sigFs * 2
-  // ensureSpace(signNeed)
-
-  // const signY = Math.max(y - cm(1.2), cm(3))
-  // page.drawLine({
-  //   start: { x: paper.w - contentX - cm(6), y: signY },
-  //   end: { x: paper.w - contentX, y: signY },
-  //   thickness: 0.8,
-  //   color: rgb(0, 0, 0),
-  // })
-  // page.drawText(user?.name || "Profissional", {
-  //   x: paper.w - contentX - cm(6),
-  //   y: signY - cm(0.5),
-  //   size: sigFs,
-  //   font: bodyFont,
-  //   color: bodyColor,
-  // })
-  // const cr = user?.crp ? `CRP: ${user.crp}` : user?.crp ? `CPM: ${user.crp}` : ""
-  // if (cr) {
-  //   page.drawText(cr, {
-  //     x: paper.w - contentX - cm(6),
-  //     y: signY - cm(1.0),
-  //     size: sigFs,
-  //     font: bodyFont,
-  //     color: bodyColor,
-  //   })
-  // }
-
   // ---------- LAYERS (text | image | qr) ----------
   if (Array.isArray(config.layers) && config.layers.length) {
     // desenha respeitando z (opcional)
@@ -373,35 +345,47 @@ export async function generateCertificatePdf(
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
 
-        // tamanho em px -> pt (e aplica escala da página)
         const sPt = pxToPt(Number(layer.fontSize) || 12)
-        const s = sPt * scaleY
+        const s = sPt * S
 
         const c = hexToRgb(layer.color || "#000000")
         const txt = String(layer.text ?? "")
 
-        // dimensões da caixa em pt já escaladas
-        const wBox = (layer.w != null ? pxToPt(layer.w) : f.widthOfTextAtSize(txt, sPt)) * scaleX
-        const hBox = (layer.h != null ? pxToPt(layer.h) : sPt) * scaleY
+        const wBox = (layer.w != null ? pxToPt(layer.w) : f.widthOfTextAtSize(txt, sPt)) * S
+        const hBox = (layer.h != null ? pxToPt(layer.h) : sPt) * S
 
-        // X inicial no canto esquerdo da caixa
-        let x = pxToPt(layer.x) * scaleX + LAYER_TWEAK_X_PT
-
-        // largura real do texto no tamanho final
+        let x = pxToPt(layer.x) * S + LAYER_TWEAK_X_PT
         const wTxt = f.widthOfTextAtSize(txt, s)
 
-        // alinhamento horizontal dentro da caixa
         if (layer.align === "center") x += (wBox - wTxt) / 2
         if (layer.align === "right") x += wBox - wTxt
 
-        // Y no PDF: base da caixa (converter top->bottom e subtrair altura da caixa)
-        const yBottom = paper.h - pxToPt(Number(layer.y)) * scaleY - hBox - LAYER_TWEAK_Y_PT
-
-        // preview usa flex + alignItems:center -> centralizar verticalmente
-        // baseline = centro da caixa + metade da altura da linha (aprox. s*0.8 de ascendência)
+        const yBottom = paper.h - pxToPt(Number(layer.y)) * S - hBox - LAYER_TWEAK_Y_PT
         const baseline = yBottom + (hBox - s) / 2 + s * 0.8
 
         page.drawText(txt, { x, y: baseline, size: s, font: f, color: c })
+        page.drawText(txt, { x, y: baseline, size: s, font: f, color: c })
+
+        if (__DEBUG__) {
+          // desenha a caixa
+          page.drawRectangle({
+            x: pxToPt(layer.x) * S,
+            y: yBottom,
+            width: wBox,
+            height: hBox,
+            color: rgb(1, 0, 0),
+            opacity: 0.1,
+          })
+          // linha vertical na posição X do texto
+          page.drawRectangle({
+            x,
+            y: yBottom,
+            width: 1,
+            height: hBox,
+            color: rgb(0, 0, 1),
+            opacity: 0.8,
+          })
+        }
       }
 
       // IMAGE
@@ -448,38 +432,60 @@ export async function generateCertificatePdf(
           console.warn("Falha ao gerar QR da layer:", e)
         }
       }
-      // SIGNATURE
+      // --- SIGNATURE ---
       if (layer?.type === "signature") {
         const fam = layer.fontFamily ?? config.titleFontFamily
         const f = pickFont(fonts, fam, "regular")
 
-        // caixa (px -> pt) com escalas
-        const wBox = pxToPt(Number(layer.w) || 220) * scaleX
-        const hBox = pxToPt(Number(layer.h) || 70) * scaleY
-        const xBox = pxToPt(Number(layer.x) || 0) * scaleX + LAYER_TWEAK_X_PT
-        const yTop = paper.h - pxToPt(Number(layer.y) || 0) * scaleY - LAYER_TWEAK_Y_PT // topo da caixa
+        // base do box a partir do layer (mínimo)
+        const wBase = pxToPt(Number(layer.w) || 220) * S
+        const hBox = pxToPt(Number(layer.h) || 70) * S
+
+        // posição base (antes do ajuste de ancoragem)
+        const xBase = pxToPt(Number(layer.x) || 0) * S + LAYER_TWEAK_X_PT
+        const yTop = paper.h - pxToPt(Number(layer.y) || 0) * S - LAYER_TWEAK_Y_PT
 
         // estilo / defaults
-        const fontSizePx = Number(layer.fontSize) || 14
-        const s = pxToPt(fontSizePx) * scaleY
+        const s = pxToPt(Number(layer.fontSize) || 14) * S
         const color = hexToRgb(layer.color || "#000000")
         const align = (layer.align as "left" | "center" | "right") || "right"
         const showLine = layer.line !== false
-        const lineThicknessPt = pxToPt(Number(layer.lineThickness) || 1) * ((scaleX + scaleY) / 2)
+        const lineThicknessPt = Math.max(0.5, pxToPt(Number(layer.lineThickness) || 1) * S)
 
-        // 0..100 do editor -> 0..250% com a proporção 2.5
+        // LARGURA DA LINHA
         const pct = Math.max(0, Math.min(100, Number(layer.lineWidthPct ?? 100)))
-        const lw = ((pct * 2.5) / 100) * wBox // largura real da linha em pt
 
-        // posição X da linha conforme alinhamento
+        // permite esticar além de 100% mantendo a escala 0..100% coerente
+        const maxMultiplier = Number(layer.maxLineWidthMultiplier ?? 2.0) // 1.0 = 100%, 2.0 = 200%, etc.
+
+        // wBase é a referência “tamanho nominal da caixa”
+        const lwNominal = (pct / 100) * (wBase * maxMultiplier)
+
+        // Se você já mediu a linha no preview e salvou (opcional), priorize a medida:
+        const lwMeasured = typeof layer.measuredLineWidthPx === "number" ? pxToPt(layer.measuredLineWidthPx) * S : null
+
+        const lw = lwMeasured ?? lwNominal // largura final da linha
+
+        // DEFINIÇÃO DA LARGURA DO BOX
+        const boxFollowsLine = Boolean(layer.boxFollowsLine) // se true, box acompanha a linha
+        // modo 1: box = max(base, linha) -> nunca menor que o base
+        // modo 2: box = linha (se preferir, troque a linha abaixo por: const wBox = lw)
+        const wBox = boxFollowsLine ? Math.max(wBase, lw) : wBase
+
+        // ANCORAGEM DO BOX para não “andar” quando a largura variar
+        const boxAnchor = (layer.boxAnchor as "left" | "center" | "right") || "left"
+        let xBox = xBase
+        if (boxAnchor === "center") xBox = xBase - wBox / 2
+        if (boxAnchor === "right") xBox = xBase - wBox
+
+        // POSIÇÃO DA LINHA DENTRO DO BOX (alinhamento horizontal)
         let lineLeftOffset = 0
         if (align === "center") lineLeftOffset = (wBox - lw) / 2
         if (align === "right") lineLeftOffset = wBox - lw
 
-        // posição Y da linha dentro da caixa (relativa ao topo da caixa)
-        // usamos uma heurística estável: ~65% da altura, mas garantindo espaço p/ textos
-        const maxBelow = hBox - s * 2.2
+        // posição Y da linha (mesma heurística)
         const preferred = hBox * 0.65
+        const maxBelow = hBox - s * 2.2
         const lineOffsetFromTop = Math.min(Math.max(s, preferred), Math.max(0, maxBelow))
         const lineY = yTop - lineOffsetFromTop
 
@@ -488,33 +494,38 @@ export async function generateCertificatePdf(
           page.drawLine({
             start: { x: xBox + lineLeftOffset, y: lineY },
             end: { x: xBox + lineLeftOffset + lw, y: lineY },
-            thickness: Math.max(0.5, lineThicknessPt),
+            thickness: lineThicknessPt,
             color: rgb(0, 0, 0),
           })
         }
 
         // textos (nome / CRP)
-        const gapLineToName = pxToPt(Number(layer.gapLineToName) ?? 8) * scaleY
-        const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * scaleY
+        const gapLineToName = pxToPt(Number(layer.gapLineToName) ?? 8) * S
+        const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * S
 
         const nameText = String(layer.name || "Profissional")
         const crpText = layer.crp ? `${layer.crp}` : ""
 
-        const nameW = f.widthOfTextAtSize(nameText, s)
-        const crpW = crpText ? f.widthOfTextAtSize(crpText, s) : 0
+        // Se você medir no preview, use as medidas; senão, calcule pela fonte
+        const nameW =
+          typeof layer.measuredNameWidthPx === "number"
+            ? pxToPt(layer.measuredNameWidthPx) * S
+            : f.widthOfTextAtSize(nameText, s)
+        const crpW =
+          crpText && typeof layer.measuredCrpWidthPx === "number"
+            ? pxToPt(layer.measuredCrpWidthPx) * S
+            : crpText
+            ? f.widthOfTextAtSize(crpText, s)
+            : 0
 
-        // base X para textos conforme alinhamento (alinhar pelos mesmos limites da linha)
-        const textBoxLeft = xBox
-        const textBoxWidth = wBox
-
-        let nameX = textBoxLeft
-        let crpX = textBoxLeft
+        let nameX = xBox
+        let crpX = xBox
         if (align === "center") {
-          nameX = textBoxLeft + (textBoxWidth - nameW) / 2
-          crpX = textBoxLeft + (textBoxWidth - crpW) / 2
+          nameX = xBox + (wBox - nameW) / 2
+          crpX = xBox + (wBox - crpW) / 2
         } else if (align === "right") {
-          nameX = textBoxLeft + (textBoxWidth - nameW)
-          crpX = textBoxLeft + (textBoxWidth - crpW)
+          nameX = xBox + (wBox - nameW)
+          crpX = xBox + (wBox - crpW)
         }
 
         const nameY = lineY - gapLineToName - s
@@ -523,7 +534,20 @@ export async function generateCertificatePdf(
         if (nameText) page.drawText(nameText, { x: nameX, y: nameY, size: s, font: f, color })
         if (crpText) page.drawText(crpText, { x: crpX, y: crpY, size: s, font: f, color })
 
-        continue
+        // --- DEBUG opcional ---
+        if (false /* __DEBUG__ */) {
+          // Caixa efetiva
+          page.drawRectangle({ x: xBox, y: yTop - hBox, width: wBox, height: hBox, color: rgb(0, 1, 0), opacity: 0.12 })
+          // Linha início/fim
+          page.drawRectangle({ x: xBox + lineLeftOffset - 1, y: lineY - 1, width: 2, height: 2, color: rgb(1, 0, 0) })
+          page.drawRectangle({
+            x: xBox + lineLeftOffset + lw - 1,
+            y: lineY - 1,
+            width: 2,
+            height: 2,
+            color: rgb(0, 0, 1),
+          })
+        }
       }
     }
   }
