@@ -29,6 +29,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 
 import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
 import { calcularIdade } from "@/utils/calcAge"
+import { ptBR } from "date-fns/locale"
+import { format } from "date-fns"
 
 type CertificateType = "atestado" | "comparecimento" | "acompanhamento" | "encaminhamento" | "relatorio"
 type CertificateConfig = any
@@ -59,7 +61,7 @@ export const ConsultationStart = () => {
   const { form, handleSubmit } = useConsultationForm({})
 
   const currentUser = useCurrentUser()
-  const [canIssueDocument, setCanIssueDocument] = useState(false)
+  const [canIssueDocument, setCanIssueDocument] = useState(true)
   const [issueOpen, setIssueOpen] = useState(false)
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
@@ -161,6 +163,7 @@ export const ConsultationStart = () => {
       horario: timeStr || "08:00",
       cid: cid || "",
       dias: days || 0,
+      dataExtenso: format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
     }
   }, [patient?.name, rg, cpf, idade, timeStr, cid, days])
 
