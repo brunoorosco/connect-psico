@@ -168,7 +168,7 @@ export const ConsultationStart = () => {
     if (!selectedConfig) return
     const userForDoc = {
       name: currentUser?.name || "Profissional",
-      crp: currentUser?.crp || currentUser?.crm || "",
+      crp: currentUser?.crp || "",
     }
     await generateCertificatePdf(selectedConfig, userForDoc, patientDataForDoc)
     setIssueOpen(false)
