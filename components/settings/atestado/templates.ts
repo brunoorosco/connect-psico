@@ -15,7 +15,7 @@ CID: {{cid}}.
 
 Deverá permanecer afastado(a) das atividades laborais por {{dias}} dias a partir desta data.
 
-                                          São Paulo, {{dataExtenso}}
+                                    São Paulo, {{dataExtenso}}
 `,
 
   comparecimento: `Declaro, para os devidos fins, que {{paciente}}, RG: {{rg}}, esteve presente em atendimento psicológico devido {{tratamento}}.
@@ -24,7 +24,7 @@ CID {{cid}}
 
 Dia {{data}} às {{horario}}
 
-                                          São Paulo, {{dataExtenso}}
+                                    São Paulo, {{dataExtenso}}
 `,
 
   acompanhamento: `Declaro para os devidos fins que {{paciente}}, CPF: {{cpf}}, encontra-se em acompanhamento psicológico, sob responsabilidade do(a) Psicólogo(a) {{nome}}, CRP {{crp}}.
@@ -32,7 +32,7 @@ Dia {{data}} às {{horario}}
 O acompanhamento teve início em {{inicio}} e tem como objetivo obter como hipótese diagnóstica CID {{cid}}. 
 As sessões ocorrem semanalmente e seguem as diretrizes éticas e profissionais da Psicologia.
 
-                                          São Paulo, {{dataExtenso}}
+                                    São Paulo, {{dataExtenso}}
 `,
 
   encaminhamento: `Prezado(a) Dr(a),
@@ -44,7 +44,7 @@ Considerando o quadro apresentado, compreendo que uma avaliação psiquiátrica 
 
 Atenciosamente,
 
-                                          São Paulo, {{dataExtenso}}
+                                    São Paulo, {{dataExtenso}}
 `,
 
   relatorio: `Paciente: {{paciente}}, {{idade}} anos
@@ -58,6 +58,6 @@ Observações clínicas: {{observacoes}}.
 De acordo com critérios diagnósticos, apresenta quadro compatível com CID {{cid}}.
 Certifico que este relatório foi elaborado com base nas observações realizadas durante o processo terapêutico, atendendo aos requisitos exigidos para reembolso junto ao convênio.
 
-                                          São Paulo, {{dataExtenso}}
+                                    São Paulo, {{dataExtenso}}
 `,
 }
