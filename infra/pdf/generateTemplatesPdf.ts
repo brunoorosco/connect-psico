@@ -498,7 +498,7 @@ export async function generateCertificatePdf(
         const gapNameToCrp = pxToPt(Number(layer.gapNameToCrp) ?? 4) * scaleY
 
         const nameText = String(layer.name || "Profissional")
-        const crpText = layer.crp ? `CRP: ${layer.crp}` : ""
+        const crpText = layer.crp ? `${layer.crp}` : ""
 
         const nameW = f.widthOfTextAtSize(nameText, s)
         const crpW = crpText ? f.widthOfTextAtSize(crpText, s) : 0

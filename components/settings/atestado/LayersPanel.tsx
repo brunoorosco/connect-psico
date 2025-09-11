@@ -113,7 +113,7 @@ export default function LayersPanel({
     const l: SignatureLayer = {
       id: newId(),
       type: "signature",
-      x: 340,
+      x: 300,
       y: 520,
       w: 220,
       h: 70,
@@ -122,12 +122,12 @@ export default function LayersPanel({
       fontSize: 14,
       color: "#000000",
       showLine: true,
-      lineWidthPct: 300,
+      lineWidthPct: 50,
       lineThickness: 1,
       gapLineToName: 8,
       gapNameToCrp: 4,
       name: user?.name || "Profissional",
-      crp: user?.crp || user?.crp || "CRP 00/00000",
+      crp: "CRP: " + `${user?.crp || "00/00000"}`,
       z: 50,
     }
     onChange([...(layers || []), l])

@@ -1,75 +1,75 @@
-import { memo, CSSProperties, useMemo } from "react";
-import { Rnd } from "react-rnd";
+import { memo, CSSProperties, useMemo } from "react"
+import { Rnd } from "react-rnd"
 
 export type BaseLayer = {
-  id: string;
-  type: "text" | "image" | "qr" | "signature";
-  x: number;
-  y: number;
-  w?: number;
-  h?: number;
-  rotate?: number;
-  z?: number;
-  lock?: boolean;
-};
+  id: string
+  type: "text" | "image" | "qr" | "signature"
+  x: number
+  y: number
+  w?: number
+  h?: number
+  rotate?: number
+  z?: number
+  lock?: boolean
+}
 
 export type TextLayer = BaseLayer & {
-  type: "text";
-  text: string;
-  fontSize?: number;
-  color?: string;
-  align?: "left" | "center" | "right";
-  fontFamily?: string;
-  bold?: boolean;
-  italic?: boolean;
-  opacity?: number;
-  background?: string;
-  padding?: number;
-};
+  type: "text"
+  text: string
+  fontSize?: number
+  color?: string
+  align?: "left" | "center" | "right"
+  fontFamily?: string
+  bold?: boolean
+  italic?: boolean
+  opacity?: number
+  background?: string
+  padding?: number
+}
 
 export type ImageLayer = BaseLayer & {
-  type: "image";
-  src: string;
-  publicId?: string;
-  objectFit?: "contain" | "cover";
-  opacity?: number;
-};
+  type: "image"
+  src: string
+  publicId?: string
+  objectFit?: "contain" | "cover"
+  opacity?: number
+}
 
 export type QrLayer = BaseLayer & {
-  type: "qr";
-  value: string;
-  fg?: string;
-  bg?: string;
-};
+  type: "qr"
+  value: string
+  fg?: string
+  bg?: string
+}
 
 // ✅ NOVO: camada de assinatura
 export type SignatureLayer = BaseLayer & {
-  type: "signature";
+  type: "signature"
   // texto/estilo
-  name?: string;
-  crp?: string;
-  fontFamily?: string;
-  fontSize?: number; // px
-  color?: string;
-  align?: "left" | "center" | "right";
+  name?: string
+  crp?: string
+  fontFamily?: string
+  fontSize?: number // px
+  color?: string
+  align?: "left" | "center" | "right"
   // linha
-  showLine?: boolean; // exibir linha
-  lineWidthPct?: number; // 0..100 (% da largura da caixa)
-  lineThickness?: number; // px
+  showLine?: boolean // exibir linha
+  lineWidthPct?: number // 0..100 (% da largura da caixa)
+  lineThickness?: number // px
   // espaçamentos (opcionais, em px)
-  gapLineToName?: number; // espaço entre linha e nome
-  gapNameToCrp?: number;  // espaço entre nome e crp
-};
+  gapLineToName?: number // espaço entre linha e nome
+  gapNameToCrp?: number // espaço entre nome e crp
+}
 
-export type AnyLayer = TextLayer | ImageLayer | QrLayer | SignatureLayer;
+export type AnyLayer = TextLayer | ImageLayer | QrLayer | SignatureLayer
 
 type Props = {
-  layer: AnyLayer;
-  boundsSelector?: string;
-  editable?: boolean;
-  onChange?: (patch: Partial<AnyLayer>) => void;
-  renderQr?: (layer: QrLayer) => React.ReactNode;
-};
+  layer: AnyLayer
+  boundsSelector?: string
+  editable?: boolean
+  onChange?: (patch: Partial<AnyLayer>) => void
+  renderQr?: (layer: QrLayer) => React.ReactNode
+}
 
 function SignatureView({ layer }: { layer: SignatureLayer }) {
   // defaults “agradáveis”
@@ -85,22 +85,20 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
     lineThickness = 1,
     gapLineToName = 8,
     gapNameToCrp = 4,
-  } = layer;
+  } = layer
 
   // posição vertical: coloca a linha relativamente “próxima” do fundo,
   // deixando espaço para nome e CRP abaixo da linha
   // (linhaY é medido a partir do topo da caixa da layer)
   const lineY = useMemo(() => {
-    const safe = Math.max(0, h - (fontSize * 2.2)); // ~2 linhas de espaço
-    return Math.min(safe, Math.max(fontSize, h * 0.65)); // clamp razoável
-  }, [h, fontSize]);
+    const safe = Math.max(0, h - fontSize * 2.2) // ~2 linhas de espaço
+    return Math.min(safe, Math.max(fontSize, h * 0.65)) // clamp razoável
+  }, [h, fontSize])
 
-  const lw = (Math.max(1, Math.min(200, lineWidthPct * 2)) / 100) * w;
-  const lineLeft =
-    align === "center" ? (w - lw) / 2 : align === "right" ? (w - lw) : 0;
+  const lw = (Math.max(1, Math.min(200, lineWidthPct * 2)) / 100) * w
+  const lineLeft = align === "center" ? (w - lw) / 2 : align === "right" ? w - lw : 0
 
-  const textAlign =
-    align === "center" ? "center" : align === "right" ? "right" : "left";
+  const textAlign = align === "center" ? "center" : align === "right" ? "right" : "left"
 
   return (
     <div className="w-full h-full relative select-none" style={{ fontFamily }}>
@@ -148,26 +146,20 @@ function SignatureView({ layer }: { layer: SignatureLayer }) {
             whiteSpace: "nowrap",
           }}
         >
-          CRP: {layer.crp}
+          {layer.crp}
         </div>
       ) : null}
     </div>
-  );
+  )
 }
 
 const DraggableLayer = memo(
-  ({
-    layer,
-    boundsSelector = "#certificate",
-    editable = false,
-    onChange,
-    renderQr,
-  }: Props) => {
+  ({ layer, boundsSelector = "#certificate", editable = false, onChange, renderQr }: Props) => {
     const style: CSSProperties = {
       position: "absolute",
       zIndex: layer.z ?? 40,
       pointerEvents: "auto",
-    };
+    }
 
     // ---------- RENDER ESTÁTICO ----------
     if (!editable) {
@@ -185,10 +177,7 @@ const DraggableLayer = memo(
             style={{
               width: "100%",
               height: "100%",
-              transform:
-                layer.rotate && layer.rotate % 360 !== 0
-                  ? `rotate(${layer.rotate}deg)`
-                  : undefined,
+              transform: layer.rotate && layer.rotate % 360 !== 0 ? `rotate(${layer.rotate}deg)` : undefined,
             }}
           >
             {layer.type === "image" ? (
@@ -205,7 +194,11 @@ const DraggableLayer = memo(
                 draggable={false}
               />
             ) : layer.type === "qr" ? (
-              renderQr ? renderQr(layer as QrLayer) : <div />
+              renderQr ? (
+                renderQr(layer as QrLayer)
+              ) : (
+                <div />
+              )
             ) : layer.type === "signature" ? (
               <SignatureView layer={layer as SignatureLayer} />
             ) : (
@@ -237,7 +230,7 @@ const DraggableLayer = memo(
             )}
           </div>
         </div>
-      );
+      )
     }
 
     // ---------- RENDER EDITÁVEL (react-rnd) ----------
@@ -270,10 +263,7 @@ const DraggableLayer = memo(
           style={{
             width: "100%",
             height: "100%",
-            transform:
-              layer.rotate && layer.rotate % 360 !== 0
-                ? `rotate(${layer.rotate}deg)`
-                : undefined,
+            transform: layer.rotate && layer.rotate % 360 !== 0 ? `rotate(${layer.rotate}deg)` : undefined,
           }}
         >
           {layer.type === "image" ? (
@@ -289,7 +279,11 @@ const DraggableLayer = memo(
               draggable={false}
             />
           ) : layer.type === "qr" ? (
-            renderQr ? renderQr(layer as QrLayer) : <div />
+            renderQr ? (
+              renderQr(layer as QrLayer)
+            ) : (
+              <div />
+            )
           ) : layer.type === "signature" ? (
             <SignatureView layer={layer as SignatureLayer} />
           ) : (
@@ -324,8 +318,8 @@ const DraggableLayer = memo(
         {/* guia visual ao passar o mouse */}
         <div className="absolute inset-0 border border-dashed border-slate-400/50 opacity-0 group-hover:opacity-100 pointer-events-none" />
       </Rnd>
-    );
+    )
   }
-);
+)
 
-export default DraggableLayer;
+export default DraggableLayer
