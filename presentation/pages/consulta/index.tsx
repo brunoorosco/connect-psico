@@ -57,16 +57,15 @@ export const ConsultationStart = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clinicalEvolution, setClinicalEvolution] = useState("")
   const [prescription, setPrescription] = useState("")
-  const [sintomas, setSintomas] = useState("")
-
+  
   const { form, handleSubmit } = useConsultationForm({})
-
+  
   const currentUser = useCurrentUser()
-  const [canIssueDocument, setCanIssueDocument] = useState(false)
+  const [canIssueDocument, setCanIssueDocument] = useState(true)
   const [issueOpen, setIssueOpen] = useState(false)
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
-
+  
   // form modal
   const [docType, setDocType] = useState<CertificateType>("atestado")
   const [cid, setCid] = useState<string>("")
@@ -75,6 +74,7 @@ export const ConsultationStart = () => {
   // NEW: RG e CPF na modal, com preenchimento automático
   const [rg, setRg] = useState<string>("")
   const [cpf, setCpf] = useState<string>("")
+  const [sintomas, setSintomas] = useState("")
 
   // Buscar paciente
   useEffect(() => {
@@ -163,6 +163,7 @@ export const ConsultationStart = () => {
       data: new Date().toLocaleDateString("pt-BR"),
       horario: timeStr || "08:00",
       cid: cid || "",
+      sintomas: sintomas || "",
       dias: days || 0,
       dataExtenso: format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
     }
@@ -325,9 +326,9 @@ export const ConsultationStart = () => {
               </Label>
               <div className="col-span-3">
                 <Input
-                  id="cpf"
+                  id="sintomas"
                   value={sintomas}
-                  onChange={(e) => setCpf(e.currentTarget.value)}
+                  onChange={(e) => setSintomas(e.currentTarget.value)}
                   placeholder="Sintomas/Avaliação"
                 />
               </div>
