@@ -6,18 +6,12 @@ export const PaperSizeSchema = z.enum(["A4", "A5"])
 export const HPosSchema = z.enum(["left", "center", "right"])
 export const VPosSchema = z.enum(["top", "middle", "bottom"])
 export const ObjectFitSchema = z.enum(["contain", "cover"])
-export const CertTypeSchema = z.enum([
-  "atestado",
-  "comparecimento",
-  "acompanhamento",
-  "encaminhamento",
-  "relatorio",
-])
+export const CertTypeSchema = z.enum(["atestado", "comparecimento", "acompanhamento", "encaminhamento", "relatorio"])
 
 /** Base das camadas */
 const BaseLayerSchema = z.object({
   id: z.string(),
-  type: z.enum(["text", "image", "qr"]),
+  type: z.enum(["text", "image", "qr", "signature"]),
   x: z.number(),
   y: z.number(),
   w: z.number().optional(),
@@ -41,6 +35,20 @@ export const TextLayerSchema = BaseLayerSchema.extend({
   background: z.string().default("transparent").optional(),
   padding: z.number().default(0).optional(),
 })
+export const SignatureLayerSchema = BaseLayerSchema.extend({
+  type: z.literal("signature"),
+  name: z.string().default(""),
+  crp: z.string().default(""),
+  fontFamily: z.string().default("inherit").optional(),
+  fontSize: z.number().min(1).default(16).optional(),
+  color: z.string().default("#111111").optional(),
+  align: HPosSchema.default("left").optional(),
+  showLine: z.boolean().optional(), // exibir linha
+  lineWidthPct: z.number().max(100).min(0),
+  lineThickness: z.number().max(10).min(0),
+  gapLineToName: z.number().max(10).min(0),
+  gapNameToCrp: z.number().max(10).min(0),
+})
 
 /** Camada de imagem */
 export const ImageLayerSchema = BaseLayerSchema.extend({
@@ -60,11 +68,7 @@ export const QrLayerSchema = BaseLayerSchema.extend({
 })
 
 /** Discriminated union das camadas */
-export const AnyLayerSchema = z.discriminatedUnion("type", [
-  TextLayerSchema,
-  ImageLayerSchema,
-  QrLayerSchema,
-])
+export const AnyLayerSchema = z.discriminatedUnion("type", [TextLayerSchema, ImageLayerSchema, QrLayerSchema, SignatureLayerSchema])
 
 /** Config completa do certificado (com defaults) */
 export const CertificateConfigSchema = z
@@ -77,12 +81,12 @@ export const CertificateConfigSchema = z
 
     showHeader: z.boolean().default(false),
     headerHeight: z.number().min(0).default(3), // cm
-    headerBgColor: z.string().default("#ffffff"),   
+    headerBgColor: z.string().default("#ffffff"),
 
     showFooter: z.boolean().default(false),
     footerHeight: z.number().min(0).default(3), // cm
     footerBgColor: z.string().default("#ffffff"),
-    
+
     companyName: z.string().default(""),
     companyAddress: z.string().default(""),
     companyPhone: z.string().default(""),
@@ -101,7 +105,7 @@ export const CertificateConfigSchema = z
     layers: z.array(AnyLayerSchema).default([]),
   })
   .passthrough() // permite chaves extras sem quebrar parse (bom p/ evolução)
-  // .strict()    // use estrito se quiser bloquear chaves desconhecidas
+// .strict()    // use estrito se quiser bloquear chaves desconhecidas
 
 /** Types gerados do schema */
 export type CertificateConfig = z.infer<typeof CertificateConfigSchema>
@@ -109,6 +113,7 @@ export type AnyLayer = z.infer<typeof AnyLayerSchema>
 export type TextLayer = z.infer<typeof TextLayerSchema>
 export type ImageLayer = z.infer<typeof ImageLayerSchema>
 export type QrLayer = z.infer<typeof QrLayerSchema>
+export type SignatureLayer = z.infer<typeof SignatureLayerSchema>
 
 /** Modelo salvo no banco */
 export type CertificateConfigModel = {

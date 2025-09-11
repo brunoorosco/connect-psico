@@ -14,6 +14,8 @@ import {
 import ColorField from "./ColorField";
 import ModelFont from "./ModelFont";
 import { templates, titles } from "./templates";
+import TemplateHelp from "./TooltipHelp";
+
 
 interface Props {
   config: CertificateConfig;
@@ -30,7 +32,7 @@ export default function BodyConfig({ config, onChange }: Props) {
   const title =
     (config.bodyTitle && config.bodyTitle.trim().length > 0
       ? config.bodyTitle
-      : titles[baseType]) ?? "";
+      : titles[baseType]);
 
   const template =
     (config.bodyTemplate && config.bodyTemplate.trim().length > 0
@@ -72,6 +74,7 @@ export default function BodyConfig({ config, onChange }: Props) {
           />
         </div>
       </div>
+      <TemplateHelp/>
 
       {/* Área para edição do conteúdo */}
       <Textarea
