@@ -15,7 +15,7 @@ const A5 = { w: 419.53, h: 595.28 }
 const cm = (n: number) => n * CM_TO_PT
 const PX_TO_PT = 72 / 96 // 0.75
 const pxToPt = (px: number) => px * PX_TO_PT
-const __DEBUG__ = true
+const __DEBUG__ = false
 
 const hexToRgb = (hex?: string) => {
   const m = hex?.match(/^#?([0-9a-f]{6})$/i)
@@ -364,7 +364,6 @@ export async function generateCertificatePdf(
         const baseline = yBottom + (hBox - s) / 2 + s * 0.8
 
         page.drawText(txt, { x, y: baseline, size: s, font: f, color: c })
-        page.drawText(txt, { x, y: baseline, size: s, font: f, color: c })
 
         if (__DEBUG__) {
           // desenha a caixa
@@ -548,7 +547,7 @@ export async function generateCertificatePdf(
         if (crpText)  page.drawText(crpText,  { x: crpX,  y: crpY, size: s, font: f, color })
       
         // --- DEBUG opcional ---
-        if (false /* __DEBUG__ */) {
+        if ( __DEBUG__ ) {
           page.drawRectangle({ x: xBox, y: yTop - hBox, width: wBox, height: hBox, color: rgb(0, 1, 0), opacity: 0.12 })
           page.drawRectangle({ x: xBox + lineLeftOffset - 1, y: lineY - 1, width: 2, height: 2, color: rgb(1, 0, 0) })
           page.drawRectangle({ x: xBox + lineLeftOffset + lw - 1, y: lineY - 1, width: 2, height: 2, color: rgb(0, 0, 1) })
