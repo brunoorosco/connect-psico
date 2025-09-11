@@ -11,7 +11,7 @@ export const templates = {
   atestado: `Atesto, para fins de afastamento das atividades laborais, que o(a) Sr(a) {{paciente}}, RG: {{rg}}, realizou consulta com o(a) Psicólogo(a) {{nome}} - CRP {{crp}}.
 Apresenta {{sintomas}}, sendo necessário acompanhamento psicológico.
 
-CID: {{cid}}.
+CID: {{cid}}
 
 Deverá permanecer afastado(a) das atividades laborais por {{dias}} dias a partir desta data.
 
