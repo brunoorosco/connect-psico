@@ -51,6 +51,7 @@ model Professional {
   numConselho        String?   @map("num_conselho") @db.VarChar(8)
   ufConselho         String?   @map("uf_conselho") @db.VarChar(2)
   publicoAlvo        String[]  @map("publico_alvo")
+  username           String?   @map("username") @db.VarChar(40)
   especialidade      String[]
   abordagem          String?
   tituloAcademico    String?   @map("(titulo_academico)")
@@ -68,7 +69,7 @@ model Professional {
   isProfileCompleted Boolean   @default(false) @map("is_profile_completed")
   experiencia        Int       @default(0) @map("experiencia")
 
-  @@index([id])
+  @@index([id, username])
   @@map("professionals")
 }
 
