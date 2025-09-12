@@ -114,7 +114,7 @@ export const menus = [
   },
   {
     title: "Ajuda",
-    url: `/app/{userId}/help`,
+    url: `/app/{userId}/help-center`,
     icon: InfoIcon,
     rules: ["SUPERVISOR"],
   },
