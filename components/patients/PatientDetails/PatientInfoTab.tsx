@@ -3,6 +3,7 @@ import React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IPatient } from "./types"
 import { format, parseISO } from "date-fns"
+import { formatPhone } from "@/utils/formatPhone"
 
 export const PatientInfoTab: React.FC<IPatient> = (props) => {
   const { patient } = props || {}
@@ -25,7 +26,7 @@ export const PatientInfoTab: React.FC<IPatient> = (props) => {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoField label="Email" value={email} />
-          <InfoField label="Telefone" value={phone} />
+          <InfoField label="Telefone" value={formatPhone(phone)} />
           <InfoField label="Data de Nascimento" value={formattedDate} />
           <InfoField label="Contato de Emergência" value={emergencyContact || "Não informado"} />
           <InfoField label="Endereço" value={formattedAddress} fullWidth />
