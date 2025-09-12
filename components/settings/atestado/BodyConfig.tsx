@@ -27,8 +27,7 @@ export default function BodyConfig({ config, onChange }: Props) {
   const template =
     (config.bodyTemplate?.trim()?.length ?? 0) > 0 ? (config.bodyTemplate as string) : templates[baseType]
 
-  const bodyCityDate = (config as any).bodyCityDate.trim()
-
+  const bodyCityDate = (config as any).bodyCityDate
   const bodyDateAlign = (config as any).bodyDateAlign ? (config as any).bodyDateAlign : "left"
 
   const bodyFontSize = Number.isFinite(config.bodyFontSize) ? (config.bodyFontSize as number) : 14
