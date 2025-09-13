@@ -19,7 +19,7 @@ declare module "next-auth" {
     isTwoFactorEnabled?: boolean;
     crp?: string
     role: string
-    phone?: string
+    phone?: string | null
   }
   interface JWT {
     role: string
