@@ -99,28 +99,6 @@ export default function MedicalCertificate() {
 
     return () => ac.abort()
   }, [])
-  const handleLoadTemplate = useCallback(async (id: string) => {
-    try {
-      const res = await fetch(`/api/templates/${id}`)
-      if (!res.ok) throw new Error(await res.text())
-      const data = await res.json()
-      // Assumindo payload: { id, name, type, configJson }
-      const loadedType: CertificateType = (data?.type || data?.configJson?.type || "atestado") as CertificateType
-      const loadedConfig = { ...DEFAULT_CONFIG, ...(data?.configJson || {}), type: loadedType } as CertificateConfig
-
-      // Hidrata o editor com o que veio do banco
-      setConfig(loadedConfig)
-
-      // Atualiza caches auxiliares (id por tipo e "modelsByType" local)
-      setIdsByType((prev) => ({ ...prev, [loadedType]: data?.id }))
-      setModelsByType((prev) => ({ ...prev, [loadedType]: loadedConfig }))
-
-      toast.success("Modelo carregado!")
-    } catch (err) {
-      console.error("Falha ao carregar modelo:", err)
-      toast.error("Não foi possível carregar o modelo.")
-    }
-  }, [])
 
   // ---- onChange centralizado ----
   const onChange = useCallback(
@@ -184,14 +162,12 @@ export default function MedicalCertificate() {
       const t = config.type
       const id = idsByType[t] ?? null
       const name = effectiveTitle(config) // título “efetivo”
-
+console.log('[page.tsx:165]', { config });
       const payload = {
         type: t,
         name, // nome amigável salvo no banco
         configJson: config, // modelo completo (inclui bodyTitle/bodyTemplate/layers)
       }
-      console.log('[page.tsx:194]', { config });
-
       const res = await fetch(id ? `/api/templates/${id}` : `/api/templates`, {
         method: id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -254,7 +230,7 @@ export default function MedicalCertificate() {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <CertificatePreview
             config={config as any}
-            user={{ name: user?.name || "Psicologo", crp: user?.crm || "123456" }}
+            user={{ name: user?.name || "Psicologo", crp: user?.crp || "123456" }}
             editing={editLayers}
             onLayerChange={handleLayerChange}
           />

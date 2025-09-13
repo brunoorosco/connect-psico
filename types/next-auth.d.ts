@@ -9,15 +9,16 @@ declare module "next-auth" {
       isTwoFactorEnabled?: boolean
       isProfileCompleted?: boolean
       isNewProfile?: boolean
-      crm?: string
+      crp?: string
       phone?: string
     } & DefaultSession["user"]
   }
   interface User extends DefaultUser {
+    role: string;
+    isProfileCompleted?: boolean;
+    isTwoFactorEnabled?: boolean;
+    crp?: string
     role: string
-    isProfileCompleted?: boolean
-    isTwoFactorEnabled?: boolean
-    crm?: string
     phone?: string
   }
   interface JWT {
@@ -37,7 +38,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     isTwoFactorEnabled?: boolean
     isProfileCompleted?: boolean
-    crm?: string
+    crp?: string
     phone?: string
   }
 }

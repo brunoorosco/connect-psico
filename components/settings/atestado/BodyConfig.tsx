@@ -1,55 +1,45 @@
-"use client";
+"use client"
 
-import { CertificateConfig, CertificateType } from "./types";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import ColorField from "./ColorField";
-import ModelFont from "./ModelFont";
-import { templates, titles } from "./templates";
+import { CertificateConfig, CertificateType } from "./types"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import ColorField from "./ColorField"
+import ModelFont from "./ModelFont"
+import { templates, titles } from "./templates"
+import TemplateHelp from "./TooltipHelp"
+
+type DateAlign = "left" | "center" | "right"
 
 interface Props {
-  config: CertificateConfig;
-  onChange: <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => void;
+  config: CertificateConfig
+  onChange: <K extends keyof CertificateConfig>(key: K, value: CertificateConfig[K]) => void
 }
 
 export default function BodyConfig({ config, onChange }: Props) {
-  // 1) NUNCA usar fallback aqui; mantém exatamente o que veio do pai
-  const selectedType: CertificateType | undefined = config.type;
+  // Mantém exatamente o que veio do pai (sem fallback no state)
+  const selectedType: CertificateType | undefined = config.type
 
-  // 2) Use um baseType SÓ para fallbacks de visualização (título/template)
-  const baseType: CertificateType = selectedType ?? "atestado";
-
-  const title =
-    (config.bodyTitle && config.bodyTitle.trim().length > 0
-      ? config.bodyTitle
-      : titles[baseType]) ?? "";
-
+  // Fallbacks apenas para VISUALIZAÇÃO de título/template
+  const baseType: CertificateType = selectedType ?? "atestado"
+  const title = (config.bodyTitle?.trim()?.length ?? 0) > 0 ? (config.bodyTitle as string) : titles[baseType]
   const template =
-    (config.bodyTemplate && config.bodyTemplate.trim().length > 0
-      ? config.bodyTemplate
-      : templates[baseType]) ?? "";
+    (config.bodyTemplate?.trim()?.length ?? 0) > 0 ? (config.bodyTemplate as string) : templates[baseType]
+
+  const bodyCityDate = (config as any).bodyCityDate
+  const bodyDateAlign = (config as any).bodyDateAlign ? (config as any).bodyDateAlign : "left"
+
+  const bodyFontSize = Number.isFinite(config.bodyFontSize) ? (config.bodyFontSize as number) : 14
+  const titleFontSize = Number.isFinite(config.titleFontSize) ? (config.titleFontSize as number) : 26
 
   return (
     <div className="space-y-3">
-      {/* Select + Input lado a lado */}
+      {/* Tipo + Título */}
       <div className="grid grid-cols-2 gap-3 items-end">
         <div>
           <Label>Tipo de Documento</Label>
-          <Select
-            // 3) Controlado pelo valor exato do estado
-            value={selectedType ?? ""}              // quando undefined, usa ""
-            onValueChange={(value) => {
-              onChange("type", value as CertificateType);
-            }}
-          >
+          <Select value={selectedType ?? ""} onValueChange={(value) => onChange("type", value as CertificateType)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione um tipo" />
             </SelectTrigger>
@@ -65,56 +55,78 @@ export default function BodyConfig({ config, onChange }: Props) {
 
         <div>
           <Label>Título do Documento</Label>
-          <Input
-            type="text"
-            value={title}
-            onChange={(e) => onChange("bodyTitle", e.currentTarget.value)}
-          />
+          <Input type="text" value={title} onChange={(e) => onChange("bodyTitle", e.currentTarget.value as any)} />
         </div>
       </div>
 
-      {/* Área para edição do conteúdo */}
-      <Textarea
-        rows={15}
-        value={template}
-        onChange={(e) => onChange("bodyTemplate", e.currentTarget.value)}
-      />
+      <TemplateHelp />
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* Template */}
+      <Textarea rows={12} value={template} onChange={(e) => onChange("bodyTemplate", e.currentTarget.value as any)} />
+
+      {/* Cidade + Alinhamento da data + Cor do texto */}
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <Label>Cidade</Label>
+          <Input
+            type="text"
+            value={bodyCityDate}
+            onChange={(e) => onChange("bodyCityDate" as any, e.currentTarget.value as any)}
+          />
+        </div>
+
+        <div>
+          <Label>Alinhamento da data</Label>
+          <Select
+            value={(bodyDateAlign as DateAlign) ?? "left"}
+            onValueChange={(val) => onChange("bodyDateAlign" as any, val as any)} // <— atualiza o config
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione o alinhamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="left">Esquerda</SelectItem>
+              <SelectItem value="center">Centro</SelectItem>
+              <SelectItem value="right">Direita</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <ColorField
           label="Cor do Texto"
           value={config.bodyTextColor}
-          onChange={(v) => onChange("bodyTextColor", v)}
+          onChange={(v) => onChange("bodyTextColor", v as any)}
         />
+      </div>
+
+      {/* Tipografia */}
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <Label>Tamanho da Fonte (px)</Label>
           <Input
             type="number"
             min={10}
             max={32}
-            value={config.bodyFontSize}
-            onChange={(e) => onChange("bodyFontSize", e.currentTarget.valueAsNumber)}
+            value={bodyFontSize}
+            onChange={(e) => onChange("bodyFontSize", e.currentTarget.valueAsNumber as any)}
           />
         </div>
-      </div>
 
-      {/* Configurações do título */}
-      <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>Tamanho do Título (px)</Label>
           <Input
             type="number"
             min={12}
             max={60}
-            value={config.titleFontSize}
-            onChange={(e) => onChange("titleFontSize", e.currentTarget.valueAsNumber)}
+            value={titleFontSize}
+            onChange={(e) => onChange("titleFontSize", e.currentTarget.valueAsNumber as any)}
           />
         </div>
-        <ModelFont
-          value={config.titleFontFamily}
-          onChange={(v) => onChange("titleFontFamily", v)}
-        />
+
+        <div>
+          <ModelFont value={config.titleFontFamily} onChange={(v) => onChange("titleFontFamily", v as any)} />
+        </div>
       </div>
     </div>
-  );
+  )
 }
