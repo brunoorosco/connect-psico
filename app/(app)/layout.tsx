@@ -16,8 +16,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col">
       <SocketProvider>
-        {" "}
-        {/* ✅ Aqui é onde o provider é adicionado */}
         <SidebarProvider>
           <AppSidebar />
           <div className="flex-1">
