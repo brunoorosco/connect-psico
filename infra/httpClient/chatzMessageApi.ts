@@ -15,10 +15,11 @@ axiosInstanceChatz.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-export const sendMessageApiWhatsapp = async (userPhone: string, message: string) => {
+export const sendMessageApiWhatsapp = async (userPhone: string, message: string, signature = true) => {
+  const msg = signature ? `*PsicoMais:*\n${message}` : message
   await axiosInstanceChatz.post("/messages/send", {
     // body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
-    body: `*PsicoMais:*\n${message}`,
+    body: msg,
     number: "55" + userPhone,
   })
 }
