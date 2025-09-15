@@ -25,6 +25,9 @@ import {
 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { Input, Label } from "@components/ui"
+import { getProfessionalByUsername } from "@/actions/users/getProfissionalsByUsername"
+import { Professional } from "@/types/appointment"
+import { ProfessionalModel } from "@/domain/model/professional"
 
 // =============================
 // Types
@@ -34,23 +37,6 @@ type Slot = { time: string; available: boolean; date?: string } // date in YYYY-
 type WeekKeys = "monday" | "tuesday" | "wednesday" | "thursday" | "friday"
 
 type WeeklySchedule = Record<WeekKeys, Slot[]>
-
-interface Professional {
-  id: string | number
-  name: string
-  specialty: string
-  approach: string
-  avatar: string
-  location: string
-  experience: string
-  rating: number
-  reviews: number
-  education: string[]
-  certifications: string[]
-  bio: string
-  email: string
-  phone: string
-}
 
 // =============================
 // Server Action (coloque em um arquivo server, ex.: app/(app)/appointments/actions.ts)
@@ -453,7 +439,7 @@ export default function ProfessionalProfilePage() {
   const router = useRouter()
   const search = useSearchParams()
 
-  const [professional, setProfessional] = useState<Professional | null>(null)
+  const [professional, setProfessional] = useState<ProfessionalModel | null>(null)
   const [weekData, setWeekData] = useState<WeeklySchedule | null>(null)
   const [loading, setLoading] = useState(true)
   const [weekOffset, setWeekOffset] = useState(0) // 0 = semana atual, 1 = próxima, etc.
@@ -482,12 +468,14 @@ export default function ProfessionalProfilePage() {
     async function load() {
       setLoading(true)
       try {
-        const professionalId = params?.id || params?.name // adapte conforme sua rota
+        const nickname = params?.name as string // adapte conforme sua rota
         // ======= BUSCAR DADOS DO PROFISSIONAL =======
         // const resPro = await fetch(`/api/professionals/${professionalId}`, { signal: controller.signal });
         // const prof: Professional = await resPro.json();
         // setProfessional(prof);
-        setProfessional(mockProfessional)
+        const terapeuta = await getProfessionalByUsername(nickname)
+        console.log(terapeuta)
+        setProfessional(terapeuta)
 
         // ======= BUSCAR AGENDA DA SEMANA =======
         const from = formatYMD(weekStartUTC)
@@ -532,7 +520,7 @@ export default function ProfessionalProfilePage() {
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <Avatar className="h-32 w-32">
-                    <AvatarImage src={professional?.avatar} alt={professional?.name ?? ""} />
+                    <AvatarImage src={professional?.image as string} alt={professional?.name ?? ""} />
                     <AvatarFallback className="text-2xl bg-primary/10 text-primary">
                       {(professional?.name || "")
                         .split(" ")
@@ -541,21 +529,24 @@ export default function ProfessionalProfilePage() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h1 className="text-2xl font-bold text-foreground mb-2">{professional?.name}</h1>
-                    <p className="text-muted-foreground mb-2">{professional?.specialty}</p>
-                    <Badge variant="secondary" className="mb-4">
-                      {professional?.approach}
+                    <h1 className="text-2xl font-bold text-foreground">{professional?.name}</h1>
+                    <p className="text-muted-foreground mb-2">{professional?.especialidade.join(", ")}</p>
+                    <Badge variant={professional?.active ? "secondary" : "default"} className="mb-4">
+                      {professional?.active ? "Ativo" : "Inativo"}
+                      {/* {professional?.publicoAlvo?.join(", ")} */}
                     </Badge>
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">{professional?.rating}</span>
-                      <span className="text-muted-foreground">({professional?.reviews} avaliações)</span>
+                      <span className="font-semibold">{4.9}</span>
+                      <span className="text-muted-foreground">({100} avaliações)</span>
                     </div>
                     <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
                       <MapPin className="h-4 w-4" />
-                      <span>{professional?.location}</span>
+                      <span>São Paulo/SP</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{professional?.experience}</p>
+                    {/* <p className="text-sm text-muted-foreground">Mais de {professional?.experiencia} anos de experiência</p> */}
+                    <p className="font-medium text-muted-foreground"> Público Alvo</p>
+                    <p className="text-sm text-muted-foreground"> {professional?.publicoAlvo?.join(", ")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -595,11 +586,15 @@ export default function ProfessionalProfilePage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(professional?.education ?? []).map((edu, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">
-                      • {edu}
-                    </li>
-                  ))}
+                  {Array.isArray(professional?.education) ? (
+                    professional.education.map((edu, i) => (
+                      <li key={i} className="text-sm text-muted-foreground">
+                        • {edu}
+                      </li>
+                    ))
+                  ) : professional?.education ? (
+                    <li className="text-sm text-muted-foreground">• {professional.education}</li>
+                  ) : null}
                 </ul>
               </CardContent>
             </Card>
@@ -611,7 +606,7 @@ export default function ProfessionalProfilePage() {
                   Certificações
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              {/* <CardContent>
                 <ul className="space-y-2">
                   {(professional?.certifications ?? []).map((cert, i) => (
                     <li key={i} className="text-sm text-muted-foreground">
@@ -619,7 +614,7 @@ export default function ProfessionalProfilePage() {
                     </li>
                   ))}
                 </ul>
-              </CardContent>
+              </CardContent> */}
             </Card>
           </div>
 
