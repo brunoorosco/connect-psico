@@ -10,7 +10,7 @@ import { createPixForAppointment } from "../payment/createPixForAppointment"
 import { auth } from "@/auth"
 
 const TZ = "America/Sao_Paulo"
-
+const prePayment = false
 const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
@@ -67,19 +67,19 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
       select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
     })
 
-    const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
-
-    await createPixForAppointment({
-      amountBRL: appointment.professional.Professional?.valorAtendimento as number,
-      appointmentId: appointment.id,
-      idempotencyKey: idempotency.key,
-      patient: {
-        name: session?.user.name as string,
-        email: session?.user.email as string,
-        cellphone: session?.user.phone as string,
-      },
-    })
-
+    if (prePayment) {
+      const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
+      await createPixForAppointment({
+        amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+        appointmentId: appointment.id,
+        idempotencyKey: idempotency.key,
+        patient: {
+          name: session?.user.name as string,
+          email: session?.user.email as string,
+          cellphone: session?.user.phone as string,
+        },
+      })
+    }
     return { success: "Agendamento realizado com sucesso", data: appointment }
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {

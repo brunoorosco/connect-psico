@@ -16,6 +16,8 @@ const CreateAppointmentSchema = z.object({
   notes: z.string().optional(),
 })
 
+const prePayment = false
+
 export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAppointmentSchema>) => {
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
   if (!valid.success) {
@@ -53,18 +55,19 @@ export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAp
       data: { professionalId, patientId, appointmentDate },
       select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
     })
-
-    const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
-    await createPixForAppointment({
-      amountBRL: appointment.professional.Professional?.valorAtendimento as number,
-      appointmentId: appointment.id,
-      idempotencyKey: idempotency.key,
-      patient: {
-        name: session.user.name as string,
-        email: session.user.email as string,
-        cellphone: session.user.phone as string,
-      },
-    })
+    if (prePayment) {
+      const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
+      await createPixForAppointment({
+        amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+        appointmentId: appointment.id,
+        idempotencyKey: idempotency.key,
+        patient: {
+          name: session.user.name as string,
+          email: session.user.email as string,
+          cellphone: session.user.phone as string,
+        },
+      })
+    }
 
     return {
       success: true,
