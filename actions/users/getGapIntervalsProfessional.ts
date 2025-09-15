@@ -62,7 +62,18 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
         gte: startOfDay,
         lte: endOfDay,
       },
-      status: { not: "CANCELLED" }, // Ignorar cancelados se quiser
+      status: {
+        not: "CANCELLED",
+      },
+      OR: [
+        { status: "CONFIRMED" },
+        {
+          status: "PENDING",
+          expiresAt: {
+            gt: new Date(), // só considerar pendentes ainda válidos
+          },
+        },
+      ],
     },
   })
 

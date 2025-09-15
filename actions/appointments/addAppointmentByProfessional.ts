@@ -5,6 +5,8 @@ import { z } from "zod"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { TIME_REGEX } from "@/utils/formatMessageTime"
 import { auth } from "@/auth"
+import { createPixForAppointment } from "../payment/createPixForAppointment"
+import { randomUUID } from "crypto"
 
 const CreateAppointmentSchema = z.object({
   patientId: z.string(),
@@ -13,6 +15,8 @@ const CreateAppointmentSchema = z.object({
   endTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
   notes: z.string().optional(),
 })
+
+const prePayment = false
 
 export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAppointmentSchema>) => {
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
@@ -47,10 +51,23 @@ export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAp
 
     if (!professionalId) return
 
-   
     const appointment = await prisma.appointment.create({
       data: { professionalId, patientId, appointmentDate },
+      select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
     })
+    if (prePayment) {
+      const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
+      await createPixForAppointment({
+        amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+        appointmentId: appointment.id,
+        idempotencyKey: idempotency.key,
+        patient: {
+          name: session.user.name as string,
+          email: session.user.email as string,
+          cellphone: session.user.phone as string,
+        },
+      })
+    }
 
     return {
       success: true,

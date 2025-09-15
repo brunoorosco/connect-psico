@@ -52,6 +52,7 @@ export const {
             isTwoFactorEnabled: session.isTwoFactorEnabled ?? token.isTwoFactorEnabled,
             isProfileCompleted: session.isProfileCompleted ?? token.isProfileCompleted,
             isNewProfile: session.isNewProfile ?? token.isNewProfile,
+            phone: session.phone,
             crp: session.crp,
           },
         }
@@ -65,14 +66,20 @@ export const {
 
         const userDb = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { role: true, isNewProfile: true, Professional: { select: { numConselho: true, ufConselho: true } } },
+          select: {
+            role: true,
+            isNewProfile: true,
+            Professional: { select: { numConselho: true, ufConselho: true } },
+            phone: true,
+          },
         })
-
+    
         token.id = user.id
         token.role = userDb?.role || UserRole.DEFAULT
         token.isProfileCompleted = isProfileComplete
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
+        token.phone = userDb?.phone || ''
         token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
       }
 
@@ -88,6 +95,7 @@ export const {
           isTwoFactorEnabled: token.isTwoFactorEnabled,
           isProfileCompleted: token.isProfileCompleted,
           isNewProfile: token.isNewProfile,
+          phone: token?.phone,
           crp: token.crp,
         },
       }

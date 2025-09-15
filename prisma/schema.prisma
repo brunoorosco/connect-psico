@@ -184,18 +184,24 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  id              Int           @id @default(autoincrement())
-  professionalId  String        @map("professional_id")
-  patientId       String        @map("patient_id")
-  appointmentDate DateTime      @map("appointment_date")
-  status          Status        @default(PENDING)
-  tipoAtendimento String?       @default("ambos") @map("tipo_atendimento")
-  roomId          String?       @default(cuid()) @map("room_id")
-  review          Boolean       @default(false)
-  createdAt       DateTime      @default(now()) @map("created_at")
-  patient         User          @relation("PatientAppointments", fields: [patientId], references: [id])
-  professional    User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
-  Comentarios     Comentarios[]
+  id              Int      @id @default(autoincrement())
+  professionalId  String   @map("professional_id")
+  patientId       String   @map("patient_id")
+  appointmentDate DateTime @map("appointment_date")
+  status          Status   @default(PENDING)
+  tipoAtendimento String?  @default("ambos") @map("tipo_atendimento")
+  roomId          String?  @default(cuid()) @map("room_id")
+  review          Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  priceCents      Int      @default(0)
+  payment         Payment?
+  expiresAt       DateTime?
+
+  patient      User          @relation("PatientAppointments", fields: [patientId], references: [id])
+  professional User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  Comentarios  Comentarios[]
+  Refund       Refund?
+  Payout       Payout?
 
   @@map("appointments")
 }
@@ -280,4 +286,76 @@ enum Status {
   CONFIRMED
   CANCELLED
   CONCLUDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  CANCELED
+  FAILED
+}
+
+enum RefundReason {
+  PATIENT_CANCEL_48H
+  PATIENT_CANCEL_LT48H
+  PRO_CANCEL
+  OTHER
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  appointmentId     Int           @unique
+  status            PaymentStatus @default(PENDING)
+  provider          String // "abacatepay"
+  providerPaymentId String?       @unique
+  checkoutUrl       String?
+  qrCodeText        String?
+  expiresAt         DateTime?
+  amountCents       Int
+  paidAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("payment")
+}
+
+model Refund {
+  id               String       @id @default(cuid())
+  appointmentId    Int          @unique
+  reason           RefundReason
+  amountCents      Int
+  providerRefundId String?
+  status           String // requested, processed, failed
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  appointment      Appointment  @relation(fields: [appointmentId], references: [id])
+
+  @@map("refund")
+}
+
+model Payout {
+  id               String    @id @default(cuid())
+  appointmentId    Int       @unique
+  professionalId   String
+  amountCents      Int
+  status           String // pending, processing, paid, failed
+  providerPayoutId String?
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("payout")
+}
+
+model IdempotencyKey {
+  key       String   @id
+  createdAt DateTime @default(now())
+
+  @@map("idempotencyKey")
 }
