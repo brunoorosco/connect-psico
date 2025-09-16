@@ -22,6 +22,7 @@ function dayRangeUtc(localDate: Date) {
   const ymd = formatInTimeZone(localDate, TZ, "yyyy-MM-dd")
   const start = fromZonedTime(new Date(`${ymd}T00:00:00.000`), TZ)
   const end = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
+
   return { start, end }
 }
 
@@ -77,7 +78,8 @@ function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interva
 
 /** Testa se [slotStart, slotEnd] está contido em algum intervalo livre */
 function slotContainedInFree(slot: Interval, free: Interval[]) {
-  return free.some((iv) => iv.start.getTime() === slot.start.getTime() && iv.end <= slot.end)
+  const res = free.some((iv) => iv.start.getTime() === slot.start.getTime() && iv.end <= slot.end)
+  return res
 }
 
 /** Mapeia 0..6 (Date.getDay) para keys em inglês começando segunda */
@@ -122,7 +124,6 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
   // Intervalo da semana (local -> UTC)
   const { start: weekStartUtc } = dayRangeUtc(mondayLocal)
   const { end: weekEndUtc } = dayRangeUtc(addDays(mondayLocal, 6))
-
   // Busca **toda** a semana de uma vez
   const [availabilities, appointments] = await Promise.all([
     prisma.availability.findMany({
@@ -207,7 +208,10 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
     const daySlots: DaySlots = baseline.map((slot) => {
       // Slot no passado nunca é true
       const isFuture = slot.startUtc.getTime() >= now.getTime()
-      const available = isFuture && slotContainedInFree({ start: slot.startUtc, end: slot.endUtc }, freeIntervals)
+      const available =
+        isFuture &&
+        freeIntervals.length > 0 &&
+        slotContainedInFree({ start: slot.startUtc, end: slot.endUtc }, freeIntervals)
       return { time: slot.time, available }
     })
 

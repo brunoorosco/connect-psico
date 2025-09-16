@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { revalidatePath } from "next/cache";
 
 const UpdateProfileSchema = z.object({
   id: z.string().cuid(),
@@ -11,18 +12,18 @@ const UpdateProfileSchema = z.object({
   professionalRegistration: z.string().max(6).min(6).optional(),
 });
 
-export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) => {
+export const completeOnboarding = async (data: z.infer<typeof UpdateProfileSchema>) => {
   const valid = await UpdateProfileSchema.safeParseAsync(data);
-
+console.log('[updateProvider.ts:17]', {  data});
   if (!valid.success) {
     return { error: "Dados inválidos" };
   }
 
   const { id, isProfessional, state, professionalRegistration } = valid.data;
   try {
-    // Verificar sobreposição com outras disponibilidades
-    const account = await prisma.account.findFirst({
-      where: { userId: id },
+    //valida se ele vem do provider google
+    const account = await prisma.user.findFirst({
+      where: { id },
     });
     let user;
 
@@ -49,7 +50,7 @@ export const updateProvider = async (data: z.infer<typeof UpdateProfileSchema>) 
         });
       }
     }
-
+    revalidatePath("/app");
     return { success: true, data: account };
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {

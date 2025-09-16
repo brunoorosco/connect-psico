@@ -82,7 +82,7 @@ export function ScheduleGrid({
 
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-2">
               {isLoading && slots.length === 0 ? (
-                Array.from({ length: 8 }).map((_, i) => (
+                Array.from({ length: 11 }).map((_, i) => (
                   <div key={`sk-${i}`} className="h-8 rounded-md bg-muted animate-pulse" />
                 ))
               ) : (

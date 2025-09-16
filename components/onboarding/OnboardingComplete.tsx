@@ -2,8 +2,9 @@ import React, { startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { updateProvider } from "@/actions/onboarding/updateProvider";
+import { completeOnboarding } from "@/actions/onboarding/updateProvider";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface OnboardingCompleteProps {
   isProfessional: boolean;
@@ -12,6 +13,7 @@ interface OnboardingCompleteProps {
 
 const OnboardingComplete: React.FC<OnboardingCompleteProps> = ({ isProfessional, isLoading }) => {
   const { update, data: session } = useSession();
+  const router = useRouter();
 
   const handleContinue = async () => {
     try {
@@ -20,7 +22,7 @@ const OnboardingComplete: React.FC<OnboardingCompleteProps> = ({ isProfessional,
           toast.error("Usuário não autenticado.");
           return;
         }
-        await updateProvider({
+        await completeOnboarding({
           id: session.user.id,
           isProfessional: false,
         });
@@ -69,3 +71,4 @@ const OnboardingComplete: React.FC<OnboardingCompleteProps> = ({ isProfessional,
 };
 
 export default OnboardingComplete;
+
