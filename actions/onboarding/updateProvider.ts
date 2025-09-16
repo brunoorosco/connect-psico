@@ -14,7 +14,7 @@ const UpdateProfileSchema = z.object({
 
 export const completeOnboarding = async (data: z.infer<typeof UpdateProfileSchema>) => {
   const valid = await UpdateProfileSchema.safeParseAsync(data);
-console.log('[updateProvider.ts:17]', {  data});
+
   if (!valid.success) {
     return { error: "Dados inválidos" };
   }

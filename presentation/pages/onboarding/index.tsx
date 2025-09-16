@@ -7,7 +7,7 @@ import ProfessionalCheck from "@/components/onboarding/ProfessionalCheck";
 import ProfessionalInfo from "@/components/onboarding/ProfessionalInfo";
 import OnboardingComplete from "@/components/onboarding/OnboardingComplete";
 import { useParams, useRouter } from "next/navigation";
-import { updateProvider } from "@/actions/onboarding/updateProvider";
+import { completeOnboarding } from "@/actions/onboarding/updateProvider";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ const Onboarding = () => {
             toast.error("Usuário não autenticado.");
             return;
           }
-          await updateProvider({
+          await completeOnboarding({
             id,
             isProfessional: true,
             state: data.ufConselho,
