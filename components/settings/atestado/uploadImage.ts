@@ -7,7 +7,7 @@ export default async function uploadImage(file: File, folder = "layers") {
     fd.append("folder", folder)
 
     const res = await uploadImageAction(fd)
-    console.log('[uploadImage.ts:10]', { res });
+
   
     // const res = await fetch("/api/upload-image", {
     //   method: "POST",

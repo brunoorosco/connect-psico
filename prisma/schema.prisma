@@ -51,6 +51,7 @@ model Professional {
   numConselho        String?   @map("num_conselho") @db.VarChar(8)
   ufConselho         String?   @map("uf_conselho") @db.VarChar(2)
   publicoAlvo        String[]  @map("publico_alvo")
+  username           String?   @unique @map("username") @db.VarChar(40)
   especialidade      String[]
   abordagem          String?
   tituloAcademico    String?   @map("(titulo_academico)")
@@ -68,7 +69,7 @@ model Professional {
   isProfileCompleted Boolean   @default(false) @map("is_profile_completed")
   experiencia        Int       @default(0) @map("experiencia")
 
-  @@index([id])
+  @@index([id, username])
   @@map("professionals")
 }
 
@@ -183,16 +184,16 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  id              Int      @id @default(autoincrement())
-  professionalId  String   @map("professional_id")
-  patientId       String   @map("patient_id")
-  appointmentDate DateTime @map("appointment_date")
-  status          Status   @default(PENDING)
-  tipoAtendimento String?  @default("ambos") @map("tipo_atendimento")
-  roomId          String?  @default(cuid()) @map("room_id")
-  review          Boolean  @default(false)
-  createdAt       DateTime @default(now()) @map("created_at")
-  priceCents      Int      @default(0)
+  id              Int       @id @default(autoincrement())
+  professionalId  String    @map("professional_id")
+  patientId       String    @map("patient_id")
+  appointmentDate DateTime  @map("appointment_date")
+  status          Status    @default(PENDING)
+  tipoAtendimento String?   @default("ambos") @map("tipo_atendimento")
+  roomId          String?   @default(cuid()) @map("room_id")
+  review          Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  priceCents      Int       @default(0)
   payment         Payment?
   expiresAt       DateTime?
 

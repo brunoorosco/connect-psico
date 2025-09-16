@@ -6,6 +6,7 @@ export type User = {
   email?: string
   phone?: string
   medicalRecordId?: string
+  username?: string
 }
 
 export type Patient = User & {
