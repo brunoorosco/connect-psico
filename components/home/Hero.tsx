@@ -104,7 +104,7 @@ const Hero = () => {
                   </Link>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                  <Link href="/professionals">
+                  <Link href="/terapeutas">
                     <Button variant="outline" size="lg" className="w-full">Encontre um Profissional</Button>
                   </Link>
                 </div>

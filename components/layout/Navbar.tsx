@@ -15,7 +15,7 @@ const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
 
   return (
     <>
-      <Link href="/professionals" className={linkClass}>
+      <Link href="/terapeutas" className={linkClass}>
         Encontrar Terapeuta
       </Link>
       <Link href="/howItWorks" className={linkClass}>

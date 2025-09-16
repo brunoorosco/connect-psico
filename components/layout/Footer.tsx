@@ -39,7 +39,7 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Para Pacientes</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/professionals" className="text-gray-300 hover:text-white">
+                <Link href="/terapeutas" className="text-gray-300 hover:text-white">
                   Encontrar Terapeuta
                 </Link>
               </li>
