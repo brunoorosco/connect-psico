@@ -5,81 +5,14 @@ import { Toaster } from "sonner"
 import AuthProvider from "@/components/auth/auth-provider"
 import type { Metadata } from "next"
 import Script from "next/script"
+import { metadados } from "@/config/metadados"
 
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["100", "300", "400", "500", "700"], // choose the required font weights
 })
 
-export const metadata: Metadata = {
-  title: "Psico Mais | Psicologia online e presencial",
-  description:
-    "Atendimento psicológico com profissionais qualificados. Marque sua consulta online ou presencial. Psicólogos especializados em saúde mental.",
-  keywords: [
-    "psico",
-    "psicologia",
-    "psicólogo",
-    "terapia online",
-    "atendimento psicológico",
-    "atendimento online",
-    "gestão de paciente",
-    "Mais Psicólogos",
-    "Psicologia Mais",
-    "psicologia da familía",
-    "psicologia infantil",
-    "psicologia clínica",
-    "psicologia comportamental",
-    "psicologia cognitiva",
-    "psicologia humanista",
-    "psicologia analítica",
-    "psicologia psicodinâmica",
-    "psicologia positiva",
-    "psicólogo em São Paulo",
-    "psicólogo no Rio de Janeiro",
-    "psicólogo em Minas Gerais",
-    "psicólogo em Curitiba",
-    "psicólogo no Brasil",
-    "terapia", "terapeuta"
-  ],
-  authors: [{ name: "Psico Mais", url: "https://psicomais.com" }],
-  creator: "Psico Mais",
-  openGraph: {
-    title: "Psico Mais | Psicologia online e presencial",
-    description:
-      "Plataforma de atendimento psicológico com profissionais especializados. Terapia com segurança e privacidade.",
-    url: "https://psicomais.com",
-    siteName: "Psico Mais",
-    locale: "pt_BR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Psico Mais | Psicologia online",
-    description: "Terapia online com psicólogos especializados. Privacidade, acolhimento e segurança.",
-  },
-  metadataBase: new URL("https://psicomais.com"),
-  icons: {
-    icon: [
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        url: "/favicon-32x32.png",
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        url: "/favicon-16x16.png",
-      },
-      {
-        rel: "apple-touch-icon",
-        sizes: "180x180",
-        url: "/apple-touch-icon.png",
-      },
-    ],
-  },
-}
+export const metadata: Metadata = metadados
 
 export default async function RootLayout({
   children,
