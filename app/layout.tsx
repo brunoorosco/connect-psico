@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   description:
     "Atendimento psicológico com profissionais qualificados. Marque sua consulta online ou presencial. Psicólogos especializados em saúde mental.",
   keywords: [
+    "psico",
     "psicologia",
     "psicólogo",
     "terapia online",
