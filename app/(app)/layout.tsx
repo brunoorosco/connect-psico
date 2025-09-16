@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session) return redirect("/")
 
   if (session.user.isNewProfile === true) return redirect(`/onboarding/${session.user.id}`)
-  console.log("layout.tsx:14", session.user)
+
 
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col">
