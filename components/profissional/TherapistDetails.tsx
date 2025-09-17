@@ -35,15 +35,6 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
     }
   }, [open, professional]);
 
-  // Calculate available day names for the professional
-  const getAvailableDayNames = () => {
-    if (!professional) return [];
-    // return professional.availableDays.map((dayValue:any) => {
-    //   const day = weekdays.find(d => d.value === dayValue);
-    //   return day ? day.label : "";
-    // }).join(", ");
-  };
-
   if (!professional) return null;
 
   return (
@@ -85,11 +76,6 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                       : "Online e Presencial"}
                   </span>
                 </div>
-
-                {/* <div className="flex items-center gap-2 mb-2">
-                  <Heart className="h-4 w-4 text-therapy-primary" />
-                  <span className="text-sm">{professional.experience} anos de experiência</span>
-                </div> */}
 
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-therapy-primary" />

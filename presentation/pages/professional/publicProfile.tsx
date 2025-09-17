@@ -6,7 +6,19 @@ import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, GraduationCap, Award, Star, Mail, Phone, MessageCircle } from "lucide-react"
+import {
+  MapPin,
+  Clock,
+  GraduationCap,
+  Award,
+  Star,
+  Mail,
+  Phone,
+  MessageCircle,
+  Check,
+  CheckCheck,
+  X,
+} from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { LoginModal } from "@components/profissional/me/LoginModal"
 import { addDaysUTC, startOfWeekMonday } from "@components/profissional/me/helpers"
@@ -17,6 +29,11 @@ import { WeeklySchedule } from "@components/profissional/me/types"
 import { BookButton } from "@components/profissional/me/BookButton"
 import { useProfessionalsUsername } from "@hooks/useProfissionals"
 import ProfessionalProfilePageSkeleton from "@components/profissional/me/SkeletonPage"
+import { toast } from "sonner"
+import { useCurrentUser } from "@hooks/use-current-user"
+import { handleCreateAppointment } from "@components/profissional/me/handleCreateAppointment"
+import { mutate } from "swr"
+import { useAvailableWeek } from "@components/profissional/me/useAvailableWeek"
 
 // === NOVO: baseline vazio 09:00–18:00 ===
 const HOURS = Array.from({ length: 11 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`) // 08..18
@@ -34,10 +51,11 @@ const buildEmptyWeek = (): WeeklySchedule => {
 }
 
 export default function ProfessionalProfilePage() {
-  const { data: session } = useSession()
+  const user = useCurrentUser()
   const params = useParams()
   const router = useRouter()
   const search = useSearchParams()
+  const nickname = params?.name as string
 
   const [weekData, setWeekData] = useState<WeeklySchedule>(buildEmptyWeek())
   const [weekOffset, setWeekOffset] = useState(0) // 0 = semana atual; positivo = futuras
@@ -49,6 +67,19 @@ export default function ProfessionalProfilePage() {
 
   // Semana mostrada = segunda da semana atual + offset (sempre segunda)
   const weekStartUTC = useMemo(() => addDaysUTC(currentMondayUTC, weekOffset * 7), [currentMondayUTC, weekOffset])
+
+  // --- << LIFT useAvailableWeek aqui >>
+  const safeProfessionalId = useMemo(() => {
+    const n = Number(professional?.id)
+    return Number.isFinite(n) && n > 0 ? n : NaN
+  }, [professional?.id])
+
+  const {
+    availableSlots,
+    isLoading: availableIsLoading,
+    error: availableError,
+    mutate,
+  } = useAvailableWeek(safeProfessionalId, weekStartUTC)
 
   // Lê URL (?sel=YYYY-MM-DD_HH:mm) e ajusta a semana automaticamente
   useEffect(() => {
@@ -72,19 +103,18 @@ export default function ProfessionalProfilePage() {
     setWeekOffset(weeks)
   }, [search, currentMondayUTC])
 
-  // Carrega profissional e (mock) semana
   useEffect(() => {
     setLoadSkeleton(true)
     const controller = new AbortController()
     async function load() {
       try {
-        const nickname = params?.name as string
         getProfissionalByUsername(nickname)
         setWeekData(buildEmptyWeek())
+        // setLoadSkeleton(false)
       } catch (e) {
         console.error(e)
       } finally {
-        setLoadSkeleton(true)
+        setLoadSkeleton(false)
       }
     }
     load()
@@ -93,17 +123,50 @@ export default function ProfessionalProfilePage() {
 
   function handleSelectSlot(payload: { ymd: string; time: string }) {
     setSelected(payload)
-    const isLogged = !!session?.user
+    const isLogged = !!user
     if (!isLogged) setLoginOpen(true)
 
-    const newSearch = new URLSearchParams(search?.toString())
-    newSearch.set("sel", `${payload.ymd}_${payload.time}`)
-    router.replace(`?${newSearch.toString()}`)
+    // const newSearch = new URLSearchParams(search?.toString())
+    // newSearch.set("sel", `${payload.ymd}_${payload.time}`)
+    // router.replace(`?${newSearch.toString()}`, {scroll:false})
+  }
+  async function handleSave() {
+    if (!selected) return
+    const date = new Date(`${selected.ymd}T${selected.time}:00`)
+
+    try {
+      await handleCreateAppointment({
+        patientId: user?.id as string,
+        professional: {
+          name: nickname as string,
+          phone: professional?.phone as string,
+          userId: String(professional?.userId),
+        },
+        selectedSlot: { start: date },
+        onSuccess,
+      })
+
+      // toast.success("Agendamento realizado com sucesso", { icon: <CheckCheck /> })
+    } catch (error) {
+      toast.error("Erro ao agendar", { icon: <X /> })
+      console.error(error)
+    }
   }
 
-  const isLogged = !!session?.user
+  async function onSuccess() {
+    try {
+      // força revalidação (se mutate existir)
+      await mutate?.()
+      setSelected(null)
+      toast.success("Agendamento realizado com sucesso", { icon: <CheckCheck /> })
+    } catch (err) {
+      console.error("Erro no onSuccess:", err)
+    }
+  }
 
-  return loading ? (
+  const isLogged = !!user
+
+  return loadSkeleton ? (
     <ProfessionalProfilePageSkeleton />
   ) : (
     <div className="min-h-screen bg-background">
@@ -177,11 +240,7 @@ export default function ProfessionalProfilePage() {
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <span>{professional?.phone}</span>
                 </div>
-                <BookButton
-                  professionalId={professional?.id ?? ""}
-                  selected={selected}
-                  onBooked={() => alert("Agendado! (substitua por toast)")}
-                />
+                <BookButton professionalId={professional?.id ?? ""} selected={selected} onBooked={() => handleSave()} />
                 {!isLogged && selected && <LoginBanner onOpenLogin={() => setLoginOpen(true)} />}
               </CardContent>
             </Card>
@@ -255,7 +314,12 @@ export default function ProfessionalProfilePage() {
                       weekData={weekData}
                       selected={selected}
                       onSelect={handleSelectSlot}
-                      professionalId={Number(professional.id)}
+                      professionalId={Number(professional?.id)}
+                      // agora passamos os dados vindos do hook (pai controla revalidação)
+                      //@ts-ignore
+                      availableSlots={availableSlots}
+                      isLoading={availableIsLoading}
+                      error={availableError}
                     />
                     <div className="mt-6 p-4 bg-muted rounded-lg">
                       <div className="flex items-center gap-4 text-sm">

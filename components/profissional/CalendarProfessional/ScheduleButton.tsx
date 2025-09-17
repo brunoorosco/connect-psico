@@ -2,46 +2,23 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { ptBR } from "date-fns/locale"
-import { createAppointment } from "@/actions/appointments"
 import { IScheduleButton } from "./types"
 import { formatInTimeZone } from "date-fns-tz"
-import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
+import { handleAppointment } from "../agedamentos/createAppoinment"
 const TZ = "America/Sao_Paulo"
 
 export function ScheduleButton({ selectedSlot, userId, professional, onSuccess }: IScheduleButton) {
   const [isLoading, setIsLoading] = useState(false)
+  
   const handleClick = async () => {
     setIsLoading(true)
-    try {
-      const result = await createAppointment({
-        patientId: userId,
-        professionalId: professional.userId,
-        appointmentDate: selectedSlot.start,
-      })
-
-      if (result.error) {
-        toast.error("Erro ao agendar", { description: result.error })
-        return
-      }
-
-      toast.success("Agendamento solicitado!", {
-        description: `Consulta para ${formatInTimeZone(selectedSlot.start, TZ, "dd/MM/yyyy")} às ${formatInTimeZone(
-          selectedSlot.start,
-          TZ,
-          "HH:mm"
-        )}.`,
-      })
-
-      sendMessageApiWhatsapp(
-        professional.phone,
-        `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
-          `Confira sua agenda na plataforma para maiores detalhes. 😉`
-      )
-
-      onSuccess()
-    } finally {
-      setIsLoading(false)
-    }
+    await handleAppointment({
+      patientId: userId,
+      professional,
+      selectedSlot,
+      onSuccess,
+    })
+    setIsLoading(false)
   }
 
   return (
