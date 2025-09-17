@@ -26,7 +26,7 @@ interface AddressFormProps {
   isLoading?: boolean
 }
 
-export default function AddressForm({ onSubmit, initialData, isLoading = false }: AddressFormProps) {
+function AddressForm({ onSubmit, initialData, isLoading = false }: AddressFormProps) {
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -213,3 +213,5 @@ export default function AddressForm({ onSubmit, initialData, isLoading = false }
     </Card>
   )
 }
+
+export default AddressForm
