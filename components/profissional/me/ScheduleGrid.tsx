@@ -71,7 +71,7 @@ export function ScheduleGrid({
                         key={`${key}-${i}`}
                         variant={slot.available ? (isSelected ? "default" : "outline") : "default"}
                         size="sm"
-                        className={`text-xs ${base} ${isSelected ? "bg-primary text-primary-foreground" : "hover:bg-accent"} disabled:opacity-40`}
+                        className={`text-xs ${base} ${isSelected ? "bg-primary text-primary-foreground" : "hover:bg-accent"} disabled:bg-[#B9AFDA] disabled:text-gray-700`}
                         disabled={!slot.available}
                         onClick={() => onSelect({ ymd, time: slot.time })}
                       >
