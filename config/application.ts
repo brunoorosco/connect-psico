@@ -13,4 +13,5 @@ export const env = {
   baseUrlPsicomaisApi: process.env.NEXT_PUBLIC_BASE_URL_API_PSICOMAIS as string,
   baseUrlChatzApi: process.env.URL_API_CHATZ as string,
   apiKeyChatz: process.env.API_KEY_CHATZ,
+  urlBase: process.env.NEXT_PUBLIC_URL || 'www.psicomais.com'
 }

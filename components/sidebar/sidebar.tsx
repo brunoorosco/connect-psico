@@ -8,36 +8,32 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { menus } from "./menu";
-import Link from "next/link";
-import Logo from "../logo";
-import { auth } from "@/auth";
-import LogoutButton from "../auth/logout-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User, Settings } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { env } from "@/config/application";
+} from "@/components/ui/sidebar"
+import { menus } from "./menu"
+import Link from "next/link"
+import Logo from "../logo"
+import { auth } from "@/auth"
+import LogoutButton from "../auth/logout-button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, User, Settings } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { env } from "@/config/application"
+import { ShareProfile } from "./sharedProfile"
 
 export async function AppSidebar() {
-  const session = await auth();
-  const urlBase = session?.user.role === "SUPERVISOR" ? "/app/professional" : "/app/users";
-  const urlProfile = `${urlBase}/${session?.user.id}/profile`;
-  const urlMinhaConta = `${urlBase}/${session?.user.id}/minha-assinatura`;
-  const urlMeusPagamentos = `${urlBase}/${session?.user.id}/pagamentos`;
+  const session = await auth()
+  const urlBase = session?.user.role === "SUPERVISOR" ? "/app/professional" : "/app/users"
+  const urlProfile = `${urlBase}/${session?.user.id}/profile`
+  const urlMinhaConta = `${urlBase}/${session?.user.id}/minha-assinatura`
+  const urlMeusPagamentos = `${urlBase}/${session?.user.id}/pagamentos`
 
   const getInitials = (name: string) => {
-    const nameParts = name.split(" ");
+    const nameParts = name.split(" ")
     if (nameParts.length > 1) {
-      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
     }
-    return name.substring(0, 2).toUpperCase();
-  };
+    return name.substring(0, 2).toUpperCase()
+  }
 
   return (
     <Sidebar className="dark:bg-zinc-600 dark:text-zinc-200">
@@ -48,9 +44,7 @@ export async function AppSidebar() {
               <Link href="/" className="flex items-center">
                 <Logo />
 
-                <span className="text-2xl font-bold text-therapy-primary">
-                  {env.applicationName}
-                </span>
+                <span className="text-2xl font-bold text-therapy-primary">{env.applicationName}</span>
               </Link>
             </div>
           </SidebarGroupLabel>
@@ -60,9 +54,7 @@ export async function AppSidebar() {
               <SidebarMenu>
                 {menus.map((item) => {
                   const hasPermission =
-                    !item.rules ||
-                    item.rules.length === 0 ||
-                    item.rules.includes(session?.user.role as string);
+                    !item.rules || item.rules.length === 0 || item.rules.includes(session?.user.role as string)
 
                   return hasPermission ? (
                     <SidebarMenuItem key={item.title}>
@@ -73,7 +65,7 @@ export async function AppSidebar() {
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  ) : null;
+                  ) : null
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -104,11 +96,12 @@ export async function AppSidebar() {
                 <User className="w-4 h-4 mr-2" /> Perfil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <ShareProfile urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`}/>
+            {/* <DropdownMenuItem asChild>
               <Link href={urlMeusPagamentos}>
                 <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             {session?.user.role === "SUPERVISOR" && (
               <DropdownMenuItem asChild>
                 <Link href={urlMinhaConta}>
@@ -125,5 +118,5 @@ export async function AppSidebar() {
         </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

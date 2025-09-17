@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -7,6 +7,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAddress } from "@hooks/useAddress"
+import { useCurrentUser } from "@hooks/use-current-user"
 
 const addressSchema = z.object({
   cidade: z.string().optional(),
@@ -20,23 +22,20 @@ const addressSchema = z.object({
 
 type AddressFormData = z.infer<typeof addressSchema>
 
-interface AddressFormProps {
-  onSubmit: (data: AddressFormData) => void
-  initialData?: Partial<AddressFormData>
-  isLoading?: boolean
-}
+function AddressForm() {
+  const user = useCurrentUser()
+  const { data, isLoading } = useAddress(user?.id)
 
-function AddressForm({ onSubmit, initialData, isLoading = false }: AddressFormProps) {
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      cidade: initialData?.cidade || "",
-      bairro: initialData?.bairro || "",
-      estado: initialData?.estado || "",
-      logradouro: initialData?.logradouro || "",
-      numero: initialData?.numero || "",
-      complemento: initialData?.complemento || "",
-      cep: initialData?.cep || "",
+      cidade: data?.cidade || "",
+      bairro: data?.bairro || "",
+      estado: data?.estado || "",
+      logradouro: data?.logradouro || "",
+      numero: data?.numero || "",
+      complemento: data?.complemento || "",
+      cep: data?.cep || "",
     },
   })
 
@@ -72,11 +71,11 @@ function AddressForm({ onSubmit, initialData, isLoading = false }: AddressFormPr
       ...data,
       cep: data.cep?.replace(/\D/g, ""), // remove máscara antes do envio
     }
-    onSubmit(cleanData)
+    console.log(cleanData)
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto mt-6">
       <CardHeader>
         <CardTitle>Endereço do Local de Atendimento</CardTitle>
         <CardDescription>Preencha as informações do endereço onde os atendimentos serão realizados</CardDescription>

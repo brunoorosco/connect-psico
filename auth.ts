@@ -54,6 +54,7 @@ export const {
             isNewProfile: session.isNewProfile ?? token.isNewProfile,
             phone: session.phone,
             crp: session.crp,
+            username: session.username,
           },
         }
       }
@@ -69,23 +70,28 @@ export const {
           select: {
             role: true,
             isNewProfile: true,
-            Professional: { select: { numConselho: true, ufConselho: true } },
-            phone: true,
+            Professional: { select: { numConselho: true, ufConselho: true, username: true } },
+            phone: true
           },
         })
-    
+
         token.id = user.id
         token.role = userDb?.role || UserRole.DEFAULT
-        token.isProfileCompleted = isProfileComplete
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
-        token.phone = userDb?.phone || ''
-        token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
+        token.phone = userDb?.phone || ""
+        if (userDb?.role !== "DEFAULT") {
+          token.isProfileCompleted = isProfileComplete
+          token.username = userDb?.Professional?.username as string
+          token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
+        }
       }
 
       return token
     },
     async session({ session, token }) {
+      const role = token.role as UserRole
+
       return {
         ...session,
         user: {
@@ -93,10 +99,13 @@ export const {
           id: token.sub as string,
           role: token.role as UserRole,
           isTwoFactorEnabled: token.isTwoFactorEnabled,
-          isProfileCompleted: token.isProfileCompleted,
           isNewProfile: token.isNewProfile,
           phone: token?.phone,
-          crp: token.crp,
+          ...(role !== "DEFAULT" && {
+            crp: token.crp,
+            isProfileCompleted: token.isProfileCompleted,
+            username: token.username,
+          }),
         },
       }
     },
