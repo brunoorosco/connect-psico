@@ -260,7 +260,7 @@ export default function ProfessionalProfilePage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{professional?.phone}</span>
+                  <span>{professional?.phone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3")}</span>
                 </div>
                 <BookButton professionalId={professional?.id ?? ""} selected={selected} onBooked={() => handleSave()} />
                 {!isLogged && selected && <LoginBanner onOpenLogin={() => setLoginOpen(true)} />}
