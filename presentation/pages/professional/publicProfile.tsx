@@ -205,7 +205,7 @@ export default function ProfessionalProfilePage() {
                     </Badge>
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">{4.9}</span>
+                      <span className="font-semibold">{5.0}</span>
                       <span className="text-muted-foreground">({100} avaliações)</span>
                     </div>
 
