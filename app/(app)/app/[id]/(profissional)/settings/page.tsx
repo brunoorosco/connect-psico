@@ -76,12 +76,12 @@ export default function SettingsScreen() {
                 href={`/app/professional/${user?.id}/profile`}
               />
 
-              {/* <SettingsCard
-                title="Configurações da Clínica"
-                description="Configure informações da clínica, endereço, contato e serviços oferecidos"
+              <SettingsCard
+                title="Endereço de Atendimento"
+                description="Configure informações do endereço de atendimento"
                 icon={<FaClinicMedical className="text-2xl" />}
-                href="/settings/clinic"
-              /> */}
+                href="./settings/address/clinic"
+              />
 
               <SettingsCard
                 title="Modelos de Documentos"

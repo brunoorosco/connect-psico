@@ -18,6 +18,7 @@ import {
   Check,
   CheckCheck,
   X,
+  Users,
 } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { LoginModal } from "@components/profissional/me/LoginModal"
@@ -165,7 +166,6 @@ export default function ProfessionalProfilePage() {
   }
 
   const isLogged = !!user
-
   return loadSkeleton ? (
     <ProfessionalProfilePageSkeleton />
   ) : (
@@ -174,7 +174,7 @@ export default function ProfessionalProfilePage() {
       <div className="container mx-auto px-4 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Coluna esquerda */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4">
             <Card className="glass-card">
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
@@ -208,13 +208,12 @@ export default function ProfessionalProfilePage() {
                       <span className="font-semibold">{4.9}</span>
                       <span className="text-muted-foreground">({100} avaliações)</span>
                     </div>
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
-                      <MapPin className="h-4 w-4" />
-                      <span>São Paulo, SP</span>
-                    </div>
-                    <div className="mb-3">
-                      <p className="font-medium text-muted-foreground">Público Alvo</p>
-                      <p className="text-sm text-muted-foreground">{professional?.publicoAlvo?.join(", ")}</p>
+                    <div className="flex flex-col items-center justify-center text-muted-foreground mb-4">
+                      <div className="flex gap-3">
+                        <MapPin className="h-4 w-4" />
+                        <p>{professional?.logradouro + ", " + professional?.numero + " - " + professional?.bairro}</p>
+                      </div>
+                      <p className="">{professional?.cidade + "/" + professional?.estado}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">{professional?.experiencia} anos de experiência</p>
@@ -224,6 +223,17 @@ export default function ProfessionalProfilePage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Público Alvo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="">
+                  <p className="text-base text-muted-foreground">{professional?.publicoAlvo?.join(", ")}</p>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -267,21 +277,21 @@ export default function ProfessionalProfilePage() {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5" />
                   Certificações
                 </CardTitle>
               </CardHeader>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Coluna direita */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Sobre o Profissional</CardTitle>
+                <CardTitle>Sobre Mim</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">{professional?.bio}</p>
