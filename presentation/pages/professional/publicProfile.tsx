@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { MapPin, Clock, GraduationCap, Award, Star, Mail, Phone, MessageCircle } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { LoginModal } from "@components/profissional/me/LoginModal"
-import { addDaysUTC, formatYMD, startOfWeekMonday } from "@components/profissional/me/helpers"
+import { addDaysUTC, startOfWeekMonday } from "@components/profissional/me/helpers"
 import { WeekNavigator } from "@components/profissional/me/WeekNavigator"
 import { ScheduleGrid } from "@components/profissional/me/ScheduleGrid"
 import { LoginBanner } from "@components/profissional/me/LoginBanner"
 import { WeeklySchedule } from "@components/profissional/me/types"
 import { BookButton } from "@components/profissional/me/BookButton"
 import { useProfessionalsUsername } from "@hooks/useProfissionals"
+import ProfessionalProfilePageSkeleton from "@components/profissional/me/SkeletonPage"
 
 // === NOVO: baseline vazio 09:00–18:00 ===
 const HOURS = Array.from({ length: 11 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`) // 08..18
@@ -42,6 +43,7 @@ export default function ProfessionalProfilePage() {
   const [weekOffset, setWeekOffset] = useState(0) // 0 = semana atual; positivo = futuras
   const [selected, setSelected] = useState<{ ymd: string; time: string } | null>(null)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [loadSkeleton, setLoadSkeleton] = useState(false)
   const { getProfissionalByUsername, loading, professional } = useProfessionalsUsername()
   const currentMondayUTC = useMemo(() => startOfWeekMonday(new Date()), [])
 
@@ -72,18 +74,17 @@ export default function ProfessionalProfilePage() {
 
   // Carrega profissional e (mock) semana
   useEffect(() => {
+    setLoadSkeleton(true)
     const controller = new AbortController()
     async function load() {
       try {
         const nickname = params?.name as string
         getProfissionalByUsername(nickname)
-
-        const from = formatYMD(weekStartUTC)
-
         setWeekData(buildEmptyWeek())
       } catch (e) {
         console.error(e)
       } finally {
+        setLoadSkeleton(true)
       }
     }
     load()
@@ -102,10 +103,11 @@ export default function ProfessionalProfilePage() {
 
   const isLogged = !!session?.user
 
-  return (
+  return loading ? (
+    <ProfessionalProfilePageSkeleton />
+  ) : (
     <div className="min-h-screen bg-background">
       <Navbar />
-
       <div className="container mx-auto px-4 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Coluna esquerda */}
