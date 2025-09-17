@@ -237,7 +237,7 @@ export default function ProfessionalProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
+                <div className="mb-2">
                   <WeekNavigator
                     weekStartUTC={weekStartUTC}
                     onPrev={() => setWeekOffset((o) => Math.max(0, o - 1))}

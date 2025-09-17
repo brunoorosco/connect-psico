@@ -69,9 +69,9 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
         { status: "CONFIRMED" },
         {
           status: "PENDING",
-          expiresAt: {
-            gt: new Date(), // só considerar pendentes ainda válidos
-          },
+          // expiresAt: {
+          //   gt: new Date(), // só considerar pendentes ainda válidos
+          // },
         },
       ],
     },

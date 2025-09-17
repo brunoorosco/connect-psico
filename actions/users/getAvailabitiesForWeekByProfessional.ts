@@ -150,7 +150,8 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
         status: { not: "CANCELLED" },
         OR: [
           { status: "CONFIRMED" },
-          { status: "PENDING", expiresAt: { gt: now } }, // só pendentes válidos
+          { status: "PENDING" }, // só pendentes válidos
+          // { status: "PENDING", expiresAt: { gt: now } }, // inserir este quando precisar validar pagamento
         ],
       },
       select: { appointmentDate: true },
