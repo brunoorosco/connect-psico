@@ -208,12 +208,24 @@ export default function ProfessionalProfilePage() {
                       <span className="font-semibold">{4.9}</span>
                       <span className="text-muted-foreground">({100} avaliações)</span>
                     </div>
+
                     <div className="flex flex-col items-center justify-center text-muted-foreground mb-4">
-                      <div className="flex gap-3">
-                        <MapPin className="h-4 w-4" />
-                        <p>{professional?.logradouro + ", " + professional?.numero + " - " + professional?.bairro}</p>
-                      </div>
-                      <p className="">{professional?.cidade + "/" + professional?.estado}</p>
+                      {/* Linha do endereço (logradouro, número, bairro) */}
+                      {professional?.logradouro && professional?.numero && professional?.bairro && (
+                        <div className="flex gap-3">
+                          <MapPin className="h-4 w-4" />
+                          <p>
+                            {professional.logradouro}, {professional.numero} - {professional.bairro}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Linha da cidade/estado */}
+                      {professional?.cidade && professional?.estado && (
+                        <p>
+                          {professional.cidade}/{professional.estado}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <p className="text-muted-foreground">{professional?.experiencia} anos de experiência</p>
@@ -231,7 +243,7 @@ export default function ProfessionalProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="">
-                  <p className="text-base text-muted-foreground">{professional?.publicoAlvo?.join(", ")}</p>
+                <p className="text-base text-muted-foreground">{professional?.publicoAlvo?.join(", ")}</p>
               </CardContent>
             </Card>
             <Card>
