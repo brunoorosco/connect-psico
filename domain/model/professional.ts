@@ -28,6 +28,7 @@ type Professional = {
   logradouro?: string
   numero?: string
   complemento?: string
+  phone: string
 }
 
 export type ProfessionalModel = Professional & User
