@@ -69,7 +69,7 @@ model Professional {
   isProfileCompleted Boolean   @default(false) @map("is_profile_completed")
   experiencia        Int       @default(0) @map("experiencia")
   cidade             String?   @db.VarChar(25)
-  municipio          String?   @db.VarChar(25)
+  bairro             String?   @db.VarChar(25)
   estado             String?   @db.VarChar(2)
   logradouro         String?   @db.VarChar(25)
   numero             String?   @db.VarChar(10)
