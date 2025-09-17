@@ -22,13 +22,17 @@ type Professional = {
   tipoAtendimento: "remoto" | "presencial" | "ambos"
   createdAt: Date
   udpatedAt: Date
+  phone: string
+}
+
+export type Address = {
   cidade?: string
   bairro?: string
   estado?: string
   logradouro?: string
   numero?: string
   complemento?: string
-  phone: string
+  cep?: string
 }
 
-export type ProfessionalModel = Professional & User
+export type ProfessionalModel = Professional & User & Address

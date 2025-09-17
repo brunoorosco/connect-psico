@@ -29,17 +29,31 @@ function AddressForm() {
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      cidade: data?.cidade || "",
-      bairro: data?.bairro || "",
-      estado: data?.estado || "",
-      logradouro: data?.logradouro || "",
-      numero: data?.numero || "",
-      complemento: data?.complemento || "",
-      cep: data?.cep || "",
+      cidade: "",
+      bairro: "",
+      estado: "",
+      logradouro: "",
+      numero: "",
+      complemento: "",
+      cep: "",
     },
   })
 
-  // Aplica máscara de CEP (00000-000)
+  // Quando os dados do endereço chegarem, atualiza os inputs
+  useEffect(() => {
+    if (data) {
+      form.reset({
+        cidade: data.cidade || "",
+        bairro: data.bairro || "",
+        estado: data.estado || "",
+        logradouro: data.logradouro || "",
+        numero: data.numero || "",
+        complemento: data.complemento || "",
+        cep: data.cep || "",
+      })
+    }
+  }, [data, form])
+
   const handleCepChange = (value: string) => {
     const numeric = value.replace(/\D/g, "")
     if (numeric.length <= 8) {

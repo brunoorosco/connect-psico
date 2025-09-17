@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, User, Settings } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { env } from "@/config/application"
-import { ShareProfile } from "./sharedProfile"
+import { ShareProfileButton } from "./sharedProfile"
 
 export async function AppSidebar() {
   const session = await auth()
@@ -96,7 +96,9 @@ export async function AppSidebar() {
                 <User className="w-4 h-4 mr-2" /> Perfil
               </Link>
             </DropdownMenuItem>
-            <ShareProfile urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`}/>
+            <DropdownMenuItem asChild>
+              <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`} />
+            </DropdownMenuItem>
             {/* <DropdownMenuItem asChild>
               <Link href={urlMeusPagamentos}>
                 <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos

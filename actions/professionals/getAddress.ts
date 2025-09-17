@@ -1,11 +1,15 @@
 "use server"
 import { auth } from "@/auth"
+import { Address } from "@/domain/model/professional"
 import { prisma } from "@/lib/db"
 
-export async function getProfessionalAddress(userId: string) {
-  // Busca no banco (exemplo com Prisma)
+export async function getProfessionalAddress(): Promise<Address | null> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error("Usuário não autenticado")
+  }
   const address = await prisma.professional.findUnique({
-    where: { userId },
+    where: { userId: session.user.id },
     select: {
       cep: true,
       cidade: true,
@@ -16,6 +20,7 @@ export async function getProfessionalAddress(userId: string) {
       complemento: true,
     },
   })
-
-  return address
+  if (!address) return null
+  
+  return address as Address
 }

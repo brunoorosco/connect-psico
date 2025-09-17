@@ -1,14 +1,17 @@
-'use client'
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Share2, User } from "lucide-react"
+"use client"
+import { Share2 } from "lucide-react"
 import { toast } from "sonner"
 
 type Props = {
   urlProfile: string
+  className?: string
+  onClick?: () => void // opcional para personalizar
 }
 
-export function ShareProfile({ urlProfile }: Props) {
-  const handleCopy = async () => {
+export function ShareProfileButton({ urlProfile, className, onClick }: Props) {
+  const handleCopy = async (e?: React.MouseEvent) => {
+    e?.stopPropagation() // só chama se existir evento
+
     try {
       await navigator.clipboard.writeText(urlProfile)
       toast.success("Link copiado!", {
@@ -22,9 +25,13 @@ export function ShareProfile({ urlProfile }: Props) {
   }
 
   return (
-    <DropdownMenuItem onClick={handleCopy}>
+    <button
+      type="button"
+      onClick={handleCopy}
+      className={`flex items-center w-full p-2 hover:bg-muted rounded ${className || ""}`}
+    >
       <Share2 className="w-4 h-4 mr-2" />
       Compartilhar Perfil
-    </DropdownMenuItem>
+    </button>
   )
 }

@@ -10,6 +10,8 @@ import { LogOut, Menu } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getInitials } from "@/utils/getInitialsName"
+import { ShareProfileButton } from "./sharedProfile"
+import { env } from "@/config/application"
 
 const MobileDrawer = () => {
   const navigate = useRouter()
@@ -89,7 +91,7 @@ const MobileDrawer = () => {
 
           {user?.role === "SUPERVISOR" && (
             <>
-              <DrawerClose asChild>
+              {/* <DrawerClose asChild>
                 <Button
                   variant="ghost"
                   onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
@@ -98,6 +100,9 @@ const MobileDrawer = () => {
                 >
                   Minha Assinatura
                 </Button>
+              </DrawerClose> */}
+              <DrawerClose asChild>
+                <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${user.username}`} />
               </DrawerClose>
               <DrawerClose asChild>
                 <Button
