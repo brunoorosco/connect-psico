@@ -77,9 +77,12 @@ function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interva
 }
 
 /** Testa se [slotStart, slotEnd] está contido em algum intervalo livre */
-function slotContainedInFree(slot: Interval, free: Interval[]) {
-  const res = free.some((iv) => iv.start.getTime() === slot.start.getTime() && iv.end <= slot.end)
-  return res
+function slotContainedInFree(slot: { start: Date; end: Date }, free: { start: Date; end: Date }[]) {
+  return free.some(
+    (iv) =>
+      iv.start.getTime() <= slot.start.getTime() &&
+      slot.end.getTime() <= iv.end.getTime()
+  )
 }
 
 /** Mapeia 0..6 (Date.getDay) para keys em inglês começando segunda */
@@ -217,6 +220,5 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
 
     result[dayKey] = daySlots
   }
-
   return result
 }

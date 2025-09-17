@@ -18,7 +18,7 @@ import { BookButton } from "@components/profissional/me/BookButton"
 import { useProfessionalsUsername } from "@hooks/useProfissionals"
 
 // === NOVO: baseline vazio 09:00–18:00 ===
-const HOURS = Array.from({ length: 8 }, (_, i) => `${String(9 + i).padStart(2, "0")}:00`) // 09..17
+const HOURS = Array.from({ length: 11 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`) // 08..18
 const buildEmptyWeek = (): WeeklySchedule => {
   const day = HOURS.map((time) => ({ time, available: false }))
   return {
@@ -44,7 +44,6 @@ export default function ProfessionalProfilePage() {
   const [loginOpen, setLoginOpen] = useState(false)
   const { getProfissionalByUsername, loading, professional } = useProfessionalsUsername()
   const currentMondayUTC = useMemo(() => startOfWeekMonday(new Date()), [])
-  console.log(loading, weekData, professional)
 
   // Semana mostrada = segunda da semana atual + offset (sempre segunda)
   const weekStartUTC = useMemo(() => addDaysUTC(currentMondayUTC, weekOffset * 7), [currentMondayUTC, weekOffset])
@@ -125,19 +124,17 @@ export default function ProfessionalProfilePage() {
                   </Avatar>
                   <div>
                     <h1 className="text-2xl font-bold text-foreground">{professional?.name}</h1>
-                    <p className="text-muted-foreground mb-2">
-                      <ul className="space-y-2">
-                        {Array.isArray(professional?.education) ? (
-                          professional.education.map((edu, i) => (
-                            <li key={i} className="text-normal text-muted-foreground">
-                              {edu}
-                            </li>
-                          ))
-                        ) : professional?.education ? (
-                          <li className="text-normal text-muted-foreground">{professional.education}</li>
-                        ) : null}
-                      </ul>
-                    </p>
+                    <ul className="space-y-2">
+                      {Array.isArray(professional?.education) ? (
+                        professional.education.map((edu, i) => (
+                          <li key={i} className="text-normal text-muted-foreground">
+                            {edu}
+                          </li>
+                        ))
+                      ) : professional?.education ? (
+                        <li className="text-normal text-muted-foreground">{professional.education}</li>
+                      ) : null}
+                    </ul>
                     <Badge className="bg-therapy-secondary mb-4 py-2 px-3">
                       {professional?.especialidade.join(", ")}
                     </Badge>

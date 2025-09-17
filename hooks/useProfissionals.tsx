@@ -56,7 +56,6 @@ export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
 }
 
 export const fetchProfessionalAvailabilityWeek = async (userId: number, date: Date) => {
-  console.log(userId, date)
   return await getProfessionalWeeklySchedule(userId, date)
 }
 
