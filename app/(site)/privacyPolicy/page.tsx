@@ -92,8 +92,8 @@ const PrivacyPolicy = () => {
               Se você tiver alguma dúvida ou preocupação sobre esta Política de Privacidade ou nossas práticas de dados, entre em contato conosco em:
             </p>
             <p className="mt-2">
-              <strong>E-mail:</strong> privacidade@psicomais.com.br<br />
-              <strong>Endereço:</strong> Av. Paulista, 1000, São Paulo - SP, CEP 01310-100
+              <strong>E-mail:</strong> contato@psicomais.com<br />
+              <strong>Endereço:</strong> Rua Gupeva, 56, São Paulo - SP, CEP 08030-320
             </p>
           </div>
         </div>
