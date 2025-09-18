@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -10,12 +9,10 @@ import {
   MapPin,
   Clock,
   GraduationCap,
-  Award,
   Star,
   Mail,
   Phone,
   MessageCircle,
-  Check,
   CheckCheck,
   X,
   Users,

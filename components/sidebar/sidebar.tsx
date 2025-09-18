@@ -96,20 +96,22 @@ export async function AppSidebar() {
                 <User className="w-4 h-4 mr-2" /> Perfil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`} />
-            </DropdownMenuItem>
-            {/* <DropdownMenuItem asChild>
+            {session?.user.role === "SUPERVISOR" && (
+              <>
+                <DropdownMenuItem asChild>
+                  <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`} />
+                </DropdownMenuItem>
+                {/* <DropdownMenuItem asChild>
               <Link href={urlMeusPagamentos}>
                 <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos
               </Link>
             </DropdownMenuItem> */}
-            {session?.user.role === "SUPERVISOR" && (
-              <DropdownMenuItem asChild>
-                <Link href={urlMinhaConta}>
-                  <Settings className="w-4 h-4 mr-2" /> Minha Assinatura
-                </Link>
-              </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={urlMinhaConta}>
+                    <Settings className="w-4 h-4 mr-2" /> Minha Assinatura
+                  </Link>
+                </DropdownMenuItem>
+              </>
             )}
             <LogoutButton>
               <DropdownMenuItem className="text-red-500">

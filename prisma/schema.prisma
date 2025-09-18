@@ -76,7 +76,7 @@ model Professional {
   complemento        String?   @db.VarChar(25)
   cep                String?   @db.VarChar(8)
 
-  @@index([id, username])
+  @@index([id, username, userId])
   @@map("professionals")
 }
 
@@ -122,6 +122,7 @@ model Pacientes {
   notePatient      NotePatient[]
 
   @@map("patients")
+  @@index([patientId])
 }
 
 model NotePatient {
@@ -210,6 +211,7 @@ model Appointment {
   Refund       Refund?
   Payout       Payout?
 
+  @@index([professionalId, patientId, status])
   @@map("appointments")
 }
 
@@ -222,6 +224,7 @@ model Availability {
   isAvailable    Boolean  @default(true) @map("is_available")
   psychologist   User     @relation(fields: [professionalId], references: [id])
 
+  @@index([professionalId])
   @@map("availabilities")
 }
 

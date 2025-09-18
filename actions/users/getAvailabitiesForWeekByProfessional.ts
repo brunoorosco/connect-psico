@@ -78,11 +78,7 @@ function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interva
 
 /** Testa se [slotStart, slotEnd] está contido em algum intervalo livre */
 function slotContainedInFree(slot: { start: Date; end: Date }, free: { start: Date; end: Date }[]) {
-  return free.some(
-    (iv) =>
-      iv.start.getTime() <= slot.start.getTime() &&
-      slot.end.getTime() <= iv.end.getTime()
-  )
+  return free.some((iv) => iv.start.getTime() <= slot.start.getTime() && slot.end.getTime() <= iv.end.getTime())
 }
 
 /** Mapeia 0..6 (Date.getDay) para keys em inglês começando segunda */
@@ -106,6 +102,35 @@ function toDayKey(d: Date): DayKey {
     default:
       return "monday"
   }
+}
+// === helpers em UTC (sem misturar horário local) ===
+function floorToHourUtc(d: Date) {
+  const x = new Date(d)
+  x.setUTCMinutes(0, 0, 0)
+  return x
+}
+function ceilToHourUtc(d: Date) {
+  const x = new Date(d)
+  if (x.getUTCMinutes() || x.getUTCSeconds() || x.getUTCMilliseconds()) {
+    x.setUTCHours(x.getUTCHours() + 1, 0, 0, 0)
+  } else {
+    x.setUTCMinutes(0, 0, 0)
+  }
+  return x
+}
+// Une intervalos que se tocam/sobrepõem (depois do arredondamento)
+function mergeIntervals(intervals: { start: Date; end: Date }[]) {
+  if (!intervals.length) return []
+  const ord = [...intervals].sort((a, b) => a.start.getTime() - b.start.getTime())
+  const out = [ord[0]]
+  for (let i = 1; i < ord.length; i++) {
+    const last = out[out.length - 1]
+    const cur = ord[i]
+    if (cur.start.getTime() <= last.end.getTime()) {
+      if (cur.end.getTime() > last.end.getTime()) last.end = cur.end
+    } else out.push(cur)
+  }
+  return out
 }
 
 /**
@@ -194,18 +219,32 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
     // Recorta appointments da semana que atingem esse dia
     const { start: dayUtcStart, end: dayUtcEnd } = dayRangeUtc(dayLocal)
     const apptsOfDay = apptIntervals.filter((iv) => iv.end > dayUtcStart && iv.start < dayUtcEnd)
-
     // Availabilities que encostam no dia
     const avOfDayRaw = Object.values(avByDay)
       .flat()
       .filter((iv) => iv.end > dayUtcStart && iv.start < dayUtcEnd)
 
     // Recorta availability para o dia (clampa nos limites do dia)
-    const avOfDay: Interval[] = avOfDayRaw.map((iv) => ({
-      start: new Date(Math.max(iv.start.getTime(), dayUtcStart.getTime())),
-      end: new Date(Math.min(iv.end.getTime(), dayUtcEnd.getTime())),
-    }))
+    const avOfDay: Interval[] = mergeIntervals(
+      avOfDayRaw
+        .map((iv) => {
+          // 1) clampa ao dia
+          const clampStart = new Date(Math.max(iv.start.getTime(), dayUtcStart.getTime()))
+          const clampEnd = new Date(Math.min(iv.end.getTime(), dayUtcEnd.getTime()))
+          if (clampEnd <= clampStart) return null
 
+          // 2) arredonda para grade de 60 min (…:00)
+          const roundedStart = floorToHourUtc(clampStart)
+          const roundedEnd = ceilToHourUtc(clampEnd)
+
+          // 3) re-clampa (ceil pode empurrar para o 00:00 do dia seguinte)
+          const start = new Date(Math.max(roundedStart.getTime(), dayUtcStart.getTime()))
+          const end = new Date(Math.min(roundedEnd.getTime(), dayUtcEnd.getTime()))
+
+          return end > start ? { start, end } : null
+        })
+        .filter((x): x is Interval => !!x)
+    )
     // Calcula "livres" = availability - appointments
     const freeIntervals: Interval[] = avOfDay.flatMap((av) => subtractIntervals(av, apptsOfDay))
     // Mapeia baseline → available true/false
