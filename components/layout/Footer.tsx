@@ -100,11 +100,11 @@ const Footer = () => {
                   Blog
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/careers" className="text-gray-300 hover:text-white">
                   Carreiras
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/contact" className="text-gray-300 hover:text-white">
                   Contato
