@@ -422,7 +422,7 @@ const HelpPage = () => {
               <CardContent className="flex flex-col sm:flex-row gap-4">
                 <a
                   className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-center"
-                  href="https://wa.me/5511940714391?text=Ol%C3%A1%21%20Preciso%20de%20saber%20mais%20sobre%20os%20servi%C3%A7os%20da%20PsicoMais."
+                  href="https://wa.me/5511954567182?text=Ol%C3%A1%21%20Preciso%20de%20saber%20mais%20sobre%20os%20servi%C3%A7os%20da%20PsicoMais."
                   target="_blank"
                   rel="noopener noreferrer"
                 >

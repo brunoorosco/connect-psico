@@ -53,11 +53,11 @@ const Footer = () => {
                   Valores
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/faq" className="text-gray-300 hover:text-white">
                   Perguntas Frequentes
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
           
@@ -79,11 +79,11 @@ const Footer = () => {
                   Planos
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/professional-faq" className="text-gray-300 hover:text-white">
                   Perguntas Frequentes
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
           
@@ -96,7 +96,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-gray-300 hover:text-white">
+                <Link href="https://blog.psicomais.com" className="text-gray-300 hover:text-white">
                   Blog
                 </Link>
               </li>
