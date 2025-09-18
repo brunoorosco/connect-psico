@@ -102,6 +102,16 @@ const MobileDrawer = () => {
                 </Button>
               </DrawerClose> */}
               <DrawerClose asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate.push(`${env.urlBase}/terapeutas/${user.username}`)}
+                  className="w-full justify-start"
+                  disabled={isPending}
+                >
+                  Perfil Público
+                </Button>
+              </DrawerClose>
+              <DrawerClose asChild>
                 <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${user.username}`} />
               </DrawerClose>
               <DrawerClose asChild>
@@ -111,7 +121,7 @@ const MobileDrawer = () => {
                   className="w-full justify-start"
                   disabled={isPending}
                 >
-                  Perfil
+                  Editar Perfil
                 </Button>
               </DrawerClose>
             </>

@@ -15,7 +15,7 @@ import Logo from "../logo"
 import { auth } from "@/auth"
 import LogoutButton from "../auth/logout-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, User, Settings } from "lucide-react"
+import { LogOut, User, Settings, ViewIcon, ExternalLink } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { env } from "@/config/application"
 import { ShareProfileButton } from "./sharedProfile"
@@ -93,11 +93,17 @@ export async function AppSidebar() {
           <DropdownMenuContent side="top" align="end" className="w-48">
             <DropdownMenuItem asChild>
               <Link href={urlProfile}>
-                <User className="w-4 h-4 mr-2" /> Perfil
+                <User className="w-4 h-4 mr-2" />Editar Perfil
               </Link>
             </DropdownMenuItem>
             {session?.user.role === "SUPERVISOR" && (
               <>
+                <DropdownMenuItem asChild>
+                  <Link href={`${env.urlBase}/terapeutas/${session?.user.username}`}>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Perfil Público
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`} />
                 </DropdownMenuItem>
@@ -106,6 +112,7 @@ export async function AppSidebar() {
                 <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos
               </Link>
             </DropdownMenuItem> */}
+
                 <DropdownMenuItem asChild>
                   <Link href={urlMinhaConta}>
                     <Settings className="w-4 h-4 mr-2" /> Minha Assinatura
