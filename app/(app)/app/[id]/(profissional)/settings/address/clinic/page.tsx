@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { startTransition, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAddress } from "@hooks/useAddress"
 import { useCurrentUser } from "@hooks/use-current-user"
+import { addProfessionalAddress } from "@/actions/professionals/addAddress"
+import { toast } from "sonner"
+import { CheckCheck } from "lucide-react"
 
 const addressSchema = z.object({
   cidade: z.string().optional(),
@@ -25,6 +28,7 @@ type AddressFormData = z.infer<typeof addressSchema>
 function AddressForm() {
   const user = useCurrentUser()
   const { data, isLoading } = useAddress(user?.id)
+  const [isBlockInput, setIsBlockInput] = useState(false)
 
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
@@ -75,6 +79,7 @@ function AddressForm() {
         form.setValue("cidade", data.localidade || "")
         form.setValue("estado", data.uf || "")
       }
+      setIsBlockInput(false)
     } catch (error) {
       console.error("Erro ao buscar CEP:", error)
     }
@@ -85,7 +90,24 @@ function AddressForm() {
       ...data,
       cep: data.cep?.replace(/\D/g, ""), // remove máscara antes do envio
     }
-    console.log(cleanData)
+    startTransition(async () => {
+      try {
+        const resp = await addProfessionalAddress(cleanData)
+        if (!resp.id) {
+          toast.error("Erro", {
+            description: "Não foi possível salvar o endereço.",
+          })
+        }
+        toast.success("Endereço cadastrado com sucesso!", { icon: <CheckCheck/>  })
+        // form.reset()
+        setIsBlockInput(true)
+
+      } catch (err: any) {
+        toast.error("Erro", {
+          description: err?.message ?? "Não foi possível salvar o endereço.",
+        })
+      }
+    })
   }
 
   return (
@@ -127,7 +149,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Endereço</FormLabel>
                       <FormControl>
-                        <Input placeholder="Rua, Avenida, etc." {...field} />
+                        <Input placeholder="Rua, Avenida, etc." {...field} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -142,7 +164,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="123" {...field} />
+                        <Input placeholder="123" {...field} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -160,7 +182,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Complemento</FormLabel>
                       <FormControl>
-                        <Input placeholder="Apartamento, sala, bloco, etc." {...field} />
+                        <Input placeholder="Apartamento, sala, bloco, etc." {...field} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -178,7 +200,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Bairro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nome do bairro" {...field} />
+                        <Input placeholder="Nome do bairro" {...field} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -193,7 +215,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Cidade</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nome da cidade" {...field} />
+                        <Input placeholder="Nome da cidade" {...field} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -208,7 +230,7 @@ function AddressForm() {
                     <FormItem>
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
-                        <Input placeholder="SP, RJ, MG..." {...field} maxLength={2} />
+                        <Input placeholder="SP, RJ, MG..." {...field} maxLength={2} disabled={isBlockInput} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
