@@ -13,14 +13,15 @@ import { FormNotesField } from "./FormNotesField"
 
 export default function AppointmentForm({ onSubmit, onCancel, selectedDate, editingAppointment }: IAppointmentForm) {
   const { form } = useAppointmentForm({ selectedDate, editingAppointment, onSubmit })
-  
+
   const handleSubmit = (data: any) => {
     onSubmit(data)
   }
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormPatientField form={form} />
+        <FormPatientField form={form} initialPatientName={editingAppointment?.patient?.name} />
         <FormDateField form={form} />
         <FormTimeFields form={form} />
         <FormNotesField form={form} />

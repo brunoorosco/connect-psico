@@ -1,7 +1,7 @@
-"use client";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { IAppointmentModalProps } from "./types";
-import AppointmentForm from "./AppointmentForm";
+"use client"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { IAppointmentModalProps } from "./types"
+import AppointmentForm from "./AppointmentForm"
 
 export const AppointmentModal: React.FC<IAppointmentModalProps> = ({
   isOpen,
@@ -30,7 +30,7 @@ export const AppointmentModal: React.FC<IAppointmentModalProps> = ({
         />
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default AppointmentModal;
+export default AppointmentModal
