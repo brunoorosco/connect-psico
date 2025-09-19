@@ -20,6 +20,8 @@ import { useSearchParams } from "next/navigation"
 import { Separator } from "../ui/separator"
 import AuthFormMessage from "./auth-form-message"
 import SocialLogin from "./social-login"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function LoginForm() {
   const [isPending, startTransition] = useTransition()
@@ -27,6 +29,7 @@ export default function LoginForm() {
   const [success, setSuccess] = useState<string>("")
   const [showOTPForm, setShowOTP] = useState<boolean>(false)
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const callbackError =
     searchParams.get("error") === "OAuthAccountNotLinked" ? "E-mail em uso com provedor diferente" : undefined
@@ -41,40 +44,39 @@ export default function LoginForm() {
   const onSubmit = async (values: z.infer<typeof CredentialsSchema>) => {
     startTransition(async () => {
       try {
-        const resp = await login(values)
+        setError("")
+        setSuccess("")
 
-        if (!resp) {
-          // setError("Resposta inválida do servidor")
-          setSuccess("")
-          form.reset()
+        const resp = await login(values) // só valida
+
+        if (resp?.error) {
+          setError(resp.error)
           return
         }
 
-        const { error, success, data } = resp
-
-        if (data?.twoFactorAuthEnabled) {
+        if (resp?.data?.twoFactorAuthEnabled) {
           setShowOTP(true)
-          if (resp.error) {
-            setError(resp.error)
-            setSuccess("")
+          return
+        }
+
+        if (resp?.success) {
+          // credenciais validadas, agora loga de verdade
+          const result = await signIn("credentials", {
+            email: values.email,
+            password: values.password,
+            redirect: false, // não redireciona automático
+            callbackUrl: "/app",
+          })
+
+          if (result?.error) {
+            setError("Credenciais inválidas")
             return
           }
-          return
-        }
 
-        if (error) {
-          setError(resp.error)
-          setSuccess("")
-          form.reset()
-          return
+          if (result?.url) {
+            router.push(result.url)
+          }
         }
-        if (success) {
-          setSuccess(resp.success)
-          setError("")
-          return
-        }
-
-        form.reset()
       } catch (err) {
         setError("Algo deu errado")
         setSuccess("")
