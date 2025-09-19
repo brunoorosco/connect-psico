@@ -19,7 +19,6 @@ import ProfessionalProfilePageSkeleton from "@components/profissional/me/Skeleto
 import { toast } from "sonner"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { handleCreateAppointment } from "@components/profissional/me/handleCreateAppointment"
-import { mutate } from "swr"
 import { useAvailableWeek } from "@components/profissional/me/useAvailableWeek"
 import { Button } from "@components/ui"
 
@@ -49,6 +48,7 @@ export default function ProfessionalProfilePage() {
   const [weekOffset, setWeekOffset] = useState(0) // 0 = semana atual; positivo = futuras
   const [selected, setSelected] = useState<{ ymd: string; time: string } | null>(null)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [hasFetched, setHasFetched] = useState(false)
   const [loadSkeleton, setLoadSkeleton] = useState(false)
   const { getProfissionalByUsername, loading, professional } = useProfessionalsUsername()
   const currentMondayUTC = useMemo(() => startOfWeekMonday(new Date()), [])
@@ -92,22 +92,25 @@ export default function ProfessionalProfilePage() {
   }, [search, currentMondayUTC])
 
   useEffect(() => {
-    setLoadSkeleton(true)
-    const controller = new AbortController()
+    let active = true
     async function load() {
       try {
-        getProfissionalByUsername(nickname)
-        setWeekData(buildEmptyWeek())
-        // setLoadSkeleton(false)
+        setLoadSkeleton(true)
+        await getProfissionalByUsername(nickname)
       } catch (e) {
         console.error(e)
       } finally {
-        setLoadSkeleton(false)
+        if (active) {
+          setHasFetched(true)
+          setLoadSkeleton(false)
+        }
       }
     }
     load()
-    return () => controller.abort()
-  }, [params, weekStartUTC])
+    return () => {
+      active = false
+    }
+  }, [nickname])
 
   function handleSelectSlot(payload: { ymd: string; time: string }) {
     setSelected(payload)
@@ -154,11 +157,13 @@ export default function ProfessionalProfilePage() {
 
   const isLogged = !!user
 
-  if (loadSkeleton) {
+  // ainda buscando → skeleton
+  if (!hasFetched || loadSkeleton || loading) {
     return <ProfessionalProfilePageSkeleton />
   }
 
-  if (!professional) {
+  // terminou de buscar e não achou → not found
+  if (hasFetched && !professional) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <h1 className="text-2xl font-bold mb-4">Profissional não encontrado</h1>
@@ -262,7 +267,9 @@ export default function ProfessionalProfilePage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{professional?.phone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3")}</span>
+                  <span>
+                    {professional?.phone ? professional?.phone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3") : "-"}
+                  </span>
                 </div>
                 <BookButton professionalId={professional?.id ?? ""} selected={selected} onBooked={() => handleSave()} />
                 {!isLogged && selected && <LoginBanner onOpenLogin={() => setLoginOpen(true)} />}
