@@ -17,13 +17,13 @@ const LoginSocialButton = ({ children, provider, callbackUrl }: Props) => {
     <Button
       variant={"outline"}
       size={"default"}
-      className=" rounded-lg"
+      className=" rounded-lg w-48"
       onClick={async () => {
         // signIn(provider, { redirectTo: callbackUrl });
         signIn(provider, { redirect: true, callbackUrl: "https://www.psicomais.com/app" });
       }}
     >
-      {children}
+      {children} Google
     </Button>
   );
 };
