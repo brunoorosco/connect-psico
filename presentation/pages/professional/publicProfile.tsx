@@ -5,18 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {
-  MapPin,
-  Clock,
-  GraduationCap,
-  Star,
-  Mail,
-  Phone,
-  MessageCircle,
-  CheckCheck,
-  X,
-  Users,
-} from "lucide-react"
+import { MapPin, Clock, GraduationCap, Star, Mail, Phone, MessageCircle, CheckCheck, X, Users } from "lucide-react"
 import Navbar from "@/components/layout/Navbar"
 import { LoginModal } from "@components/profissional/me/LoginModal"
 import { addDaysUTC, startOfWeekMonday } from "@components/profissional/me/helpers"
@@ -32,6 +21,7 @@ import { useCurrentUser } from "@hooks/use-current-user"
 import { handleCreateAppointment } from "@components/profissional/me/handleCreateAppointment"
 import { mutate } from "swr"
 import { useAvailableWeek } from "@components/profissional/me/useAvailableWeek"
+import { Button } from "@components/ui"
 
 // === NOVO: baseline vazio 09:00–18:00 ===
 const HOURS = Array.from({ length: 11 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`) // 08..18
@@ -163,9 +153,24 @@ export default function ProfessionalProfilePage() {
   }
 
   const isLogged = !!user
-  return loadSkeleton ? (
-    <ProfessionalProfilePageSkeleton />
-  ) : (
+
+  if (loadSkeleton) {
+    return <ProfessionalProfilePageSkeleton />
+  }
+
+  if (!professional) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+        <h1 className="text-2xl font-bold mb-4">Profissional não encontrado</h1>
+        <p className="text-muted-foreground mb-6">
+          O profissional que você está procurando não existe ou não está ativo.
+        </p>
+        <Button onClick={() => router.back()}>Voltar</Button>
+      </div>
+    )
+  }
+
+  return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-4">
@@ -202,7 +207,7 @@ export default function ProfessionalProfilePage() {
                     </Badge>
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">{5.0.toFixed(1)}</span>
+                      <span className="font-semibold">{(5.0).toFixed(1)}</span>
                       <span className="text-muted-foreground">({100} avaliações)</span>
                     </div>
 

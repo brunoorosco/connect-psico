@@ -6,7 +6,8 @@ import { prisma } from "@/lib/db"
 type GetProfessionalByIdResult = Pick<
   User,
   "id" | "name" | "email" | "active" | "phone" | "createdAt" | "updatedAt" | "image"
-> & TProfessional
+> &
+  TProfessional
 
 export const getProfessionalByUsername = async (username: string): Promise<GetProfessionalByIdResult | null> => {
   const user = await prisma.user.findMany({
@@ -22,7 +23,7 @@ export const getProfessionalByUsername = async (username: string): Promise<GetPr
     },
   })
 
-  if (!user) return null
+  if (!user || user.length === 0) return null
   const { Professional, ...restUser } = user[0]
 
   return {
