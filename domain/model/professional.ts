@@ -6,14 +6,14 @@ export type AvailableSlot = {
   time: string
 }
 
-type Professional = {
+export type TProfessional = {
   id: number
   especialidade: string[]
   experiencia?: string
   abordagem: string
   bio: string
   isProfileCompleted: boolean
-  valorAtendimento: string
+  valorAtendimento: number
   education: string
   tempoConsulta: number
   publicoAlvo: string[]
@@ -22,7 +22,7 @@ type Professional = {
   ufConselho: string
   tipoAtendimento: "remoto" | "presencial" | "ambos"
   createdAt: Date
-  udpatedAt: Date
+  updatedAt: Date
   phone: string
 }
 
@@ -43,4 +43,4 @@ export const addressSchema = z.object({
 
 export type Address = z.infer<typeof addressSchema>
 
-export type ProfessionalModel = Professional & User & Address
+export type ProfessionalModel = TProfessional & User & Address
