@@ -44,7 +44,7 @@ export default function LoginForm() {
         const resp = await login(values)
 
         if (!resp) {
-          setError("Resposta inválida do servidor")
+          // setError("Resposta inválida do servidor")
           setSuccess("")
           form.reset()
           return
