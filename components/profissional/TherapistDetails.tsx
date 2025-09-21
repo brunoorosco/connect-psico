@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  MapPin,
-  MessageCircle,
-  Calendar as CalendarIcon,
-  DollarSign,
-  User2,
-  BookCopyIcon,
-} from "lucide-react";
-import { ProfessionalModel } from "@/domain/model/professional";
-import { TextMessage } from "./TextMessage";
-import { CalendarProfessional } from "./CalendarProfessional";
+import React, { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MapPin, MessageCircle, Calendar as CalendarIcon, DollarSign, User2, BookCopyIcon } from "lucide-react"
+import { ProfessionalModel } from "@/domain/model/professional"
+import { TextMessage } from "./TextMessage"
+import { CalendarProfessional } from "./CalendarProfessional"
 
 interface ProfessionalDetailsModalProps {
-  professional: ProfessionalModel | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  professional: ProfessionalModel | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> = ({
@@ -24,18 +17,18 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
   open,
   onOpenChange,
 }) => {
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("schedule");
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("schedule")
   // Reset state when modal opens or professional changes
   useEffect(() => {
     if (open && professional) {
-      setAvailableSlots([]);
-      setSelectedSlot(null);
+      setAvailableSlots([])
+      setSelectedSlot(null)
     }
-  }, [open, professional]);
+  }, [open, professional])
 
-  if (!professional) return null;
+  if (!professional) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,7 +42,12 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
             <div>
               <DialogTitle className="text-xl">{professional.name}</DialogTitle>
               <p className="text-sm text-muted-foreground">
-                {/* {professional.especialista.join(", ")} */}
+                <a
+                  href={`/terapeutas/${professional.username}`}
+                  className="underline underline-offset-2 hover:text-primary"
+                >
+                  Mais informações
+                </a>
               </p>
             </div>
           </div>
@@ -59,9 +57,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-justify">
-                {professional.bio.length > 500
-                  ? `${professional.bio.slice(0, 497)}...`
-                  : professional.bio}
+                {professional.bio.length > 500 ? `${professional.bio.slice(0, 497)}...` : professional.bio}
               </p>
 
               <div className="mt-4">
@@ -135,5 +131,5 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
