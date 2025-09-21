@@ -14,6 +14,7 @@ import {
   Settings2Icon,
   StarIcon,
   InfoIcon,
+  Search,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -73,6 +74,12 @@ export const menus = [
     title: "Dashboard",
     url: "/app",
     icon: GraduationCap,
+    rules: ["DEFAULT"],
+  },
+  {
+    title: "Encontrar Terapeuta",
+    url: "/terapeutas",
+    icon: Search,
     rules: ["DEFAULT"],
   },
   {

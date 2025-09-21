@@ -104,6 +104,16 @@ const MobileDrawer = () => {
               <DrawerClose asChild>
                 <Button
                   variant="ghost"
+                  onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
+                  className="w-full justify-start"
+                  disabled={isPending}
+                >
+                  Editar Perfil
+                </Button>
+              </DrawerClose>
+              <DrawerClose asChild>
+                <Button
+                  variant="ghost"
                   onClick={() => navigate.push(`${env.urlBase}/terapeutas/${user.username}`)}
                   className="w-full justify-start"
                   disabled={isPending}
@@ -113,16 +123,6 @@ const MobileDrawer = () => {
               </DrawerClose>
               <DrawerClose asChild>
                 <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${user.username}`} />
-              </DrawerClose>
-              <DrawerClose asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
-                  className="w-full justify-start"
-                  disabled={isPending}
-                >
-                  Editar Perfil
-                </Button>
               </DrawerClose>
             </>
           )}

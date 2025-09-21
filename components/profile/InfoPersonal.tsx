@@ -47,7 +47,7 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div className="col-span-2">
                 <FormField
                   control={control}
