@@ -15,7 +15,7 @@ export const TherapistFilter = ({ selectedSpecialty, onSpecialtyChange }: Therap
         </SelectTrigger>
         <SelectContent>
           <SelectItem key={"none"} value="none">
-            Nenhuma
+            Todas as especialidades
           </SelectItem>
           {especialidades.map((specialty) => (
             <SelectItem key={specialty} value={specialty}>
