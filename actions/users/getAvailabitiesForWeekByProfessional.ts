@@ -26,10 +26,29 @@ function dayRangeUtc(localDate: Date) {
   return { start, end }
 }
 
-/** Gera slots locais (São Paulo) de 60min entre WORK_START..WORK_END */
-function buildBaselineSlotsLocal(dayLocal: Date) {
+function buildBaselineSlotsLocal(dayLocal: Date, freeIntervals: Interval[]) {
   const slots: { time: string; startUtc: Date; endUtc: Date }[] = []
-  for (let h = WORK_START; h < WORK_END; h += SLOT_MINUTES / 60) {
+
+  // limites padrão
+  let startHour = WORK_START
+  let endHour = WORK_END
+
+  // Verifica se há disponibilidade antes das 8h
+  const earliest = freeIntervals.length ? Math.min(...freeIntervals.map((iv) => iv.start.getHours())) : WORK_START
+  if (earliest < WORK_START) {
+    startHour = earliest
+    endHour = startHour + 11 // garante 11 slots
+  }
+
+  // Verifica se há disponibilidade depois das 19h
+  const latest = freeIntervals.length ? Math.max(...freeIntervals.map((iv) => iv.end.getHours())) : WORK_END
+  if (latest > WORK_END) {
+    endHour = latest
+    startHour = endHour - 11 // recua para caber 11 slots
+  }
+
+  // monta grade ajustada
+  for (let h = startHour; h < endHour; h++) {
     const hh = String(h).padStart(2, "0")
     const timeLocal = `${formatInTimeZone(dayLocal, TZ, "yyyy-MM-dd")}T${hh}:00:00`
     const startUtc = fromZonedTime(new Date(timeLocal), TZ)
@@ -40,7 +59,8 @@ function buildBaselineSlotsLocal(dayLocal: Date) {
       endUtc,
     })
   }
-  return slots
+
+  return slots.slice(0, 11) // garante 11 slots exatos
 }
 
 /** Subtrai intervalsB (appointments) de intervalA (availability) e retorna "buracos" livres */
@@ -214,7 +234,6 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
   for (let offset = 0; offset < 7; offset++) {
     const dayLocal = addDays(mondayLocal, offset)
     const dayKey = toDayKey(dayLocal)
-    const baseline = buildBaselineSlotsLocal(dayLocal) // slots locais 09..17 -> UTC
 
     // Recorta appointments da semana que atingem esse dia
     const { start: dayUtcStart, end: dayUtcEnd } = dayRangeUtc(dayLocal)
@@ -247,6 +266,7 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
     )
     // Calcula "livres" = availability - appointments
     const freeIntervals: Interval[] = avOfDay.flatMap((av) => subtractIntervals(av, apptsOfDay))
+    const baseline = buildBaselineSlotsLocal(dayLocal, freeIntervals) // slots locais 09..17 -> UTC
     // Mapeia baseline → available true/false
     const daySlots: DaySlots = baseline.map((slot) => {
       // Slot no passado nunca é true
