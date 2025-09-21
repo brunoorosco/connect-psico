@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
 import { menus } from "./menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Menu } from "lucide-react"
+import { LogOut, Menu, User } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getInitials } from "@/utils/getInitialsName"
@@ -88,6 +88,17 @@ const MobileDrawer = () => {
                 ) : null
               })
             : Array.from({ length: 3 }).map((_, idx) => <Skeleton key={idx} className="h-9 w-full rounded-md" />)}
+          <DrawerClose asChild>
+            <Button
+              variant="ghost"
+              onClick={() => navigate.push(`/app/professional/${user?.id}/profile`)}
+              className="w-full justify-start"
+              disabled={isPending}
+            >
+              <User/>
+              Editar Perfil
+            </Button>
+          </DrawerClose>
 
           {user?.role === "SUPERVISOR" && (
             <>
@@ -101,16 +112,7 @@ const MobileDrawer = () => {
                   Minha Assinatura
                 </Button>
               </DrawerClose> */}
-              <DrawerClose asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate.push(`/app/professional/${user.id}/profile`)}
-                  className="w-full justify-start"
-                  disabled={isPending}
-                >
-                  Editar Perfil
-                </Button>
-              </DrawerClose>
+
               <DrawerClose asChild>
                 <Button
                   variant="ghost"

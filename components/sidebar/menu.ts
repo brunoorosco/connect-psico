@@ -4,7 +4,6 @@ import {
   Home,
   CalendarClock,
   LogOut,
-  GraduationCap,
   FilePieChartIcon,
   MessageCircle,
   CalendarDaysIcon,
@@ -73,7 +72,7 @@ export const menus = [
   {
     title: "Dashboard",
     url: "/app",
-    icon: GraduationCap,
+    icon: Home,
     rules: ["DEFAULT"],
   },
   {
