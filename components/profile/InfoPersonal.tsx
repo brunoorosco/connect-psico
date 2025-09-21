@@ -47,8 +47,8 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                 </FormItem>
               )}
             />
-            <div className="flex gap-4 items-start">
-              <div className="w-2/4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="col-span-2">
                 <FormField
                   control={control}
                   name="email"
@@ -63,7 +63,7 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                   )}
                 />
               </div>
-              <div className="w-1/4">
+              <div className="col-span-1">
                 <FormField
                   control={control}
                   name="phone"
@@ -94,7 +94,7 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                   )}
                 />
               </div>
-              <div className="w-1/4">
+              <div className="col-span-1">
                 <FormField
                   control={control}
                   name="username"
