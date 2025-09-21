@@ -1,9 +1,9 @@
-"use server";
+"use server"
 
-import { prisma } from "@/lib/db";
-import { profileSchema, ProfileFormValues } from "@/schemas/PsicologoProfileSchema";
-import type { z } from "zod";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { prisma } from "@/lib/db"
+import { profileSchema, ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
+import type { z } from "zod"
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
 /**
  * Atualiza o perfil profissional do usuário
@@ -11,16 +11,13 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
  * @param {z.infer<typeof profileSchema>} data - Dados atualizados do perfil.
  * @returns {Promise<{error?: string, success?: string}>}
  */
-export const updateProfessionalProfile = async (
-  userId: string,
-  data: z.infer<typeof profileSchema>
-) => {
-  const valid = await profileSchema.safeParseAsync(data);
+export const updateProfessionalProfile = async (userId: string, data: z.infer<typeof profileSchema>) => {
+  const valid = await profileSchema.safeParseAsync(data)
 
   if (!valid.success) {
     return {
       error: "Dados inválidos. Verifique os campos e tente novamente.",
-    };
+    }
   }
 
   try {
@@ -45,6 +42,7 @@ export const updateProfessionalProfile = async (
               tempoConsulta: data.tempoConsulta,
               publicoAlvo: data.publicoAlvo,
               tipoAtendimento: data.tipoAtendimento,
+              username: data.username,
             },
             update: {
               bio: data.bio,
@@ -58,26 +56,27 @@ export const updateProfessionalProfile = async (
               tempoConsulta: data.tempoConsulta,
               publicoAlvo: data.publicoAlvo,
               tipoAtendimento: data.tipoAtendimento,
+              username: data.username,
             },
           },
         },
       },
-    });
+    })
 
     return {
       success: "Perfil atualizado com sucesso!",
-    };
+    }
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         return {
           error: "Já existe um usuário com este e-mail ou telefone.",
-        };
+        }
       }
     }
-    console.error(error);
+    console.error(error)
     return {
       error: "Erro inesperado ao atualizar o perfil.",
-    };
+    }
   }
-};
+}

@@ -5,6 +5,7 @@ const especialidadesSemCRP = ["Coach", "Psicanálise"]
 export const profileSchema = z
   .object({
     name: z.string().min(3, { message: "Nome é obrigatório" }),
+    username: z.string().min(3, { message: "Perfil Público é obrigatório" }),
     email: z.string().email({ message: "Email inválido" }),
     phone: z.string().min(10, { message: "Telefone inválido" }),
     profilePhoto: z.any().optional(),
@@ -65,6 +66,7 @@ export const defaultProfileValues: Partial<ProfileFormValues> = {
   valorAtendimento: 0,
   tipoAtendimento: "ambos",
   publicoAlvo: [],
+  username: "",
 }
 
 export const publicoAlvo = ["Crianças", "Adolescentes", "Adultos", "Idosos", "Casais", "Famílias", "Empresas"]

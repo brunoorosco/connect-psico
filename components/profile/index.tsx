@@ -1,5 +1,5 @@
 "use client"
-import React, { startTransition, use, useEffect, useTransition } from "react"
+import React, { useEffect, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react"
 import { useGetProfessionalById } from "@/hooks/useProfissionals"
 import { updateProfessionalProfile } from "@/actions/users/udpateProfileProfessional"
 import { useParams } from "next/navigation"
+import { checkUsernameAvailability } from "@/actions/professionals/checkUsername"
 
 const ProfileProfessionalForm: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -21,10 +22,11 @@ const ProfileProfessionalForm: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   })
+
   const params = useParams()
   const id = params.id as string
   const { data: session, update } = useSession()
-  const { user, loading, error } = useGetProfessionalById(id)
+  const { user } = useGetProfessionalById(id)
 
   async function onSubmit(data: ProfileFormValues) {
     startTransition(async () => {
@@ -33,6 +35,16 @@ const ProfileProfessionalForm: React.FC = () => {
           toast.error("Usuário não autenticado.")
           return
         }
+
+        // 🔹 Validação de username antes de salvar
+        if (data.username && data.username !== user?.username) {
+          const result = await checkUsernameAvailability(data.username)
+          if (!result.available) {
+            toast.error("Este nome de perfil já está em uso.")
+            return
+          }
+        }
+
         const payload = {
           ...data,
           isProfileCompleted: true,
@@ -43,22 +55,24 @@ const ProfileProfessionalForm: React.FC = () => {
         toast.success(result.success!, {
           description: "Suas informações foram salvas.",
         })
+
+        // 🔹 Atualiza sessão do NextAuth
+        await update({
+          ...session!.user,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          image: data.profilePhoto,
+          username: data.username,
+          isProfileCompleted: true,
+        })
       } catch (error) {
         toast.error("Erro ao atualizar perfil.")
         console.error(error)
       }
     })
-    ;("use server")
-    await update({
-      ...session!.user,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      image: data.profilePhoto,
-      isProfileCompleted: true,
-    })
-    // window.location.href = `/app/professional/${session?.user.id}/profile`;
   }
+
   useEffect(() => {
     if (user) {
       form.reset({
@@ -76,19 +90,18 @@ const ProfileProfessionalForm: React.FC = () => {
         tempoConsulta: user.tempoConsulta || 50,
         publicoAlvo: user.publicoAlvo || [],
         tipoAtendimento: user.tipoAtendimento || "ambos",
+        username: user.username,
       })
     }
   }, [user, form])
 
   return (
     <div className="lg:container mx-auto py-6 max-w-5xl">
-      {/* <h1 className="text-3xl font-bold mb-6 text-therapy-tertiary">Perfil Profissional</h1> */}
       <p className="text-muted-foreground mb-4">
         Preencha seu perfil profissional para que seus pacientes possam conhecer melhor seu trabalho e especialidades.
       </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* <pre className="text-red-500">{JSON.stringify(form.formState.errors, null, 2)}</pre> */}
           <PersonalInfoForm profile={user} />
           <ProfessionalInfoForm profile={user} />
           <TargetAudienceForm profile={user} />
@@ -107,4 +120,5 @@ const ProfileProfessionalForm: React.FC = () => {
     </div>
   )
 }
+
 export default ProfileProfessionalForm

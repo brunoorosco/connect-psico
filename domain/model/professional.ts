@@ -24,6 +24,7 @@ export type TProfessional = {
   createdAt: Date
   updatedAt: Date
   phone: string
+  username: string
 }
 
 export const addressSchema = z.object({
