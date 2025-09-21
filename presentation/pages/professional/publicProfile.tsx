@@ -186,7 +186,11 @@ export default function ProfessionalProfilePage() {
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <Avatar className="h-32 w-32">
-                    <AvatarImage src={professional?.image as string} alt={professional?.name ?? ""} />
+                    <AvatarImage
+                      src={professional?.image as string}
+                      alt={professional?.name ?? ""}
+                      className="object-cover"
+                    />
                     <AvatarFallback className="text-2xl bg-primary/10 text-primary">
                       {(professional?.name || "")
                         .split(" ")
