@@ -139,7 +139,7 @@ export const useChatStore = create<State>((set, get) => ({
       // atualiza cache (LRU: se passar do limite, remove o primeiro)
       if (!messageCache.has(userId) && messageCache.size >= MAX_CACHE_ENTRIES) {
         const oldestKey = messageCache.keys().next().value
-        messageCache.delete(oldestKey)
+        messageCache.delete(oldestKey ?? "")
       }
       // para manter ordem LRU, re-seta a chave
       messageCache.delete(userId)
