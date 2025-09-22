@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { signOut } from "next-auth/react"
 import { menus } from "./menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Menu, User } from "lucide-react"
+import { ExternalLink, LogOut, Menu, User } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getInitials } from "@/utils/getInitialsName"
@@ -19,9 +19,7 @@ const MobileDrawer = () => {
   const [isPending, startTransition] = useTransition()
 
   const handleNavigate = (url: string) => {
-    startTransition(() => {
-      navigate.push(url)
-    })
+    startTransition(() => navigate.push(url))
   }
 
   const renderUserInfo = () => {
@@ -36,7 +34,6 @@ const MobileDrawer = () => {
         </div>
       )
     }
-
     return (
       <div className="flex items-center space-x-3 p-4">
         <Avatar>
@@ -59,94 +56,97 @@ const MobileDrawer = () => {
           <span className="sr-only">Abrir menu</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Menu</DrawerTitle>
-        </DrawerHeader>
 
-        {renderUserInfo()}
+      {/* 1) Bloqueia auto-focus para não “puxar” pro fim */}
+      <DrawerContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        // 2) Limita a altura da folha e zera paddings (vamos controlar dentro)
+        className="p-0 max-h-[85svh] pb-safe"
+      >
+        {/* 3) Layout em coluna com área rolável no meio */}
+        <div className="flex flex-col max-h-[85svh]">
+          <DrawerHeader className="shrink-0">
+            <DrawerTitle>Menu</DrawerTitle>
+          </DrawerHeader>
 
-        <div className="px-4 py-2 space-y-4">
-          {user
-            ? menus.map((item) => {
-                const hasPermission = !item.rules || item.rules.length === 0 || item.rules.includes(user.role)
+          {/* topo fixo: usuário */}
+          <div className="shrink-0">{renderUserInfo()}</div>
 
-                return hasPermission ? (
-                  <DrawerClose asChild key={item.title}>
-                    <Button
-                      key={item.title}
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => handleNavigate(item.url.replace("/{userId}", `/${user.id}`))}
-                      disabled={isPending}
-                    >
-                      <item.icon className="mr-2 h-5 w-5" />
-                      {item.title}
-                      {/* {isPending ? "Carregando..." : item.title} */}
-                    </Button>
-                  </DrawerClose>
-                ) : null
-              })
-            : Array.from({ length: 3 }).map((_, idx) => <Skeleton key={idx} className="h-9 w-full rounded-md" />)}
-          <DrawerClose asChild>
-            <Button
-              variant="ghost"
-              onClick={() => navigate.push(`/app/professional/${user?.id}/profile`)}
-              className="w-full justify-start"
-              disabled={isPending}
-            >
-              <User/>
-              Editar Perfil
-            </Button>
-          </DrawerClose>
+          {/* miolo rolável */}
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-2 space-y-4">
+            {user
+              ? menus.map((item) => {
+                  const hasPermission = !item.rules || item.rules.length === 0 || item.rules.includes(user.role)
+                  return hasPermission ? (
+                    <DrawerClose asChild key={item.title}>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => handleNavigate(item.url.replace("/{userId}", `/${user.id}`))}
+                        disabled={isPending}
+                      >
+                        <item.icon className="mr-2 h-5 w-5" />
+                        {item.title}
+                      </Button>
+                    </DrawerClose>
+                  ) : null
+                })
+              : Array.from({ length: 3 }).map((_, idx) => <Skeleton key={idx} className="h-9 w-full rounded-md" />)}
 
-          {user?.role === "SUPERVISOR" && (
-            <>
-              {/* <DrawerClose asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate.push(`/app/professional/${user.id}/minha-assinatura`)}
-                  className="w-full justify-start"
-                  disabled={isPending}
-                >
-                  Minha Assinatura
-                </Button>
-              </DrawerClose> */}
+            <DrawerClose asChild>
+              <Button
+                variant="ghost"
+                onClick={() => navigate.push(`/app/professional/${user?.id}/profile`)}
+                className="w-full justify-start"
+                disabled={isPending}
+              >
+                <User className="mr-2 h-5 w-5" />
+                Editar Perfil
+              </Button>
+            </DrawerClose>
 
-              <DrawerClose asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate.push(`${env.urlBase}/terapeutas/${user.username}`)}
-                  className="w-full justify-start"
-                  disabled={isPending}
-                >
-                  Perfil Público
-                </Button>
-              </DrawerClose>
-              <DrawerClose asChild>
-                <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${user.username}`} />
-              </DrawerClose>
-            </>
-          )}
-          <DrawerClose asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-500"
-              onClick={() => signOut()}
-              disabled={!user}
-            >
-              <LogOut className="mr-2 h-5 w-5" />
-              Sair
-            </Button>
-          </DrawerClose>
-        </div>
+            {user?.role === "SUPERVISOR" && (
+              <>
+                <DrawerClose asChild>
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate.push(`${env.urlBase}/terapeutas/${user.username}`)}
+                    className="w-full justify-start"
+                    disabled={isPending}
+                  >
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                    Perfil Público
+                  </Button>
+                </DrawerClose>
+                <DrawerClose asChild>
+                  <div className="mr-2">
+                    <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${user.username}`} />
+                  </div>
+                </DrawerClose>
+              </>
+            )}
 
-        <div className="p-4">
-          <DrawerClose asChild>
-            <Button variant="outline" className="w-full">
-              Fechar
-            </Button>
-          </DrawerClose>
+            <DrawerClose asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-500"
+                onClick={() => signOut()}
+                disabled={!user}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                Sair
+              </Button>
+            </DrawerClose>
+          </div>
+
+          {/* rodapé fixo */}
+          <div className="shrink-0 p-4">
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">
+                Fechar
+              </Button>
+            </DrawerClose>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

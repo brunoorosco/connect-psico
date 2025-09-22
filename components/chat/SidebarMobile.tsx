@@ -52,7 +52,7 @@ const SidebarMobile = () => {
           className={`${selectedUser ? "hidden lg:block" : "block"} w-full lg:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200`}
         >
           {/* Cabeçalho da lista */}
-          <div className="border-b border-gray-200 w-full p-4">
+          {/* <div className="border-b border-gray-200 w-full p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Users className="size-6" />
@@ -71,7 +71,7 @@ const SidebarMobile = () => {
                 </label>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Erro inline */}
           {errorMessage && (
