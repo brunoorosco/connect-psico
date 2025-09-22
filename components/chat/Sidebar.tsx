@@ -44,10 +44,10 @@ const SidebarChat = () => {
   }, [safeUsers, showOnlineOnly, onlineUsers])
 
   if (isUsersLoading) return <SidebarSkeleton />
-  console.log("[Sidebar.tsx:47]", safeUsers)
 
   return (
-    <aside className="h-full max-w-[16rem] xl:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200">
+    // aside atual: substitua por
+    <aside className="h-full w-full lg:max-w-[16rem] xl:max-w-[18rem] xl:w-[20rem] border-r border-base-300 flex flex-col transition-all duration-200">
       {/* Cabeçalho */}
       <div className="border-b border-gray-200 w-full p-5">
         <div className="flex items-center justify-between gap-2">

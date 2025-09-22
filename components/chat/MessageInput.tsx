@@ -54,7 +54,7 @@ const MessageInput = () => {
   const canSend = Boolean(text.trim() || imagePreview)
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full sticky bottom-0 z-10 bg-base-100 border-t border-base-300">
       {/* Preview da imagem anexada */}
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
