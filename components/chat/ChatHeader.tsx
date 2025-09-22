@@ -14,6 +14,7 @@ const ChatHeader = () => {
         {/* VOLTAR: só no mobile */}
         <button
           className="lg:hidden inline-flex p-2 rounded hover:bg-base-200"
+          //@ts-ignore
           onClick={() => setSelectedUser(null)}
           aria-label="Voltar"
         >
@@ -30,19 +31,18 @@ const ChatHeader = () => {
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <div className="font-medium truncate">
-                {selectedUser.name || "Contato"}
-              </div>
+              <div className="font-medium truncate">{selectedUser.name || "Contato"}</div>
               {/* Subtítulo opcional: status/último visto/etc */}
               {/* <div className="text-xs text-zinc-500">Online</div> */}
             </div>
-        </div>
+          </div>
         )}
 
         {/* Fechar conversa (opcional no desktop) */}
         {!!selectedUser && (
           <button
             className="ml-auto hidden lg:inline-flex p-2 rounded hover:bg-base-200"
+            //@ts-ignore
             onClick={() => setSelectedUser(null)}
             aria-label="Fechar conversa"
           >
