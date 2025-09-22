@@ -1,43 +1,54 @@
-import { X } from "lucide-react"
+"use client"
 
+import { X, ChevronLeft } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
-import { useAuthStore } from "@/infra/stores/useAuthStore"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { getInitials } from "@/utils/getInitialsName"
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore()
-  const { onlineUsers } = useAuthStore()
-
-  const userOnline = onlineUsers.some((user) => user === selectedUser.userId)
-
-  if (!selectedUser) return null // não renderiza se não houver usuário selecionado
 
   return (
-    <div className="p-2.5 border-b border-base-300">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={selectedUser.image || ""} alt={selectedUser.name} />
-            <AvatarFallback>{getInitials(selectedUser?.name || "")}</AvatarFallback>
-          </Avatar>
-          {/* User info */}
-          <div>
-            <h3 className="font-medium">{selectedUser.name}</h3>
-            <p className="text-sm text-base-content/70">{userOnline ? "Online" : "Offline"}</p>
-          </div>
-        </div>
-        {/* Close button */}
+    <div className="sticky top-0 z-10 bg-base-100 p-2.5 border-b border-base-300">
+      <div className="flex items-center gap-3">
+        {/* VOLTAR: só no mobile */}
         <button
-          onClick={() =>
-            //@ts-ignore
-            setSelectedUser(null)
-          }
-          className="p-1 hover:bg-neutral-100 rounded-full"
+          className="lg:hidden inline-flex p-2 rounded hover:bg-base-200"
+          onClick={() => setSelectedUser(null)}
+          aria-label="Voltar"
         >
-          <X className="w-5 h-5" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
+
+        {/* Avatar + nome do contato selecionado */}
+        {!!selectedUser && (
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar>
+              <AvatarImage src={selectedUser.image || ""} />
+              <AvatarFallback className="bg-therapy-primary text-white">
+                {getInitials(selectedUser.name ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <div className="font-medium truncate">
+                {selectedUser.name || "Contato"}
+              </div>
+              {/* Subtítulo opcional: status/último visto/etc */}
+              {/* <div className="text-xs text-zinc-500">Online</div> */}
+            </div>
+        </div>
+        )}
+
+        {/* Fechar conversa (opcional no desktop) */}
+        {!!selectedUser && (
+          <button
+            className="ml-auto hidden lg:inline-flex p-2 rounded hover:bg-base-200"
+            onClick={() => setSelectedUser(null)}
+            aria-label="Fechar conversa"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   )
