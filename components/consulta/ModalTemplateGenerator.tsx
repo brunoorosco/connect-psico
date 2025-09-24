@@ -1,7 +1,6 @@
-import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
-import { calcularIdade } from "@/utils/calcAge"
-import { CertificateType } from "@components/settings/atestado/types"
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui"
+"use client"
+import * as React from "react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,87 +8,86 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@components/ui/dialog"
-import { TemplateItem } from "@services/templates"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
-import { useMemo, useState } from "react"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"
+import { CertificateType } from "@components/settings/atestado/types"
 
-type Props = {
-  issueOpen: boolean
-  setIssueOpen: (arg: boolean) => void
-  professional: {
-    name: string
-    crp: string
-  }
-  patient: {
-    name: string
-    idade: string
-    cpf: string
-    rg: string
-    birthDate: string
-  }
+export type CertificateConfig = any
+
+export type TemplateItem = {
+  id: string | number
+  name?: string
+  type: CertificateType
+  configJson: CertificateConfig
 }
-type CertificateConfig = any
 
-export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, professional, patient }: Props) {
-  const [docType, setDocType] = useState<CertificateType>("atestado")
-  const [cid, setCid] = useState<string>("")
-  const [days, setDays] = useState<number>(3)
-  const [timeStr, setTimeStr] = useState<string>("08:00")
-  // NEW: RG e CPF na modal, com preenchimento automático
-  const [rg, setRg] = useState<string>("")
-  const [cpf, setCpf] = useState<string>("")
-  const [sintomas, setSintomas] = useState("")
-  const [templates, setTemplates] = useState<TemplateItem[]>([])
-  const [templatesLoading, setTemplatesLoading] = useState(false)
+// =====================
+// PROPS DO COMPONENTE
+// =====================
+export type IssueDocumentDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
 
-  const configByType = useMemo(() => {
-    const map: Partial<Record<CertificateType, CertificateConfig>> = {}
-    for (const it of templates) {
-      map[it.type] = it.configJson
-    }
-    return map
-  }, [templates])
+  // Dados / opções
+  templates: TemplateItem[]
+  templatesLoading?: boolean
 
-  const selectedConfig = useMemo<CertificateConfig | undefined>(() => {
-    return docType ? configByType[docType] : undefined
-  }, [docType, configByType])
+  // Controle de tipo de documento
+  docType: CertificateType
+  onDocTypeChange: (type: CertificateType) => void
 
-  const idade = useMemo(() => {
-    const v = calcularIdade(patient?.birthDate as any)
-    return v == null ? "" : String(v)
-  }, [patient?.birthDate])
+  // Campos controlados pelo pai
+  rg: string
+  onChangeRg: (v: string) => void
+  cpf: string
+  onChangeCpf: (v: string) => void
+  sintomas: string
+  onChangeSintomas: (v: string) => void
+  cid: string
+  onChangeCid: (v: string) => void
+  days: number
+  onChangeDays: (v: number) => void
+  consultationTime: string
+  onChangeConsultationTime: (v: string) => void
 
-  const patientDataForDoc = useMemo(() => {
-    return {
-      paciente: patient?.name ?? "",
-      rg: rg || patient?.rg || "",
-      cpf: cpf || patient?.cpf || "",
-      idade,
-      modalidade: "online",
-      data: new Date().toLocaleDateString("pt-BR"),
-      horario: timeStr || "08:00",
-      cid: cid || "",
-      sintomas: sintomas || "",
-      dias: days || 0,
-      dataExtenso: format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
-    }
-  }, [patient?.name, rg, cpf, idade, timeStr, cid, days])
+  // Ação principal
+  onGenerate: () => Promise<void> | void
 
-  async function handleEmitDocument() {
-    if (!selectedConfig) return
-    const userForDoc = {
-      name: professional.name || "Profissional",
-      crp: professional.crp || "",
-    }
-    await generateCertificatePdf(selectedConfig, userForDoc, patientDataForDoc)
-    setIssueOpen(false)
-  }
+  // Estado de desabilitar botão
+  canGenerate?: boolean
+}
+
+export default function IssueDocumentDialog(props: IssueDocumentDialogProps) {
+  const {
+    open,
+    onOpenChange,
+    templates,
+    templatesLoading = false,
+    docType,
+    onDocTypeChange,
+    rg,
+    onChangeRg,
+    cpf,
+    onChangeCpf,
+    sintomas,
+    onChangeSintomas,
+    cid,
+    onChangeCid,
+    days,
+    onChangeDays,
+    consultationTime,
+    onChangeConsultationTime,
+    onGenerate,
+    canGenerate = true,
+  } = props
+
+  const hasTemplates = templates?.length > 0
 
   return (
-    <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle>Emitir documento</DialogTitle>
           <DialogDescription>Preencha os dados para gerar o PDF do documento.</DialogDescription>
@@ -98,12 +96,12 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
         <div className="grid gap-4 py-2">
           {/* Tipo */}
           <div className="grid gap-1">
-            <Label className="">Tipo</Label>
+            <Label>Tipo</Label>
             <div className="col-span-3">
               <Select
                 value={docType}
-                onValueChange={(v) => setDocType(v as CertificateType)}
-                disabled={templatesLoading || templates.length === 0}
+                onValueChange={(v) => onDocTypeChange(v as CertificateType)}
+                disabled={templatesLoading || !hasTemplates}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={templatesLoading ? "Carregando..." : "Selecione"} />
@@ -127,7 +125,7 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
                 <Input
                   id="rg"
                   value={rg}
-                  onChange={(e) => setRg(e.currentTarget.value)}
+                  onChange={(e) => onChangeRg(e.currentTarget.value)}
                   placeholder="Ex.: 12.345.678-9"
                 />
               </div>
@@ -140,7 +138,7 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
                 <Input
                   id="cpf"
                   value={cpf}
-                  onChange={(e) => setCpf(e.currentTarget.value)}
+                  onChange={(e) => onChangeCpf(e.currentTarget.value)}
                   placeholder="Ex.: 123.456.789-00"
                 />
               </div>
@@ -148,23 +146,22 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
           </div>
 
           <div className="grid gap-1">
-            <Label htmlFor="cpf" className="">
-              Sintomas/Avaliação
-            </Label>
+            <Label htmlFor="sintomas">Sintomas/Avaliação</Label>
             <div className="col-span-3">
               <Input
                 id="sintomas"
                 value={sintomas}
-                onChange={(e) => setSintomas(e.currentTarget.value)}
+                onChange={(e) => onChangeSintomas(e.currentTarget.value)}
                 placeholder="Sintomas/Avaliação"
               />
             </div>
           </div>
+
           <div className="grid grid-cols-3 gap-2">
             {/* CID */}
             <div className="grid gap-1">
               <Label htmlFor="cid">CID</Label>
-              <Input id="cid" value={cid} onChange={(e) => setCid(e.currentTarget.value)} placeholder="Ex.: F41" />
+              <Input id="cid" value={cid} onChange={(e) => onChangeCid(e.currentTarget.value)} placeholder="Ex.: F41" />
             </div>
 
             {/* Dias */}
@@ -175,8 +172,8 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
                   id="dias"
                   type="number"
                   min={0}
-                  value={days}
-                  onChange={(e) => setDays(e.currentTarget.valueAsNumber || 0)}
+                  value={Number.isFinite(days) ? days : 0}
+                  onChange={(e) => onChangeDays(e.currentTarget.valueAsNumber || 0)}
                   placeholder="Ex.: 3"
                 />
               </div>
@@ -188,8 +185,8 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
               <div className="col-span-3">
                 <Input
                   id="horario"
-                  value={timeStr}
-                  onChange={(e) => setTimeStr(e.currentTarget.value)}
+                  value={consultationTime}
+                  onChange={(e) => onChangeConsultationTime(e.currentTarget.value)}
                   placeholder="Ex.: 08:00"
                 />
               </div>
@@ -197,15 +194,11 @@ export default function ModalTemplateGenerator({ issueOpen, setIssueOpen, profes
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => setIssueOpen(false)}>
+        <DialogFooter className="gap-2 sm:gap-0 grid grid-cols-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleEmitDocument}
-            disabled={!selectedConfig || templatesLoading}
-            className="bg-therapy-primary hover:bg-therapy-tertiary"
-          >
+          <Button onClick={onGenerate} disabled={!canGenerate || templatesLoading || !hasTemplates}>
             Gerar PDF
           </Button>
         </DialogFooter>
