@@ -1,7 +1,8 @@
-import { ConsultationStart } from "@presentation/pages/consulta";
+import ConsultationSessionAudioPart from "@presentation/pages/consulta/index_"
 
 const Consultation = () => {
-  return <ConsultationStart />;
-};
+  // return <ConsultationStart />;
+  return <ConsultationSessionAudioPart />
+}
 
-export default Consultation;
+export default Consultation

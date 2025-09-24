@@ -20,10 +20,10 @@ export type CertificateConfig = {
   backgroundOpacity?: number
   layers?: AnyLayer[]
 }
-
 export type TemplateItem = {
-  id: number
-  name: CertificateType
+  id: string | number
+  name?: string
+  type: CertificateType
   configJson: CertificateConfig
 }
 

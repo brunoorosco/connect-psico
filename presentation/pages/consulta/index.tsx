@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { PatientHeader } from "@components/consulta/PatientHeader"
 import { ConsultationDateTimeEditor } from "@components/consulta/ConsultationDateTimeEditor"
 import { ClinicalEvolution } from "@components/consulta/ClinicalEvolution"
-// import { AiSummary } from "@components/consulta/AISummary"
+import { AiSummary } from "@components/consulta/AISummary"
 // import { Prescription } from "@components/consulta/Prescription"
 import { usePatientStore } from "@/infra/stores/usePatientStore"
 import { ConsultaSkeleton } from "@components/skeletons"
@@ -31,6 +31,7 @@ import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
 import { calcularIdade } from "@/utils/calcAge"
 import { ptBR } from "date-fns/locale"
 import { format } from "date-fns"
+import { Mic2 } from "lucide-react"
 
 type CertificateType = "atestado" | "comparecimento" | "acompanhamento" | "encaminhamento" | "relatorio"
 type CertificateConfig = any
@@ -57,15 +58,16 @@ export const ConsultationStart = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clinicalEvolution, setClinicalEvolution] = useState("")
   const [prescription, setPrescription] = useState("")
-  
+
   const { form, handleSubmit } = useConsultationForm({})
-  
+
   const currentUser = useCurrentUser()
   const [canIssueDocument, setCanIssueDocument] = useState(false)
   const [issueOpen, setIssueOpen] = useState(false)
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
-  
+  const [isRecorder, setIsRecorder] = useState(false)
+
   // form modal
   const [docType, setDocType] = useState<CertificateType>("atestado")
   const [cid, setCid] = useState<string>("")
@@ -196,6 +198,11 @@ export const ConsultationStart = () => {
     }
   }
 
+  const handleRecorder = (e: any) => {
+    console.log("index.tsx:202", e)
+    setIsRecorder(true)
+  }
+
   if (isChecking) return <ConsultaSkeleton />
 
   return (
@@ -231,7 +238,12 @@ export const ConsultationStart = () => {
             </div>
           )}
         </Card>
-
+        <div className="flex justify-end mb-2">
+          <Button className="gap-2" onClick={(e) => handleRecorder(e)}>
+            {!isRecorder ? "Gravar consulta" : "Gravando Consulta"}
+            <Mic2 />
+          </Button>
+        </div>
         {/* <AiSummary /> */}
         <ClinicalEvolution value={clinicalEvolution} onChange={setClinicalEvolution} />
         {/* <Prescription value={prescription} onChange={setPrescription} /> */}
