@@ -36,12 +36,12 @@ async function transcribeWithGroq(combinedFilePath: string) {
   }
   const fileBuffer = await fs.readFile(combinedFilePath)
   const form = new FormData()
-  form.append("file", new Blob([fileBuffer]), path.basename(combinedFilePath))
+  form.append("file", new Blob([new Uint8Array(fileBuffer)]), path.basename(combinedFilePath))
   form.append("model", "whisper-large-v3-turbo")
   form.append("language", "pt")
   form.append("response_format", "json")
   form.append("temperature", "0")
-  
+
   const resp = await fetch(GROQ_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${GROQ_KEY}` } as any,
