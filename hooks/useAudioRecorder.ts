@@ -37,7 +37,7 @@ export function useAudioRecorder(onChunk: OnChunk) {
     }
 
     // timeslice: em ms (a cada 5s gera um chunk); ajuste se quiser mais/menos
-    recorder.start(5000)
+    recorder.start(10000)
     setIsRecording(true)
     setRecordingTime(0)
 

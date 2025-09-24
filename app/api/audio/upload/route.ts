@@ -6,7 +6,7 @@ import fs from "fs/promises"
 import path from "path"
 
 const TMP_ROOT = path.join(process.cwd(), "tmp", "audio_sessions")
-const CHUNK_LIMIT = 0.5 * 1024 * 1024 // MB
+const CHUNK_LIMIT = 1 * 1024 * 1024 // 1MB
 
 async function ensureDir(p: string) {
   await fs.mkdir(p, { recursive: true })
