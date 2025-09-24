@@ -18,18 +18,9 @@ import { CertificateType } from "@components/settings/atestado/types"
 import { ptBR } from "date-fns/locale"
 import { format } from "date-fns"
 import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui"
-import ModalTemplateGenerator from "@components/consulta/ModalTemplateGenerator"
 import { useAudioRecorder } from "@hooks/useAudioRecorder"
 import { finalizeRecordingRequest, uploadChunk } from "@services/consultationService"
+import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 
 type CertificateConfig = any
 
@@ -352,125 +343,28 @@ const ConsultationSession = () => {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={issueOpen} onOpenChange={setIssueOpen}>
-        <DialogContent className="sm:max-w-md rounded-lg">
-          <DialogHeader>
-            <DialogTitle>Emitir documento</DialogTitle>
-            <DialogDescription>Preencha os dados para gerar o PDF do documento.</DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-2">
-            {/* Tipo */}
-            <div className="grid gap-1">
-              <Label className="">Tipo</Label>
-              <div className="col-span-3">
-                <Select
-                  value={docType}
-                  onValueChange={(v) => setDocType(v as CertificateType)}
-                  disabled={templatesLoading || templates.length === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={templatesLoading ? "Carregando..." : "Selecione"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.map((t) => (
-                      <SelectItem key={t.id} value={t.type}>
-                        {t.name || t.type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {/* RG */}
-              <div className="grid gap-1">
-                <Label htmlFor="rg">RG</Label>
-                <div className="col-span-3">
-                  <Input
-                    id="rg"
-                    value={rg}
-                    onChange={(e) => setRg(e.currentTarget.value)}
-                    placeholder="Ex.: 12.345.678-9"
-                  />
-                </div>
-              </div>
-
-              {/* CPF */}
-              <div className="grid gap-1">
-                <Label htmlFor="cpf">CPF</Label>
-                <div className="col-span-3">
-                  <Input
-                    id="cpf"
-                    value={cpf}
-                    onChange={(e) => setCpf(e.currentTarget.value)}
-                    placeholder="Ex.: 123.456.789-00"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-1">
-              <Label htmlFor="cpf" className="">
-                Sintomas/Avaliação
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="sintomas"
-                  value={sintomas}
-                  onChange={(e) => setSintomas(e.currentTarget.value)}
-                  placeholder="Sintomas/Avaliação"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {/* CID */}
-              <div className="grid gap-1">
-                <Label htmlFor="cid">CID</Label>
-                <Input id="cid" value={cid} onChange={(e) => setCid(e.currentTarget.value)} placeholder="Ex.: F41" />
-              </div>
-
-              {/* Dias */}
-              <div className="grid gap-1">
-                <Label htmlFor="dias">Dias</Label>
-                <div className="col-span-3">
-                  <Input
-                    id="dias"
-                    type="number"
-                    min={0}
-                    value={days}
-                    onChange={(e) => setDays(e.currentTarget.valueAsNumber || 0)}
-                    placeholder="Ex.: 3"
-                  />
-                </div>
-              </div>
-
-              {/* Horário */}
-              <div className="grid gap-1">
-                <Label htmlFor="horario">Horário</Label>
-                <div className="col-span-3">
-                  <Input
-                    id="horario"
-                    value={consultationTime}
-                    onChange={(e) => setConsultationTime(e.currentTarget.value)}
-                    placeholder="Ex.: 08:00"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0 grid grid-cols-2">
-            <Button variant="outline" onClick={() => setIssueOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleEmitDocument} disabled={!selectedConfig || templatesLoading}>
-              Gerar PDF
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <IssueDocumentDialog
+        open={issueOpen}
+        onOpenChange={setIssueOpen}
+        templates={templates}
+        templatesLoading={templatesLoading}
+        docType={docType}
+        onDocTypeChange={(t: CertificateType) => setDocType(t)}
+        rg={rg}
+        onChangeRg={setRg}
+        cpf={cpf}
+        onChangeCpf={setCpf}
+        sintomas={sintomas}
+        onChangeSintomas={setSintomas}
+        cid={cid}
+        onChangeCid={setCid}
+        days={days}
+        onChangeDays={setDays}
+        consultationTime={consultationTime}
+        onChangeConsultationTime={setConsultationTime}
+        onGenerate={handleEmitDocument}
+        canGenerate={!!selectedConfig}
+      />
     </div>
   )
 }
