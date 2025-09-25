@@ -1,4 +1,6 @@
+// app/(onde-estiver)/ConsultationSession.tsx
 "use client"
+
 import React, { useState, useRef, useEffect, startTransition, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,13 +16,14 @@ import { getPatientByUserId } from "@/actions/patients"
 import { calcularIdade } from "@/utils/calcAge"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { CertificateType } from "@components/settings/atestado/types"
-// import { TemplateItem } from "@services/templates"
 import { ptBR } from "date-fns/locale"
 import { format } from "date-fns"
 import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
 import { useAudioRecorder } from "@hooks/useAudioRecorder"
-import { finalizeRecordingRequest, uploadChunk } from "@services/consultationService"
 import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
+
+// 💡 use sempre o MESMO caminho de services para evitar import duplicado
+import { getPresignedPutForKey, transcribeChunk } from "@/services/minioUpload"
 
 type CertificateConfig = any
 
@@ -36,11 +39,22 @@ const ConsultationSession = () => {
   const params = useParams()
   const currentUser = useCurrentUser()
   const { patientId, id } = params as { patientId: string; id: string }
-  const [patientName, setPatientName] = useState("Nome Paciente")
+
+  // ====== ÁUDIO / TRANSCRIÇÃO ======
+  const FIVE_MB = 5 * 1024 * 1024
+  const chunkBufRef = useRef<Blob[]>([])
+  const chunkBytesRef = useRef(0)
+  const partIndexRef = useRef(0)
+  const flushingRef = useRef(false)
+  const [transcript, setTranscript] = useState("")
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const bootingRef = useRef(false) // evita start duplo
+
+  // ====== CAMPOS ======
   const [consultationDate, setConsultationDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [consultationTime, setConsultationTime] = useState(format(new Date(), "HH:mm"))
   const [notes, setNotes] = useState("")
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null) // mantive se quiser download local
   const [summary, setSummary] = useState<string | null>(null)
   const [canIssueDocument, setCanIssueDocument] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,21 +63,16 @@ const ConsultationSession = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
   const [issueOpen, setIssueOpen] = useState(false)
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [docType, setDocType] = useState<CertificateType>("atestado")
   const [cid, setCid] = useState<string>("")
   const [days, setDays] = useState<number>(3)
-  // NEW: RG e CPF na modal, com preenchimento automático
   const [rg, setRg] = useState<string>("")
   const [cpf, setCpf] = useState<string>("")
   const [sintomas, setSintomas] = useState("")
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
   const setPatient = usePatientStore((state) => state.setPatient)
   const patient = usePatientStore((state) => state.patient)
+  const [patientName, setPatientName] = useState(patient?.name ?? "")
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -87,37 +96,88 @@ const ConsultationSession = () => {
     startTransition(fetchPatient)
   }, [patientId, router, setPatient, patient?.userId])
 
-  const { start, stop, isRecording, recordingTime } = useAudioRecorder(async (chunk: Blob) => {
-    // envia cada chunk para a API com o sessionId
-    if (!sessionId) return
+  // ====== FLUSH (~5MB) -> MinIO -> Transcrição (Groq) ======
+  async function flush5MBChunk(currentSessionId: string) {
+    if (flushingRef.current) return
+    if (chunkBytesRef.current === 0) return
+
+    flushingRef.current = true
     try {
-      await uploadChunk(sessionId, chunk)
-    } catch (err) {
-      console.error("upload chunk failed", err)
+      partIndexRef.current += 1
+      const partNo = partIndexRef.current
+      const key = `sessions/${currentSessionId}/part-${String(partNo).padStart(5, "0")}.webm`
+
+      const blob = new Blob(chunkBufRef.current, { type: "audio/webm" })
+
+      // presign + PUT do chunk
+      const { url } = await getPresignedPutForKey(key) // a rota deve ser /api/recordings/presign
+      const resp = await fetch(url, { method: "PUT", body: blob })
+      if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
+
+      // transcrever o chunk
+      const stt = await transcribeChunk({
+        key,
+        sessionId: currentSessionId,
+        part: partNo,
+      })
+
+      if (stt?.text) {
+        setTranscript((prev) => (prev ? prev + " " : "") + stt.text)
+        // opcional: alimentar suas notas/resumo
+        setSummary((prev) => (prev ? prev + "\n" : "") + stt.text)
+      }
+
+      // reset buffer
+      chunkBufRef.current = []
+      chunkBytesRef.current = 0
+    } catch (e) {
+      console.error("flush5MBChunk failed:", e)
+    } finally {
+      flushingRef.current = false
     }
+  }
+
+  const { start, stop, isRecording, recordingTime, error } = useAudioRecorder({
+    mimeType: "audio/webm;codecs=opus",
+    timeslice: 1500,
+    onChunk: async (piece) => {
+      // acumula até ~5MB
+      chunkBufRef.current.push(piece)
+      chunkBytesRef.current += piece.size
+      if (sessionId && chunkBytesRef.current >= FIVE_MB) {
+        await flush5MBChunk(sessionId)
+      }
+    },
+    // sem onStop => não seguramos áudio completo em RAM
   })
 
   const startRecording = async () => {
-    const s = crypto.randomUUID?.() ?? `s-${Date.now()}`
-    setSessionId(s)
-    await start()
+    if (bootingRef.current) return
+    bootingRef.current = true
+    try {
+      // garante sessionId e zera estado local
+      const s = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `s-${Date.now()}`
+      setSessionId(s)
+
+      partIndexRef.current = 0
+      chunkBufRef.current = []
+      chunkBytesRef.current = 0
+      // setTranscript("")
+
+      await start()
+    } finally {
+      bootingRef.current = false
+    }
   }
 
   const stopRecording = async () => {
     stop()
     if (!sessionId) return
-    try {
-      const res = await finalizeRecordingRequest(sessionId)
-      if (res?.summary) {
-        setSummary(res.summary)
-        // opcional: preenche notas automaticamente
-        // setNotes(prev => prev + "\n\nResumo automático:\n" + res.summary)
-      }
-    } catch (err) {
-      console.error("finalize failed", err)
-    }
+    // manda o restinho < 5MB
+    await flush5MBChunk(sessionId)
   }
 
+  // ====== UI helpers ======
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -143,7 +203,7 @@ const ConsultationSession = () => {
     }
   }
 
-  // Carregar templates ao abrir a modal
+  // ====== Templates ======
   async function loadTemplates() {
     try {
       setTemplatesLoading(true)
@@ -172,9 +232,7 @@ const ConsultationSession = () => {
 
   const configByType = useMemo(() => {
     const map: Partial<Record<CertificateType, CertificateConfig>> = {}
-    for (const it of templates) {
-      map[it.type] = it.configJson
-    }
+    for (const it of templates) map[it.type] = it.configJson
     return map
   }, [templates])
 
@@ -183,13 +241,14 @@ const ConsultationSession = () => {
       const url = URL.createObjectURL(audioBlob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `consulta-${patientName.replace(" ", "-")}-${consultationDate}.wav`
+      a.download = `consulta-${(patientName || "paciente").replace(/\s+/g, "-")}-${consultationDate}.webm`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     }
   }
+
   const selectedConfig = useMemo<CertificateConfig | undefined>(() => {
     return docType ? configByType[docType] : undefined
   }, [docType, configByType])
@@ -227,11 +286,11 @@ const ConsultationSession = () => {
 
   async function openIssueModal() {
     if (!templates.length) await loadTemplates()
-    // Pré-preenche RG/CPF se existirem no paciente
     if (patient?.rg) setRg(patient.rg)
     if (patient?.cpf) setCpf(patient.cpf)
     setIssueOpen(true)
   }
+
   return (
     <div className="min-h-screen bg-background py-2">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -240,13 +299,13 @@ const ConsultationSession = () => {
             <CardTitle className="text-2xl font-bold text-primary">Sessão</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Informações do Paciente e Consulta */}
+            {/* Informações */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="patient-name">Nome do Paciente</Label>
                 <Input
                   id="patient-name"
-                  value={patient?.name}
+                  value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                   className="bg-muted"
                 />
@@ -274,24 +333,25 @@ const ConsultationSession = () => {
               </div>
             </div>
 
-            {/* Controles de Gravação */}
+            {/* Gravação */}
             <Card className="bg-muted/50">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
                       variant={isRecording ? "destructive" : "default"}
                       size="lg"
                       className="flex items-center space-x-2"
+                      disabled={bootingRef.current}
                     >
                       {isRecording ? <MicOff /> : <Mic />}
                       <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
                     </Button>
 
                     {isRecording && (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-destructive rounded-full animate-pulse"></div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
                         <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
                       </div>
                     )}
@@ -304,8 +364,19 @@ const ConsultationSession = () => {
                     </Button>
                   )}
                 </div>
+
+                {/* feedback de erro do gravador */}
+                {error && <p className="text-sm text-destructive mt-3">{error}</p>}
               </CardContent>
             </Card>
+
+            {/* Transcript (preview) */}
+            {transcript && (
+              <div className="space-y-2">
+                <Label>Transcrição parcial</Label>
+                <Textarea value={transcript} readOnly rows={6} className="min-h-[120px]" />
+              </div>
+            )}
 
             {/* Anotações */}
             <div className="space-y-2">
@@ -321,12 +392,10 @@ const ConsultationSession = () => {
               <p className="text-sm text-muted-foreground">{notes.length} caracteres</p>
             </div>
 
-            {/* Botões de Ação */}
+            {/* Ações */}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
               <Button
-                // onClick={generateDeclaration}
                 onClick={openIssueModal}
-                // disabled={!canIssueDocument}
                 variant="outline"
                 className="flex items-center space-x-2"
                 size="lg"
@@ -343,6 +412,7 @@ const ConsultationSession = () => {
           </CardContent>
         </Card>
       </div>
+
       <IssueDocumentDialog
         open={issueOpen}
         onOpenChange={setIssueOpen}

@@ -57,6 +57,7 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.376.0",
+    "minio": "^8.0.2",
     "mustache": "^4.2.0",
     "next": "14.2.3",
     "next-auth": "^5.0.0-beta.17",
