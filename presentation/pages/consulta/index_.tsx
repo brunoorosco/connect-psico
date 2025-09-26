@@ -24,6 +24,7 @@ import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 
 // 💡 use sempre o MESMO caminho de services para evitar import duplicado
 import { getPresignedPutForKey, transcribeChunk } from "@/services/minioUpload"
+import { SummaryResult, summarizeAllText } from "@services/summarize"
 
 type CertificateConfig = any
 
@@ -69,10 +70,40 @@ const ConsultationSession = () => {
   const [rg, setRg] = useState<string>("")
   const [cpf, setCpf] = useState<string>("")
   const [sintomas, setSintomas] = useState("")
-
+  const [aiSummary, setAiSummary] = useState<SummaryResult | null>(null)
+  const [summLoading, setSummLoading] = useState(false)
+  const [bufBytesUI, setBufBytesUI] = useState(0)
+  const [partNoUI, setPartNoUI] = useState(0)
+  const fmtMB = (n: number) => (n / (1024 * 1024)).toFixed(2)
   const setPatient = usePatientStore((state) => state.setPatient)
   const patient = usePatientStore((state) => state.patient)
   const [patientName, setPatientName] = useState(patient?.name ?? "")
+  const [withTimestamps, setWithTimestamps] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+
+  // limpeza MinIO
+  const [cleanupLoading, setCleanupLoading] = useState(false)
+  const [finalizing, setFinalizing] = useState(false)
+  const [autoSoftDelete, setAutoSoftDelete] = useState(false) // se true, manda para trash/ antes de apagar
+
+  const storageKey = useMemo(
+    () => `consult:draft:${patientId}:${id}:${consultationDate}`,
+    [patientId, id, consultationDate]
+  )
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+  async function withRetry<T>(fn: () => Promise<T>, tries = 3, base = 300): Promise<T> {
+    let last: unknown
+    for (let i = 0; i < tries; i++) {
+      try {
+        return await fn()
+      } catch (e) {
+        last = e
+        if (i < tries - 1) await sleep(base * 2 ** i)
+      }
+    }
+    throw last
+  }
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -96,6 +127,32 @@ const ConsultationSession = () => {
     startTransition(fetchPatient)
   }, [patientId, router, setPatient, patient?.userId])
 
+  // Restaura rascunho salvo (se existir)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey)
+      if (!saved) return
+      const obj = JSON.parse(saved)
+      if (typeof obj?.notes === "string") setNotes(obj.notes)
+      if (typeof obj?.transcript === "string") setTranscript(obj.transcript)
+      if (typeof obj?.updatedAt === "number") setLastSavedAt(obj.updatedAt)
+    } catch (e) {
+      console.error("Falha ao restaurar rascunho:", e)
+    }
+  }, [storageKey])
+
+  useEffect(() => {
+    const h = setTimeout(() => {
+      try {
+        const payload = { notes, transcript, updatedAt: Date.now() }
+        localStorage.setItem(storageKey, JSON.stringify(payload))
+        setLastSavedAt(payload.updatedAt)
+      } catch (e) {
+        console.error("Falha ao salvar rascunho:", e)
+      }
+    }, 800)
+    return () => clearTimeout(h)
+  }, [notes, transcript, storageKey])
   // ====== FLUSH (~5MB) -> MinIO -> Transcrição (Groq) ======
   async function flush5MBChunk(currentSessionId: string) {
     if (flushingRef.current) return
@@ -109,27 +166,42 @@ const ConsultationSession = () => {
 
       const blob = new Blob(chunkBufRef.current, { type: "audio/webm" })
 
-      // presign + PUT do chunk
-      const { url } = await getPresignedPutForKey(key) // a rota deve ser /api/recordings/presign
-      const resp = await fetch(url, { method: "PUT", body: blob })
-      if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
+      // presign + PUT com retry
+      const { url } = await getPresignedPutForKey(key)
+      await withRetry(
+        async () => {
+          const resp = await fetch(url, { method: "PUT", body: blob })
+          if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
+        },
+        4,
+        300
+      )
 
-      // transcrever o chunk
-      const stt = await transcribeChunk({
-        key,
-        sessionId: currentSessionId,
-        part: partNo,
-      })
+      // transcrever com retry e response_format condicional
+      const stt = await withRetry(
+        () =>
+          transcribeChunk({
+            key,
+            sessionId: currentSessionId,
+            part: partNo,
+            response_format: withTimestamps ? "verbose_json" : "json",
+            language: "pt",
+          }),
+        3,
+        500
+      )
 
       if (stt?.text) {
-        setTranscript((prev) => (prev ? prev + " " : "") + stt.text)
-        // opcional: alimentar suas notas/resumo
-        setSummary((prev) => (prev ? prev + "\n" : "") + stt.text)
+        const piece = String(stt.text).trim()
+        setTranscript((prev) => [prev, piece].filter(Boolean).join(" "))
+        setSummary((prev) => [prev, piece].filter(Boolean).join("\n"))
       }
 
-      // reset buffer
+      // reset buffer + progresso
       chunkBufRef.current = []
       chunkBytesRef.current = 0
+      setBufBytesUI(0)
+      setPartNoUI(partNo)
     } catch (e) {
       console.error("flush5MBChunk failed:", e)
     } finally {
@@ -144,6 +216,8 @@ const ConsultationSession = () => {
       // acumula até ~5MB
       chunkBufRef.current.push(piece)
       chunkBytesRef.current += piece.size
+      setBufBytesUI((v) => v + piece.size) // <-- progresso na UI
+
       if (sessionId && chunkBytesRef.current >= FIVE_MB) {
         await flush5MBChunk(sessionId)
       }
@@ -291,6 +365,63 @@ const ConsultationSession = () => {
     setIssueOpen(true)
   }
 
+  async function handleSummarize() {
+    try {
+      setSummLoading(true)
+      const fullText = [transcript, notes].filter(Boolean).join("\n\n")
+      const result = await summarizeAllText({ text: fullText, language: "pt-BR" })
+      setAiSummary(result)
+      // opcional: salvar notas com o sumário agregado
+      // setSummary(result.summary);
+    } catch (e) {
+      console.error(e)
+      toast.error("Falha ao gerar resumo com OpenAI")
+    } finally {
+      setSummLoading(false)
+    }
+  }
+
+  async function finalizeAndCleanup() {
+    if (!sessionId) {
+      toast.error("Sessão não iniciada.")
+      return
+    }
+
+    setFinalizing(true)
+    try {
+      // garante nenhum flush concorrente
+      if (isRecording) stop()
+
+      // manda o restinho < 5MB
+      await flush5MBChunk(sessionId)
+      // espera flush terminar
+      while (flushingRef.current) await sleep(50)
+
+      // chama API de limpeza (veja rota /api/recordings/cleanup)
+      setCleanupLoading(true)
+      const res = await fetch("/api/recordings/cleanup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          hardDelete: !autoSoftDelete, // se marcado, faz soft delete (trash/)
+        }),
+      })
+      const data = await res.json()
+      setCleanupLoading(false)
+
+      if (!res.ok) throw new Error(data?.details || data?.error || "Falha ao apagar áudio")
+
+      const qty = data?.deleted ?? data?.moved ?? 0
+      toast.success(`Áudio removido do servidor (${qty} parte${qty === 1 ? "" : "s"})`)
+    } catch (e) {
+      console.error(e)
+      toast.error("Falha ao finalizar e limpar o áudio")
+    } finally {
+      setFinalizing(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background py-2">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -350,9 +481,14 @@ const ConsultationSession = () => {
                     </Button>
 
                     {isRecording && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                        <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                          <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          Parte {Math.max(partNoUI, 0)} • Buffer ~{fmtMB(bufBytesUI)} MB / 5.00 MB
+                        </span>
                       </div>
                     )}
                   </div>
@@ -391,9 +527,54 @@ const ConsultationSession = () => {
               />
               <p className="text-sm text-muted-foreground">{notes.length} caracteres</p>
             </div>
+            {aiSummary && (
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Resumo IA</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p>{aiSummary.summary}</p>
+                  </div>
+
+                  {!!aiSummary.key_points?.length && (
+                    <div>
+                      <Label>Pontos-chave</Label>
+                      <ul className="list-disc ml-5 text-sm">
+                        {aiSummary.key_points.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {!!aiSummary.action_items?.length && (
+                    <div>
+                      <Label>Itens de Ação</Label>
+                      <ul className="list-disc ml-5 text-sm">
+                        {aiSummary.action_items.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {!!aiSummary.warnings?.length && (
+                    <div>
+                      <Label>Alertas</Label>
+                      <ul className="list-disc ml-5 text-sm">
+                        {aiSummary.warnings.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Ações */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
               <Button
                 onClick={openIssueModal}
                 variant="outline"
@@ -404,9 +585,31 @@ const ConsultationSession = () => {
                 <FileText className="w-4 h-4" />
                 <span>Emitir Documento</span>
               </Button>
+
+              <Button
+                onClick={handleSummarize}
+                variant="secondary"
+                size="lg"
+                disabled={summLoading || (!transcript && !notes) || !!aiSummary}
+                title="Gerar resumo automático"
+              >
+                {summLoading ? "Resumindo..." : "Gerar Resumo"}
+              </Button>
+
               <Button onClick={saveConsultation} className="flex items-center space-x-2" size="lg">
                 <Save className="w-4 h-4" />
                 <span>Salvar Consulta</span>
+              </Button>
+
+              <Button
+                onClick={finalizeAndCleanup}
+                variant="destructive"
+                className="flex items-center space-x-2"
+                size="lg"
+                disabled={finalizing || cleanupLoading}
+                title="Finaliza a sessão e apaga o áudio do servidor"
+              >
+                {finalizing || cleanupLoading ? "Finalizando..." : "Finalizar (apagar áudio)"}
               </Button>
             </div>
           </CardContent>
