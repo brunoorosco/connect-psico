@@ -21,7 +21,7 @@ export type CertificateConfig = {
   layers?: AnyLayer[]
 }
 export type TemplateItem = {
-  id: string | number
+  id: number
   name?: string
   type: CertificateType
   configJson: CertificateConfig

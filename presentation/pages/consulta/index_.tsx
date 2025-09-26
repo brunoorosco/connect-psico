@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mic, MicOff, Save, FileText, Download } from "lucide-react"
+import { Mic, MicOff, Save, FileText, Download, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { useParams, useRouter } from "next/navigation"
 import { useConsultationForm } from "@hooks/useConsultation"
@@ -424,12 +424,12 @@ const ConsultationSession = () => {
 
   return (
     <div className="min-h-screen bg-background py-2">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-primary">Sessão</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-3">
             {/* Informações */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2 col-span-2">
@@ -466,31 +466,49 @@ const ConsultationSession = () => {
 
             {/* Gravação */}
             <Card className="bg-muted/50">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      onClick={isRecording ? stopRecording : startRecording}
-                      variant={isRecording ? "destructive" : "default"}
-                      size="lg"
-                      className="flex items-center space-x-2"
-                      disabled={bootingRef.current}
-                    >
-                      {isRecording ? <MicOff /> : <Mic />}
-                      <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
-                    </Button>
-
-                    {isRecording && (
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                          <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          Parte {Math.max(partNoUI, 0)} • Buffer ~{fmtMB(bufBytesUI)} MB / 5.00 MB
-                        </span>
+              <CardContent className="pt-4">
+                <div className="flex items-center flex-col">
+                  <div
+                    className="flex items-start gap-2 rounded-md border-l-4 border-yellow-400 bg-yellow-100 p-3 mb-4"
+                    role="alert"
+                  >
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <AlertTriangle className="h-5 w-5 text-yellow-400" />
                       </div>
-                    )}
+                      <div className="ml-2">
+                        <p className="text-sm text-yellow-800">
+                          O uso de gravação sem consentimento assinado do paciente fere o{" "}
+                          <strong>Art. 9º do Código de Ética</strong>. Garanta o registro digital antes de prosseguir.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={isRecording ? stopRecording : startRecording}
+                        variant={isRecording ? "destructive" : "default"}
+                        size="lg"
+                        className="flex items-center space-x-2"
+                        disabled={bootingRef.current}
+                      >
+                        {isRecording ? <MicOff /> : <Mic />}
+                        <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
+                      </Button>
+
+                      {isRecording && (
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                            <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            Parte {Math.max(partNoUI, 0)} • Buffer ~{fmtMB(bufBytesUI)} MB / 5.00 MB
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {audioBlob && (

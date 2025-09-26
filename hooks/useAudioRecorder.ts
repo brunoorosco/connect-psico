@@ -86,7 +86,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
 
   async function checkPermission(): Promise<PermissionState | null> {
     try {
-      // @ts-expect-error permissions pode não existir em todos navegadores
+      // permissions pode não existir em todos navegadores
       const res: any = await navigator?.permissions?.query?.({ name: "microphone" })
       if (res && "state" in res) {
         setPermission(res.state as PermissionState)

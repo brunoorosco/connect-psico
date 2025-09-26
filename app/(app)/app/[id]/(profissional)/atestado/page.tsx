@@ -111,7 +111,7 @@ export default function PatientPage({ params }: { params: { id: string } }) {
           >
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
-                {LABEL_BY_TYPE[t.name] ?? t.name}
+                {LABEL_BY_TYPE[t.name as string] ?? t.name}
               </option>
             ))}
           </select>
