@@ -20,17 +20,13 @@ export type UseAudioRecorderReturn = {
   recordingTime: number
   permission: PermissionState | null
   error: string | null
+  errorName?: string | null
 }
 
 type MediaRecorderErrorEventSafe = Event & { error?: DOMException }
 
 export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecorderReturn {
-  const {
-    mimeType: desiredMime = "audio/webm;codecs=opus",
-    timeslice = 2000,
-    onChunk,
-    onStop,
-  } = opts ?? {}
+  const { mimeType: desiredMime = "audio/webm;codecs=opus", timeslice = 2000, onChunk, onStop } = opts ?? {}
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -40,6 +36,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
   const [recordingTime, setRecordingTime] = useState(0)
   const [permission, setPermission] = useState<PermissionState | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [errorName, setErrorName] = useState<string | null>(null)
 
   const intervalRef = useRef<number | null>(null)
 
@@ -86,18 +83,31 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
 
   async function checkPermission(): Promise<PermissionState | null> {
     try {
-      // permissions pode não existir em todos navegadores
-      const res: any = await navigator?.permissions?.query?.({ name: "microphone" })
-      if (res && "state" in res) {
-        setPermission(res.state as PermissionState)
-        return res.state as PermissionState
+      const anyNav = navigator as any
+      const query = anyNav?.permissions?.query
+      if (!query) return null // Safari e alguns ambientes não têm Permissions API
+
+      const res = await query({ name: "microphone" }) // <- sem erro de TS
+      const state = (res?.state ?? null) as PermissionState | null
+
+      // reativo (nem todo browser implementa)
+      if (res && "onchange" in res && typeof res.onchange !== "undefined") {
+        res.onchange = () => {
+          const st = (res.state as PermissionState) || null
+          setPermission(st)
+        }
       }
-    } catch {}
-    return null
+
+      setPermission(state)
+      return state
+    } catch {
+      return null
+    }
   }
 
   async function start() {
     setError(null)
+    setErrorName(null)
 
     // ✅ evita reentrância
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -115,7 +125,15 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch (e: any) {
-      setError(e?.message || "Falha ao obter permissão do microfone.")
+      const name = e?.name || "Error"
+      const msg = e?.message || "Falha ao obter permissão do microfone."
+      setErrorName(name) // <-- NOVO
+      setError(msg)
+
+      // Se o browser nem mostrou prompt (bloqueio permanente) ou usuário clicou "Bloquear"
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        setPermission("denied") as any // <-- força "denied" p/ UI abrir modal
+      }
       return
     }
     streamRef.current = stream
@@ -176,6 +194,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     // ✅ tipado + fallback seguro
     recorder.onerror = (ev: MediaRecorderErrorEventSafe) => {
       const msg = ev.error?.message || "Erro desconhecido no MediaRecorder."
+      setErrorName(ev.error?.name || null)
       setError(msg)
     }
 
@@ -227,7 +246,9 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     if (!mr) return
     if (mr.state === "recording") {
       // ✅ força emissão do último chunk antes de parar
-      try { mr.requestData() } catch {}
+      try {
+        mr.requestData()
+      } catch {}
     }
     if (mr.state !== "inactive") mr.stop()
   }
@@ -271,5 +292,6 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     recordingTime,
     permission,
     error,
+    errorName,
   }
 }

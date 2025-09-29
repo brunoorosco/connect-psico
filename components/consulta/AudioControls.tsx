@@ -22,7 +22,7 @@ export function AudioControls({ isRecording, time, onStart, onStop }: Props) {
         {isRecording ? "Parar" : "Gravar"}
       </Button>
 
-      {isRecording && <span className="text-sm font-mono text-center sm:text-left">{formatTime(time)}</span>}
+      {/* {isRecording && <span className="text-sm font-mono text-center sm:text-left">{formatTime(time)}</span>} */}
     </div>
   )
 }

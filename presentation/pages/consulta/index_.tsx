@@ -25,6 +25,7 @@ import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 // 💡 use sempre o MESMO caminho de services para evitar import duplicado
 import { getPresignedPutForKey, transcribeChunk } from "@/services/minioUpload"
 import { SummaryResult, summarizeAllText } from "@services/summarize"
+import { MicPermissionModal } from "@components/MicPermissionModal"
 
 type CertificateConfig = any
 
@@ -42,7 +43,7 @@ const ConsultationSession = () => {
   const { patientId, id } = params as { patientId: string; id: string }
 
   // ====== ÁUDIO / TRANSCRIÇÃO ======
-  const FIVE_MB = 5 * 1024 * 1024
+  const FIVE_MB = 1 * 1024 * 1024
   const chunkBufRef = useRef<Blob[]>([])
   const chunkBytesRef = useRef(0)
   const partIndexRef = useRef(0)
@@ -80,6 +81,7 @@ const ConsultationSession = () => {
   const [patientName, setPatientName] = useState(patient?.name ?? "")
   const [withTimestamps, setWithTimestamps] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+  const [showMicModal, setShowMicModal] = useState(false)
 
   // limpeza MinIO
   const [cleanupLoading, setCleanupLoading] = useState(false)
@@ -104,6 +106,41 @@ const ConsultationSession = () => {
     }
     throw last
   }
+
+  const {
+    start,
+    stop,
+    isRecording,
+    recordingTime,
+    error: recError,
+    errorName,
+    permission,
+  } = useAudioRecorder({
+    mimeType: "audio/webm;codecs=opus",
+    timeslice: 1500,
+    onChunk: async (piece) => {
+      // acumula até ~5MB
+      chunkBufRef.current.push(piece)
+      chunkBytesRef.current += piece.size
+      setBufBytesUI((v) => v + piece.size) // <-- progresso na UI
+
+      if (sessionId && chunkBytesRef.current >= FIVE_MB) {
+        await flush5MBChunk(sessionId)
+      }
+    },
+    // sem onStop => não seguramos áudio completo em RAM
+  })
+
+  useEffect(() => {
+    if (permission === "denied") setShowMicModal(true)
+  }, [permission])
+
+  useEffect(() => {
+    // se veio erro clássico de bloqueio, abra o modal
+    if (errorName === "NotAllowedError" || errorName === "SecurityError") {
+      setShowMicModal(true)
+    }
+  }, [errorName])
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -153,6 +190,7 @@ const ConsultationSession = () => {
     }, 800)
     return () => clearTimeout(h)
   }, [notes, transcript, storageKey])
+
   // ====== FLUSH (~5MB) -> MinIO -> Transcrição (Groq) ======
   async function flush5MBChunk(currentSessionId: string) {
     if (flushingRef.current) return
@@ -162,7 +200,7 @@ const ConsultationSession = () => {
     try {
       partIndexRef.current += 1
       const partNo = partIndexRef.current
-      const key = `sessions/${currentSessionId}/part-${String(partNo).padStart(5, "0")}.webm`
+      const key = `sessions/${currentSessionId}/part-${String(partNo).padStart(1, "0")}.webm`
 
       const blob = new Blob(chunkBufRef.current, { type: "audio/webm" })
 
@@ -209,24 +247,12 @@ const ConsultationSession = () => {
     }
   }
 
-  const { start, stop, isRecording, recordingTime, error } = useAudioRecorder({
-    mimeType: "audio/webm;codecs=opus",
-    timeslice: 1500,
-    onChunk: async (piece) => {
-      // acumula até ~5MB
-      chunkBufRef.current.push(piece)
-      chunkBytesRef.current += piece.size
-      setBufBytesUI((v) => v + piece.size) // <-- progresso na UI
-
-      if (sessionId && chunkBytesRef.current >= FIVE_MB) {
-        await flush5MBChunk(sessionId)
-      }
-    },
-    // sem onStop => não seguramos áudio completo em RAM
-  })
-
   const startRecording = async () => {
     if (bootingRef.current) return
+    if (permission === "denied") {
+      setShowMicModal(true)
+      return
+    }
     bootingRef.current = true
     try {
       // garante sessionId e zera estado local
@@ -520,7 +546,7 @@ const ConsultationSession = () => {
                 </div>
 
                 {/* feedback de erro do gravador */}
-                {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+                {recError && <p className="text-sm text-destructive mt-3">{recError}</p>}
               </CardContent>
             </Card>
 
@@ -632,6 +658,12 @@ const ConsultationSession = () => {
             </div>
           </CardContent>
         </Card>
+        <MicPermissionModal
+          open={showMicModal}
+          onClose={() => setShowMicModal(false)}
+          errorName={errorName as string}
+          errorMessage={recError}
+        />
       </div>
 
       <IssueDocumentDialog
