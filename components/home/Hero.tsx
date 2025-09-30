@@ -21,7 +21,7 @@ import { env } from "@/config/application";
 //               Conectamos você aos melhores profissionais de psicologia, oferecendo suporte para sua saúde mental de forma simples e eficaz. Consultas online ou presenciais com psicólogos qualificados.
 //             </p>
 //             <div className="mt-10 flex flex-col sm:flex-row gap-4">
-//               <Link href="/find-therapist">
+//               <Link href="/terapeutas">
 //                 <Button size="lg">Encontrar um Terapeuta</Button>
 //               </Link>
 //               <Link href="/how-it-works">

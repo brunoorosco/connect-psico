@@ -23,21 +23,21 @@ const Resources = () => {
         description: "Sessões de terapia por videoconferência com total privacidade e segurança.",
         icon: <VideoIcon className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Flexibilidade de horário", "Acesso de qualquer lugar", "Sem deslocamentos", "Mesma qualidade da terapia presencial"],
-        link: "/find-therapist?type=online"
+        link: "/terapeutas?type=online"
       },
       {
         title: "Terapia Individual Presencial",
         description: "Atendimento face a face em consultório, com toda a atenção personalizada para seu processo terapêutico.",
         icon: <UserCheck className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Ambiente terapêutico dedicado", "Comunicação não-verbal facilitada", "Experiência tradicional de terapia"],
-        link: "/find-therapist?type=inperson"
+        link: "/terapeutas?type=inperson"
       },
       {
         title: "Aconselhamento Pontual",
         description: "Sessões únicas para situações específicas que necessitam de orientação profissional.",
         icon: <Calendar className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Resolução de questões específicas", "Sem compromisso continuado", "Orientação especializada"],
-        link: "/find-therapist?type=counseling"
+        link: "/terapeutas?type=counseling"
       }
     ],
     group: [
@@ -46,21 +46,21 @@ const Resources = () => {
         description: "Sessões terapêuticas em grupo para compartilhar experiências e construir redes de apoio.",
         icon: <Users className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Custo mais acessível", "Aprendizado com diferentes perspectivas", "Desenvolvimento de habilidades sociais", "Sentimento de pertencimento"],
-        link: "/find-therapist?type=group"
+        link: "/terapeutas?type=group"
       },
       {
         title: "Grupos Temáticos",
         description: "Grupos focados em temas específicos como ansiedade, luto, relacionamentos, entre outros.",
         icon: <MessageCircle className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Foco em questões específicas", "Compartilhamento de estratégias", "Apoio mútuo entre participantes"],
-        link: "/find-therapist?type=themed"
+        link: "/terapeutas?type=themed"
       },
       {
         title: "Workshops Terapêuticos",
         description: "Atividades práticas em grupo para desenvolvimento de habilidades específicas.",
         icon: <BookOpen className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Aprendizado prático", "Duração definida", "Objetivos claros", "Materiais de apoio"],
-        link: "/find-therapist?type=workshop"
+        link: "/terapeutas?type=workshop"
       }
     ],
     professional: [
@@ -69,21 +69,21 @@ const Resources = () => {
         description: "Acompanhamento personalizado para estudantes e profissionais em formação.",
         icon: <HeadphonesIcon className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Feedback detalhado sobre casos", "Desenvolvimento de habilidades clínicas", "Suporte ético e profissional"],
-        link: "/find-therapist?type=supervision"
+        link: "/terapeutas?type=supervision"
       },
       {
         title: "Supervisão em Grupo",
         description: "Supervisão clínica em grupo para troca de experiências entre profissionais.",
         icon: <Users className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Aprendizado compartilhado", "Networking profissional", "Custo reduzido", "Diversidade de casos e abordagens"],
-        link: "/find-therapist?type=group-supervision"
+        link: "/terapeutas?type=group-supervision"
       },
       {
         title: "Mentoria para Carreira",
         description: "Orientação profissional para desenvolvimento de carreira na área da psicologia e psicanálise.",
         icon: <Link className="h-10 w-10 text-therapy-primary" />,
         benefits: ["Planejamento de carreira", "Orientação sobre especialização", "Desenvolvimento profissional continuado"],
-        link: "/find-therapist?type=mentoring"
+        link: "/terapeutas?type=mentoring"
       }
     ]
   };

@@ -76,7 +76,7 @@ const HowItWorks = () => {
             Nossos profissionais qualificados estão prontos para te ajudar.
           </p>
           <div className="mt-8">
-            <Link href="/find-therapist">
+            <Link href="/terapeutas">
               <Button size="lg">Encontrar um Terapeuta</Button>
             </Link>
           </div>
