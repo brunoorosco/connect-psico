@@ -22,7 +22,7 @@ import { generateCertificatePdf } from "@/infra/pdf/generateTemplatesPdf"
 import { useAudioRecorder } from "@hooks/useAudioRecorder"
 import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 
-// 💡 use sempre o MESMO caminho de services para evitar import duplicado
+// serviços
 import { getPresignedPutForKey, transcribeChunk } from "@/services/minioUpload"
 import { SummaryResult, summarizeAllText } from "@services/summarize"
 
@@ -35,6 +35,17 @@ type TemplateItem = {
   configJson: CertificateConfig
 }
 
+function mergeTranscripts(prev: string, curr: string, sep = " ") {
+  const tail = prev.slice(-120)
+  const max = Math.min(120, curr.length)
+  for (let n = max; n >= 20; n--) {
+    if (tail.endsWith(curr.slice(0, n))) {
+      return prev + curr.slice(n)
+    }
+  }
+  return prev ? prev + sep + curr : curr
+}
+
 const ConsultationSession = () => {
   const router = useRouter()
   const params = useParams()
@@ -42,21 +53,16 @@ const ConsultationSession = () => {
   const { patientId, id } = params as { patientId: string; id: string }
 
   // ====== ÁUDIO / TRANSCRIÇÃO ======
-  const FIVE_MB = 5 * 1024 * 1024
-  const chunkBufRef = useRef<Blob[]>([])
-  const chunkBytesRef = useRef(0)
-  const partIndexRef = useRef(0)
-  const flushingRef = useRef(false)
   const [transcript, setTranscript] = useState("")
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const bootingRef = useRef(false) // evita start duplo
+  const [summary, setSummary] = useState<string | null>(null)
+  const [withTimestamps, setWithTimestamps] = useState(false)
+  const sessionIdRef = useRef<string | null>(null)
 
   // ====== CAMPOS ======
   const [consultationDate, setConsultationDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [consultationTime, setConsultationTime] = useState(format(new Date(), "HH:mm"))
   const [notes, setNotes] = useState("")
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null) // mantive se quiser download local
-  const [summary, setSummary] = useState<string | null>(null)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null) // se quiser download local
   const [canIssueDocument, setCanIssueDocument] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { form, handleSubmit } = useConsultationForm({})
@@ -72,19 +78,16 @@ const ConsultationSession = () => {
   const [sintomas, setSintomas] = useState("")
   const [aiSummary, setAiSummary] = useState<SummaryResult | null>(null)
   const [summLoading, setSummLoading] = useState(false)
-  const [bufBytesUI, setBufBytesUI] = useState(0)
-  const [partNoUI, setPartNoUI] = useState(0)
-  const fmtMB = (n: number) => (n / (1024 * 1024)).toFixed(2)
+
   const setPatient = usePatientStore((state) => state.setPatient)
   const patient = usePatientStore((state) => state.patient)
   const [patientName, setPatientName] = useState(patient?.name ?? "")
-  const [withTimestamps, setWithTimestamps] = useState(false)
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
 
   // limpeza MinIO
   const [cleanupLoading, setCleanupLoading] = useState(false)
   const [finalizing, setFinalizing] = useState(false)
-  const [autoSoftDelete, setAutoSoftDelete] = useState(false) // se true, manda para trash/ antes de apagar
+  const [autoSoftDelete, setAutoSoftDelete] = useState(false)
 
   const storageKey = useMemo(
     () => `consult:draft:${patientId}:${id}:${consultationDate}`,
@@ -141,6 +144,7 @@ const ConsultationSession = () => {
     }
   }, [storageKey])
 
+  // Autosave
   useEffect(() => {
     const h = setTimeout(() => {
       try {
@@ -153,23 +157,23 @@ const ConsultationSession = () => {
     }, 800)
     return () => clearTimeout(h)
   }, [notes, transcript, storageKey])
-  // ====== FLUSH (~5MB) -> MinIO -> Transcrição (Groq) ======
-  async function flush5MBChunk(currentSessionId: string) {
-    if (flushingRef.current) return
-    if (chunkBytesRef.current === 0) return
 
-    flushingRef.current = true
-    try {
-      partIndexRef.current += 1
-      const partNo = partIndexRef.current
-      const key = `sessions/${currentSessionId}/part-${String(partNo).padStart(5, "0")}.webm`
+  useEffect(() => {
+    setPatientName(patient?.name ?? "")
+  }, [patient?.name])
 
-      const blob = new Blob(chunkBufRef.current, { type: "audio/webm" })
+  const { requestPermission, start, stop, isRecording, recordingTime, canRecord, error } = useAudioRecorder({
+    mode: "dual",
+    partDurationMs: 10_000,
+    overlapMs: 400,
+    onPart: async (blob, { index }) => {
+      const sid = sessionIdRef.current!
+      const key = `sessions/${sid}/part-${String(index).padStart(5, "0")}.webm`
 
-      // presign + PUT com retry
-      const { url } = await getPresignedPutForKey(key)
+      // upload com retry
       await withRetry(
         async () => {
+          const { url } = await getPresignedPutForKey(key)
           const resp = await fetch(url, { method: "PUT", body: blob })
           if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
         },
@@ -177,13 +181,13 @@ const ConsultationSession = () => {
         300
       )
 
-      // transcrever com retry e response_format condicional
+      // transcrever com retry
       const stt = await withRetry(
         () =>
           transcribeChunk({
             key,
-            sessionId: currentSessionId,
-            part: partNo,
+            sessionId: sid,
+            part: index,
             response_format: withTimestamps ? "verbose_json" : "json",
             language: "pt",
           }),
@@ -191,71 +195,33 @@ const ConsultationSession = () => {
         500
       )
 
-      if (stt?.text) {
-        const piece = String(stt.text).trim()
-        setTranscript((prev) => [prev, piece].filter(Boolean).join(" "))
-        setSummary((prev) => [prev, piece].filter(Boolean).join("\n"))
-      }
-
-      // reset buffer + progresso
-      chunkBufRef.current = []
-      chunkBytesRef.current = 0
-      setBufBytesUI(0)
-      setPartNoUI(partNo)
-    } catch (e) {
-      console.error("flush5MBChunk failed:", e)
-    } finally {
-      flushingRef.current = false
-    }
-  }
-
-  const { start, stop, isRecording, recordingTime, error } = useAudioRecorder({
-    mimeType: "audio/webm;codecs=opus",
-    timeslice: 1500,
-    onChunk: async (piece) => {
-      // acumula até ~5MB
-      chunkBufRef.current.push(piece)
-      chunkBytesRef.current += piece.size
-      setBufBytesUI((v) => v + piece.size) // <-- progresso na UI
-
-      if (sessionId && chunkBytesRef.current >= FIVE_MB) {
-        await flush5MBChunk(sessionId)
+      const piece = stt?.text?.trim()
+      if (piece) {
+        setTranscript((prev) => mergeTranscripts(prev, piece))
+        setSummary((prev) => mergeTranscripts(prev ?? "", piece, "\n"))
       }
     },
-    // sem onStop => não seguramos áudio completo em RAM
+    onStop: async (fullBlob) => {
+      // opcional: manter arquivo final local pra download
+      setAudioBlob(fullBlob)
+    },
   })
 
-  const startRecording = async () => {
-    if (bootingRef.current) return
-    bootingRef.current = true
-    try {
-      // garante sessionId e zera estado local
-      const s = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `s-${Date.now()}`
-      setSessionId(s)
-
-      partIndexRef.current = 0
-      chunkBufRef.current = []
-      chunkBytesRef.current = 0
-      // setTranscript("")
-
-      await start()
-    } finally {
-      bootingRef.current = false
+  // Start: garante sessionId e permissão antes de iniciar o hook
+  const handleStart = async () => {
+    if (!sessionIdRef.current) {
+      const s = (crypto as any)?.randomUUID ? crypto.randomUUID() : `s-${Date.now()}`
+      sessionIdRef.current = s
     }
+    if (!canRecord) {
+      const ok = await requestPermission()
+      if (!ok) return
+    }
+    await start()
   }
 
-  const stopRecording = async () => {
+  const handleStop = () => {
     stop()
-    if (!sessionId) return
-    // manda o restinho < 5MB
-    await flush5MBChunk(sessionId)
-  }
-
-  // ====== UI helpers ======
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
   const saveConsultation = async () => {
@@ -270,6 +236,7 @@ const ConsultationSession = () => {
         description: "Os dados da consulta foram salvos com sucesso",
       })
       setCanIssueDocument(true)
+      localStorage.removeItem(storageKey)
     } catch (error) {
       console.error("Erro ao finalizar consulta:", error)
     } finally {
@@ -310,19 +277,6 @@ const ConsultationSession = () => {
     return map
   }, [templates])
 
-  const downloadAudio = () => {
-    if (audioBlob) {
-      const url = URL.createObjectURL(audioBlob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `consulta-${(patientName || "paciente").replace(/\s+/g, "-")}-${consultationDate}.webm`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    }
-  }
-
   const selectedConfig = useMemo<CertificateConfig | undefined>(() => {
     return docType ? configByType[docType] : undefined
   }, [docType, configByType])
@@ -352,7 +306,7 @@ const ConsultationSession = () => {
     if (!selectedConfig) return
     const userForDoc = {
       name: currentUser?.name || "Profissional",
-      crp: currentUser?.crp || "",
+      crp: (currentUser as any)?.crp || "",
     }
     await generateCertificatePdf(selectedConfig, userForDoc, patientDataForDoc)
     setIssueOpen(false)
@@ -371,8 +325,6 @@ const ConsultationSession = () => {
       const fullText = [transcript, notes].filter(Boolean).join("\n\n")
       const result = await summarizeAllText({ text: fullText, language: "pt-BR" })
       setAiSummary(result)
-      // opcional: salvar notas com o sumário agregado
-      // setSummary(result.summary);
     } catch (e) {
       console.error(e)
       toast.error("Falha ao gerar resumo com OpenAI")
@@ -382,29 +334,28 @@ const ConsultationSession = () => {
   }
 
   async function finalizeAndCleanup() {
-    if (!sessionId) {
+    const sid = sessionIdRef.current
+    if (!sid) {
       toast.error("Sessão não iniciada.")
       return
     }
 
     setFinalizing(true)
     try {
-      // garante nenhum flush concorrente
+      // 1) parar a gravação — garante que o último onPart rode
       if (isRecording) stop()
 
-      // manda o restinho < 5MB
-      await flush5MBChunk(sessionId)
-      // espera flush terminar
-      while (flushingRef.current) await sleep(50)
+      // 2) aguarda um tique para concluir onPart pendente
+      await sleep(250)
 
-      // chama API de limpeza (veja rota /api/recordings/cleanup)
+      // 3) limpar no servidor
       setCleanupLoading(true)
       const res = await fetch("/api/recordings/cleanup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId,
-          hardDelete: !autoSoftDelete, // se marcado, faz soft delete (trash/)
+          sessionId: sid,
+          hardDelete: !autoSoftDelete,
         }),
       })
       const data = await res.json()
@@ -424,10 +375,26 @@ const ConsultationSession = () => {
 
   return (
     <div className="min-h-screen bg-background py-2">
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-6xl mx-auto space-y-4">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex">
             <CardTitle className="text-2xl font-bold text-primary">Sessão</CardTitle>
+            <div
+              className="flex items-start gap-2 rounded-md border-l-4 border-yellow-400 bg-yellow-100 p-3 mb-4"
+              role="alert"
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-2">
+                  <p className="text-sm text-yellow-800">
+                    O uso de gravação sem consentimento assinado do paciente fere o{" "}
+                    <strong>Art. 9º do Código de Ética</strong>. Garanta o registro digital antes de prosseguir.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Informações */}
@@ -467,56 +434,73 @@ const ConsultationSession = () => {
             {/* Gravação */}
             <Card className="bg-muted/50">
               <CardContent className="pt-4">
-                <div className="flex items-center flex-col">
-                  <div
-                    className="flex items-start gap-2 rounded-md border-l-4 border-yellow-400 bg-yellow-100 p-3 mb-4"
-                    role="alert"
-                  >
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                      </div>
-                      <div className="ml-2">
-                        <p className="text-sm text-yellow-800">
-                          O uso de gravação sem consentimento assinado do paciente fere o{" "}
-                          <strong>Art. 9º do Código de Ética</strong>. Garanta o registro digital antes de prosseguir.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex justify-between w-full">
                     <div className="flex items-center gap-2">
                       <Button
-                        onClick={isRecording ? stopRecording : startRecording}
+                        onClick={isRecording ? handleStop : handleStart}
                         variant={isRecording ? "destructive" : "default"}
                         size="lg"
                         className="flex items-center space-x-2"
-                        disabled={bootingRef.current}
                       >
-                        {isRecording ? <MicOff /> : <Mic />}
+                        {isRecording ? (
+                          <>
+                            {/* <div className="w-3 h-3 bg-white rounded-full animate-pulse" />  */}
+                            <MicOff />
+                          </>
+                        ) : (
+                          <Mic />
+                        )}
                         <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
                       </Button>
 
-                      {isRecording && (
+                      {/* {isRecording && (
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
                             <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            Parte {Math.max(partNoUI, 0)} • Buffer ~{fmtMB(bufBytesUI)} MB / 5.00 MB
-                          </span>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
+                  <Button
+                    onClick={openIssueModal}
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                    size="lg"
+                    title={!canIssueDocument ? "Finalize a consulta para emitir o documento" : "Emitir documento"}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Emitir Documento</span>
+                  </Button>
 
-                  {audioBlob && (
-                    <Button onClick={downloadAudio} variant="outline" size="sm" className="flex items-center space-x-2">
-                      <Download className="w-4 h-4" />
-                      <span>Download Áudio</span>
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleSummarize}
+                    variant="outline"
+                    size="lg"
+                    disabled={summLoading || (!transcript && !notes) || !!aiSummary}
+                    title="Gerar resumo automático"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {summLoading ? "Resumindo..." : "Gerar Resumo"}
+                  </Button>
+
+                  <Button onClick={saveConsultation} className="flex items-center space-x-2" size="lg">
+                    <Save className="w-4 h-4" />
+                    <span>Salvar Consulta</span>
+                  </Button>
+
+                  <Button
+                    onClick={finalizeAndCleanup}
+                    variant="destructive"
+                    className="flex items-center space-x-2"
+                    size="lg"
+                    disabled={finalizing || cleanupLoading}
+                    title="Finaliza a sessão e apaga o áudio do servidor"
+                  >
+                    {finalizing || cleanupLoading ? "Finalizando..." : "Finalizar (apagar áudio)"}
+                  </Button>
                 </div>
 
                 {/* feedback de erro do gravador */}
@@ -527,7 +511,7 @@ const ConsultationSession = () => {
             {/* Transcript (preview) */}
             {transcript && (
               <div className="space-y-2">
-                <Label>Transcrição parcial</Label>
+                <Label>Transcrição parcial </Label>
                 <Textarea value={transcript} readOnly rows={6} className="min-h-[120px]" />
               </div>
             )}
@@ -545,6 +529,7 @@ const ConsultationSession = () => {
               />
               <p className="text-sm text-muted-foreground">{notes.length} caracteres</p>
             </div>
+
             {aiSummary && (
               <Card className="mt-4">
                 <CardHeader>
@@ -592,7 +577,7 @@ const ConsultationSession = () => {
             )}
 
             {/* Ações */}
-            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
+            {/* <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
               <Button
                 onClick={openIssueModal}
                 variant="outline"
@@ -629,7 +614,7 @@ const ConsultationSession = () => {
               >
                 {finalizing || cleanupLoading ? "Finalizando..." : "Finalizar (apagar áudio)"}
               </Button>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>

@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
   const objectKey: string = key ?? `${prefix}/${crypto.randomUUID()}.${ext}`
 
   // expiração da URL (segundos)
-  const expires = 60
+  const expires = 300
+
 
   // 📌 Simples e robusto: presignedUrl("PUT") sem headers adicionais.
   // => No PUT do cliente, NÃO envie Content-Type.
   const url = await minio.presignedUrl("PUT", BUCKET, objectKey, expires)
-
   // 🔄 Alternativa: se você QUISER obrigar Content-Type no PUT,
   // use presignedPutObject e envie o MESMO header no fetch do cliente:
   // const url = await minio.presignedPutObject(
