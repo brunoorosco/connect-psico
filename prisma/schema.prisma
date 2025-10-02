@@ -224,7 +224,7 @@ model Availability {
   isAvailable    Boolean  @default(true) @map("is_available")
   psychologist   User     @relation(fields: [professionalId], references: [id])
 
-  @@index([professionalId])
+  @@index([id,professionalId])
   @@map("availabilities")
 }
 
