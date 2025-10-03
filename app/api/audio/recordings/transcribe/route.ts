@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
 
     // Sucesso
     const success = data as GroqSuccess
+    console.log(success?.text)
     return NextResponse.json({
       text: success?.text ?? "",
       // segments: success?.segments, // se usar verbose_json
