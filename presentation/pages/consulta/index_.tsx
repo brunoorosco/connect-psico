@@ -84,11 +84,6 @@ const ConsultationSession = () => {
   const [patientName, setPatientName] = useState(patient?.name ?? "")
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
 
-  // limpeza MinIO
-  const [cleanupLoading, setCleanupLoading] = useState(false)
-  const [finalizing, setFinalizing] = useState(false)
-  const [autoSoftDelete, setAutoSoftDelete] = useState(false)
-
   const storageKey = useMemo(
     () => `consult:draft:${patientId}:${id}:${consultationDate}`,
     [patientId, id, consultationDate]
@@ -200,6 +195,25 @@ const ConsultationSession = () => {
         setTranscript((prev) => mergeTranscripts(prev, piece))
         setSummary((prev) => mergeTranscripts(prev ?? "", piece, "\n"))
       }
+      // 3) Apagar o arquivo do MinIO (após transcrição)
+      try {
+        await withRetry(
+          async () => {
+            const resp = await fetch("/api/audio/recordings/cleanup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              // softDelete: true -> move para trash/sessions/..., em vez de deletar
+              body: JSON.stringify({ key, softDelete: false }),
+            })
+            if (!resp.ok) throw new Error(await resp.text())
+          },
+          3,
+          400
+        )
+      } catch (e) {
+        // se falhar, não bloqueia o fluxo; ficará para um cleanup posterior (opcional)
+        console.warn("Falha ao remover parte após STT:", e, { key })
+      }
     },
     onStop: async (fullBlob) => {
       // opcional: manter arquivo final local pra download
@@ -271,6 +285,12 @@ const ConsultationSession = () => {
     }
   }
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, "0")}`
+  }
+
   const configByType = useMemo(() => {
     const map: Partial<Record<CertificateType, CertificateConfig>> = {}
     for (const it of templates) map[it.type] = it.configJson
@@ -327,49 +347,9 @@ const ConsultationSession = () => {
       setAiSummary(result)
     } catch (e) {
       console.error(e)
-      toast.error("Falha ao gerar resumo com OpenAI")
+      toast.error("Falha ao gerar resumo")
     } finally {
       setSummLoading(false)
-    }
-  }
-
-  async function finalizeAndCleanup() {
-    const sid = sessionIdRef.current
-    if (!sid) {
-      toast.error("Sessão não iniciada.")
-      return
-    }
-
-    setFinalizing(true)
-    try {
-      // 1) parar a gravação — garante que o último onPart rode
-      if (isRecording) stop()
-
-      // 2) aguarda um tique para concluir onPart pendente
-      await sleep(250)
-
-      // 3) limpar no servidor
-      setCleanupLoading(true)
-      const res = await fetch("/api/recordings/cleanup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: sid,
-          hardDelete: !autoSoftDelete,
-        }),
-      })
-      const data = await res.json()
-      setCleanupLoading(false)
-
-      if (!res.ok) throw new Error(data?.details || data?.error || "Falha ao apagar áudio")
-
-      const qty = data?.deleted ?? data?.moved ?? 0
-      toast.success(`Áudio removido do servidor (${qty} parte${qty === 1 ? "" : "s"})`)
-    } catch (e) {
-      console.error(e)
-      toast.error("Falha ao finalizar e limpar o áudio")
-    } finally {
-      setFinalizing(false)
     }
   }
 
@@ -454,14 +434,14 @@ const ConsultationSession = () => {
                         <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
                       </Button>
 
-                      {/* {isRecording && (
+                      {isRecording && (
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
                             <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
                           </div>
                         </div>
-                      )} */}
+                      )}
                     </div>
                   </div>
                   <Button
@@ -479,7 +459,7 @@ const ConsultationSession = () => {
                     onClick={handleSummarize}
                     variant="outline"
                     size="lg"
-                    disabled={summLoading || (!transcript && !notes) || !!aiSummary}
+                    disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
                     title="Gerar resumo automático"
                   >
                     <FileText className="w-4 h-4" />
@@ -489,17 +469,6 @@ const ConsultationSession = () => {
                   <Button onClick={saveConsultation} className="flex items-center space-x-2" size="lg">
                     <Save className="w-4 h-4" />
                     <span>Salvar Consulta</span>
-                  </Button>
-
-                  <Button
-                    onClick={finalizeAndCleanup}
-                    variant="destructive"
-                    className="flex items-center space-x-2"
-                    size="lg"
-                    disabled={finalizing || cleanupLoading}
-                    title="Finaliza a sessão e apaga o áudio do servidor"
-                  >
-                    {finalizing || cleanupLoading ? "Finalizando..." : "Finalizar (apagar áudio)"}
                   </Button>
                 </div>
 
