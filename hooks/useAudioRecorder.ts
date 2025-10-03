@@ -39,6 +39,7 @@ export type UseAudioRecorderReturn = {
   isPaused: boolean
   isCutting: boolean
   recordingTime: number
+  isStopping: boolean
   permission: PermissionState | null
   canRecord: boolean
   error: string | null
@@ -68,6 +69,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
   const [recordingTime, setRecordingTime] = useState(0)
   const [permission, setPermission] = useState<PermissionState | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isStopping, setIsStopping] = useState(false)
   const [isCutting, setIsCutting] = useState(false)
 
   const canRecord = permission === "granted"
@@ -246,7 +248,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
       setError(msg)
     }
 
-    rec.onstop = async () => {
+    rec.onstop = () => {
       const chunks = partChunksRef.current[label]
       if (chunks.length > 0) {
         const mime = chunks[0]?.type || rec.mimeType || supportedMimeRef.current || "audio/webm"
@@ -258,18 +260,16 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
         partChunksRef.current[label] = []
         partStartedAtRef.current[label] = null
 
-        try {
-          await opts?.onPart?.(blob, { index: idx, startedAt, durationMs, mimeType: mime })
-        } catch (e) {
-          console.error("onPart falhou:", e)
+        // roda onPart ASSÍNCRONO (não bloqueia parada)
+        if (opts?.onPart) {
+          Promise.resolve(opts.onPart(blob, { index: idx, startedAt, durationMs, mimeType: mime })).catch((e) =>
+            console.error("onPart falhou:", e)
+          )
         }
       }
 
-      try {
-        await drainQueue()
-      } catch (e) {
-        console.error("Falha ao drenar fila:", e)
-      }
+      // drena fila sem bloquear UI
+      void drainQueue().catch((e) => console.error("Falha ao drenar fila:", e))
 
       const bothInactive =
         (!recARef.current || recARef.current.state === "inactive") &&
@@ -277,24 +277,16 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
 
       if (bothInactive && finalStopRef.current) {
         clearSessionTimer()
-        setIsRecording(false)
         setIsPaused(false)
+        setIsStopping(false) // libera o botão; isRecording já foi false em stop()
 
         if (opts?.onStop && fullChunksRef.current?.length) {
           const finalType = rec.mimeType || supportedMimeRef.current || "audio/webm"
           const fullBlob = new Blob(fullChunksRef.current, { type: finalType })
           fullChunksRef.current = []
-          try {
-            await opts.onStop(fullBlob)
-          } catch (e) {
-            console.error("onStop falhou:", e)
-          }
+          // também sem bloquear a UI
+          void Promise.resolve(opts.onStop(fullBlob)).catch((e) => console.error("onStop falhou:", e))
         }
-
-        try {
-          const s = streamRef.current
-          s?.getTracks().forEach((t) => t.stop())
-        } catch {}
       }
     }
 
@@ -404,6 +396,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     // OK: inicia sessão agora
     finalStopRef.current = false
     setRecordingTime(0)
+    setIsStopping(false)
     startSessionTimerOnce()
     setIsRecording(true)
     setIsPaused(false)
@@ -424,13 +417,17 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
 
   function stop() {
     finalStopRef.current = true
+    setIsStopping(true) // <-- feedback imediato na UI
+    setIsRecording(false) // <-- botão troca agora
     clearCutTick()
 
     const stopRec = (mr: MediaRecorder | null) => {
       if (!mr) return
       try {
         if (mr.state === "recording") {
-          try { mr.requestData() } catch {}
+          try {
+            mr.requestData()
+          } catch {}
           mr.stop()
         } else if (mr.state !== "inactive") {
           mr.stop()
@@ -440,7 +437,9 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
 
     stopRec(recARef.current)
     stopRec(recBRef.current)
-    // o timer da sessão é parado no onstop quando ambos ficam inativos
+    try {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    } catch {}
   }
 
   async function cutNow() {
@@ -462,7 +461,9 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
         const stream = await ensureStream()
         const mr = recARef.current
         if (mr && mr.state === "recording") {
-          try { mr.requestData() } catch {}
+          try {
+            mr.requestData()
+          } catch {}
           mr.stop()
         }
         await new Promise((r) => setTimeout(r, Math.max(100, overlapMs)))
@@ -485,7 +486,9 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     // tenta ler o estado de permissão na montagem (se suportado)
     void probePermission()
     return () => {
-      try { stop() } catch {}
+      try {
+        stop()
+      } catch {}
       clearCutTick()
       clearSessionTimer()
     }
@@ -504,6 +507,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     isCutting,
     recordingTime,
     permission,
+    isStopping,
     canRecord,
     error,
     supportedMimeType: supportedMimeRef.current,

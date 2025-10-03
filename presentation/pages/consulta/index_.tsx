@@ -157,69 +157,72 @@ const ConsultationSession = () => {
     setPatientName(patient?.name ?? "")
   }, [patient?.name])
 
-  const { requestPermission, start, stop, isRecording, recordingTime, canRecord, error } = useAudioRecorder({
-    mode: "dual",
-    partDurationMs: 10_000,
-    overlapMs: 400,
-    onPart: async (blob, { index }) => {
-      const sid = sessionIdRef.current!
-      const key = `sessions/${sid}/part-${String(index).padStart(5, "0")}.webm`
+  const { requestPermission, start, stop, isRecording, recordingTime, isStopping, canRecord, error } = useAudioRecorder(
+    {
+      mode: "dual",
+      partDurationMs: 10_000,
+      overlapMs: 400,
+      timeslice: 250,
+      onPart: async (blob, { index }) => {
+        const sid = sessionIdRef.current!
+        const key = `sessions/${sid}/part-${String(index).padStart(5, "0")}.webm`
 
-      // upload com retry
-      await withRetry(
-        async () => {
-          const { url } = await getPresignedPutForKey(key)
-          const resp = await fetch(url, { method: "PUT", body: blob })
-          if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
-        },
-        4,
-        300
-      )
-
-      // transcrever com retry
-      const stt = await withRetry(
-        () =>
-          transcribeChunk({
-            key,
-            sessionId: sid,
-            part: index,
-            response_format: withTimestamps ? "verbose_json" : "json",
-            language: "pt",
-          }),
-        3,
-        500
-      )
-
-      const piece = stt?.text?.trim()
-      if (piece) {
-        setTranscript((prev) => mergeTranscripts(prev, piece))
-        setSummary((prev) => mergeTranscripts(prev ?? "", piece, "\n"))
-      }
-      // 3) Apagar o arquivo do MinIO (após transcrição)
-      try {
+        // upload com retry
         await withRetry(
           async () => {
-            const resp = await fetch("/api/audio/recordings/cleanup", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              // softDelete: true -> move para trash/sessions/..., em vez de deletar
-              body: JSON.stringify({ key, softDelete: false }),
-            })
-            if (!resp.ok) throw new Error(await resp.text())
+            const { url } = await getPresignedPutForKey(key)
+            const resp = await fetch(url, { method: "PUT", body: blob })
+            if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
           },
-          3,
-          400
+          4,
+          300
         )
-      } catch (e) {
-        // se falhar, não bloqueia o fluxo; ficará para um cleanup posterior (opcional)
-        console.warn("Falha ao remover parte após STT:", e, { key })
-      }
-    },
-    onStop: async (fullBlob) => {
-      // opcional: manter arquivo final local pra download
-      setAudioBlob(fullBlob)
-    },
-  })
+
+        // transcrever com retry
+        const stt = await withRetry(
+          () =>
+            transcribeChunk({
+              key,
+              sessionId: sid,
+              part: index,
+              response_format: withTimestamps ? "verbose_json" : "json",
+              language: "pt",
+            }),
+          3,
+          500
+        )
+
+        const piece = stt?.text?.trim()
+        if (piece) {
+          setTranscript((prev) => mergeTranscripts(prev, piece))
+          setSummary((prev) => mergeTranscripts(prev ?? "", piece, "\n"))
+        }
+        // 3) Apagar o arquivo do MinIO (após transcrição)
+        try {
+          await withRetry(
+            async () => {
+              const resp = await fetch("/api/audio/recordings/cleanup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                // softDelete: true -> move para trash/sessions/..., em vez de deletar
+                body: JSON.stringify({ key, softDelete: false }),
+              })
+              if (!resp.ok) throw new Error(await resp.text())
+            },
+            3,
+            400
+          )
+        } catch (e) {
+          // se falhar, não bloqueia o fluxo; ficará para um cleanup posterior (opcional)
+          console.warn("Falha ao remover parte após STT:", e, { key })
+        }
+      },
+      onStop: async (fullBlob) => {
+        // opcional: manter arquivo final local pra download
+        setAudioBlob(fullBlob)
+      },
+    }
+  )
 
   // Start: garante sessionId e permissão antes de iniciar o hook
   const handleStart = async () => {
@@ -422,16 +425,11 @@ const ConsultationSession = () => {
                         variant={isRecording ? "destructive" : "default"}
                         size="lg"
                         className="flex items-center space-x-2"
+                        // disabled={isStopping}
+                        aria-busy={isStopping ? "true" : "false"}
                       >
-                        {isRecording ? (
-                          <>
-                            {/* <div className="w-3 h-3 bg-white rounded-full animate-pulse" />  */}
-                            <MicOff />
-                          </>
-                        ) : (
-                          <Mic />
-                        )}
-                        <span>{isRecording ? "Parar Gravação" : "Iniciar Gravação"}</span>
+                        {isRecording ? <MicOff /> : <Mic />}
+                        <span>{isRecording ? (isStopping ? "Parando..." : "Parar Gravação") : "Iniciar Gravação"}</span>
                       </Button>
 
                       {isRecording && (
