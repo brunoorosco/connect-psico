@@ -34,7 +34,8 @@ export async function GET() {
         })
         processed++
       } catch (e) {
-        console.error("Falha no envio api.chatz")
+        //@ts-ignore
+        console.error("Falha no envio api.chatz", { error: e?.message })
         // se falhar o envio, reabra a janela para reprocessar depois
         await reopenWindow(row.receiverId, row.msgCount, 5)
       }
