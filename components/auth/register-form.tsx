@@ -64,7 +64,7 @@ export default function RegisterForm() {
       })
 
       setShowConsentDialog(false)
-      navigate("/dashboard")
+      // navigate("/dashboard")
     } catch (error: any) {
       console.error("Error saving consent:", error)
       toast("Erro", { description: "Não foi possível registrar seu consentimento." })
@@ -80,7 +80,7 @@ export default function RegisterForm() {
       })
 
       setShowConsentDialog(false)
-      navigate("/dashboard")
+      // navigate("/dashboard")
     } catch (error: any) {
       console.error("Error saving consent decline:", error)
       toast.error("Erro", {
