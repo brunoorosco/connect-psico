@@ -6,7 +6,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import Navbar from "./app/navbar"
 import { CallFloatingWindow } from "@components/videoChat/CallFloatingWindow"
 import { SocketProvider } from "@/infra/contexts/SocketContext"
-import ConsentGate from "@components/consentimento/ConsentGate"
+import ConsentGate from "@components/Consentimento/ConsentGate"
 import { acceptConsent, declineConsent, getConsentStatus } from "@/actions/consent"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
