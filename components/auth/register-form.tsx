@@ -17,8 +17,6 @@ import AuthCard from "./auth-card"
 import AuthFormMessage from "./auth-form-message"
 import SocialLogin from "./social-login"
 import { ufCRP } from "@/utils/ufCRP"
-import { ConsentDialog } from "@components/consentimento/ConsentDialog"
-
 
 export default function RegisterForm() {
   const [isPending, startTransition] = useTransition()
