@@ -9,7 +9,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { Switch } from "@/components/ui/switch"
-import InputMask from "react-input-mask";
+import InputMask from "react-input-mask"
 import { register } from "@/actions/auth"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { RegisterSchema } from "@/schemas/auth"

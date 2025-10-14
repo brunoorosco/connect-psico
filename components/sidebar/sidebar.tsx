@@ -76,16 +76,19 @@ export async function AppSidebar() {
       <SidebarFooter className="p-4 border-t mt-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center space-x-3 cursor-pointer">
-              <Avatar>
+            <div className="flex items-center space-x-3 cursor-pointer max-w-full overflow-hidden">
+              <Avatar className="flex-shrink-0">
                 <AvatarImage src={session?.user?.image as string} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {getInitials(session?.user.name as string)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{session?.user.name}</span>
-                <span className="text-xs text-muted-foreground">{session?.user.email}</span>
+
+              <div className="flex flex-col min-w-0">
+                {" "}
+                {/* min-w-0 é essencial para o truncate funcionar */}
+                <span className="font-medium text-sm truncate">{session?.user.name}</span>
+                <span className="text-xs text-muted-foreground truncate">{session?.user.email}</span>
               </div>
             </div>
           </DropdownMenuTrigger>
@@ -93,9 +96,11 @@ export async function AppSidebar() {
           <DropdownMenuContent side="top" align="end" className="w-48">
             <DropdownMenuItem asChild>
               <Link href={urlProfile}>
-                <User className="w-4 h-4 mr-2" />Editar Perfil
+                <User className="w-4 h-4 mr-2" />
+                Editar Perfil
               </Link>
             </DropdownMenuItem>
+
             {session?.user.role === "SUPERVISOR" && (
               <>
                 <DropdownMenuItem asChild>
@@ -104,14 +109,10 @@ export async function AppSidebar() {
                     Perfil Público
                   </Link>
                 </DropdownMenuItem>
+
                 <DropdownMenuItem asChild>
                   <ShareProfileButton urlProfile={`${env.urlBase}/terapeutas/${session?.user.username}`} />
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem asChild>
-              <Link href={urlMeusPagamentos}>
-                <Settings className="w-4 h-4 mr-2" /> Meus Pagamentos
-              </Link>
-            </DropdownMenuItem> */}
 
                 <DropdownMenuItem asChild>
                   <Link href={urlMinhaConta}>
@@ -120,6 +121,7 @@ export async function AppSidebar() {
                 </DropdownMenuItem>
               </>
             )}
+
             <LogoutButton>
               <DropdownMenuItem className="text-red-500">
                 <LogOut className="w-4 h-4 mr-2" /> Sair
