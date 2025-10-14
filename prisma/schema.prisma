@@ -11,36 +11,35 @@ datasource db {
 
 model User {
   id                       String                 @id @default(cuid())
-  index                    Int                    @default(autoincrement())
   name                     String
   email                    String                 @unique
   emailVerified            DateTime?
   image                    String?
-  active                   Boolean                @default(true)
   phone                    String?
   role                     UserRole               @default(DEFAULT)
   password                 String?
   isTwoFactorAuthEnabled   Boolean                @default(false)
   twoFactorAuthVerified    DateTime?
-  isNewProfile             Boolean                @default(true)
   createdAt                DateTime               @default(now())
   updatedAt                DateTime               @updatedAt
+  active                   Boolean                @default(true)
+  index                    Int                    @default(autoincrement())
+  isNewProfile             Boolean                @default(true)
+  Account                  Account[]
+  Session                  Session[]
+  VideoCallParticipant     VideoCallParticipant[]
   patientAppointments      Appointment[]          @relation("PatientAppointments")
   professionalAppointments Appointment[]          @relation("ProfessionalAppointments")
   availabilities           Availability[]
-  receivedMessages         Message[]              @relation("ReceivedMessages")
-  sentMessages             Message[]              @relation("SentMessages")
-  Message                  Message[]
-  Professional             Professional?
-  patientUser              Pacientes[]            @relation("PatientUser")
-  patientProfessional      Pacientes[]            @relation("PatientProfessional")
-  Session                  Session[]
-  Account                  Account[]
-  NotePatient              NotePatient[]          @relation("NotePatientProfessional")
-  VideoCallParticipant     VideoCallParticipant[]
   CertificateConfig        CertificateConfig[]
   ComentariosProfessional  Comentarios[]          @relation("ReviewsProfessional")
   ComentariosUser          Comentarios[]          @relation("ReviewsUser")
+  receivedMessages         Message[]              @relation("ReceivedMessages")
+  sentMessages             Message[]              @relation("SentMessages")
+  Message                  Message[]
+  NotePatient              NotePatient[]          @relation("NotePatientProfessional")
+  patientUser              Pacientes[]            @relation("PatientUser")
+  Professional             Professional?
 
   @@index([id])
   @@map("users")
@@ -48,33 +47,33 @@ model User {
 
 model Professional {
   id                 Int       @id @default(autoincrement())
-  numConselho        String?   @map("num_conselho") @db.VarChar(8)
-  ufConselho         String?   @map("uf_conselho") @db.VarChar(2)
-  publicoAlvo        String[]  @map("publico_alvo")
-  username           String?   @unique @map("username") @db.VarChar(40)
-  especialidade      String[]
   abordagem          String?
-  tituloAcademico    String?   @map("(titulo_academico)")
+  userId             String    @unique
+  bio                String?
+  ufConselho         String?   @map("uf_conselho") @db.VarChar(2)
+  especialidade      String[]
+  numConselho        String?   @map("num_conselho") @db.VarChar(8)
   education          String?
   tipoAtendimento    String?   @default("ambos") @map("tipo_atendimento")
-  bio                String?
   valorAtendimento   Int?      @default(0) @map("valor_atendimento")
-  tempoConsulta      Int?      @default(60) @map("tempo_consulta")
-  visivel            Boolean   @default(true) @map("visivel")
-  userId             String    @unique
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tituloAcademico    String?   @map("(titulo_academico)")
   createdAt          DateTime  @default(now())
+  tempoConsulta      Int?      @default(60) @map("tempo_consulta")
   updatedAt          DateTime  @updatedAt
-  deletedAt          DateTime? @map("deleted_at")
+  publicoAlvo        String[]  @map("publico_alvo")
   isProfileCompleted Boolean   @default(false) @map("is_profile_completed")
   experiencia        Int       @default(0) @map("experiencia")
+  visivel            Boolean   @default(true) @map("visivel")
+  deletedAt          DateTime? @map("deleted_at")
+  username           String?   @unique @map("username") @db.VarChar(40)
   cidade             String?   @db.VarChar(25)
-  bairro             String?   @db.VarChar(25)
+  complemento        String?   @db.VarChar(25)
   estado             String?   @db.VarChar(2)
   logradouro         String?   @db.VarChar(25)
   numero             String?   @db.VarChar(10)
-  complemento        String?   @db.VarChar(25)
+  bairro             String?   @db.VarChar(25)
   cep                String?   @db.VarChar(8)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([id, username, userId])
   @@map("professionals")
@@ -92,47 +91,47 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
 
 model Pacientes {
-  id               Int           @id @default(autoincrement())
-  birthDate        String?       @map("birth_date")
-  emergencyContact String?       @map("emergency_contact")
-  address          String?
-  medicalRecordId  String        @unique @map("prontuario_id")
-  professionalId   String        @map("professional_id")
-  patientId        String        @map("patient_id")
-  deletedAt        DateTime?     @map("deleted_at")
-  cep              String?
-  street           String?
-  neighborhood     String?
-  city             String?
-  state            String?
-  number           String?
-  notes            String?
-  patient          User          @relation("PatientUser", fields: [patientId], references: [id])
-  professional     User          @relation("PatientProfessional", fields: [professionalId], references: [id])
-  notePatient      NotePatient[]
+  id                 Int           @id @default(autoincrement())
+  professionalId     String?       @map("professional_id")
+  patientId          String        @unique @map("patient_id")
+  address            String?
+  birthDate          String?       @map("birth_date")
+  emergencyContact   String?       @map("emergency_contact")
+  medicalRecordId    String        @unique @map("prontuario_id")
+  cep                String?
+  city               String?
+  neighborhood       String?
+  notes              String?
+  number             String?
+  state              String?
+  street             String?
+  deletedAt          DateTime?     @map("deleted_at")
+  consentRecording   Boolean       @default(false) @map("consent_record")
+  consentVersion     String?
+  consentRecordingAt DateTime?     @map("consent_at")
+  notePatient        NotePatient[]
+  patient            User          @relation("PatientUser", fields: [patientId], references: [id])
 
-  @@map("patients")
   @@index([patientId])
+  @@map("patients")
 }
 
 model NotePatient {
   id             Int       @id @default(autoincrement())
   patientId      Int       @map("patitent_id")
   notes          String
+  createdAt      DateTime  @default(now())
   prescription   String
   professionalId String    @map("professional_id")
   patients       Pacientes @relation(fields: [patientId], references: [id])
-  createdAt      DateTime  @default(now())
   professional   User      @relation("NotePatientProfessional", fields: [professionalId], references: [id])
 
   @@map("note_patients")
@@ -140,14 +139,14 @@ model NotePatient {
 
 model Comentarios {
   id             Int         @id @default(autoincrement())
-  comment        String
-  rating         Int
   userId         String
-  appointmentId  Int         @map("appointment_id")
-  createdAt      DateTime    @default(now()) @map("created_at")
   professionalId String
-  professional   User        @relation("ReviewsProfessional", fields: [professionalId], references: [id], onDelete: Cascade)
+  appointmentId  Int         @map("appointment_id")
+  comment        String
+  createdAt      DateTime    @default(now()) @map("created_at")
+  rating         Int
   appointment    Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  professional   User        @relation("ReviewsProfessional", fields: [professionalId], references: [id], onDelete: Cascade)
   user           User        @relation("ReviewsUser", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([id])
@@ -167,10 +166,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model TwoFactorToken {
@@ -192,50 +190,49 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  id              Int       @id @default(autoincrement())
-  professionalId  String    @map("professional_id")
-  patientId       String    @map("patient_id")
-  appointmentDate DateTime  @map("appointment_date")
-  status          Status    @default(PENDING)
-  tipoAtendimento String?   @default("ambos") @map("tipo_atendimento")
-  roomId          String?   @default(cuid()) @map("room_id")
-  review          Boolean   @default(false)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  priceCents      Int       @default(0)
-  payment         Payment?
+  professionalId  String        @map("professional_id")
+  patientId       String        @map("patient_id")
+  appointmentDate DateTime      @map("appointment_date")
+  status          Status        @default(PENDING)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  id              Int           @id @default(autoincrement())
+  roomId          String?       @default(cuid()) @map("room_id")
+  tipoAtendimento String?       @default("ambos") @map("tipo_atendimento")
+  review          Boolean       @default(false)
+  priceCents      Int           @default(0)
   expiresAt       DateTime?
-
-  patient      User          @relation("PatientAppointments", fields: [patientId], references: [id])
-  professional User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
-  Comentarios  Comentarios[]
-  Refund       Refund?
-  Payout       Payout?
+  patient         User          @relation("PatientAppointments", fields: [patientId], references: [id])
+  professional    User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  Comentarios     Comentarios[]
+  payment         Payment?
+  Payout          Payout?
+  Refund          Refund?
 
   @@index([professionalId, patientId, status])
   @@map("appointments")
 }
 
 model Availability {
-  id             Int      @id @default(autoincrement())
   professionalId String   @map("professional_id")
   dayOfWeek      Int      @map("day_of_week")
   startTime      DateTime @map("start_time")
   endTime        DateTime @map("end_time")
   isAvailable    Boolean  @default(true) @map("is_available")
+  id             Int      @id @default(autoincrement())
   psychologist   User     @relation(fields: [professionalId], references: [id])
 
-  @@index([id,professionalId])
+  @@index([id, professionalId])
   @@map("availabilities")
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
   senderId   String   @map("sender_id")
   receiverId String   @map("receiver_id")
   content    String
   read       Boolean  @default(false)
   createdAt  DateTime @default(now()) @map("created_at")
   userId     String?
+  id         Int      @id @default(autoincrement())
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
   User       User?    @relation(fields: [userId], references: [id])
@@ -245,9 +242,9 @@ model Message {
 
 model VideoCallRoom {
   id           String                 @id @default(cuid())
-  participants VideoCallParticipant[]
   scheduledAt  DateTime
   createdAt    DateTime               @default(now())
+  participants VideoCallParticipant[]
 
   @@map("video_call_rooms")
 }
@@ -257,8 +254,8 @@ model VideoCallParticipant {
   userId   String
   roomId   String
   joinedAt DateTime      @default(now())
-  user     User          @relation(fields: [userId], references: [id])
   room     VideoCallRoom @relation(fields: [roomId], references: [id])
+  user     User          @relation(fields: [userId], references: [id])
 
   @@unique([userId, roomId])
 }
@@ -272,17 +269,70 @@ model NotifyDigest {
 }
 
 model CertificateConfig {
-  id     Int    @id @default(autoincrement())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @map("user_id")
-  name   String
-
+  id         Int      @id @default(autoincrement())
+  userId     String   @map("user_id")
+  name       String
   configJson Json
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, name])
   @@map("certificate_config")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  appointmentId     Int           @unique
+  status            PaymentStatus @default(PENDING)
+  provider          String
+  providerPaymentId String?       @unique
+  checkoutUrl       String?
+  qrCodeText        String?
+  expiresAt         DateTime?
+  amountCents       Int
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  appointment       Appointment   @relation(fields: [appointmentId], references: [id])
+
+  @@map("payment")
+}
+
+model Refund {
+  id               String       @id @default(cuid())
+  appointmentId    Int          @unique
+  reason           RefundReason
+  amountCents      Int
+  providerRefundId String?
+  status           String
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  appointment      Appointment  @relation(fields: [appointmentId], references: [id])
+
+  @@map("refund")
+}
+
+model Payout {
+  id               String      @id @default(cuid())
+  appointmentId    Int         @unique
+  professionalId   String
+  amountCents      Int
+  status           String
+  providerPayoutId String?
+  paidAt           DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  appointment      Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@map("payout")
+}
+
+model IdempotencyKey {
+  key       String   @id
+  createdAt DateTime @default(now())
+
+  @@map("idempotencyKey")
 }
 
 enum UserRole {
@@ -311,61 +361,4 @@ enum RefundReason {
   PATIENT_CANCEL_LT48H
   PRO_CANCEL
   OTHER
-}
-
-model Payment {
-  id                String        @id @default(cuid())
-  appointmentId     Int           @unique
-  status            PaymentStatus @default(PENDING)
-  provider          String // "abacatepay"
-  providerPaymentId String?       @unique
-  checkoutUrl       String?
-  qrCodeText        String?
-  expiresAt         DateTime?
-  amountCents       Int
-  paidAt            DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
-
-  @@map("payment")
-}
-
-model Refund {
-  id               String       @id @default(cuid())
-  appointmentId    Int          @unique
-  reason           RefundReason
-  amountCents      Int
-  providerRefundId String?
-  status           String // requested, processed, failed
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  appointment      Appointment  @relation(fields: [appointmentId], references: [id])
-
-  @@map("refund")
-}
-
-model Payout {
-  id               String    @id @default(cuid())
-  appointmentId    Int       @unique
-  professionalId   String
-  amountCents      Int
-  status           String // pending, processing, paid, failed
-  providerPayoutId String?
-  paidAt           DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
-
-  @@map("payout")
-}
-
-model IdempotencyKey {
-  key       String   @id
-  createdAt DateTime @default(now())
-
-  @@map("idempotencyKey")
 }

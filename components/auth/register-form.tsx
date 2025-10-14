@@ -17,14 +17,13 @@ import AuthCard from "./auth-card"
 import AuthFormMessage from "./auth-form-message"
 import SocialLogin from "./social-login"
 import { ufCRP } from "@/utils/ufCRP"
-import { ConsentDialog } from "@/components/Consentimento/modal"
-import { toast } from "sonner"
+import { ConsentDialog } from "@components/consentimento/ConsentDialog"
+
 
 export default function RegisterForm() {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string>("")
   const [success, setSuccess] = useState<string>("")
-  const [showConsentDialog, setShowConsentDialog] = useState(false)
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -53,40 +52,6 @@ export default function RegisterForm() {
         form.reset()
       }
     })
-  }
-
-  const handleConsentAccept = async () => {
-    try {
-      if (error) throw error
-
-      toast.success("Cadastro concluído", {
-        description: "Seu consentimento foi registrado. Bem-vindo ao EmpathySpace!",
-      })
-
-      setShowConsentDialog(false)
-      // navigate("/dashboard")
-    } catch (error: any) {
-      console.error("Error saving consent:", error)
-      toast("Erro", { description: "Não foi possível registrar seu consentimento." })
-    }
-  }
-
-  const handleConsentDecline = async () => {
-    try {
-      if (error) throw error
-
-      toast.success("Consentimento recusado", {
-        description: "Você optou por não permitir a gravação. O atendimento continuará normalmente sem gravação.",
-      })
-
-      setShowConsentDialog(false)
-      // navigate("/dashboard")
-    } catch (error: any) {
-      console.error("Error saving consent decline:", error)
-      toast.error("Erro", {
-        description: "Não foi possível registrar sua escolha.",
-      })
-    }
   }
 
   return (
@@ -252,7 +217,6 @@ export default function RegisterForm() {
           </Link>
         </div>
       </div>
-      <ConsentDialog open={showConsentDialog} onAccept={handleConsentAccept} onDecline={handleConsentDecline} />
     </AuthCard>
   )
 }
