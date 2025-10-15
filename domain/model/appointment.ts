@@ -7,7 +7,7 @@ export type AppointmentModel = {
   appointmentDate: Date
   notes?: string
   status: StatusAppointment
-  roomId?: string
+  roomId?: string | null
   tipoAtendimento?: "ambos" | "remoto" | "presencial"
   duration?: number
   review?: boolean

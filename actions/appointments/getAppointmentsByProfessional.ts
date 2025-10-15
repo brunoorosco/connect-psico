@@ -1,6 +1,7 @@
 "use server"
 import { prisma } from "@/lib/db"
 import { auth } from "@/auth"
+import { StatusAppointment } from "@/domain/model/appointment"
 
 type PaginationParams = {
   page?: number
@@ -10,7 +11,7 @@ type PaginationParams = {
 type AppointmentDTO = {
   id: number
   appointmentDate: Date
-  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "CONCLUDED" // ou use o enum do Prisma se preferir
+  status: StatusAppointment
   professionalId: string
   patientId: string
   roomId: string | null
