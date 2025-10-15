@@ -1,0 +1,273 @@
+import { Appointment, Patient, Professional, Availability, Status } from "@/types/appointment";
+import { addDays } from "date-fns";
+
+// Generate today and nearby dates for sample data
+const today = new Date();
+const formatDate = (date: Date) => date.toISOString();
+
+export const mockPatients: Patient[] = [
+  {
+    id: 1,
+    userId: "user1",
+    name: "Maria Silva",
+    phone: "(11) 98765-4321",
+    email: "maria.silva@email.com",
+    medicalRecordId: "MR001",
+    active: true,
+    cep: "01234-567",
+    state: "SP",
+    street: "Rua das Flores",
+    neighborhood: "Centro",
+    emergencyContact: "",
+    birthDate:"1990-03-03",
+    city: "São Paulo",
+    number: "123",
+    notes: "Paciente com hipertensão",
+  },
+  {
+    id: 2,
+    userId: "user2",
+    name: "João Santos",
+    phone: "(11) 91234-5678",
+    email: "joao.santos@email.com",
+    medicalRecordId: "MR002",
+    active: true,
+    cep: "01234-567",
+    state: "SP",
+    street: "Rua das Flores",
+    neighborhood: "Centro",
+    emergencyContact: "",
+    birthDate:"1990-03-03",
+    city: "São Paulo",
+    number: "123",
+    notes: "Paciente com hipertensão",
+  },
+  {
+    id: 3,
+    userId: "user3",
+    name: "Ana Oliveira",
+    phone: "(11) 99876-5432",
+    email: "ana.oliveira@email.com",
+    medicalRecordId: "MR003",
+    active: true,
+    cep: "01234-567",
+    state: "SP",
+    street: "Rua das Flores",
+    neighborhood: "Centro",
+    emergencyContact: "",
+    birthDate:"1990-03-03",
+    city: "São Paulo",
+    number: "123",
+    notes: "Paciente com hipertensão",
+  },
+  {
+    id: 4,
+    userId: "user4",
+    name: "Carlos Ferreira",
+    phone: "(11) 98888-7777",
+    email: "carlos.ferreira@email.com",
+    active: true,
+    cep: "01234-567",
+    state: "SP",
+    street: "Rua das Flores",
+    neighborhood: "Centro",
+    emergencyContact: "",
+    birthDate:"1990-03-03",
+    city: "São Paulo",
+    number: "123",
+    notes: "Paciente com hipertensão",
+  },
+  {
+    id: 5,
+    userId: "user5",
+    name: "Fernanda Costa",
+    phone: "(11) 97777-6666",
+    email: "fernanda.costa@email.com",
+    medicalRecordId: "MR004",
+    active: true,
+    cep: "01234-567",
+    state: "SP",
+    street: "Rua das Flores",
+    neighborhood: "Centro",
+    emergencyContact: "",
+    birthDate:"1990-03-03",
+    city: "São Paulo",
+    number: "123",
+    notes: "Paciente com hipertensão",
+  },
+];
+
+export const mockProfessionals: Professional[] = [
+  {
+    id: 1,
+    name: "Dr. Roberto Lima",
+    email: "roberto.lima@clinica.com",
+    phone: "(11) 99999-1111",
+  },
+];
+
+export const mockAppointments: Appointment[] = [
+  {
+    id: "a1",
+    professionalId: "prof1",
+    patientId: "user1",
+    appointmentDate: new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      9,
+      0
+    ).toISOString(),
+    status: "CONFIRMED" as Status,
+    createdAt: formatDate(today),
+    patient: mockPatients[0],
+    professional: mockProfessionals[0],
+    // Legacy fields for display
+    date: today.toISOString().split("T")[0],
+    startTime: "09:00",
+    endTime: "09:30",
+    notes: "Consulta de rotina",
+    patientName: "Maria Silva",
+    isLinkedToMedicalRecord: true,
+  },
+  {
+    id: "a2",
+    professionalId: "prof1",
+    patientId: "user2",
+    appointmentDate: new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      10,
+      0
+    ).toISOString(),
+    status: "CONFIRMED" as Status,
+    createdAt: formatDate(today),
+    patient: mockPatients[1],
+    professional: mockProfessionals[0],
+    // Legacy fields for display
+    date: today.toISOString().split("T")[0],
+    startTime: "10:00",
+    endTime: "10:30",
+    notes: "Retorno pós-cirurgia",
+    patientName: "João Santos",
+    isLinkedToMedicalRecord: true,
+  },
+  {
+    id: "a3",
+    professionalId: "prof1",
+    patientId: "user3",
+    appointmentDate: new Date(
+      addDays(today, 1).getFullYear(),
+      addDays(today, 1).getMonth(),
+      addDays(today, 1).getDate(),
+      14,
+      0
+    ).toISOString(),
+    status: "PENDING" as Status,
+    createdAt: formatDate(today),
+    patient: mockPatients[2],
+    professional: mockProfessionals[0],
+    // Legacy fields for display
+    date: addDays(today, 1).toISOString().split("T")[0],
+    startTime: "14:00",
+    endTime: "14:30",
+    notes: "Primeira consulta",
+    patientName: "Ana Oliveira",
+    isLinkedToMedicalRecord: true,
+  },
+  {
+    id: "a4",
+    professionalId: "prof1",
+    patientId: "p4",
+    appointmentDate: new Date(
+      addDays(today, 1).getFullYear(),
+      addDays(today, 1).getMonth(),
+      addDays(today, 1).getDate(),
+      15,
+      0
+    ).toISOString(),
+    status: "PENDING" as Status,
+    createdAt: formatDate(today),
+    patient: mockPatients[3],
+    professional: mockProfessionals[0],
+    // Legacy fields for display
+    date: addDays(today, 1).toISOString().split("T")[0],
+    startTime: "15:00",
+    endTime: "15:30",
+    notes: "Exame de sangue",
+    patientName: "Carlos Ferreira",
+    isLinkedToMedicalRecord: false,
+  },
+  {
+    id: "a5",
+    professionalId: "prof1",
+    patientId: "p5",
+    appointmentDate: new Date(
+      addDays(today, 2).getFullYear(),
+      addDays(today, 2).getMonth(),
+      addDays(today, 2).getDate(),
+      11,
+      0
+    ).toISOString(),
+    status: "CONFIRMED" as Status,
+    createdAt: formatDate(today),
+    patient: mockPatients[4],
+    professional: mockProfessionals[0],
+    // Legacy fields for display
+    date: addDays(today, 2).toISOString().split("T")[0],
+    startTime: "11:00",
+    endTime: "11:30",
+    notes: "Avaliação",
+    patientName: "Fernanda Costa",
+    isLinkedToMedicalRecord: true,
+  },
+];
+
+export const mockAvailabilities: Availability[] = [
+  {
+    id: "av1",
+    professionalId: "prof1",
+    dayOfWeek: 1, // Monday
+    startTime: "08:00",
+    endTime: "17:00",
+    isAvailable: true,
+    psychologist: mockProfessionals[0],
+  },
+  {
+    id: "av2",
+    professionalId: "prof1",
+    dayOfWeek: 2, // Tuesday
+    startTime: "08:00",
+    endTime: "17:00",
+    isAvailable: true,
+    psychologist: mockProfessionals[0],
+  },
+  {
+    id: "av3",
+    professionalId: "prof1",
+    dayOfWeek: 3, // Wednesday
+    startTime: "08:00",
+    endTime: "17:00",
+    isAvailable: true,
+    psychologist: mockProfessionals[0],
+  },
+  {
+    id: "av4",
+    professionalId: "prof1",
+    dayOfWeek: 4, // Thursday
+    startTime: "08:00",
+    endTime: "17:00",
+    isAvailable: true,
+    psychologist: mockProfessionals[0],
+  },
+  {
+    id: "av5",
+    professionalId: "prof1",
+    dayOfWeek: 5, // Friday
+    startTime: "08:00",
+    endTime: "16:00",
+    isAvailable: true,
+    psychologist: mockProfessionals[0],
+  },
+];
