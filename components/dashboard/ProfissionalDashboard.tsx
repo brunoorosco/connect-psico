@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import DashboardHeader from "./DashboardHeader"
@@ -14,11 +15,14 @@ const PsychologistDashboard: React.FC = () => {
   const router = useRouter()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
+
   const { appointments, total, loading, fetchAppointments } = useAppointments()
   const user = useCurrentUser()
 
   useEffect(() => {
+    // primeira busca
     fetchAppointments()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleViewRecord = (patientId: string) => {
@@ -26,10 +30,11 @@ const PsychologistDashboard: React.FC = () => {
   }
 
   const handleStartConsultation = (patientId: string) => {
-    router.push(`./app/professional/${user?.id}/pacientes/${patientId}/consulta`)
+    if (!user?.id) return
+    router.push(`/app/professional/${user.id}/pacientes/${patientId}/consulta`)
   }
 
-  // Função para verificar se a data selecionada é hoje ou no futuro
+  // Hoje ou futuro (0h)
   const isTodayOrFuture = (date: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -54,6 +59,7 @@ const PsychologistDashboard: React.FC = () => {
         <div className="col-span-12 lg:col-span-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">Agenda do Dia</h2>
+
             {selectedPatient && isTodayOrFuture(selectedDate) && (
               <Button
                 onClick={() => handleStartConsultation(selectedPatient)}
@@ -65,12 +71,19 @@ const PsychologistDashboard: React.FC = () => {
               </Button>
             )}
           </div>
-          <AppointmentsList
-            appointments={appointments}
-            selectedDate={selectedDate}
-            userRole="SUPERVISOR"
-            onViewRecord={handleViewRecord}
-          />
+
+          {loading ? (
+            <div className="rounded-md border p-6">
+              <p className="text-sm text-muted-foreground">Carregando agenda…</p>
+            </div>
+          ) : (
+            <AppointmentsList
+              appointments={appointments}
+              selectedDate={selectedDate}
+              userRole="SUPERVISOR"
+              onViewRecord={handleViewRecord}
+            />
+          )}
         </div>
 
         <div className="lg:col-span-6 col-span-12 space-y-6">
