@@ -2,8 +2,6 @@ import React from "react";
 import {
   format,
   isSameDay,
-  getHours,
-  addMinutes,
   setHours,
   setMinutes,
   setSeconds,
@@ -13,13 +11,16 @@ import { ptBR } from "date-fns/locale";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AppointmentModel } from "@/domain/model/appointment";
+import { getAppointmentsUsers } from "@/actions/appointments";
 
+type AppListItem = NonNullable<
+  Awaited<ReturnType<typeof getAppointmentsUsers>>["data"]
+>[number]
 interface DailyViewProps {
   selectedDate: Date;
-  appointments: AppointmentModel[];
+  appointments: AppListItem[];
   onAddAppointment: (date: Date) => void;
-  onEditAppointment: (appointment: AppointmentModel) => void;
+  onEditAppointment: (appointment: AppListItem) => void;
 }
 
 const DailyView: React.FC<DailyViewProps> = ({
@@ -44,7 +45,7 @@ const DailyView: React.FC<DailyViewProps> = ({
 
           <div className="grid grid-cols-1 gap-2">
             {Array.from({ length: 10 }).map((_, i) => {
-              const hour = i + 9; // Começa às 9h
+              const hour = i + 8; // Começa às 9h
               const timeStr = `${hour.toString().padStart(2, "0")}:00`;
 
               const appointmentsAtTime = appointments.filter((apt) => {
