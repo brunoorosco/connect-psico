@@ -10,12 +10,14 @@ export type User = {
   id?: string
   name: string
   email: string
+  emailVerified?: Date
   image: File | string | null
   phone?: string
   password: string
   role: UserRole
   active: boolean
   isTwoFactorAuthEnabled: boolean
+  twoFactorAuthVerified?: Date
   createdAt: Date
   updatedAt: Date
 }
@@ -35,3 +37,10 @@ export const userSchemaProfile = userSchema.extend({
 })
 
 export type TUser = z.infer<typeof userSchemaProfile>
+
+export type UserAuth = {
+  id?: string
+  email: string
+  emailVerified?: Date | null
+  isTwoFactorAuthEnabled: boolean
+}

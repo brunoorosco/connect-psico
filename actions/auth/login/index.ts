@@ -1,7 +1,6 @@
 "use server"
 
-import { signIn } from "@/auth"
-import { CredentialsSchema, MagicLinkSignInSchema } from "@/schemas/auth"
+import { CredentialsSchema } from "@/schemas/auth"
 import { findUserbyEmail } from "@/services"
 import {
   createTwoFactorAuthToken,

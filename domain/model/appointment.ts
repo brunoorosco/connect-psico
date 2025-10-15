@@ -30,23 +30,6 @@ export type User = {
   username?: string
 }
 
-// export type Patient = User & {
-//   cep: string
-//   state: string
-//   street: string
-//   neighborhood: string
-//   emergencyContact: string
-//   birthDate?: string
-//   city: string
-//   number: string
-//   notes: string
-//   active: boolean
-//   image?: string
-//   userId: string
-//   cpf?: string
-//   rg?: string
-// }
-
 export type Professional = User
 
 export type Appointment = {

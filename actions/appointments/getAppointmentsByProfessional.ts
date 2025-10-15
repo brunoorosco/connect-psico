@@ -1,7 +1,7 @@
 "use server"
 import { prisma } from "@/lib/db"
 import { auth } from "@/auth"
-import { AppointmentModel } from "@/domain/model/appointment"
+import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
 
 type PaginationParams = {
   page?: number
@@ -62,26 +62,25 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     prisma.appointment.count({ where: whereBase }),
   ])
 
-  const data: AppointmentModel[] = rows.map((row: AppointmentModel) => {
+  const data: AppointmentModel[] = rows.map((row) => {
     const { professional, patient, ...rest } = row
     const duration = professional?.Professional?.tempoConsulta ?? 60
 
-    // se NÃO existe professionalId no prontuário => é novo
-    const primaryProInRecord = patient?.patientUser?.[0]?.professionalId ?? null
-    const isNewByRecord: boolean = !primaryProInRecord // ✅ boolean minúsculo
-
     return {
-      id: rest.id,
-      appointmentDate: new Date(rest.appointmentDate),
-      status: rest.status as AppointmentModel["status"],
-      professionalId: rest.professionalId,
-      patientId: rest.patientId,
-      roomId: rest.roomId,
+      ...rest,
       duration,
-      professional: { id: professional?.id ?? "", name: professional?.name ?? "" },
-      patient: { id: patient?.id ?? "", name: patient?.name ?? "" },
-      isNewPatient: isNewByRecord,
-    }
+      professional: {
+        id: professional.id,
+        name: professional.name,
+        Professional: professional.Professional,
+      },
+      patient: {
+        ...patient,
+        patientUser: patient.patientUser.map((u) => ({
+          professionalId: u.professionalId ?? "",
+        })),
+      },
+    } as AppointmentModel
   })
 
   return {

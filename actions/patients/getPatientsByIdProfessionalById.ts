@@ -3,7 +3,8 @@ import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
 import { auth } from "@/auth" // Certifique-se de que está importando corretamente
 import { PatientModel } from "@/domain/model/patient"
 
-type PatientResponse = Omit<PatientModel, "profissionalId">
+type PatientResponse = Omit<PatientModel, "professionalId">
+
 export const getPatientsByIdProfessionalById = async (patientId: string): Promise<PatientResponse[] | { error: string }> => {
   const session = await auth() // Obtém a sessão do usuário autenticado
   try {

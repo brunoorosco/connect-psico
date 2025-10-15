@@ -1,6 +1,6 @@
 "use server";
 
-import { User } from "@/domain/model/user";
+import { User, UserAuth } from "@/domain/model/user";
 import { sendOtpEmail } from "@/infra/email";
 import { prisma } from "@/lib/db";
 import { findUserbyEmail } from "@/services";
@@ -20,7 +20,7 @@ import { findTwoFactorAuthTokeByToken } from "@/services/auth";
  * @param {string} token - The verification token.
  * @returns {Promise<{ error?: string, success?: string }>} An object indicating the result of the operation.
  */
-export const sendTwoFactorAuthEmail = async (user: User, token: string) => {
+export const sendTwoFactorAuthEmail = async (user: UserAuth, token: string) => {
   const { OTP_SUBJECT } = process.env;
 
   if (!OTP_SUBJECT) {

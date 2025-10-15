@@ -4,7 +4,9 @@ import { prisma } from "@/lib/db";
 import { findUserbyEmail } from "@/services";
 import { findVerificationTokenbyToken } from "@/services/auth";
 import { sendVerificationEmail } from "@/infra/email";
-import { User } from "@/domain/model/user";
+import {  UserAuth, User } from "@/domain/model/user";
+
+
 /**
  * This method uses nodemailer to send an email to the user to verify
  * the ownership of the email by the user.
@@ -13,7 +15,7 @@ import { User } from "@/domain/model/user";
  * @param {string} token - The verification token.
  * @returns {Promise<{ error?: string, success?: string }>} An object indicating the result of the operation.
  */
-export const sendAccountVerificationEmail = async (user: User, token: string) => {
+export const sendAccountVerificationEmail = async (user: UserAuth, token: string) => {
   const { VERIFICATION_SUBJECT, NEXT_PUBLIC_URL, VERIFICATION_URL } =
     process.env;
   if (!VERIFICATION_SUBJECT || !NEXT_PUBLIC_URL || !VERIFICATION_URL) {
