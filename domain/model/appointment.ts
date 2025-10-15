@@ -7,9 +7,9 @@ export type AppointmentModel = {
   appointmentDate: Date
   notes?: string
   status: StatusAppointment
-  roomId?: string | null
+  roomId: string | null
   tipoAtendimento?: "ambos" | "remoto" | "presencial"
-  duration?: number
+  duration?: number | null
   review?: boolean
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date

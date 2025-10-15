@@ -15,7 +15,7 @@ type AppointmentDTO = {
   professionalId: string
   patientId: string
   roomId: string | null
-  duration: number
+  duration?: number | null
   professional: { id: string; name: string }
   patient: { id: string; name: string }
   isNewPatient: boolean
