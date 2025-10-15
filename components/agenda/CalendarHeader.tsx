@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { CalendarViewType } from '@/types/appointment';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -10,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { CalendarViewType } from '@/domain/model/appointment';
 
 interface CalendarHeaderProps {
   currentDate: Date;

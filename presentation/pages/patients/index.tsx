@@ -7,8 +7,8 @@ import PatientForm from "@/components/patients/PatientForm"
 import PatientList from "@/components/patients/PatientList"
 import { usePatientManager } from "@/hooks/usePatientManager"
 import { useRouter } from "next/navigation"
-import { Patient } from "@/types/appointment"
 import { usePatientForm } from "@hooks/usePatientForm"
+import { PatientModel } from "@/domain/model/patient"
 
 export function PatientsPage() {
   const {
@@ -26,9 +26,9 @@ export function PatientsPage() {
 
   const router = useRouter()
 
-  const handleViewAndRedirect = (patient: Patient) => {
+  const handleViewAndRedirect = (patient: PatientModel) => {
     handleViewPatient(patient)
-    router.push(`./pacientes/${patient.userId}`)
+    router.push(`./pacientes/${patient.patientId}`)
   }
   const patientFormHook = usePatientForm({
     patient: editingPatient,

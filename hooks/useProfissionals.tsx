@@ -6,12 +6,11 @@ import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessi
 import { getProfessionalById } from "@/actions/users/getProfessionalById"
 import { getProfessionalByUsername } from "@/actions/users/getProfissionalsByUsername"
 import { ProfessionalModel } from "@/domain/model/professional"
-import { Professional } from "@/types/appointment"
 import { useCallback, useState, useTransition } from "react"
 import useSWR from "swr"
 
 export function useProfessionalsFetcher() {
-  const [professionals, setProfessionals] = useState<Professional[]>([])
+  const [professionals, setProfessionals] = useState<ProfessionalModel[]>([])
   const [total, setTotal] = useState(0)
   const [loading, startTransition] = useTransition()
 

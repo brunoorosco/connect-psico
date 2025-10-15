@@ -14,12 +14,12 @@ export const patientSchema = z.object({
   number: z.string().optional(),
   notes: z.string().optional(),
   phone: z.string().optional(),
-  name: z.string()
+  name: z.string(),
 })
 
 export type PatientInput = z.infer<typeof patientSchema>
 
-export type PatientModel = z.infer<typeof patientSchema>
+export type PatientModel = z.infer<typeof patientSchema> & { id: number }
 
 export type UserChat = {
   id: number

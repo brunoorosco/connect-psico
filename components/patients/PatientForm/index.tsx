@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react"
 import { PatientFormData } from "@/hooks/usePatientForm"
-import { Patient } from "@/types/appointment"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -11,10 +10,11 @@ import InputMask from "react-input-mask"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { UseFormReturn } from "react-hook-form"
 import { customAlphabet } from "nanoid"
+import { PatientModel } from "@/domain/model/patient"
 const nanoid = customAlphabet("1234567890", 5)
 
 type Props = {
-  patient?: Patient | null
+  patient?: (PatientModel & { email: string }) | null
   onSubmit: (data: PatientFormData) => void | Promise<void>
   onCancel: () => void
   form: UseFormReturn<PatientFormData>
@@ -26,49 +26,49 @@ type Props = {
 export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form, handleCepChange, isEdit, reset }) => {
   const user = useCurrentUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
-useEffect(() => {
-  if (patient) {
-    const birthDateFormatted =
-      patient.birthDate && typeof patient.birthDate !== "string"
-        ? new Date(patient.birthDate).toISOString().substring(0, 10)
-        : patient.birthDate || ""
 
-    reset({
-      name: patient.name || "",
-      email: patient.email || "",
-      phone: patient.phone || "",
-      medicalRecordId: patient.medicalRecordId || "",
-      birthDate: birthDateFormatted || "",
-      emergencyContact: patient.emergencyContact || "",
-      notes: patient.notes || "",
-      cep: patient.cep || "",
-      street: patient.street || "",
-      neighborhood: patient.neighborhood || "",
-      city: patient.city || "",
-      state: patient.state || "",
-      number: patient.number || "",
-      profissionalId: user?.id,
-    })
-  } else {
-    reset({
-      name: "",
-      email: "",
-      phone: "",
-      medicalRecordId: `PR-${nanoid()}`,  // Gera novo ID aqui
-      birthDate: "",
-      emergencyContact: "",
-      notes: "",
-      cep: "",
-      street: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      number: "",
-      profissionalId: user?.id,
-    })
-  }
-}, [patient, reset, user?.id])
+  useEffect(() => {
+    if (patient) {
+      const birthDateFormatted =
+        patient.birthDate && typeof patient.birthDate !== "string"
+          ? new Date(patient.birthDate).toISOString().substring(0, 10)
+          : patient.birthDate || ""
+
+      reset({
+        name: patient.name || "",
+        email: patient.email || "",
+        phone: patient.phone || "",
+        medicalRecordId: patient.medicalRecordId || "",
+        birthDate: birthDateFormatted || "",
+        emergencyContact: patient.emergencyContact || "",
+        notes: patient.notes || "",
+        cep: patient.cep || "",
+        street: patient.street || "",
+        neighborhood: patient.neighborhood || "",
+        city: patient.city || "",
+        state: patient.state || "",
+        number: patient.number || "",
+        profissionalId: user?.id,
+      })
+    } else {
+      reset({
+        name: "",
+        email: "",
+        phone: "",
+        medicalRecordId: `PR-${nanoid()}`, // Gera novo ID aqui
+        birthDate: "",
+        emergencyContact: "",
+        notes: "",
+        cep: "",
+        street: "",
+        neighborhood: "",
+        city: "",
+        state: "",
+        number: "",
+        profissionalId: user?.id,
+      })
+    }
+  }, [patient, reset, user?.id])
 
   const internalSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true)

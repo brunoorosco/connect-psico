@@ -1,5 +1,3 @@
-import { Patient } from "@/types/appointment";
-
 export interface IPrescription {
   value: string;
   onChange: (val: string) => void;

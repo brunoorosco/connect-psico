@@ -1,23 +1,24 @@
-import { Appointment, Patient } from "@/types/appointment";
+import { Appointment } from "@/domain/model/appointment"
+import { PatientModel } from "@/domain/model/patient"
 
 export interface IPatient {
-  patient: Patient;
+  patient: PatientModel
 }
 
 export interface IPatientHeader {
-  patient: Patient;
-  onBack: () => void;
-  onEdit: () => void;
-  onSendMessage: () => void;
-  onSchedule: () => void;
+  patient: PatientModel
+  onBack: () => void
+  onEdit: () => void
+  onSendMessage: () => void
+  onSchedule: () => void
 }
 
 export interface IPatientDetails {
-  patient: Patient;
-  onBack: () => void;
-  onEdit: () => void;
+  patient: PatientModel
+  onBack: () => void
+  onEdit: () => void
 }
 
 export interface IPatientAppointmentsTab {
-  appointments: Appointment[];
+  appointments: Appointment[]
 }

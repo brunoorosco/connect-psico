@@ -1,25 +1,25 @@
 // hooks/usePatientList.ts
+import { PatientModel } from "@/domain/model/patient"
 import { useCallback } from "react"
-import { Patient } from "@/types/appointment"
 
 export function usePatientList({
   onViewPatient,
   onEditPatient,
   onDeletePatient,
 }: {
-  onViewPatient: (patient: Patient) => void
-  onEditPatient: (patient: Patient) => void
+  onViewPatient: (patient: PatientModel) => void
+  onEditPatient: (patient: PatientModel) => void
   onDeletePatient: (patientId: number) => void
 }) {
   const handleView = useCallback(
-    (patient: Patient) => {
+    (patient: PatientModel) => {
       onViewPatient(patient)
     },
     [onViewPatient]
   )
 
   const handleEdit = useCallback(
-    (data: Patient) => {
+    (data: PatientModel) => {
       onEditPatient(data)
     },
     [onEditPatient]
@@ -33,7 +33,7 @@ export function usePatientList({
     
   )
 
-  const handleSendMessage = useCallback((patient: Patient) => {
+  const handleSendMessage = useCallback((patient: PatientModel) => {
     // Lógica real de envio pode vir de outro hook depois
     console.log("Enviando mensagem para:", patient.name)
   }, [])

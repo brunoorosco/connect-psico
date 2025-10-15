@@ -1,6 +1,6 @@
-import { Patient } from "@/types/appointment";
+import { PatientModel } from "@/domain/model/patient";
 
 export interface IPatientForm {
-  patient?: Patient | null;
+  patient?: PatientModel | null;
   onCancel: () => void;
 }

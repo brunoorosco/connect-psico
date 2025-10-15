@@ -61,7 +61,7 @@ export function useAppointmentForm({
   }, [editingAppointment, selectedDate])
 
   const handleSubmit = (values: AppointmentFormValues) => {
-    const selectedPatient = patients.find((p) => p.userId === values.patientId)
+    const selectedPatient = patients.find((p) => p.patientId === values.patientId)
     if (!selectedPatient) {
       toast({ title: "Erro", description: "Paciente não encontrado", variant: "destructive" })
       return
@@ -81,9 +81,9 @@ export function useAppointmentForm({
         telefone: "00000000",
         email: "dr@clinic.com",
       },
-      patientId: selectedPatient.userId,
+      patientId: selectedPatient.patientId,
       patient: {
-        id: selectedPatient.userId,
+        id: selectedPatient.patientId,
         name: selectedPatient.name,
         telefone: selectedPatient.phone ?? "",
         email: selectedPatient.email ?? "",

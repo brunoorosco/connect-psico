@@ -1,11 +1,11 @@
-import { Patient } from "@/types/appointment";
+import { PatientModel } from "@/domain/model/patient"
 
-export type TPatientListItem =  Patient;
+export type TPatientListItem = PatientModel & { email: string }
 
 export interface IPatientList {
-  patients: TPatientListItem[];
-  onViewPatient: (patient: Patient) => void;
-  onEditPatient: (patient: Patient) => void;
-  onDeletePatient: (patientId: number) => void;
-  onAppointmentCreate: (patientId: Patient) => void;
-};
+  patients: TPatientListItem[]
+  onViewPatient: (patient: PatientModel) => void
+  onEditPatient: (patient: PatientModel) => void
+  onDeletePatient: (patientId: number) => void
+  onAppointmentCreate: (patientId: PatientModel) => void
+}

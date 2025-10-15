@@ -3,8 +3,8 @@
 import { getPatientUsers } from "@/actions/users";
 import { getProfessionalSchedule } from "@/actions/users/getGapIntervalsProfessional";
 import { useState, useTransition } from "react";
-import { Patient } from "@/types/appointment";
 import { usePatientAppointments } from "./useAppointments";
+import { PatientModel } from "@/domain/model/patient";
 
 export function usePatientsFetcher() {
   const [userDefault, setUserDefault] = useState<any>([]);
@@ -25,7 +25,7 @@ export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
   return await getProfessionalSchedule(userId, date);
 };
 
-export function usePatientDetails(patient: Patient) {
+export function usePatientDetails(patient: PatientModel) {
   const handleSendMessage = () => {
     console.log("Enviando mensagem para:", patient.name);
   };
@@ -34,7 +34,7 @@ export function usePatientDetails(patient: Patient) {
     console.log("Agendando consulta para:", patient.name);
   };
 
-  const { appointments, fetchAppointments, isLoading } = usePatientAppointments(patient?.userId);
+  const { appointments, fetchAppointments, isLoading } = usePatientAppointments(patient?.patientId as string);
 
   return {
     patientAppointments: appointments,

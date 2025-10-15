@@ -10,7 +10,7 @@ import { format } from "date-fns"
 
 import { createPatient } from "@/actions/patients/addPatient"
 import { updatePatient } from "@/actions/patients/updatePatient"
-import { Patient } from "@/types/appointment"
+import { PatientModel } from "@/domain/model/patient"
 
 const nanoid = customAlphabet("1234567890", 5)
 
@@ -33,7 +33,13 @@ const schema = z.object({
 
 export type PatientFormData = z.infer<typeof schema>
 
-export function usePatientForm({ patient, mutate }: { patient?: Patient | null; mutate: () => Promise<any> }) {
+export function usePatientForm({
+  patient,
+  mutate,
+}: {
+  patient?: (PatientModel & { email: string }) | null
+  mutate: () => Promise<any>
+}) {
   const { data: session } = useSession()
 
   const generateMedicalRecordId = () => `PR-${nanoid()}`

@@ -9,18 +9,17 @@ import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { IFormPatientField } from "./types"
 import { getPatientsByProfessionalId } from "@/actions/patients"
-import { Patient } from "@/types/appointment"
 
 type Props = IFormPatientField & {
-  initialPatientName?: string; // <- NOVO
+  initialPatientName?: string // <- NOVO
 }
 
 export const FormPatientField: React.FC<Props> = ({ form, initialPatientName }) => {
   const [open, setOpen] = useState(false)
-  const [patients, setPatients] = useState<Patient[]>([])
+  const [patients, setPatients] = useState<any[]>([])
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
         const patientsList = await getPatientsByProfessionalId()
         if (Array.isArray(patientsList)) setPatients(patientsList)
@@ -77,7 +76,9 @@ export const FormPatientField: React.FC<Props> = ({ form, initialPatientName }) 
                           <div className="flex flex-col">
                             <span>{patient.name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {patient.medicalRecordId ? `Prontuário: ${patient.medicalRecordId}` : "Sem prontuário vinculado"}
+                              {patient.medicalRecordId
+                                ? `Prontuário: ${patient.medicalRecordId}`
+                                : "Sem prontuário vinculado"}
                             </span>
                           </div>
                         </CommandItem>

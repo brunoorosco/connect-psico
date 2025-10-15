@@ -5,13 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { usePatientList } from "@/hooks/usePatientList"
 import { IPatientList } from "./types"
 import { usePatientStore } from "@/infra/stores/usePatientStore"
-import { Patient } from "@/types/appointment"
 import { useState } from "react"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
 import { PatientActions } from "./buttonsActions"
 import { MessageDialog } from "../DialogMessagePatient"
 import { formatPhone } from "@/utils/formatPhone"
+import { PatientModel } from "@/domain/model/patient"
+
+type Patient = PatientModel & { email: string }
 
 export default function PatientList({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) {
   const { handleView, handleEdit, handleDelete } = usePatientList({

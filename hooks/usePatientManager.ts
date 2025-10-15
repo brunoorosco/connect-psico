@@ -2,16 +2,15 @@
 
 import { startTransition, useEffect, useState } from "react"
 import { deletePatient, getPatientsByProfessionalId } from "@/actions/patients"
-import { Patient } from "@/types/appointment"
 import { toast } from "sonner"
 import { getPatientsByIdProfessionalById } from "@/actions/patients/getPatientsByIdProfessionalById"
-import { PatientFormData } from "./usePatientForm"
+import { PatientModel } from "@/domain/model/patient"
 
 export function usePatientManager() {
-  const [patients, setPatients] = useState<Patient[]>([])
+  const [patients, setPatients] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
-  const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [editingPatient, setEditingPatient] = useState<any>(null)
 
   const fetchPatients = async () => {
     startTransition(async () => {
@@ -49,7 +48,7 @@ export function usePatientManager() {
   }, [])
 
   const handleAddPatient = (patient: any) => {
-    const newPatient: Patient = {
+    const newPatient: PatientModel = {
       ...patient,
       id: parseInt(Math.random().toString().substring(2, 9)),
     }
@@ -87,17 +86,17 @@ export function usePatientManager() {
     })
   }
 
-  const handleViewPatient = (patient: Patient) => {
+  const handleViewPatient = (patient: PatientModel) => {
     console.log("handleViewPatient", patient)
     setSelectedPatient(patient)
   }
 
-  const handleEditClick = (patient: Patient) => {
+  const handleEditClick = (patient: PatientModel) => {
     setEditingPatient(patient)
     setShowForm(true)
   }
 
-  const handleAppointmentCreate = (patient: Patient) => {
+  const handleAppointmentCreate = (patient: PatientModel) => {
     console.log("handleAppointmentCreate", patient)
     setSelectedPatient(patient)
   }
@@ -124,6 +123,6 @@ export function usePatientManager() {
     setShowForm,
     handleAppointmentCreate,
     fetchPatientById,
-    fetchPatients
+    fetchPatients,
   }
 }

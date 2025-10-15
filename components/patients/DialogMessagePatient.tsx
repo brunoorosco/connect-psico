@@ -4,11 +4,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { formatMessageTime } from "@/utils/formatMessageTime"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { useCurrentUser } from "@hooks/use-current-user"
-import { Patient } from "@/types/appointment"
 import ChatFooter from "./PatientList/chatFooter"
+import { PatientModel } from "@/domain/model/patient"
 
 interface IMessageDialogProps {
-  patient: Patient | null
+  patient: PatientModel | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -28,7 +28,7 @@ export function MessageDialog({ patient, open, onOpenChange }: IMessageDialogPro
         <div className="flex-1 overflow-y-auto border rounded-md p-4 space-y-4 bg-muted">
           {messages &&
             messages
-              .filter((msg) => msg.receiverId === patient?.userId || msg.senderId === patient?.userId)
+              .filter((msg) => msg.receiverId === patient?.patientId || msg.senderId === patient?.patientId)
               .map((msg) => {
                 const isCurrentUser = msg.senderId === user?.id
                 return (
@@ -45,7 +45,7 @@ export function MessageDialog({ patient, open, onOpenChange }: IMessageDialogPro
         </div>
 
         <div className="pt-4 space-y-2">
-          <ChatFooter receiverId={patient?.userId as string} />
+          <ChatFooter receiverId={patient?.patientId as string} />
           <DialogFooter />
         </div>
       </DialogContent>

@@ -1,9 +1,9 @@
-import { Patient } from '@/types/appointment';
+import { PatientModel } from '@/domain/model/patient';
 import { create } from 'zustand';
 
 type PatientStore = {
-  patient: Patient | null;
-  setPatient: (data: Patient) => void;
+  patient: PatientModel | null;
+  setPatient: (data: PatientModel) => void;
   clearPatient: () => void;
 };
 

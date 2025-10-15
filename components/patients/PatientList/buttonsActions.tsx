@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, MessageSquare, SquarePlay } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Patient } from "@/types/appointment"
+import { PatientModel } from "@/domain/model/patient"
 
 export function PatientActions({
   item,
@@ -13,11 +13,11 @@ export function PatientActions({
   onDelete,
   onSendMessage,
 }: {
-  item: Patient
-  onStart: (item: Patient) => void
-  onEdit: (item: Patient) => void
+  item: PatientModel
+  onStart: (item: PatientModel) => void
+  onEdit: (item: PatientModel) => void
   onDelete: (id: number) => void
-  onSendMessage: (item: Patient) => void
+  onSendMessage: (item: PatientModel) => void
 }) {
   const router = useRouter()
 
@@ -31,7 +31,7 @@ export function PatientActions({
             onClick={(e) => {
               e.stopPropagation()
               onStart(item)
-              router.push(`./pacientes/${item.userId}/consulta`)
+              router.push(`./pacientes/${item.patientId as string}/consulta`)
             }}
           >
             <SquarePlay className="h-5 w-5" />

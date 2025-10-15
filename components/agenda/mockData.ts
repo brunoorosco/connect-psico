@@ -1,14 +1,14 @@
-import { Appointment, Patient, Professional, Availability, Status } from "@/types/appointment";
-import { addDays } from "date-fns";
+import { Appointment, Professional, Availability, StatusAppointment } from "@/domain/model/appointment"
+import { addDays } from "date-fns"
 
 // Generate today and nearby dates for sample data
-const today = new Date();
-const formatDate = (date: Date) => date.toISOString();
+const today = new Date()
+const formatDate = (date: Date) => date.toISOString()
 
-export const mockPatients: Patient[] = [
+export const mockPatients = [
   {
     id: 1,
-    userId: "user1",
+    patientId: "user1",
     name: "Maria Silva",
     phone: "(11) 98765-4321",
     email: "maria.silva@email.com",
@@ -19,14 +19,14 @@ export const mockPatients: Patient[] = [
     street: "Rua das Flores",
     neighborhood: "Centro",
     emergencyContact: "",
-    birthDate:"1990-03-03",
+    birthDate: "1990-03-03",
     city: "São Paulo",
     number: "123",
     notes: "Paciente com hipertensão",
   },
   {
     id: 2,
-    userId: "user2",
+    patientId: "user2",
     name: "João Santos",
     phone: "(11) 91234-5678",
     email: "joao.santos@email.com",
@@ -37,14 +37,14 @@ export const mockPatients: Patient[] = [
     street: "Rua das Flores",
     neighborhood: "Centro",
     emergencyContact: "",
-    birthDate:"1990-03-03",
+    birthDate: "1990-03-03",
     city: "São Paulo",
     number: "123",
     notes: "Paciente com hipertensão",
   },
   {
     id: 3,
-    userId: "user3",
+    patientId: "user3",
     name: "Ana Oliveira",
     phone: "(11) 99876-5432",
     email: "ana.oliveira@email.com",
@@ -55,14 +55,14 @@ export const mockPatients: Patient[] = [
     street: "Rua das Flores",
     neighborhood: "Centro",
     emergencyContact: "",
-    birthDate:"1990-03-03",
+    birthDate: "1990-03-03",
     city: "São Paulo",
     number: "123",
     notes: "Paciente com hipertensão",
   },
   {
     id: 4,
-    userId: "user4",
+    patientId: "user4",
     name: "Carlos Ferreira",
     phone: "(11) 98888-7777",
     email: "carlos.ferreira@email.com",
@@ -72,14 +72,14 @@ export const mockPatients: Patient[] = [
     street: "Rua das Flores",
     neighborhood: "Centro",
     emergencyContact: "",
-    birthDate:"1990-03-03",
+    birthDate: "1990-03-03",
     city: "São Paulo",
     number: "123",
     notes: "Paciente com hipertensão",
   },
   {
     id: 5,
-    userId: "user5",
+    patientId: "user5",
     name: "Fernanda Costa",
     phone: "(11) 97777-6666",
     email: "fernanda.costa@email.com",
@@ -90,12 +90,12 @@ export const mockPatients: Patient[] = [
     street: "Rua das Flores",
     neighborhood: "Centro",
     emergencyContact: "",
-    birthDate:"1990-03-03",
+    birthDate: "1990-03-03",
     city: "São Paulo",
     number: "123",
     notes: "Paciente com hipertensão",
   },
-];
+]
 
 export const mockProfessionals: Professional[] = [
   {
@@ -104,21 +104,15 @@ export const mockProfessionals: Professional[] = [
     email: "roberto.lima@clinica.com",
     phone: "(11) 99999-1111",
   },
-];
+]
 
-export const mockAppointments: Appointment[] = [
+export const mockAppointments = [
   {
     id: "a1",
     professionalId: "prof1",
     patientId: "user1",
-    appointmentDate: new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      9,
-      0
-    ).toISOString(),
-    status: "CONFIRMED" as Status,
+    appointmentDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0).toISOString(),
+    status: "CONFIRMED" as StatusAppointment,
     createdAt: formatDate(today),
     patient: mockPatients[0],
     professional: mockProfessionals[0],
@@ -134,14 +128,8 @@ export const mockAppointments: Appointment[] = [
     id: "a2",
     professionalId: "prof1",
     patientId: "user2",
-    appointmentDate: new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      10,
-      0
-    ).toISOString(),
-    status: "CONFIRMED" as Status,
+    appointmentDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0).toISOString(),
+    status: "CONFIRMED" as StatusAppointment,
     createdAt: formatDate(today),
     patient: mockPatients[1],
     professional: mockProfessionals[0],
@@ -164,7 +152,7 @@ export const mockAppointments: Appointment[] = [
       14,
       0
     ).toISOString(),
-    status: "PENDING" as Status,
+    status: "PENDING" as StatusAppointment,
     createdAt: formatDate(today),
     patient: mockPatients[2],
     professional: mockProfessionals[0],
@@ -187,7 +175,7 @@ export const mockAppointments: Appointment[] = [
       15,
       0
     ).toISOString(),
-    status: "PENDING" as Status,
+    status: "PENDING" as StatusAppointment,
     createdAt: formatDate(today),
     patient: mockPatients[3],
     professional: mockProfessionals[0],
@@ -210,7 +198,7 @@ export const mockAppointments: Appointment[] = [
       11,
       0
     ).toISOString(),
-    status: "CONFIRMED" as Status,
+    status: "CONFIRMED" as StatusAppointment,
     createdAt: formatDate(today),
     patient: mockPatients[4],
     professional: mockProfessionals[0],
@@ -222,7 +210,7 @@ export const mockAppointments: Appointment[] = [
     patientName: "Fernanda Costa",
     isLinkedToMedicalRecord: true,
   },
-];
+]
 
 export const mockAvailabilities: Availability[] = [
   {
@@ -270,4 +258,4 @@ export const mockAvailabilities: Availability[] = [
     isAvailable: true,
     psychologist: mockProfessionals[0],
   },
-];
+]
