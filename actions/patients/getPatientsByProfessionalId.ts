@@ -1,9 +1,11 @@
 "use server";
 import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
 import { auth } from "@/auth"; // Certifique-se de que está importando corretamente
-import { Patient } from "@/types/appointment";
+import { PatientModel } from "@/domain/model/patient";
 
-export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error: string }> => {
+type PatientResponse = Omit<PatientModel, "profissionalId">
+
+export const getPatientsByProfessionalId = async (): Promise<PatientResponse[] | { error: string }> => {
   const session = await auth(); // Obtém a sessão do usuário autenticado
   try {
     const patients = await prisma.pacientes.findMany({
@@ -55,7 +57,7 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
       active: item.patient.active,
     }));
 
-    return patientMapper as Patient[];
+    return patientMapper as PatientResponse[];
   } catch (error) {
     console.error("Erro ao buscar pacientes:", error);
     return { error: "Erro ao buscar pacientes" };

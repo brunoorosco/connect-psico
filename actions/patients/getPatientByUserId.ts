@@ -1,8 +1,10 @@
-"use server";
-import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
-import { Patient } from "@/types/appointment";
+"use server"
+import { auth } from "@/auth"
+import { PatientModel } from "@/domain/model/patient"
+import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
 
 export const getPatientByUserId = async (id: string) => {
+  const session = await auth()
   try {
     const patient = await prisma.pacientes.findFirst({
       where: { patientId: String(id) },
@@ -29,9 +31,9 @@ export const getPatientByUserId = async (id: string) => {
           },
         },
       },
-    });
+    })
 
-   if (patient) {
+    if (patient) {
       return {
         id: patient.id,
         medicalRecordId: patient.medicalRecordId,
@@ -44,17 +46,17 @@ export const getPatientByUserId = async (id: string) => {
         city: patient.city,
         number: patient.number,
         notes: patient.notes,
-        userId: patient.patient.id,
+        patientId: patient.patient.id,
         name: patient.patient.name,
         email: patient.patient.email,
         phone: patient.patient.phone,
         image: patient.patient.image,
         active: patient.patient.active,
-      } as Patient
+      } as Omit<PatientModel, "profissionalId">
     }
-    return null;
+    return null
   } catch (error) {
-    console.error("Erro ao buscar pacientes:", error);
-    return { error: "Erro ao buscar pacientes" };
+    console.error("Erro ao buscar pacientes:", error)
+    return { error: "Erro ao buscar pacientes" }
   }
-};
+}
