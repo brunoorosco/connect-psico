@@ -1,10 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { UserRole } from "@prisma/client"
 import NextAuth from "next-auth"
 import authConfig from "./auth.config"
 import { prisma } from "./lib/db"
 import { findUserbyEmail } from "./services"
 import { isProfileCompleteDb, isTwoFactorAutenticationEnabled } from "./services/auth"
+import { UserRole } from "./domain/model/user"
 
 export const {
   handlers: { GET, POST },

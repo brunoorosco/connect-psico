@@ -26,7 +26,7 @@ export async function ingestDigest(receiverId: string) {
       receiverId,
       windowEndAt: toUTCMinus3(windowEndAt),
       msgCount: 1,
-      firstEventAt: toUTCMinus3(new Date())
+      firstEventAt: toUTCMinus3(new Date()),
     },
     update: {
       msgCount: { increment: 1 },
@@ -47,7 +47,7 @@ export async function ingestDigest(receiverId: string) {
 export async function takeDueDigests(limit: number) {
   const now = new Date()
 
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: any) => {
     const rows = await tx.notifyDigest.findMany({
       where: { windowEndAt: { lte: now } },
       orderBy: { windowEndAt: "asc" },
@@ -58,7 +58,7 @@ export async function takeDueDigests(limit: number) {
 
     await tx.notifyDigest.deleteMany({
       where: {
-        receiverId: { in: rows.map((r) => r.receiverId) },
+        receiverId: { in: rows.map((r: any) => r.receiverId) },
         windowEndAt: { lte: now }, // garante que só apaga o que está vencido
       },
     })

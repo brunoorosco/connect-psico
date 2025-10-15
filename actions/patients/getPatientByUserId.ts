@@ -52,7 +52,7 @@ export const getPatientByUserId = async (id: string) => {
         phone: patient.patient.phone,
         image: patient.patient.image,
         active: patient.patient.active,
-      } as Omit<PatientModel, "profissionalId">
+      } as Omit<PatientModel, "professionalId">
     }
     return null
   } catch (error) {

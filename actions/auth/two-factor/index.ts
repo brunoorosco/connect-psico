@@ -1,10 +1,10 @@
 "use server";
 
+import { User } from "@/domain/model/user";
 import { sendOtpEmail } from "@/infra/email";
 import { prisma } from "@/lib/db";
 import { findUserbyEmail } from "@/services";
 import { findTwoFactorAuthTokeByToken } from "@/services/auth";
-import type { User } from "@prisma/client";
 
 /**
  * This method sends an e-mail to the user with the 6 digits code to login

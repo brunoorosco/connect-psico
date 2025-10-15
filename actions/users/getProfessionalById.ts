@@ -1,13 +1,13 @@
 "use server"
+import { ProfessionalModel } from "@/domain/model/professional"
 import { User } from "@/domain/model/user"
 import { prisma } from "@/lib/db"
-import { Professional } from "@/types/appointment"
 
 type GetProfessionalByIdResult = Pick<
   User,
   "id" | "name" | "email" | "active" | "phone" | "createdAt" | "updatedAt" | "image"
 > &
-  Partial<Professional>
+  Partial<ProfessionalModel>
 
 export const getProfessionalById = async (id: string): Promise<GetProfessionalByIdResult | null> => {
   const user = await prisma.user.findUnique({

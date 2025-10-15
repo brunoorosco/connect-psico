@@ -26,7 +26,7 @@ export async function PUT(req: Request, { params }: Params) {
   }
 
   // ✅ sanitiza para JSON puro (sem undefined) e casa com o tipo do Prisma
-  const configJson: Prisma.InputJsonValue = JSON.parse(JSON.stringify(parsed.data))
+  const configJson = JSON.parse(JSON.stringify(parsed.data))
 
   const updated = await prisma.certificateConfig.update({
     where: { id: Number(params.id), userId: session?.user.id },

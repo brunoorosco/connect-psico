@@ -1,28 +1,15 @@
 "use server"
 import { prisma } from "@/lib/db"
 import { auth } from "@/auth"
-import { StatusAppointment } from "@/domain/model/appointment"
+import { AppointmentModel } from "@/domain/model/appointment"
 
 type PaginationParams = {
   page?: number
   limit?: number
 }
 
-type AppointmentDTO = {
-  id: number
-  appointmentDate: Date
-  status: StatusAppointment
-  professionalId: string
-  patientId: string
-  roomId: string | null
-  duration?: number | null
-  professional: { id: string; name: string }
-  patient: { id: string; name: string }
-  isNewPatient: boolean
-}
-
 type Response = {
-  data?: AppointmentDTO[]
+  data?: AppointmentModel[]
   total: number
   page: number
   lastPage: number
@@ -75,7 +62,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     prisma.appointment.count({ where: whereBase }),
   ])
 
-  const data: AppointmentDTO[] = rows.map((row) => {
+  const data: AppointmentModel[] = rows.map((row: AppointmentModel) => {
     const { professional, patient, ...rest } = row
     const duration = professional?.Professional?.tempoConsulta ?? 60
 
@@ -86,7 +73,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     return {
       id: rest.id,
       appointmentDate: new Date(rest.appointmentDate),
-      status: rest.status as AppointmentDTO["status"],
+      status: rest.status as AppointmentModel["status"],
       professionalId: rest.professionalId,
       patientId: rest.patientId,
       roomId: rest.roomId,

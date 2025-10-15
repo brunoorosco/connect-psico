@@ -1,4 +1,5 @@
 import { PatientModel } from "./patient"
+import { ProfessionalModel } from "./professional"
 
 export type StatusAppointment = "PENDING" | "CANCELLED" | "CONFIRMED" | "COMPLETED" | "CONCLUDED"
 export type CalendarViewType = "daily" | "weekly" | "monthly"
@@ -16,10 +17,9 @@ export type AppointmentModel = {
   review?: boolean
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date
-  patient: { id: string; name: string; telefone?: string; email?: string }
-  professional: { id: string; name: string; telefone?: string; email?: string }
+  patient: { id: string; name: string; telefone?: string; email?: string; patientUser?: PatientModel[] }
+  professional: { id: string; name: string; telefone?: string; email?: string; Professional?: ProfessionalModel }
 }
-
 
 export type User = {
   id: number

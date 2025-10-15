@@ -114,7 +114,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     }
     return slotsInInterval
   })
-  const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
+  const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start: any) => ({
     start: new Date(start),
   })) // mantém UTC, sem offset manual
 

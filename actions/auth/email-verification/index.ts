@@ -3,8 +3,8 @@
 import { prisma } from "@/lib/db";
 import { findUserbyEmail } from "@/services";
 import { findVerificationTokenbyToken } from "@/services/auth";
-import type { User } from "@prisma/client";
 import { sendVerificationEmail } from "@/infra/email";
+import { User } from "@/domain/model/user";
 /**
  * This method uses nodemailer to send an email to the user to verify
  * the ownership of the email by the user.

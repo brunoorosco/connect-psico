@@ -26,7 +26,7 @@ export async function acceptConsent(consentVersion = "v1") {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Not authenticated")
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     const paciente = await tx.pacientes.findFirst({
       where: { patientId: session.user.id, deletedAt: null },
       select: { id: true },
@@ -57,37 +57,37 @@ export async function acceptConsent(consentVersion = "v1") {
   revalidatePath("/app")
 }
 
-export async function declineConsent(consentVersion = 'v1') {
-    const session = await auth()
-    if (!session?.user?.id) throw new Error('Not authenticated')
-  
-    await prisma.$transaction(async (tx) => {
-      const paciente = await tx.pacientes.findFirst({
-        where: { patientId: session.user.id, deletedAt: null },
-        select: { id: true },
-      })
-  
-      if (paciente) {
-        await tx.pacientes.update({
-          where: { id: paciente.id },
-          data: {
-            consentRecording: false,
-            consentRecordingAt: new Date(),
-            consentVersion,
-          },
-        })
-      } else {
-        await tx.pacientes.create({
-          data: {
-            patientId: session.user.id as string,
-            medicalRecordId: `PR-${nanoid()}`, // ou gere do jeito que usa aí
-            consentRecording: false,
-            consentRecordingAt: new Date(),
-            consentVersion,
-          },
-        })
-      }
+export async function declineConsent(consentVersion = "v1") {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Not authenticated")
+
+  await prisma.$transaction(async (tx: any) => {
+    const paciente = await tx.pacientes.findFirst({
+      where: { patientId: session.user.id, deletedAt: null },
+      select: { id: true },
     })
-  
-    revalidatePath('/app')
-  }
+
+    if (paciente) {
+      await tx.pacientes.update({
+        where: { id: paciente.id },
+        data: {
+          consentRecording: false,
+          consentRecordingAt: new Date(),
+          consentVersion,
+        },
+      })
+    } else {
+      await tx.pacientes.create({
+        data: {
+          patientId: session.user.id as string,
+          medicalRecordId: `PR-${nanoid()}`, // ou gere do jeito que usa aí
+          consentRecording: false,
+          consentRecordingAt: new Date(),
+          consentVersion,
+        },
+      })
+    }
+  })
+
+  revalidatePath("/app")
+}

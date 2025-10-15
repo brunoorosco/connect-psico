@@ -3,11 +3,11 @@
 import { prisma } from "@/lib/db";
 import { RegisterSchema } from "@/schemas/auth";
 import { createVerificationToken } from "@/services/auth";
-import { UserRole } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import bcryptjs from "bcryptjs";
 import type { z } from "zod";
 import { sendAccountVerificationEmail } from "../email-verification";
+import { UserRole } from "@/domain/model/user";
 
 /**
  * This method creates the user for Credentials provider

@@ -1,5 +1,4 @@
 "use server";
-import { z } from "zod";
 import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
 import { patientSchema } from "@/domain/model/patient";
 import { RegisterSchema } from "@/schemas/auth";
@@ -48,7 +47,7 @@ export const createPatient = async (params: any) => {
             city: validPatient.data.city || null,
             state: validPatient.data.state || null,
             number: validPatient.data.number || null,
-            professionalId: validPatient.data.profissionalId as string,
+            professionalId: validPatient.data.professionalId as string,
           },
         },
       },

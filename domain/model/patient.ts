@@ -5,7 +5,7 @@ export const patientSchema = z.object({
   birthDate: z.string().optional(),
   emergencyContact: z.string().optional(),
   patientId: z.string().cuid().optional(),
-  profissionalId: z.string().cuid(),
+  professionalId: z.string().cuid(),
   cep: z.string().optional(),
   street: z.string().optional(),
   neighborhood: z.string().optional(),
