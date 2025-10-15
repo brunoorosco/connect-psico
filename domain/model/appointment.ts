@@ -10,11 +10,11 @@ export type AppointmentModel = {
   roomId?: string
   tipoAtendimento?: "ambos" | "remoto" | "presencial"
   duration?: number
-  review: boolean
+  review?: boolean
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date
-  patient: { id: string; name: string; telefone: string; email: string }
-  professional: { id: string; name: string; telefone: string; email: string }
+  patient: { id: string; name: string; telefone?: string; email?: string }
+  professional: { id: string; name: string; telefone?: string; email?: string }
 }
 
 export type CalendarViewType = "daily" | "weekly" | "monthly"
