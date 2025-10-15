@@ -1,4 +1,7 @@
+import { PatientModel } from "./patient"
+
 export type StatusAppointment = "PENDING" | "CANCELLED" | "CONFIRMED" | "COMPLETED" | "CONCLUDED"
+export type CalendarViewType = "daily" | "weekly" | "monthly"
 
 export type AppointmentModel = {
   id: number
@@ -17,7 +20,6 @@ export type AppointmentModel = {
   professional: { id: string; name: string; telefone?: string; email?: string }
 }
 
-export type CalendarViewType = "daily" | "weekly" | "monthly"
 
 export type User = {
   id: number
@@ -28,22 +30,22 @@ export type User = {
   username?: string
 }
 
-export type Patient = User & {
-  cep: string
-  state: string
-  street: string
-  neighborhood: string
-  emergencyContact: string
-  birthDate?: string
-  city: string
-  number: string
-  notes: string
-  active: boolean
-  image?: string
-  userId: string
-  cpf?: string
-  rg?: string
-}
+// export type Patient = User & {
+//   cep: string
+//   state: string
+//   street: string
+//   neighborhood: string
+//   emergencyContact: string
+//   birthDate?: string
+//   city: string
+//   number: string
+//   notes: string
+//   active: boolean
+//   image?: string
+//   userId: string
+//   cpf?: string
+//   rg?: string
+// }
 
 export type Professional = User
 
@@ -55,7 +57,7 @@ export type Appointment = {
   status: StatusAppointment
   createdAt: string // ISO string format
   // Relations (optional for frontend display)
-  patient?: Patient
+  patient?: PatientModel
   professional?: Professional
   // Legacy fields for display (derived from appointmentDate)
   date?: string
