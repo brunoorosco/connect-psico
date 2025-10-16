@@ -1,63 +1,58 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export type Appointment = {
-  _id: string;
-  studentId: string;
-  supervisorId: string;
-  date: string;
-};
+  _id: string
+  studentId: string
+  supervisorId: string
+  date: string
+}
 interface CalendarProps {
-  onSelectSlot?: (date: Date) => void;
-  appointments?: Appointment[];
-  title: string;
+  onSelectSlot?: (date: Date) => void
+  appointments?: Appointment[]
+  title: string
 }
 
-const Calendar: React.FC<CalendarProps> = ({
-  onSelectSlot,
-  appointments,
-  title,
-}) => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+const Calendar: React.FC<CalendarProps> = ({ onSelectSlot, appointments, title }) => {
+  const [selectedDate, setSelectedDate] = useState(new Date())
 
   const generateTimeSlots = () => {
-    const slots = [];
+    const slots: Date[] = []
     for (let i = 8; i < 20; i++) {
-      slots.push(new Date(selectedDate.setHours(i, 0, 0, 0)));
-      slots.push(new Date(selectedDate.setHours(i, 30, 0, 0)));
-    }
-    return slots;
-  };
+      slots.push(new Date(selectedDate.setHours(i, 0, 0, 0)))
 
-  const timeSlots = generateTimeSlots();
+      slots.push(new Date(selectedDate.setHours(i, 30, 0, 0)))
+    }
+    return slots
+  }
+
+  const timeSlots = generateTimeSlots()
 
   const isSlotTaken = (slot: Date) => {
-    return appointments?.some(
-      (appointment) => new Date(appointment.date).getTime() === slot.getTime()
-    );
-  };
+    return appointments?.some((appointment) => new Date(appointment.date).getTime() === slot.getTime())
+  }
 
   return (
-    <Card className='w-full'>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className='text-xl font-bold'>{title}</CardTitle>
+        <CardTitle className="text-xl font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className='mb-4'>
+        <div className="mb-4">
           <input
-            type='date'
+            type="date"
             value={selectedDate.toISOString().split("T")[0]}
             onChange={(e) => setSelectedDate(new Date(e.target.value))}
-            className='w-full p-2 border rounded bg-background text-foreground'
+            className="w-full p-2 border rounded bg-background text-foreground"
           />
         </div>
-        <div className='grid grid-cols-4 gap-2'>
-          {timeSlots.map((slot) => (
+        <div className="grid grid-cols-4 gap-2">
+          {timeSlots.map((slot, index) => (
             <Button
-              key={slot.toISOString()}
+              key={index}
               variant={isSlotTaken(slot) ? "secondary" : "outline"}
-              className='w-full'
+              className="w-full"
               onClick={() => onSelectSlot && onSelectSlot(slot)}
               disabled={isSlotTaken(slot)}
             >
@@ -70,7 +65,7 @@ const Calendar: React.FC<CalendarProps> = ({
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default Calendar;
+export default Calendar

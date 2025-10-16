@@ -10,26 +10,16 @@ import { useSession } from "next-auth/react"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
 import { Badge } from "@components/ui/badge"
-import { getAppointmentsUsers } from "@/actions/appointments"
-
-// 🔹 Tipo do item inferido do backend
-type AppListItem = NonNullable<
-  Awaited<ReturnType<typeof getAppointmentsUsers>>["data"]
->[number]
+import { AppointmentModel } from "@/domain/model/appointment"
 
 interface AppointmentsListProps {
-  appointments: AppListItem[]
+  appointments: AppointmentModel[]
   selectedDate: Date
   userRole: "SUPERVISOR" | "DEFAULT"
   onViewRecord?: (patientId: string) => void
 }
 
-const AppointmentsList: React.FC<AppointmentsListProps> = ({
-  appointments,
-  selectedDate,
-  userRole,
-  onViewRecord,
-}) => {
+const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
   const isToday = isSameDay(selectedDate, new Date())
   const { data: session } = useSession()
 
@@ -67,10 +57,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
     <div className="space-y-3">
       {filteredAppointments
         .slice()
-        .sort(
-          (a, b) =>
-            new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime()
-        )
+        .sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime())
         .map((appointment) => {
           const apptDate = new Date(appointment.appointmentDate)
           return (
@@ -90,9 +77,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-3">
                     <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
-                      <span className="font-semibold text-sm">
-                        {String(apptDate.getHours()).padStart(2, "0")}:00
-                      </span>
+                      <span className="font-semibold text-sm">{String(apptDate.getHours()).padStart(2, "0")}:00</span>
                     </div>
                     <div>
                       <h3 className="font-medium">

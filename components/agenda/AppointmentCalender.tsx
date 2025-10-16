@@ -31,7 +31,7 @@ const AppointmentCalendar = () => {
 
   const appointments = data.data ?? []
 
-  const handleSaveAppointment = async (appointment: AppointmentModel) => {
+  const handleSaveAppointment = async (appointment: Omit<AppointmentModel, "roomId">) => {
     try {
       if (editingAppointment) {
         // Você pode implementar a lógica de edição aqui se necessário
