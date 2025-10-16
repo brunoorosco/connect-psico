@@ -1,4 +1,5 @@
 "use server"
+
 import { prisma } from "@/lib/db"
 import { auth } from "@/auth"
 import { AppointmentModel } from "@/domain/model/appointment"
@@ -9,26 +10,31 @@ type PaginationParams = {
 }
 
 type Response = {
-  data?: AppointmentModel[]
+  data: AppointmentModel[]
   total: number
   page: number
   lastPage: number
 }
 
-export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationParams): Promise<Response> => {
-  const skip = (page - 1) * limit
+export const getAppointmentsUsers = async ({
+  page = 1,
+  limit = 10,
+}: PaginationParams): Promise<Response> => {
   const session = await auth()
-  if (!session) {
-    throw new Error("User not found")
+  if (!session?.user) {
+    throw new Error("Usuário não autenticado")
   }
 
+  const skip = (page - 1) * limit
   const isPatient = session.user.role === "DEFAULT"
-  const query = isPatient ? { patientId: session.user.id } : { professionalId: session.user.id }
+  const query = isPatient
+    ? { patientId: session.user.id }
+    : { professionalId: session.user.id }
 
-  const [users, total] = await Promise.all([
-    await prisma.appointment.findMany({
+  // 🔹 Buscar appointments e total em paralelo
+  const [appointments, total] = await Promise.all([
+    prisma.appointment.findMany({
       where: query,
-
       select: {
         id: true,
         appointmentDate: true,
@@ -40,41 +46,48 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
           select: {
             name: true,
             Professional: {
-              select: {
-                tempoConsulta: true,
-              },
+              select: { tempoConsulta: true },
             },
           },
         },
-        patient: {
-          select: {
-            name: true,
-          },
-        },
+        patient: { select: { name: true } },
       },
       skip,
       take: limit,
     }),
-    prisma.appointment.count({
-      where: query,
-    }),
+    prisma.appointment.count({ where: query }),
   ])
-  
-  const mappedUsers = users.map((user) => {
-    const { professional, ...restUser } = user
-    const { Professional, ...restProfessional } = professional
 
-    // Pega o primeiro professional, caso exista
+  // 🔹 Opcional: otimizar a busca de pacientes já existentes
+  const patientIds = appointments.map(a => a.patientId)
+  const existingPatients = await prisma.pacientes.findMany({
+    where: {
+      patientId: { in: patientIds },
+      professionalId: session.user.id,
+    },
+    select: { patientId: true },
+  })
+
+  const existingPatientIds = new Set(existingPatients.map(p => p.patientId))
+
+  // 🔹 Montagem dos dados
+  const mappedAppointments = appointments.map(app => {
+    const { professional, ...rest } = app
+    const { Professional, ...restProfessional } = professional
     const professionalData = Professional ?? {}
 
+    const isNewPatient = !existingPatientIds.has(app.patientId)
+
     return {
-      ...restUser,
+      ...rest,
       ...professionalData,
-      professional: { ...restProfessional },
+      isNewPatient,
+      professional: restProfessional,
     }
   })
+
   return {
-    data: mappedUsers as any,
+    data: mappedAppointments as any,
     total,
     page,
     lastPage: Math.ceil(total / limit),

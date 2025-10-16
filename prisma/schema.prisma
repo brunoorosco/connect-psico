@@ -40,8 +40,10 @@ model User {
   NotePatient              NotePatient[]          @relation("NotePatientProfessional")
   patientUser              Pacientes[]            @relation("PatientUser")
   Professional             Professional?
+  PatientProfessional      PatientProfessional[]  @relation("PatientProfessional")
+  PatientProfessional1     PatientProfessional[]  @relation("PatientProfessional1")
 
-  @@index([id])
+  @@index([id, email])
   @@map("users")
 }
 
@@ -101,7 +103,7 @@ model Account {
 model Pacientes {
   id                 Int           @id @default(autoincrement())
   professionalId     String?       @map("professional_id")
-  patientId          String        @unique @map("patient_id")
+  patientId          String        @map("patient_id")
   address            String?
   birthDate          String?       @map("birth_date")
   emergencyContact   String?       @map("emergency_contact")
@@ -122,6 +124,20 @@ model Pacientes {
 
   @@index([patientId])
   @@map("patients")
+}
+
+model PatientProfessional {
+  id             Int    @id @default(autoincrement())
+  patientId      String @map("patitent_id")
+  professionalId String @map("professional_id")
+
+  professional User @relation("PatientProfessional", fields: [professionalId], references: [id])
+  patient      User @relation("PatientProfessional1", fields: [patientId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([patientId, professionalId])
+  @@map("patient_professional")
 }
 
 model NotePatient {

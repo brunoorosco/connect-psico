@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
+import { Badge } from "@components/ui/badge"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -103,14 +104,19 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                         </Button>
                         // <ButtonStartWrapper id={appointment.patientId}/>
                       )}
+                      <div>
+                        <div
+                          className={`text-xs px-2 py-1 rounded-full mb-2 ${getAppointmentStatusClass(
+                            appointment.status as any
+                          )}`}
+                        >
+                          {getAppointmentStatusLabel(appointment.status as any)}
+                        </div>
+
+                        {appointment.isNewPatient && <Badge className="px-2">Novo Paciente</Badge>}
+                      </div>
                     </>
                   )}
-                  <div
-                    className={`text-xs px-2 py-1 rounded-full                   
-                    ${getAppointmentStatusClass(appointment.status as StatusAppointment)}`}
-                  >
-                    {getAppointmentStatusLabel(appointment.status as StatusAppointment)}
-                  </div>
                 </div>
               </div>
             </CardContent>
