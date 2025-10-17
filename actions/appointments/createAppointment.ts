@@ -48,13 +48,25 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     const end = endOfDay(appointmentDate)
 
     // 2. Verificar se já existe agendamento neste horário
+  
+
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
-        professionalId,
-        appointmentDate: {
-          gte: start,
-          lte: end,
-        },
+        OR: [
+          // 1️⃣ Paciente já tem agendamento neste dia
+          {
+            patientId,
+            appointmentDate: {
+              gte: start,
+              lte: end,
+            },
+          },
+          // 2️⃣ Mesmo profissional já tem agendamento neste horário exato
+          {
+            professionalId,
+            appointmentDate: appointmentDate,
+          },
+        ],
       },
     })
 
