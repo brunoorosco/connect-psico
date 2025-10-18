@@ -36,7 +36,7 @@ const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="start-time-modal">Horário inicial</Label>
           <Input
