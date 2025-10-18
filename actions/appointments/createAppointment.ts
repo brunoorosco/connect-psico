@@ -10,7 +10,7 @@ import { createPixForAppointment } from "../payment/createPixForAppointment"
 import { auth } from "@/auth"
 
 const TZ = "America/Sao_Paulo"
-const prePayment = false
+const prePayment = process.env.PRE_PAYMENT_APPOINTMENT || false
 const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
