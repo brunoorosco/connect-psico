@@ -95,7 +95,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     const start = new Date(av.startTime)
     start.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0)
 
-    const end = new Date(av.startTime)
+    const end = new Date(av.endTime) // ✅ Corrigido
     end.setHours(endTime.getHours(), endTime.getMinutes(), 0, 0)
 
     return getFreeIntervals({ start, end }, appointmentIntervals)
