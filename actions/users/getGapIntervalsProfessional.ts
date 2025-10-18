@@ -75,7 +75,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
       ],
     },
   })
-
+  console.debug("app::", appointments)
   if (availabilities.length === 0) {
     return []
   }
@@ -114,8 +114,7 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     return slotsInInterval
   })
 
-  console.debug("solts::::",slots)
-
+  console.debug("solts::::", slots)
 
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
     start: new Date(start),
