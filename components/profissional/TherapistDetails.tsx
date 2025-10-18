@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MapPin, MessageCircle, Calendar as CalendarIcon, DollarSign, User2, BookCopyIcon } from "lucide-react"
 import { ProfessionalModel } from "@/domain/model/professional"
@@ -51,6 +51,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
               </p>
             </div>
           </div>
+          <DialogDescription>Detalhes do profissional selecionado.</DialogDescription>
         </DialogHeader>
 
         <div className="mt-2 space-y-4">
