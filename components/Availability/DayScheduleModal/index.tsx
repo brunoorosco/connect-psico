@@ -9,12 +9,10 @@ import { Save, Trash2 } from "lucide-react"
 import TimeSlotForm from "../TimeSlotForm"
 import { useDayScheduleModal } from "@/hooks/useDayScheduleModal"
 import { IDayScheduleModal } from "./types"
-
-// ⬇️ ADICIONE
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
 import { toast } from "sonner"
-const TZ = "America/Sao_Paulo"
 
+const TZ = "America/Sao_Paulo"
 const weekdayPt = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
 
 export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
@@ -26,16 +24,22 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   onDayAvailabilityUpdate,
   onDayAvailabilityDelete,
 }) => {
-  const { sortedTimeSlots, handleAddTimeSlot, handleRemoveTimeSlot, hasChanges, handleSave, isEditing } =
-    useDayScheduleModal(
-      date,
-      isOpen,
-      dayAvailabilities,
-      weeklySchedules,
-      onDayAvailabilityUpdate,
-      onClose,
-      onDayAvailabilityDelete
-    )
+  const {
+    sortedTimeSlots,
+    handleAddTimeSlot,
+    handleRemoveTimeSlot,
+    hasChanges,
+    handleSave,
+    isEditing,
+  } = useDayScheduleModal(
+    date,
+    isOpen,
+    dayAvailabilities,
+    weeklySchedules,
+    onDayAvailabilityUpdate,
+    onClose,
+    onDayAvailabilityDelete
+  )
 
   const handleClearAll = () => {
     if (sortedTimeSlots.length === 0) return
@@ -45,11 +49,10 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   const titlePrefix = isEditing ? "Editar disponibilidade" : "Nova disponibilidade"
   void weekdayPt[getDay(date)]
 
-  // ⬇️ ADICIONE: helpers de validação
   function dayRangeUtc(dateObj: Date) {
     const ymd = formatInTimeZone(dateObj, TZ, "yyyy-MM-dd")
     const startUtc = fromZonedTime(new Date(`${ymd}T00:00:00.000`), TZ)
-    const endUtc   = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
+    const endUtc = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
     return { startUtc, endUtc }
   }
 
@@ -57,74 +60,70 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
     return fromZonedTime(new Date(`${ymd}T${hhmm}:00.000`), TZ)
   }
 
-  // ⬇️ ADICIONE: valida “não pode estar no passado”
   function validateNotPast(): { ok: boolean; message?: string } {
     const now = new Date()
-
-    // 1) Se o dia inteiro já passou, bloqueia
     const { endUtc } = dayRangeUtc(date)
     if (endUtc < now) {
       return { ok: false, message: "Não é permitido cadastrar disponibilidade em um dia que já passou." }
     }
-
-    // 2) Se for hoje, bloqueia apenas slots que começam antes de agora
     const ymd = formatInTimeZone(date, TZ, "yyyy-MM-dd")
-    const invalid = sortedTimeSlots.filter(s => {
-      const start = slotStartUtc(ymd, s.startTime) // "HH:mm"
+    const invalid = sortedTimeSlots.filter((s) => {
+      const start = slotStartUtc(ymd, s.startTime)
       return start < now
     })
-
     if (invalid.length > 0) {
-      const list = invalid.map(s => `${s.startTime}–${s.endTime}`).join(", ")
-      return { ok: false, message: `Há horários no passado: ${list}. Ajuste os horários antes de salvar.` }
+      const list = invalid.map((s) => `${s.startTime}–${s.endTime}`).join(", ")
+      return { ok: false, message: `Há horários no passado: ${list}. Ajuste antes de salvar.` }
     }
-
     return { ok: true }
   }
 
-  // >>> Usa a lógica de deletar quando edição + vazio
   const onSave = () => {
     const dateStr = format(date, "yyyy-MM-dd")
-
     if (isEditing && sortedTimeSlots.length === 0) {
       onDayAvailabilityDelete?.(dateStr)
       onClose()
       return
     }
-
-    // ⬇️ ADICIONE: validação antes de salvar
     const { ok, message } = validateNotPast()
     if (!ok) {
       toast.error(message)
       return
     }
-
     handleSave()
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-2xl max-h-[80vh] overflow-y-auto"
-        onPointerDownOutside={(e) => { e.preventDefault() }}
+        className="
+          w-[90vw] max-w-lg sm:max-w-2xl 
+          max-h-[85vh] overflow-y-auto 
+          rounded-2xl p-4 sm:p-6 
+        "
+        onPointerDownOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-xl">
-            {titlePrefix} — {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          <DialogTitle className="text-lg sm:text-xl text-center sm:text-left">
+            {titlePrefix} —{" "}
+            {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 mt-4">
+          {/* Lista de horários */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Horários Configurados</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+              <h3 className="text-base sm:text-lg font-medium text-center sm:text-left">
+                Horários Configurados
+              </h3>
 
               {isEditing && sortedTimeSlots.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleClearAll}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Remover todos
@@ -133,15 +132,18 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             </div>
 
             {sortedTimeSlots.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                <p>Nenhum horário definido para este dia</p>
+              <div className="text-center py-6 sm:py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                <p>Nenhum horário definido</p>
                 <p className="text-sm mt-1">Adicione um horário abaixo</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {sortedTimeSlots.map((slot) => (
-                  <div key={slot.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-                    <span className="font-medium">
+                  <div
+                    key={slot.id}
+                    className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border"
+                  >
+                    <span className="font-medium text-sm sm:text-base">
                       {slot.startTime} - {slot.endTime}
                     </span>
                     <Button
@@ -158,17 +160,20 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             )}
           </div>
 
+          {/* Formulário */}
           <div>
-            <h3 className="text-lg font-medium mb-4">
+            <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 text-center sm:text-left">
               {isEditing ? "Adicionar novo horário" : "Definir horários para este dia"}
             </h3>
             <TimeSlotForm key={date.toISOString()} onAddTimeSlot={handleAddTimeSlot} />
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
+          {/* Botões */}
+          <div className="flex flex-col sm:flex-row justify-end sm:space-x-3 gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
               Cancelar
             </Button>
+
             {isEditing && (
               <Button
                 variant="destructive"
@@ -177,14 +182,16 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
                   onDayAvailabilityDelete?.(dateStr)
                   onClose()
                 }}
+                className="w-full sm:w-auto"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Excluir disponibilidade do dia
+                Excluir Todos
               </Button>
             )}
-            <Button onClick={onSave} disabled={!hasChanges}>
+
+            <Button onClick={onSave} disabled={!hasChanges} className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
-              {isEditing ? "Salvar Alterações" : "Criar Disponibilidade"}
+              {isEditing ? "Salvar" : "Criar"}
             </Button>
           </div>
         </div>
