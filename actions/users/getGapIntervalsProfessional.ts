@@ -1,8 +1,7 @@
 "use server"
+import { env } from "@/config/application"
 import { prisma } from "@/lib/db"
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz"
-
-const TZ = "America/Sao_Paulo"
 
 type Interval = { start: Date; end: Date }
 const DEFAULT_DURATION_MINUTES = 60
@@ -50,10 +49,10 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
   })
 
   // Constrói YYYY-MM-DD da data selecionada, segundo São Paulo
-  const ymd = formatInTimeZone(date, TZ, "yyyy-MM-dd")
+  const ymd = formatInTimeZone(date, env.timezone, "yyyy-MM-dd")
   // 00:00 e 23:59:59.999 em São Paulo, convertidos para UTC (Date)
-  const startOfDay = fromZonedTime(new Date(`${ymd}T00:00:00`), TZ)
-  const endOfDay = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
+  const startOfDay = fromZonedTime(new Date(`${ymd}T00:00:00`), env.timezone)
+  const endOfDay = fromZonedTime(new Date(`${ymd}T23:59:59.999`), env.timezone)
 
   const appointments = await prisma.appointment.findMany({
     where: {
@@ -114,12 +113,18 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     }
     return slotsInInterval
   })
+
+  console.debug("solts::::",slots)
+
+
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
     start: new Date(start),
   })) // mantém UTC, sem offset manual
+  console.debug("120 Unique::::", slotsUnique)
 
   const slotsOrdened = slotsUnique
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .map((s) => ({ start: s.start.toISOString() })) // enviar ISO UTC ao front (ok)
+  console.debug("124 Ordenado::::", slotsOrdened)
   return slotsOrdened
 }
