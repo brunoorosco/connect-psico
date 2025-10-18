@@ -47,7 +47,6 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
       }, // busca apenas horários futuros (>= agora)
     },
   })
-  console.info(availabilities)
   // Constrói YYYY-MM-DD da data selecionada, segundo São Paulo
   const ymd = formatInTimeZone(date, env.timezone, "yyyy-MM-dd")
   // 00:00 e 23:59:59.999 em São Paulo, convertidos para UTC (Date)
@@ -114,16 +113,12 @@ export const getProfessionalSchedule = async (userId: number, date: Date) => {
     return slotsInInterval
   })
 
-  console.debug("solts::::", slots)
-
   const slotsUnique = Array.from(new Set(slots.map((item) => item.start.toISOString()))).map((start) => ({
     start: new Date(start),
   })) // mantém UTC, sem offset manual
-  console.debug("120 Unique::::", slotsUnique)
 
   const slotsOrdened = slotsUnique
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .map((s) => ({ start: s.start.toISOString() })) // enviar ISO UTC ao front (ok)
-  console.debug("124 Ordenado::::", slotsOrdened)
   return slotsOrdened
 }
