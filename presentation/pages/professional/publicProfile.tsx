@@ -21,21 +21,7 @@ import { useCurrentUser } from "@hooks/use-current-user"
 import { handleCreateAppointment } from "@components/profissional/me/handleCreateAppointment"
 import { useAvailableWeek } from "@components/profissional/me/useAvailableWeek"
 import { Button } from "@components/ui"
-
-// === NOVO: baseline vazio 09:00–18:00 ===
-const HOURS = Array.from({ length: 11 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`) // 08..18
-const buildEmptyWeek = (): WeeklySchedule => {
-  const day = HOURS.map((time) => ({ time, available: false }))
-  return {
-    monday: [...day],
-    tuesday: [...day],
-    wednesday: [...day],
-    thursday: [...day],
-    friday: [...day],
-    saturday: [...day],
-    sunday: [...day],
-  }
-}
+import { buildEmptyWeek } from "@/utils/scheduleHelpers"
 
 export default function ProfessionalProfilePage() {
   const user = useCurrentUser()
@@ -69,6 +55,7 @@ export default function ProfessionalProfilePage() {
     mutate,
   } = useAvailableWeek(safeProfessionalId, weekStartUTC)
 
+  console.info (availableSlots)
   // Lê URL (?sel=YYYY-MM-DD_HH:mm) e ajusta a semana automaticamente
   useEffect(() => {
     const sel = search.get("sel")

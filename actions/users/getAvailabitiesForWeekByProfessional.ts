@@ -1,20 +1,15 @@
 "use server"
 import { prisma } from "@/lib/db"
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz"
-import { addDays, startOfWeek as dfStartOfWeek } from "date-fns"
+import { addDays } from "date-fns"
 
 const TZ = "America/Sao_Paulo"
 const SLOT_MINUTES = 60
-const WORK_START = 8 // 09:00
-const WORK_END = 19 // 18:00 (exclusivo; último slot começa 17:00)
 const DEFAULT_DURATION_MINUTES = 60 as const
 
 type DayKey = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"
-
 type DaySlots = { time: string; available: boolean }[]
-
 type WeeklySchedule = Record<DayKey, DaySlots>
-
 type Interval = { start: Date; end: Date }
 
 /** Constrói [UTC] do início/fim de um dia local (São Paulo) */
@@ -22,51 +17,82 @@ function dayRangeUtc(localDate: Date) {
   const ymd = formatInTimeZone(localDate, TZ, "yyyy-MM-dd")
   const start = fromZonedTime(new Date(`${ymd}T00:00:00.000`), TZ)
   const end = fromZonedTime(new Date(`${ymd}T23:59:59.999`), TZ)
-
   return { start, end }
 }
 
-function buildBaselineSlotsLocal(dayLocal: Date, freeIntervals: Interval[]) {
+/**
+ * ✨ NOVA VERSÃO: Constrói slots baseado nos intervalos livres REAIS
+ * Não usa mais limites fixos WORK_START/WORK_END
+ * 
+ * @param ensureMinimumRange - Se true, garante que pelo menos 08:00-18:00 sejam mostrados
+ */
+function buildDynamicSlotsFromFreeIntervals(
+  dayLocal: Date, 
+  freeIntervals: Interval[],
+  ensureMinimumRange = false
+) {
   const slots: { time: string; startUtc: Date; endUtc: Date }[] = []
+  const processedHours = new Set<string>()
 
-  // limites padrão
-  let startHour = WORK_START
-  let endHour = WORK_END
-
-  // Verifica se há disponibilidade antes das 8h
-  const earliest = freeIntervals.length ? Math.min(...freeIntervals.map((iv) => iv.start.getHours())) : WORK_START
-  if (earliest < WORK_START) {
-    startHour = earliest
-    endHour = startHour + 11 // garante 11 slots
+  if (freeIntervals.length === 0) {
+    // Se não há intervalos livres mas queremos range mínimo, cria slots vazios
+    if (ensureMinimumRange) {
+      const ymd = formatInTimeZone(dayLocal, TZ, "yyyy-MM-dd")
+      for (let h = 8; h < 19; h++) {
+        const timeLocal = `${ymd}T${String(h).padStart(2, "0")}:00:00`
+        const startUtc = fromZonedTime(new Date(timeLocal), TZ)
+        const endUtc = new Date(startUtc.getTime() + SLOT_MINUTES * 60 * 1000)
+        
+        slots.push({
+          time: `${String(h).padStart(2, "0")}:00`,
+          startUtc,
+          endUtc,
+        })
+      }
+    }
+    return slots
   }
 
-  // Verifica se há disponibilidade depois das 19h
-  const latest = freeIntervals.length ? Math.max(...freeIntervals.map((iv) => iv.end.getHours())) : WORK_END
-  if (latest > WORK_END) {
-    endHour = latest
-    startHour = endHour - 11 // recua para caber 11 slots
+  // Para cada intervalo livre, gera slots de 60min
+  for (const interval of freeIntervals) {
+    let current = new Date(interval.start)
+    const end = interval.end
+
+    // Arredonda para a hora cheia (floor)
+    current.setUTCMinutes(0, 0, 0)
+
+    // Gera slots dentro deste intervalo
+    while (current < end) {
+      const nextSlot = new Date(current.getTime() + SLOT_MINUTES * 60 * 1000)
+      
+      // Verifica se o slot inteiro cabe dentro do intervalo livre
+      if (nextSlot <= end) {
+        // ✅ CORRIGIDO: Formata a hora no timezone de São Paulo
+        const hourLocal = formatInTimeZone(current, TZ, "HH:mm")
+        
+        // Evita duplicatas
+        const uniqueKey = `${current.toISOString()}`
+        if (!processedHours.has(uniqueKey)) {
+          processedHours.add(uniqueKey)
+          
+          slots.push({
+            time: hourLocal, // ✅ Agora em horário local (SP)
+            startUtc: new Date(current),
+            endUtc: new Date(nextSlot),
+          })
+        }
+      }
+      
+      current = nextSlot
+    }
   }
 
-  // monta grade ajustada
-  for (let h = startHour; h < endHour; h++) {
-    const hh = String(h).padStart(2, "0")
-    const timeLocal = `${formatInTimeZone(dayLocal, TZ, "yyyy-MM-dd")}T${hh}:00:00`
-    const startUtc = fromZonedTime(new Date(timeLocal), TZ)
-    const endUtc = new Date(startUtc.getTime() + SLOT_MINUTES * 60 * 1000)
-    slots.push({
-      time: `${hh}:00`,
-      startUtc,
-      endUtc,
-    })
-  }
-
-  return slots.slice(0, 11) // garante 11 slots exatos
+  // Ordena por horário UTC
+  return slots.sort((a, b) => a.startUtc.getTime() - b.startUtc.getTime())
 }
 
 /** Subtrai intervalsB (appointments) de intervalA (availability) e retorna "buracos" livres */
 function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interval[] {
-  // Estratégia simples: dividir A por quaisquer sobreposições de B
-  // 1) ordenar B por início
   const B = [...intervalsB].sort((x, y) => x.start.getTime() - y.start.getTime())
   let parts: Interval[] = [intervalA]
 
@@ -78,13 +104,11 @@ function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interva
       const bS = b.start.getTime(),
         bE = b.end.getTime()
 
-      // sem overlap
       if (bE <= aS || bS >= aE) {
         nextParts.push(a)
         continue
       }
 
-      // recortes
       if (bS > aS) nextParts.push({ start: a.start, end: new Date(bS) })
       if (bE < aE) nextParts.push({ start: new Date(bE), end: a.end })
     }
@@ -92,7 +116,6 @@ function subtractIntervals(intervalA: Interval, intervalsB: Interval[]): Interva
     if (!parts.length) break
   }
 
-  // descartar vazios
   return parts.filter((p) => p.end.getTime() > p.start.getTime())
 }
 
@@ -103,32 +126,25 @@ function slotContainedInFree(slot: { start: Date; end: Date }, free: { start: Da
 
 /** Mapeia 0..6 (Date.getDay) para keys em inglês começando segunda */
 function toDayKey(d: Date): DayKey {
-  const day = d.getDay() // 0=Sun..6=Sat
+  const day = d.getDay()
   switch (day) {
-    case 1:
-      return "monday"
-    case 2:
-      return "tuesday"
-    case 3:
-      return "wednesday"
-    case 4:
-      return "thursday"
-    case 5:
-      return "friday"
-    case 6:
-      return "saturday"
-    case 0:
-      return "sunday"
-    default:
-      return "monday"
+    case 1: return "monday"
+    case 2: return "tuesday"
+    case 3: return "wednesday"
+    case 4: return "thursday"
+    case 5: return "friday"
+    case 6: return "saturday"
+    case 0: return "sunday"
+    default: return "monday"
   }
 }
-// === helpers em UTC (sem misturar horário local) ===
+
 function floorToHourUtc(d: Date) {
   const x = new Date(d)
   x.setUTCMinutes(0, 0, 0)
   return x
 }
+
 function ceilToHourUtc(d: Date) {
   const x = new Date(d)
   if (x.getUTCMinutes() || x.getUTCSeconds() || x.getUTCMilliseconds()) {
@@ -138,7 +154,7 @@ function ceilToHourUtc(d: Date) {
   }
   return x
 }
-// Une intervalos que se tocam/sobrepõem (depois do arredondamento)
+
 function mergeIntervals(intervals: { start: Date; end: Date }[]) {
   if (!intervals.length) return []
   const ord = [...intervals].sort((a, b) => a.start.getTime() - b.start.getTime())
@@ -154,9 +170,10 @@ function mergeIntervals(intervals: { start: Date; end: Date }[]) {
 }
 
 /**
- * Grade semanal (segunda→domingo), slots 09:00..17:00, marcando available true/false.
- * - weekStart pode ser qualquer data; será normalizada para a segunda-feira correspondente.
- * - Apenas horários no futuro são elegíveis (não marca `true` para slots já passados).
+ * ✨ VERSÃO MELHORADA: Grade semanal 100% dinâmica
+ * - Mostra TODOS os horários disponíveis (08:00, 22:00, 23:00, etc.)
+ * - Não limita mais a WORK_START/WORK_END
+ * - Slots são gerados baseados nos intervalos livres reais
  */
 export async function getProfessionalWeeklySchedule(userId: number, weekStart: Date): Promise<WeeklySchedule> {
   const now = new Date()
@@ -169,17 +186,15 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
 
   // Normaliza para segunda-feira local
   const mondayLocal = new Date(weekStart.getTime() + 3 * 60 * 60 * 1000)
-  // Intervalo da semana (local -> UTC)
   const { start: weekStartUtc } = dayRangeUtc(mondayLocal)
   const { end: weekEndUtc } = dayRangeUtc(addDays(mondayLocal, 6))
-  // Busca **toda** a semana de uma vez
+
+  // Busca toda a semana de uma vez
   const [availabilities, appointments] = await Promise.all([
     prisma.availability.findMany({
       where: {
         professionalId: professional.userId,
         isAvailable: true,
-        // disponibilidade que toca em qualquer ponto da semana:
-        // (start < fimDaSemana) AND (end > inicioDaSemana)
         startTime: { lt: weekEndUtc },
         endTime: { gt: weekStartUtc },
       },
@@ -195,8 +210,7 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
         status: { not: "CANCELLED" },
         OR: [
           { status: "CONFIRMED" },
-          { status: "PENDING" }, // só pendentes válidos
-          // { status: "PENDING", expiresAt: { gt: now } }, // inserir este quando precisar validar pagamento
+          { status: "PENDING" },
         ],
       },
       select: { appointmentDate: true },
@@ -204,18 +218,15 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
   ])
 
   // Converte appointments em intervals
-  const apptIntervals: Interval[] = appointments.map((a) => {
-    const start = a.appointmentDate
-    const dur = DEFAULT_DURATION_MINUTES
-    return { start, end: new Date(start.getTime() + dur * 60 * 1000) }
-  })
+  const apptIntervals: Interval[] = appointments.map((a) => ({
+    start: a.appointmentDate,
+    end: new Date(a.appointmentDate.getTime() + DEFAULT_DURATION_MINUTES * 60 * 1000),
+  }))
 
-  // Pré-agrupa availabilities por dia local (chave yyyy-MM-dd)
+  // Pré-agrupa availabilities por dia local
   const avByDay: Record<string, Interval[]> = {}
   for (const av of availabilities) {
-    // recorta availability ao próprio dia local em que cada slot cairá; faremos isso por dia abaixo
-    // aqui só acumulamos "como veio"
-    const key = formatInTimeZone(av.startTime, TZ, "yyyy-MM-dd") // aproximação de agrupamento
+    const key = formatInTimeZone(av.startTime, TZ, "yyyy-MM-dd")
     ;(avByDay[key] ||= []).push({ start: av.startTime, end: av.endTime })
   }
 
@@ -235,28 +246,23 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
     const dayLocal = addDays(mondayLocal, offset)
     const dayKey = toDayKey(dayLocal)
 
-    // Recorta appointments da semana que atingem esse dia
     const { start: dayUtcStart, end: dayUtcEnd } = dayRangeUtc(dayLocal)
     const apptsOfDay = apptIntervals.filter((iv) => iv.end > dayUtcStart && iv.start < dayUtcEnd)
-    // Availabilities que encostam no dia
     const avOfDayRaw = Object.values(avByDay)
       .flat()
       .filter((iv) => iv.end > dayUtcStart && iv.start < dayUtcEnd)
 
-    // Recorta availability para o dia (clampa nos limites do dia)
+    // Recorta availability para o dia
     const avOfDay: Interval[] = mergeIntervals(
       avOfDayRaw
         .map((iv) => {
-          // 1) clampa ao dia
           const clampStart = new Date(Math.max(iv.start.getTime(), dayUtcStart.getTime()))
           const clampEnd = new Date(Math.min(iv.end.getTime(), dayUtcEnd.getTime()))
           if (clampEnd <= clampStart) return null
 
-          // 2) arredonda para grade de 60 min (…:00)
           const roundedStart = floorToHourUtc(clampStart)
           const roundedEnd = ceilToHourUtc(clampEnd)
 
-          // 3) re-clampa (ceil pode empurrar para o 00:00 do dia seguinte)
           const start = new Date(Math.max(roundedStart.getTime(), dayUtcStart.getTime()))
           const end = new Date(Math.min(roundedEnd.getTime(), dayUtcEnd.getTime()))
 
@@ -264,12 +270,15 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
         })
         .filter((x): x is Interval => !!x)
     )
-    // Calcula "livres" = availability - appointments
+
+    // Calcula intervalos livres
     const freeIntervals: Interval[] = avOfDay.flatMap((av) => subtractIntervals(av, apptsOfDay))
-    const baseline = buildBaselineSlotsLocal(dayLocal, freeIntervals) // slots locais 09..17 -> UTC
+
+    // ✨ USA A NOVA FUNÇÃO DINÂMICA
+    const baseline = buildDynamicSlotsFromFreeIntervals(dayLocal, freeIntervals)
+
     // Mapeia baseline → available true/false
     const daySlots: DaySlots = baseline.map((slot) => {
-      // Slot no passado nunca é true
       const isFuture = slot.startUtc.getTime() >= now.getTime()
       const available =
         isFuture &&
@@ -280,5 +289,6 @@ export async function getProfessionalWeeklySchedule(userId: number, weekStart: D
 
     result[dayKey] = daySlots
   }
+
   return result
 }
