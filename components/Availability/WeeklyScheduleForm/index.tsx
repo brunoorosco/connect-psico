@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -10,6 +10,7 @@ import { Plus, Trash2, Calendar } from "lucide-react"
 import { daysOfWeek, months } from "@/utils/constants"
 import { useWeeklySchedule } from "@/hooks/useWeeklySchedule"
 import { WeeklyScheduleFormProps } from "./types"
+import { addMinutes, format } from "date-fns"
 
 export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
   weeklySchedules,
@@ -28,7 +29,7 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
     handleSaveAvailability,
     removeTimeSlot,
   } = useWeeklySchedule(weeklySchedules, onScheduleUpdate)
-  
+  const [singleSession, setSingleSession] = useState(false)
   useEffect(() => {
     if (activeMonth) {
       setSelectedMonth(activeMonth.getMonth())
@@ -63,33 +64,37 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
             </div>
           </div>
 
-          {/* <div className="mt-4">
-            <Label htmlFor="month-select" className="text-sm font-medium mb-2 block">
-              Mês de agendamento:
-            </Label>
-            <select
-              id="month-select"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-            >
-              {months.map((month) => (
-                <option key={month.value} value={month.value}>
-                  {month.label}
-                </option>
-              ))}
-            </select>
-          </div> */}
-
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="start-time">Horário inicial</Label>
+              <Label htmlFor="start-time">1ª Sessão</Label>
               <Input id="start-time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </div>
+
             <div>
-              <Label htmlFor="end-time">Horário final</Label>
-              <Input id="end-time" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+              <Label htmlFor="end-time">
+                Última Sessão{" "}
+                {singleSession && (
+                  <span className="hidden lg:inline text-sm text-muted-foreground">(automático)</span>
+                )}
+              </Label>
+              <Input
+                id="end-time"
+                type="time"
+                value={
+                  singleSession ? format(addMinutes(new Date(`1970-01-01T${startTime}:00`), 59), "HH:mm") : endTime
+                }
+                onChange={(e) => setEndTime(e.target.value)}
+                disabled={singleSession}
+              />
             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="single-session"
+              checked={singleSession}
+              onCheckedChange={(checked) => setSingleSession(!!checked)}
+            />
+            <Label htmlFor="single-session">Sessão única (1h padrão)</Label>
           </div>
 
           <Button

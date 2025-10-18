@@ -10,7 +10,7 @@ import { createPixForAppointment } from "../payment/createPixForAppointment"
 import { auth } from "@/auth"
 
 const TZ = "America/Sao_Paulo"
-const prePayment = false
+const prePayment = process.env.PRE_PAYMENT_APPOINTMENT || false
 const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
@@ -48,13 +48,25 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     const end = endOfDay(appointmentDate)
 
     // 2. Verificar se já existe agendamento neste horário
+  
+
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
-        professionalId,
-        appointmentDate: {
-          gte: start,
-          lte: end,
-        },
+        OR: [
+          // 1️⃣ Paciente já tem agendamento neste dia
+          {
+            patientId,
+            appointmentDate: {
+              gte: start,
+              lte: end,
+            },
+          },
+          // 2️⃣ Mesmo profissional já tem agendamento neste horário exato
+          {
+            professionalId,
+            appointmentDate: appointmentDate,
+          },
+        ],
       },
     })
 
