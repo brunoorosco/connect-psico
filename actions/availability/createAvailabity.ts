@@ -20,13 +20,6 @@ function anchorDateForDow(dayOfWeek: number): string {
   return `${yyyy}-${mm}-${dd}` // "YYYY-MM-DD"
 }
 
-type TimeSlotInput = { startTime: string; endTime: string } // "HH:mm" (mantido aqui só como referência)
-type DayAvailabilityInput = {
-  professionalId: string
-  date: string // "YYYY-MM-DD" (dia em São Paulo) - não usado neste create recorrente
-  timeSlots: TimeSlotInput[]
-}
-
 const CreateAvailabilitySchema = z.object({
   professionalId: z.string().uuid(),
   dayOfWeek: z.number().min(0).max(6),

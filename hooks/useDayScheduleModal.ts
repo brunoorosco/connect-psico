@@ -76,7 +76,7 @@ export function useDayScheduleModal(
       toast.error("Horário inválido. Use HH:MM.")
       return
     }
-    if (toMin(newSlot.startTime) >= toMin(newSlot.endTime)) {
+    if (toMin(newSlot.startTime) > toMin(newSlot.endTime)) {
       toast.error("Hora inicial deve ser menor que a final.")
       return
     }
@@ -116,7 +116,6 @@ export function useDayScheduleModal(
 
     if (isEditing && sorted.length === 0) {
       // >>> aqui é DELETE no backend
-      console.log('[useDayScheduleModal.ts:119]', { onDayAvailabilityDelete });
       if (onDayAvailabilityDelete) {
         onDayAvailabilityDelete(dateStr)
       } else {

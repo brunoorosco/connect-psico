@@ -3,7 +3,7 @@
 import React from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { format, getDay } from "date-fns"
+import { format, getDay, startOfDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Save, Trash2 } from "lucide-react"
 import TimeSlotForm from "../TimeSlotForm"
@@ -24,23 +24,17 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
   onDayAvailabilityUpdate,
   onDayAvailabilityDelete,
 }) => {
-  const {
-    sortedTimeSlots,
-    handleAddTimeSlot,
-    handleRemoveTimeSlot,
-    hasChanges,
-    handleSave,
-    isEditing,
-  } = useDayScheduleModal(
-    date,
-    isOpen,
-    dayAvailabilities,
-    weeklySchedules,
-    onDayAvailabilityUpdate,
-    onClose,
-    onDayAvailabilityDelete
-  )
-
+  const { sortedTimeSlots, handleAddTimeSlot, handleRemoveTimeSlot, hasChanges, handleSave, isEditing } =
+    useDayScheduleModal(
+      date,
+      isOpen,
+      dayAvailabilities,
+      weeklySchedules,
+      onDayAvailabilityUpdate,
+      onClose,
+      onDayAvailabilityDelete
+    )
+  const isPastDay = startOfDay(date) < startOfDay(new Date())
   const handleClearAll = () => {
     if (sortedTimeSlots.length === 0) return
     for (const s of sortedTimeSlots) handleRemoveTimeSlot(s.id)
@@ -105,8 +99,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
       >
         <DialogHeader>
           <DialogTitle className="text-lg sm:text-xl text-center sm:text-left">
-            {titlePrefix} —{" "}
-            {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            {titlePrefix} — {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </DialogTitle>
         </DialogHeader>
 
@@ -114,12 +107,11 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
           {/* Lista de horários */}
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
-              <h3 className="text-base sm:text-lg font-medium text-center sm:text-left">
-                Horários Configurados
-              </h3>
+              <h3 className="text-base sm:text-lg font-medium text-center sm:text-left">Horários Configurados</h3>
 
               {isEditing && sortedTimeSlots.length > 0 && (
                 <Button
+                  disabled={isPastDay}
                   variant="ghost"
                   size="sm"
                   onClick={handleClearAll}
@@ -141,12 +133,15 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
                 {sortedTimeSlots.map((slot) => (
                   <div
                     key={slot.id}
-                    className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border"
+                    className={`flex items-center justify-between bg-gray-50 p-3 rounded-lg border ${
+                      isPastDay ? "text-gray-500" : ""
+                    } `}
                   >
                     <span className="font-medium text-sm sm:text-base">
                       {slot.startTime} - {slot.endTime}
                     </span>
                     <Button
+                      disabled={isPastDay}
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveTimeSlot(slot.id)}
@@ -165,7 +160,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 text-center sm:text-left">
               {isEditing ? "Adicionar novo horário" : "Definir horários para este dia"}
             </h3>
-            <TimeSlotForm key={date.toISOString()} onAddTimeSlot={handleAddTimeSlot} />
+            <TimeSlotForm key={date.toISOString()} onAddTimeSlot={handleAddTimeSlot} disabled={isPastDay} />
           </div>
 
           {/* Botões */}
@@ -176,6 +171,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
 
             {isEditing && (
               <Button
+                disabled={isPastDay}
                 variant="destructive"
                 onClick={() => {
                   const dateStr = format(date, "yyyy-MM-dd")
