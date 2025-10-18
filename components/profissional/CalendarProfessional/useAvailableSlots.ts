@@ -20,7 +20,7 @@ export function useAvailableSlots(professionalId: number, selectedDate: Date) {
 
     const slots = data.map((interval: { start: string | Date }) => {
       const start = new Date(interval.start)
-
+      console.info("slots::::",interval)
       return { start }
     })
 
