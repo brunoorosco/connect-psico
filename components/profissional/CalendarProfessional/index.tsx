@@ -12,8 +12,7 @@ import { useAvailableSlots } from "./useAvailableSlots"
 import { AvailableSlots } from "./AvailableSlots"
 import { ScheduleButton } from "./ScheduleButton"
 import { ICalendarProfessional } from "./types"
-
-const TZ = "America/Sao_Paulo"
+import { env } from "@/config/application"
 
 export const CalendarProfessional = ({ professionalData }: ICalendarProfessional) => {
   const { data: session, status } = useSession()
@@ -33,14 +32,12 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
       const day = new Date(date)
       day.setHours(0, 0, 0, 0)
 
-      const dateStr = formatInTimeZone(day, TZ, "yyyy-MM-dd")
+      const dateStr = formatInTimeZone(day, env.timezone, "yyyy-MM-dd")
 
       return day < today || !availableDatesSet.has(dateStr)
     },
     [availableDatesSet]
   )
-  console.info('index.tsx:42', JSON.stringify(availableDatesSet,null,2));
-  console.debug('index.tsx:43', JSON.stringify(availableSlots,null,2));
   
   return (
     <TabsContent value="schedule" className="pt-4">
