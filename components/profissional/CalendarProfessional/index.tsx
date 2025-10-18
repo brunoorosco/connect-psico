@@ -39,6 +39,8 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
     },
     [availableDatesSet]
   )
+  console.info('index.tsx:42', JSON.stringify(availableDatesSet,null,2));
+  console.debug('index.tsx:43', JSON.stringify(availableSlots,null,2));
   
   return (
     <TabsContent value="schedule" className="pt-4">
