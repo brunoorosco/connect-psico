@@ -90,12 +90,12 @@ export default function SettingsScreen() {
                 href="./settings/atestado"
               />
 
-              {/* <SettingsCard
-                title="Integrações"
-                description="Conecte sua conta com outros sistemas e plataformas de saúde"
+              <SettingsCard
+                title="Pagamentos"
+                description="Dados bancário para pagamento e ativação de pagamento via plataforma"
                 icon={<FaStethoscope className="text-2xl" />}
-                href="/settings/integrations"
-              /> */}
+                href="/settings/payments"
+              />
 
               {/* <SettingsCard
                 title="Configurações Gerais"
