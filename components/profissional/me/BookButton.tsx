@@ -44,7 +44,7 @@ export function BookButton({
       {/* Hidden fields para futura Server Action */}
       <input name="professionalId" defaultValue={String(professionalId)} hidden readOnly />
       <input name="isoDate" defaultValue={iso} hidden readOnly />
-      <Button type="submit" className="w-full" disabled={disabled}>
+      <Button type="submit" className="w-full text-gray-50" disabled={disabled}>
         <Calendar className="h-4 w-4 mr-2" />
         {isPending ? "Agendando..." : "Agendar Consulta"}
       </Button>
