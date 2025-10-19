@@ -198,7 +198,7 @@ console.log('[page.tsx:165]', { config });
       <div className="sticky top-0 z-50 bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/40 border-b">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
           <h1 className="text-xl font-medium">Modelos de Documentos</h1>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} className="text-gray-50">
             {saving ? "Salvando..." : `Salvar ${currentLabel}`}
           </Button>
         </div>

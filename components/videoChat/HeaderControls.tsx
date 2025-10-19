@@ -104,6 +104,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
           {btnRecorder && (
             <Button
               variant={isRecording ? "destructive" : "secondary"}
+              className="bg-primary text-gray-50"
               size="sm"
               onClick={onToggleRecording}
               title={isRecording ? "Parar gravação" : "Iniciar gravação"}

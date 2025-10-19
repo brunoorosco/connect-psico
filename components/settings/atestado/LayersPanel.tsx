@@ -160,11 +160,11 @@ export default function LayersPanel({
   return (
     <div className="space-y-4">
       {/* Ações */}
-      <div className="flex gap-2 flex-wrap">
-        <Button size="sm" onClick={addText}>+ Texto</Button>
-        <Button size="sm" onClick={addImage}>+ Imagem</Button>
-        <Button size="sm" onClick={addQr}>+ QR</Button>
-        <Button size="sm" onClick={addSignature}>Assinatura</Button>
+      <div className="flex  gap-2 flex-wrap">
+        <Button className="text-gray-50" size="sm" onClick={addText}>+ Texto</Button>
+        <Button className="text-gray-50" size="sm" onClick={addImage}>+ Imagem</Button>
+        <Button className="text-gray-50" size="sm" onClick={addQr}>+ QR</Button>
+        <Button className="text-gray-50" size="sm" onClick={addSignature}>Assinatura</Button>
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="secondary" onClick={bringToFront} disabled={!selected}>Frente</Button>
           <Button size="sm" variant="secondary" onClick={sendToBack} disabled={!selected}>Fundo</Button>

@@ -424,7 +424,7 @@ const ConsultationSession = () => {
                         onClick={isRecording ? handleStop : handleStart}
                         variant={isRecording ? "destructive" : "default"}
                         size="lg"
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 text-gray-50"
                         // disabled={isStopping}
                         aria-busy={isStopping ? "true" : "false"}
                       >
@@ -464,7 +464,7 @@ const ConsultationSession = () => {
                     {summLoading ? "Resumindo..." : "Gerar Resumo"}
                   </Button>
 
-                  <Button onClick={saveConsultation} className="flex items-center space-x-2" size="lg">
+                  <Button onClick={saveConsultation} className="flex items-center space-x-2 text-gray-50" size="lg">
                     <Save className="w-4 h-4" />
                     <span>Salvar Consulta</span>
                   </Button>

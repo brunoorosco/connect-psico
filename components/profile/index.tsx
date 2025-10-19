@@ -111,7 +111,7 @@ const ProfileProfessionalForm: React.FC = () => {
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
             </Button>
-            <Button disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary">
+            <Button disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary text-gray-50">
               Salvar perfil
             </Button>
           </div>

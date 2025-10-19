@@ -185,7 +185,7 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
               </Button>
             )}
 
-            <Button onClick={onSave} disabled={!hasChanges} className="w-full sm:w-auto">
+            <Button onClick={onSave} disabled={!hasChanges} className="w-full sm:w-auto text-white">
               <Save className="h-4 w-4 mr-2" />
               {isEditing ? "Salvar" : "Criar"}
             </Button>

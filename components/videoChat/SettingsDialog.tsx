@@ -308,10 +308,10 @@ export function SettingsDialog({ isOpen, onClose, onDeviceChange }: SettingsDial
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline"  onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={handleSave}>Salvar Configurações</Button>
+          <Button className="text-gray-50" onClick={handleSave}>Salvar Configurações</Button>
         </div>
       </DialogContent>
     </Dialog>

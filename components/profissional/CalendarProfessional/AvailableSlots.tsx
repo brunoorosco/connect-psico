@@ -1,15 +1,14 @@
 import { formatInTimeZone } from "date-fns-tz"
 import { Button } from "@/components/ui/button"
 import { IAvailableSlots } from "./types"
-
-const TZ = "America/Sao_Paulo"
+import { env } from "@/config/application"
 
 export function AvailableSlots({ selectedDate, availableSlots, selectedSlot, onSelectSlot }: IAvailableSlots) {
   // const slotsForDate = availableSlots.filter(
   //   ({ start }) => format(start, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
   // );
   const slotsForDate = availableSlots.filter(
-    ({ start }) => formatInTimeZone(start, TZ, "yyyy-MM-dd") === formatInTimeZone(selectedDate, TZ, "yyyy-MM-dd")
+    ({ start }) => formatInTimeZone(start, env.timezone, "yyyy-MM-dd") === formatInTimeZone(selectedDate, env.timezone, "yyyy-MM-dd")
   )
 
   if (slotsForDate.length === 0)
@@ -23,10 +22,10 @@ export function AvailableSlots({ selectedDate, availableSlots, selectedSlot, onS
           <Button
             key={String(slot.start.getTime())}
             variant={isSelected ? "default" : "outline"}
-            className={isSelected ? "bg-therapy-primary hover:bg-therapy-tertiary" : ""}
+            className={isSelected ? "bg-therapy-primary text-gray-50 hover:bg-therapy-tertiary" : ""}
             onClick={() => onSelectSlot(slot)}
           >
-            {formatInTimeZone(slot.start, TZ, "HH:mm")}
+            {formatInTimeZone(slot.start, env.timezone, "HH:mm")}
           </Button>
         )
       })}

@@ -16,7 +16,7 @@ export function AudioControls({ isRecording, time, onStart, onStop }: Props) {
       <Button
         onClick={isRecording ? onStop : onStart}
         variant={isRecording ? "destructive" : "default"}
-        className="w-full sm:w-auto flex items-center gap-2"
+        className="w-full sm:w-auto flex items-center gap-2 text-gray-50"
       >
         {isRecording ? <MicOff /> : <Mic />}
         {isRecording ? "Parar" : "Gravar"}

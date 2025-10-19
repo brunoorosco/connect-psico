@@ -239,7 +239,7 @@ function AddressForm() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full text-gray-50" disabled={isLoading}>
               {isLoading ? "Salvando..." : "Salvar Endereço"}
             </Button>
           </form>
