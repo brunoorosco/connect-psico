@@ -99,7 +99,7 @@ export const WeeklyScheduleForm: React.FC<WeeklyScheduleFormProps> = ({
 
           <Button
             onClick={handleSaveAvailability}
-            className="w-full"
+            className="w-full text-gray-50"
             disabled={selectedDays.length === 0 || !startTime || !endTime}
           >
             <Plus className="h-4 w-4 mr-2" />

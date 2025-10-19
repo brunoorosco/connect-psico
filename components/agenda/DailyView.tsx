@@ -36,7 +36,7 @@ const DailyView: React.FC<DailyViewProps> = ({
             <h3 className="text-lg font-medium">
               {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
             </h3>
-            <Button onClick={() => onAddAppointment(selectedDate)}>
+            <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50">
               <Plus className="h-4 w-4 mr-2" />
               Nova Consulta
             </Button>

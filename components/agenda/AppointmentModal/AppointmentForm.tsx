@@ -30,7 +30,7 @@ export default function AppointmentForm({ onSubmit, onCancel, selectedDate, edit
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit">{editingAppointment ? "Salvar Alterações" : "Agendar Consulta"}</Button>
+          <Button className="text-gray-50" type="submit">{editingAppointment ? "Salvar Alterações" : "Agendar Consulta"}</Button>
         </DialogFooter>
       </form>
     </Form>

@@ -201,7 +201,7 @@ const UserProfileForm: React.FC = () => {
             <Button variant="outline" type="button" onClick={() => form.reset()}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-therapy-primary hover:bg-therapy-tertiary">
+            <Button type="submit" className="bg-therapy-primary hover:bg-therapy-tertiary text-gray-50" >
               Salvar perfil
             </Button>
           </div>

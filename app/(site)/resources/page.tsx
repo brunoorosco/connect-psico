@@ -214,7 +214,7 @@ const Resources = () => {
                     <p>{item.description}</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="ghost" className="text-therapy-primary">
+                    <Button variant="default" className="text-white">
                       Explorar
                     </Button>
                   </CardFooter>
@@ -283,7 +283,7 @@ const ResourceCard = ({ resource }: { resource: any }) => {
         </ul>
       </CardContent>
       <CardFooter className="pt-2 flex justify-center">
-        <Button asChild>
+        <Button asChild className="text-gray-50">
           <a href={resource.link}>Explorar</a>
         </Button>
       </CardFooter>

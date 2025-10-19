@@ -44,7 +44,7 @@ export function PatientsPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <h1 className="text-2xl font-bold text-medical text-center sm:text-left">Gerenciamento de Pacientes</h1>
           <div className="flex justify-center sm:justify-end">
-            <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto">
+            <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto text-gray-50">
               <Plus className="h-4 w-4 mr-2 shrink-0" />
               Novo Paciente
             </Button>

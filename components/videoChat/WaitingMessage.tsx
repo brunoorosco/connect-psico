@@ -90,7 +90,7 @@ export function WaitingMessage({
             <span>Compartilhe o ID da sala com outros participantes</span>
           </div> */}
 
-          <Button className="w-full mt-4" variant="default" onClick={onJoinRoom}>
+          <Button className="w-full mt-4 text-gray-50" variant="default" onClick={onJoinRoom}>
             {!isWaiting ? "Ingressar na Sala" : " Aguardando Participantes"}
           </Button>
         </div>

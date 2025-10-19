@@ -286,7 +286,7 @@ useEffect(() => {
           <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} className="text-gray-50">
             {" "}
             {isEdit ? "Atualizar" : "Criar"} Paciente
           </Button>

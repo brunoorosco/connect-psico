@@ -37,7 +37,7 @@ export function PatientActions({
             <SquarePlay className="h-5 w-5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="text-gray-50">
           <p>Iniciar Consulta</p>
         </TooltipContent>
       </Tooltip>
@@ -55,7 +55,7 @@ export function PatientActions({
             <Edit className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="text-gray-50">
           <p>Editar Paciente</p>
         </TooltipContent>
       </Tooltip>
@@ -73,7 +73,7 @@ export function PatientActions({
             <MessageSquare className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="text-gray-50">
           <p>Enviar Mensagem</p>
         </TooltipContent>
       </Tooltip>
@@ -91,7 +91,7 @@ export function PatientActions({
             <Trash2 className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="text-gray-50">
           <p>Excluir Paciente</p>
         </TooltipContent>
       </Tooltip>

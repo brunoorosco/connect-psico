@@ -85,7 +85,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <Button
           variant={view === 'daily' ? 'default' : 'outline'}
           onClick={() => onViewChange('daily')}
-          className="flex gap-1 items-center"
+          className={`flex gap-1 items-center ${view === 'daily' ? 'text-gray-50' : 'text-black'}`}
         >
           <CalendarIcon className="h-4 w-4" />
           <span>Diário</span>
@@ -93,7 +93,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <Button
           variant={view === 'weekly' ? 'default' : 'outline'}
           onClick={() => onViewChange('weekly')}
-          className="flex gap-1 items-center"
+          className={`flex gap-1 items-center ${view === 'weekly' ? 'text-gray-50' : 'text-black'}`}
         >
           <CalendarDays className="h-4 w-4" />
           <span>Semanal</span>
@@ -101,7 +101,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <Button
           variant={view === 'monthly' ? 'default' : 'outline'}
           onClick={() => onViewChange('monthly')}
-          className="flex gap-1 items-center"
+          className={`flex gap-1 items-center ${view === 'monthly' ? 'text-gray-50' : 'text-black'}`}
         >
           <CalendarMonth className="h-4 w-4" />
           <span>Mensal</span>
