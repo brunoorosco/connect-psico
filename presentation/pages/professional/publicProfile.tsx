@@ -198,7 +198,7 @@ export default function ProfessionalProfilePage() {
                         <li className="text-normal text-muted-foreground">{professional.education}</li>
                       ) : null}
                     </ul>
-                    <Badge className="bg-therapy-secondary mb-4 py-2 px-3">
+                    <Badge className="bg-primary text-gray-50 mb-4 py-2 px-3">
                       {professional?.especialidade.join(", ")}
                     </Badge>
                     <div className="flex items-center justify-center gap-2 mb-4">
