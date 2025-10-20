@@ -5,6 +5,7 @@ import Head from "next/head"
 import Link from "next/link"
 import { FaFileMedical, FaUserMd, FaClinicMedical, FaStethoscope, FaCog } from "react-icons/fa"
 import { useCurrentUser } from "@hooks/use-current-user"
+import { Receipt } from "lucide-react"
 
 interface SettingsCardProps {
   title: string
@@ -93,8 +94,8 @@ export default function SettingsScreen() {
               <SettingsCard
                 title="Pagamentos"
                 description="Dados bancário para pagamento e ativação de pagamento via plataforma"
-                icon={<FaStethoscope className="text-2xl" />}
-                href="/settings/payments"
+                icon={<Receipt className="text-2xl" />}
+                href="./settings/payments"
               />
 
               {/* <SettingsCard
