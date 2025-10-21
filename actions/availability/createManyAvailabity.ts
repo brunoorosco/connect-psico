@@ -8,11 +8,22 @@ type AvailabilityPayload = {
   endTime: Date
 }
 
+function getFutureDates(data: any[]) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // zera horas para comparar apenas o dia
+
+  return data.filter((item) => {
+    const startDate = new Date(item.startTime)
+    return startDate >= today
+  })
+}
+
 export const createAvailabilityBulk = async (availabilities: AvailabilityPayload[]) => {
+  const futureSchedules = getFutureDates(availabilities)
   try {
     // Opcional: validar todos com zod usando .array()
     await prisma.$transaction(async (tx) => {
-      for (const item of availabilities) {
+      for (const item of futureSchedules) {
         const conflict = await tx.availability.findFirst({
           where: {
             professionalId: item.professionalId,
@@ -43,8 +54,13 @@ export const createAvailabilityBulk = async (availabilities: AvailabilityPayload
     })
 
     return { success: "Disponibilidades cadastradas com sucesso" }
-  } catch (error) {
-    console.error("Erro ao criar disponibilidades", error)
-    return { error: error instanceof Error ? error.message : "Erro ao criar disponibilidades" }
+  } catch (error: unknown) {
+    console.error("Erro ao criar disponibilidades")
+
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
+
+    return { error: "Erro ao criar disponibilidades" }
   }
 }
