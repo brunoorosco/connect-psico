@@ -13,4 +13,5 @@ export interface IAvailabilityCalendar {
   dayAvailabilities: DayAvailability[]
   onDayAvailabilityUpdate: (dayAvailability: DayAvailability) => void
   onDayAvailabilityDelete: (dateISO: string) => void
+  onMonthChange?: (month: Date) => void // 👈 nova prop
 }

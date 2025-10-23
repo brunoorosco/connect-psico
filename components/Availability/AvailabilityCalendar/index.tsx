@@ -48,6 +48,7 @@ export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
   dayAvailabilities,
   onDayAvailabilityUpdate,
   onDayAvailabilityDelete,
+  onMonthChange,
 }) => {
   const { editingDate, setEditingDate, currentMonth, setCurrentMonth } = useAvailabilityLogic(
     selectedDate,
@@ -90,7 +91,9 @@ export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
               onSelect={(date) => date && onDateSelect(date)}
               locale={ptBR}
               onMonthChange={(month) => {
-                setCurrentMonth(new Date(month.getFullYear(), month.getMonth(), 1))
+                const newMonth = new Date(month.getFullYear(), month.getMonth(), 1)
+                setCurrentMonth(newMonth)
+                onMonthChange?.(newMonth) // 👈 envia o valor para o pai
               }}
               className="rounded-md border w-full"
               classNames={calendarClassNames}

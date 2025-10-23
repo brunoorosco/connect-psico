@@ -15,6 +15,7 @@ export const AvailabilityPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [weeklySchedules, setWeeklySchedules] = useState<WeeklySchedule[]>([])
   const [dayAvailabilities, setDayAvailabilities] = useState<DayAvailability[]>([])
+ const [selectedMonth, setSelectedMonth] = useState<Date>(new Date())
 
   const professionalId = useCurrentUser()
   const [visibleMonth, setVisibleMonth] = useState<Date>(
@@ -25,7 +26,6 @@ export const AvailabilityPage = () => {
     startTransition(() => {
       getDayAvailabilitiesForMonth(professionalId?.id as string, selectedDate)
         .then((data) => {
-          console.log(data)
           setDayAvailabilities(data)
           //   toast.dismiss(toastId);
         })
@@ -34,9 +34,7 @@ export const AvailabilityPage = () => {
           toast.error("Erro ao carregar disponibilidade")
         })
     })
-  }, [selectedDate])
-
-  console.log("dasds",dayAvailabilities)
+  }, [selectedDate, selectedMonth])
 
   const handleWeeklyScheduleUpdate = (schedules: WeeklySchedule[]) => {
     setWeeklySchedules(schedules)
@@ -90,6 +88,7 @@ export const AvailabilityPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <AvailabilityCalendar
+              onMonthChange={(month) => setSelectedMonth(month)}
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
               weeklySchedules={weeklySchedules}
