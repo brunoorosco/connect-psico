@@ -54,6 +54,7 @@ export const BankAccountResponseSchema = z.object({
   branchNumber: branchNumberSchema,
   accountNumber: accountNumberSchema,
   pixKey: pixKeySchema.nullable(),
+  prepaymentEnabled: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
   userId: z.string().cuid(),

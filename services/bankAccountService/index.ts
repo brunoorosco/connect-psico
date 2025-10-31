@@ -4,10 +4,6 @@
 import { BankAccountCreateInput, BankAccountUpdateInput } from "@/domain/model/bankAccount"
 import { prisma } from "@/lib/db"
 
-export async function create(data: BankAccountCreateInput) {
-  return await prisma.bankAccount.create({ data })
-}
-
 export async function update(id: number, data: BankAccountUpdateInput) {
   return await prisma.bankAccount.update({
     where: { id },
@@ -53,5 +49,6 @@ export async function upsert(userId: string, data: BankAccountCreateInput) {
 }
 
 export async function findByUserId(userId: string) {
-  return await prisma.bankAccount.findFirst({ where: { userId } })
+  const resp = await prisma.bankAccount.findFirst({ where: { userId } })
+  return resp
 }

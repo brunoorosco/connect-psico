@@ -20,8 +20,10 @@ import { ArrowLeft, Plus, Trash2, AlertCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { saveBankAccountAction } from "@/actions/payment/bankAccount"
+import { getBankAccountAction, saveBankAccountAction } from "@/actions/payment/bankAccount"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui"
+import { useCurrentUser } from "@hooks/use-current-user"
+import { updatePrepaymentAction } from "@/actions/payment/updatePrepayment"
 
 interface SessionPackage {
   id: string
@@ -33,6 +35,9 @@ interface SessionPackage {
 const PaymentSettings = () => {
   const navigate = useRouter()
   const [showTermsDialog, setShowTermsDialog] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const user = useCurrentUser()
+
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false)
   const [prepaymentEnabled, setPrepaymentEnabled] = useState(false)
   const [paymentData, setPaymentData] = useState({
@@ -51,12 +56,43 @@ const PaymentSettings = () => {
   })
 
   useEffect(() => {
-    const accepted = localStorage.getItem("payment_terms_accepted")
-    if (accepted === "true") {
-      setHasAcceptedTerms(true)
-      setShowTermsDialog(false)
+    const fetchData = async () => {
+      const accepted = localStorage.getItem("payment_terms_accepted")
+      if (accepted === "true") {
+        setHasAcceptedTerms(true)
+        setShowTermsDialog(false)
+      }
+
+      if (user?.id) {
+        await handleGetBankAccount(user.id)
+      }
     }
-  }, [])
+
+    fetchData()
+  }, [user?.id])
+
+  const handleGetBankAccount = async (userId: string) => {
+    try {
+      setLoading(true)
+      const result = await getBankAccountAction(userId)
+
+      if (result?.success && result.data) {
+        setPaymentData({
+          accountType: result.data.accountType || "",
+          bankName: result.data.bankName || "",
+          agency: result.data.branchNumber || "",
+          account: result.data.accountNumber || "",
+          pixKey: result.data.pixKey || "",
+        })
+        toast.info("Dados bancários carregados com sucesso.")
+      }
+    } catch (error) {
+      console.error("Erro ao buscar conta bancária:", error)
+      toast.error("Erro ao buscar informações bancárias.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleAcceptTerms = () => {
     localStorage.setItem("payment_terms_accepted", "true")
@@ -68,7 +104,7 @@ const PaymentSettings = () => {
   }
 
   const handleDeclineTerms = () => {
-    navigate.push("/professional-dashboard")
+    navigate.push("/app")
   }
 
   const handlePaymentDataChange = (field: string, value: string) => {
@@ -76,6 +112,7 @@ const PaymentSettings = () => {
   }
 
   const handleSavePaymentData = async () => {
+    setLoading(true)
     const formData = new FormData()
     formData.append("accountType", paymentData.accountType)
     formData.append("bankName", paymentData.bankName)
@@ -94,6 +131,7 @@ const PaymentSettings = () => {
         description: JSON.stringify(result.error),
       })
     }
+    setLoading(false)
   }
 
   const handleAddPackage = () => {
@@ -124,6 +162,21 @@ const PaymentSettings = () => {
     })
   }
 
+  const handleTogglePrepayment = async (enabled: boolean) => {
+    setPrepaymentEnabled(enabled)
+    if (!user?.id) return
+    try {
+      const result = await updatePrepaymentAction(user.id, enabled)
+      if (result.success) {
+        toast.success(enabled ? "Pagamento prévio ativado" : "Pagamento prévio desativado")
+      } else {
+        toast.error("Falha ao atualizar configuração de pagamento")
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao atualizar configuração de pagamento")
+    }
+  }
   return (
     <>
       <Dialog open={showTermsDialog} onOpenChange={() => {}}>
@@ -245,10 +298,10 @@ const PaymentSettings = () => {
 
       <div className="min-h-screen bg-background">
         <div className="container mx-auto p-6 max-w-6xl">
-          <Button variant="ghost" onClick={() => navigate.push("/professional-dashboard")} className="mb-6">
+          {/* <Button variant="ghost" onClick={() => navigate.push("/app")} className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Dashboard
-          </Button>
+          </Button> */}
 
           <div className="space-y-6">
             <div>
@@ -266,7 +319,7 @@ const PaymentSettings = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-4">
-                  <Switch checked={prepaymentEnabled} onCheckedChange={setPrepaymentEnabled} />
+                  <Switch checked={prepaymentEnabled} onCheckedChange={handleTogglePrepayment} />
                   <Label>{prepaymentEnabled ? "Ativado" : "Desativado"}</Label>
                 </div>
               </CardContent>
@@ -336,14 +389,14 @@ const PaymentSettings = () => {
                   />
                 </div>
 
-                <Button onClick={handleSavePaymentData} className="mt-4">
+                <Button onClick={handleSavePaymentData} disabled={loading} className="mt-4">
                   Salvar Dados Bancários
                 </Button>
               </CardContent>
             </Card>
 
             {/* Pacotes de Sessões */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Pacotes de Sessões</CardTitle>
                 <CardDescription>Crie pacotes com quantidade de sessões e valores fechados</CardDescription>
@@ -421,7 +474,7 @@ const PaymentSettings = () => {
                   </>
                 )}
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>

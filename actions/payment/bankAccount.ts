@@ -3,21 +3,8 @@
 
 import { auth } from "@/auth"
 import { BankAccountCreateSchema, BankAccountUpdateSchema } from "@/domain/model/bankAccount"
-import { create, excluir, update, upsert } from "@services/bankAccountService"
+import { excluir, findByUserId, listByUser, update, upsert } from "@services/bankAccountService"
 import { revalidatePath } from "next/cache"
-
-export async function createBankAccountAction(formData: FormData) {
-  const raw = Object.fromEntries(formData)
-  const parsed = BankAccountCreateSchema.safeParse(raw)
-
-  if (!parsed.success) {
-    return { success: false, errors: parsed.error.flatten() }
-  }
-
-  const account = await create(parsed.data)
-  revalidatePath("/dashboard/bank-accounts") // atualiza a página automaticamente
-  return { success: true, data: account }
-}
 
 export async function updateBankAccountAction(id: number, formData: FormData) {
   const raw = Object.fromEntries(formData)
@@ -63,4 +50,14 @@ export async function saveBankAccountAction(formData: FormData) {
   revalidatePath("/professional-dashboard/payment-settings")
 
   return { success: true }
+}
+
+export async function getBankAccountAction(userId: string) {
+  try {
+    const account = await findByUserId(userId)
+    return { success: true, data: account }
+  } catch (error) {
+    console.error(error)
+    return { success: false, message: "Erro ao buscar conta bancária" }
+  }
 }
