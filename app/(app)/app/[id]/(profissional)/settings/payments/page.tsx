@@ -20,6 +20,8 @@ import { ArrowLeft, Plus, Trash2, AlertCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { saveBankAccountAction } from "@/actions/payment/bankAccount"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui"
 
 interface SessionPackage {
   id: string
@@ -40,6 +42,7 @@ const PaymentSettings = () => {
     account: "",
     pixKey: "",
   })
+
   const [packages, setPackages] = useState<SessionPackage[]>([])
   const [newPackage, setNewPackage] = useState({
     name: "",
@@ -72,10 +75,25 @@ const PaymentSettings = () => {
     setPaymentData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSavePaymentData = () => {
-    toast.success("Dados salvos", {
-      description: "Suas informações de pagamento foram atualizadas com sucesso.",
-    })
+  const handleSavePaymentData = async () => {
+    const formData = new FormData()
+    formData.append("accountType", paymentData.accountType)
+    formData.append("bankName", paymentData.bankName)
+    formData.append("agency", paymentData.agency)
+    formData.append("account", paymentData.account)
+    formData.append("pixKey", paymentData.pixKey)
+
+    const result = await saveBankAccountAction(formData)
+
+    if (result.success) {
+      toast.success("Dados salvos com sucesso!", {
+        description: "Suas informações bancárias foram atualizadas.",
+      })
+    } else {
+      toast.error("Erro ao salvar", {
+        description: JSON.stringify(result.error),
+      })
+    }
   }
 
   const handleAddPackage = () => {
@@ -264,12 +282,18 @@ const PaymentSettings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="accountType">Tipo de Conta</Label>
-                    <Input
-                      id="accountType"
-                      placeholder="Conta Corrente / Poupança"
+                    <Select
                       value={paymentData.accountType}
-                      onChange={(e) => handlePaymentDataChange("accountType", e.target.value)}
-                    />
+                      onValueChange={(value) => handlePaymentDataChange("accountType", value)}
+                    >
+                      <SelectTrigger id="accountType">
+                        <SelectValue placeholder="Selecione o tipo de conta" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CHECKING">Conta Corrente</SelectItem>
+                        <SelectItem value="SAVINGS">Conta Poupança</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="bankName">Banco</Label>
