@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCurrentUser } from "@hooks/use-current-user"
 import { updatePrepaymentAction } from "@/actions/payment/updatePrepayment"
 
-interface SessionPackage {
+type SessionPackage = {
   id: string
   name: string
   sessions: number

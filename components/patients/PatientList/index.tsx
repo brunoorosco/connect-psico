@@ -12,6 +12,8 @@ import { useCurrentUser } from "@hooks/use-current-user"
 import { PatientActions } from "./buttonsActions"
 import { MessageDialog } from "../DialogMessagePatient"
 import { formatPhone } from "@/utils/formatPhone"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
+import { getInitials } from "@/utils/getInitialsName"
 
 export default function PatientList({ patients, onViewPatient, onEditPatient, onDeletePatient }: IPatientList) {
   const { handleView, handleEdit, handleDelete } = usePatientList({
@@ -43,6 +45,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead />
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Telefone</TableHead>
@@ -53,6 +56,15 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
             <TableBody>
               {patients.map((item) => (
                 <TableRow key={item.id} className="hover:bg-gray-100 cursor-pointer" onClick={() => handleView(item)}>
+                  <TableCell className="font-medium uppercase py-1">
+                    <Avatar>
+                      {item?.image ? (
+                        <AvatarImage src={item?.image} />
+                      ) : (
+                        <AvatarFallback className="bg-primary text-white">{getInitials(item.name)}</AvatarFallback>
+                      )}
+                    </Avatar>
+                  </TableCell>
                   <TableCell className="font-medium uppercase py-2">{item.name}</TableCell>
                   <TableCell className="py-2">{item.email || "-"}</TableCell>
                   <TableCell className="py-2">{formatPhone(item.phone) || "-"}</TableCell>
@@ -78,6 +90,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
         <div className="md:hidden space-y-2">
           {patients.map((item) => (
             <div key={item.id} className="border rounded-lg p-4 bg-white shadow-sm" onClick={() => handleView(item)}>
+              <img className="text-lg font-semibold uppercase" />
               <div className="text-lg font-semibold uppercase">{item.name}</div>
               <div className="text-sm text-gray-600 mt-1">Email: {item.email || "-"}</div>
               <div className="text-sm text-gray-600">Telefone: {formatPhone(item.phone) || "-"}</div>

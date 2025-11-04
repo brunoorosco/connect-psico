@@ -14,7 +14,7 @@ export type AppointmentModel = {
   isNewPatient?: boolean
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date
-  patient: { id: string; name: string; telefone: string; email: string }
+  patient: { id: string; name: string; telefone: string; email: string; image?: string }
   professional: { id: string; name: string; telefone: string; email: string }
 }
 

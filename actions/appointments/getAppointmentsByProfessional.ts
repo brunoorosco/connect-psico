@@ -16,10 +16,7 @@ type Response = {
   lastPage: number
 }
 
-export const getAppointmentsUsers = async ({
-  page = 1,
-  limit = 10,
-}: PaginationParams): Promise<Response> => {
+export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationParams): Promise<Response> => {
   const session = await auth()
   if (!session?.user) {
     throw new Error("Usuário não autenticado")
@@ -27,9 +24,7 @@ export const getAppointmentsUsers = async ({
 
   const skip = (page - 1) * limit
   const isPatient = session.user.role === "DEFAULT"
-  const query = isPatient
-    ? { patientId: session.user.id }
-    : { professionalId: session.user.id }
+  const query = isPatient ? { patientId: session.user.id } : { professionalId: session.user.id }
 
   // 🔹 Buscar appointments e total em paralelo
   const [appointments, total] = await Promise.all([
@@ -50,7 +45,7 @@ export const getAppointmentsUsers = async ({
             },
           },
         },
-        patient: { select: { name: true } },
+        patient: { select: { name: true, image: true } },
       },
       skip,
       take: limit,
@@ -59,7 +54,7 @@ export const getAppointmentsUsers = async ({
   ])
 
   // 🔹 Opcional: otimizar a busca de pacientes já existentes
-  const patientIds = appointments.map(a => a.patientId)
+  const patientIds = appointments.map((a) => a.patientId)
   const existingPatients = await prisma.pacientes.findMany({
     where: {
       patientId: { in: patientIds },
@@ -68,10 +63,10 @@ export const getAppointmentsUsers = async ({
     select: { patientId: true },
   })
 
-  const existingPatientIds = new Set(existingPatients.map(p => p.patientId))
+  const existingPatientIds = new Set(existingPatients.map((p) => p.patientId))
 
   // 🔹 Montagem dos dados
-  const mappedAppointments = appointments.map(app => {
+  const mappedAppointments = appointments.map((app) => {
     const { professional, ...rest } = app
     const { Professional, ...restProfessional } = professional
     const professionalData = Professional ?? {}

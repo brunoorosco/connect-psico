@@ -15,4 +15,7 @@ export const env = {
   apiKeyChatz: process.env.API_KEY_CHATZ,
   urlBase: process.env.NEXT_PUBLIC_URL || "www.psicomais.com",
   timezone: process.env.Tz || "America/Sao_Paulo",
+  baseUrlEVOApi: process.env.EVO_APIURL || "https://evo2.orostec.com.br",
+  instanceEVO: process.env.EVO_INSTANCE || "psicomais",
+  apiKeyEVO: process.env.EVO_APIKEY as string,
 }
