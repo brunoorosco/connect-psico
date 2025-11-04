@@ -10,7 +10,7 @@ import { createPixForAppointment } from "../payment/createPixForAppointment"
 import { auth } from "@/auth"
 
 const TZ = "America/Sao_Paulo"
-const prePayment = process.env.PRE_PAYMENT_APPOINTMENT || false
+
 const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
@@ -48,7 +48,6 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     const end = endOfDay(appointmentDate)
 
     // 2. Verificar se já existe agendamento neste horário
-  
 
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
@@ -74,10 +73,13 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
       return { error: "Já existe um agendamento pra este dia" }
     }
     // 3. Criar agendamento
-    const appointment = await prisma.appointment.create({
-      data: { professionalId, patientId, appointmentDate, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
-      select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
-    })
+    const [appointment, prePayment] = await Promise.all([
+      prisma.appointment.create({
+        data: { professionalId, patientId, appointmentDate, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+        select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
+      }),
+      prisma.bankAccount.findFirst({ where: { userId: professionalId }, select: { prepaymentEnabled: true } }),
+    ])
 
     if (prePayment) {
       const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })

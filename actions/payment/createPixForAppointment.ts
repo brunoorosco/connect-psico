@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { abacatePay } from "@/infra/payments/abacatepay"
 
-import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
+import { sendMediaApiWhatsapp, sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
 import { sendEmail } from "@/infra/email/sendEmail"
 import { withIdem } from "@/infra/db/repositories/idempotency"
 import { delay } from "@/utils/delay"
@@ -52,6 +52,8 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
       },
     })
 
+    const base64Data = resp.data.brCodeBase64.replace(/^data:image\/\w+;base64,/, "")
+
     // notificar paciente
     const when = new Date(resp.data.expiresAt)
     const date = when.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
@@ -65,9 +67,28 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
     if (app.patient.phone) {
       await sendMessageApiWhatsapp(app.patient.phone, msg1)
       await delay(500)
-      await sendMessageApiWhatsapp(app.patient.phone, msg2, false)
+      await sendMediaApiWhatsapp(app.patient.phone, "QRCode", base64Data, false)
     }
-    // await sendEmail(app.patient.email, "Pagamento da sua consulta", `<p>${msg}</p>`)
+
+    // ---- ENVIO DE E-MAIL ----
+    await sendEmail({
+      to: patient.email,
+      subject: "💳 Pagamento da sua consulta via PIX",
+      html: `
+    <p>Olá ${patient.name},</p>
+    <p>Segue o QR Code para pagamento:</p>
+    <img src="cid:qrcodepix" alt="QR Code PIX" style="max-width: 200px; border-radius: 8px;" />
+    <p>Código PIX:</p>
+    <pre style="background:#f3f3f3;padding:10px">${resp.data.brCode}</pre>
+  `,
+      attachments: [
+        {
+          filename: "pix-qrcode.png",
+          content: Buffer.from(base64Data, "base64"),
+          cid: "qrcodepix",
+        },
+      ],
+    })
 
     return { checkoutUrl: "", qrCodeText: resp.data.brCode }
   })

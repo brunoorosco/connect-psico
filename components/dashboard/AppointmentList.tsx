@@ -11,6 +11,9 @@ import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
 import { Badge } from "@components/ui/badge"
+import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
+import { Avatar } from "@components/ui/avatar"
+import { getInitials } from "@/utils/getInitialsName"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -69,17 +72,27 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                 : "border-l-4 border-l-therapy-primary"
             }`}
           >
-            <CardContent className="p-4">
+            <CardContent className="px-4 py-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
+                  {/* <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
                     <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
-                  </div>
-                  <div>
+                  </div> */}
+                  <Avatar className="size-14">
+                    {appointment.patient.image ? (
+                      <AvatarImage  src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
+                    ) : (
+                      <AvatarFallback>{getInitials(appointment.patient.name)}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex flex-col">
                     <h3 className="font-medium">
                       {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                     </h3>
-                    <p className="text-sm text-gray-500">{appointment.duration} minutos</p>
+                    {/* <p className="text-sm text-gray-500">{appointment.duration} minutos</p> */}
+                    <div className="bg-gray-200 rounded-full px-2 text-center w-2/3 text-therapy-tertiary">
+                      <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -113,7 +126,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                           {getAppointmentStatusLabel(appointment.status as any)}
                         </div>
 
-                        {appointment.isNewPatient && <Badge className="px-2">Novo Paciente</Badge>}
+                        {appointment.isNewPatient && <Badge className="px-2 text-white">Novo Paciente</Badge>}
                       </div>
                     </>
                   )}
