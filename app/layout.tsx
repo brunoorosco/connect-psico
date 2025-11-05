@@ -60,14 +60,7 @@ export default async function RootLayout({
           `}
         </Script>
         {/* End Google Tag Manager */}
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=SEU_PIXEL_ID_AQUI&ev=PageView&noscript=1"
-          />
-        </noscript>
+   
       </head>
       <body className={roboto.className} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}
