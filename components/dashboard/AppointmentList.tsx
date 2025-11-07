@@ -5,7 +5,7 @@ import { ptBR } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { isSameDay } from "date-fns"
-import { Calendar } from "lucide-react"
+import { Calendar, CalendarX, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
@@ -80,18 +80,24 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   </div> */}
                   <Avatar className="size-14">
                     {appointment.patient.image ? (
-                      <AvatarImage  src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
+                      <AvatarImage src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
                     ) : (
                       <AvatarFallback>{getInitials(appointment.patient.name)}</AvatarFallback>
                     )}
                   </Avatar>
                   <div className="flex flex-col">
-                    <h3 className="font-medium">
+                    <h3 className="font-sans font-medium">
                       {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                     </h3>
                     {/* <p className="text-sm text-gray-500">{appointment.duration} minutos</p> */}
-                    <div className="bg-gray-200 rounded-full px-2 text-center w-2/3 text-therapy-tertiary">
-                      <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
+                    <div className="flex flex-row gap-2">
+                      <div className="bg-gray-200 rounded-full px-3 text-center text-therapy-tertiary">
+                        <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
+                      </div>
+
+                      {appointment.isNewPatient && (
+                        <Badge className="px-2 bg-primary/90 text-[0.6rem] text-white">Novo Paciente</Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -99,10 +105,10 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
                     <>
                       <Button
-                        variant="outline"
                         size="sm"
+                        variant="outline"
                         onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
-                        className="text-therapy-tertiary hover:text-therapy-primary hover:bg-therapy-light/50"
+                        className="text-therapy-secondary hover:text-therapy-primary hover:bg-primary/20 border-primary-foreground shadow-md"
                       >
                         Ver prontuário
                       </Button>
@@ -119,14 +125,25 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                       )}
                       <div>
                         <div
-                          className={`text-xs px-2 py-1 rounded-full mb-2 ${getAppointmentStatusClass(
+                          className={`text-xs px-2 py-1 rounded-lg font-semibold text-center mb-2 ${getAppointmentStatusClass(
                             appointment.status as any
                           )}`}
                         >
                           {getAppointmentStatusLabel(appointment.status as any)}
                         </div>
 
-                        {appointment.isNewPatient && <Badge className="px-2 text-white">Novo Paciente</Badge>}
+                        {appointment.status === "CONFIRMED" && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="text-white"
+                            onClick={() => handleStartConsultation(appointment.patientId)}
+                          >
+                            <CalendarX className="h-4 w-4 mr-1" />
+                            Cancelar
+                          </Button>
+                          // <ButtonStartWrapper id={appointment.patientId}/>
+                        )}
                       </div>
                     </>
                   )}

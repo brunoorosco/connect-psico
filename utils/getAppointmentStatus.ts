@@ -3,7 +3,7 @@ import { StatusAppointment } from "@/domain/model/appointment";
 export function getAppointmentStatusLabel(status: StatusAppointment): string {
   switch (status) {
     case "CONFIRMED":
-      return "Agendado";
+      return "Confirmado";
     case "CONCLUDED":
       return "Concluído";
     case "PENDING":
