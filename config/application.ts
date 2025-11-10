@@ -5,7 +5,6 @@ export const env = {
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
   apikeyMailerSender: process.env.TOKEN_MAILERSEND,
   version: "1.0.0",
-  apiKeyBabyMail: process.env.API_KEY_BABY_MAIL,
   nodemailerHost: process.env.NODEMAILER_HOST,
   nodemailerPort: Number(process.env.NODEMAILER_PORT),
   nodemailerUser: process.env.NODEMAILER_USER,
@@ -18,4 +17,5 @@ export const env = {
   baseUrlEVOApi: process.env.EVO_APIURL || "https://evo2.orostec.com.br",
   instanceEVO: process.env.EVO_INSTANCE || "psicomais",
   apiKeyEVO: process.env.EVO_APIKEY as string,
+  apikeyASAAS: process.env.ASAAS_API_KEY as string || 'api_key_asaas',
 }
