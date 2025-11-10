@@ -29,7 +29,6 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
   }, [open, professional])
 
   if (!professional) return null
-  console.info('TherapistDetails.tsx:32', );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -13,11 +13,15 @@ import { AvailableSlots } from "./AvailableSlots"
 import { ScheduleButton } from "./ScheduleButton"
 import { ICalendarProfessional } from "./types"
 import { env } from "@/config/application"
+import { PaymentSelector } from "./PaymentSelector"
 
 export const CalendarProfessional = ({ professionalData }: ICalendarProfessional) => {
   const { data: session, status } = useSession()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null)
+  // estado global de pagamento
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit" | null>("pix")
+  const [errorPayment, setErrorPayment] = useState(false)
 
   const { availableSlots, availableDatesSet, isLoading, error, mutate } = useAvailableSlots(
     professionalData.id,
@@ -38,7 +42,8 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
     },
     [availableDatesSet]
   )
-  
+  console.log(paymentMethod)
+
   return (
     <TabsContent value="schedule" className="pt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -79,12 +84,24 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
           </div>
 
           {selectedSlot && status === "authenticated" && session?.user?.id && (
-            <ScheduleButton
-              selectedSlot={selectedSlot}
-              userId={session.user.id}
-              professional={professionalData}
-              onSuccess={mutate}
-            />
+            <>
+              <PaymentSelector
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                errorPayment={errorPayment}
+                setErrorPayment={setErrorPayment}
+              />
+
+              <ScheduleButton
+                selectedSlot={selectedSlot}
+                userId={session.user.id}
+                professional={professionalData}
+                onSuccess={mutate}
+                errorPayment={errorPayment}
+                setErrorPayment={setErrorPayment}
+                paymentMethod={paymentMethod}
+              />
+            </>
           )}
         </div>
       </div>
