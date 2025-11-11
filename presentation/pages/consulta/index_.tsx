@@ -357,31 +357,28 @@ const ConsultationSession = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-2">
+    <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-6xl mx-auto space-y-4">
-        <Card>
-          <CardHeader className="flex">
-            <CardTitle className="text-2xl font-bold text-primary">Sessão</CardTitle>
+        <Card className="shadow-sm border-none sm:border">
+          <CardHeader className="pb-2 sm:pb-4">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-primary">Sessão</CardTitle>
+
+            {/* ⚠️ Alerta ético */}
             <div
-              className="flex items-start gap-2 rounded-md border-l-4 border-yellow-400 bg-yellow-100 p-3 mb-4"
+              className="flex flex-col sm:flex-row sm:items-start gap-2 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-3 mt-2"
               role="alert"
             >
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                </div>
-                <div className="ml-2">
-                  <p className="text-sm text-yellow-800">
-                    O uso de gravação sem consentimento assinado do paciente fere o{" "}
-                    <strong>Art. 9º do Código de Ética</strong>. Garanta o registro digital antes de prosseguir.
-                  </p>
-                </div>
-              </div>
+              <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+              <p className="text-sm text-yellow-800 leading-snug">
+                O uso de gravação sem consentimento assinado do paciente fere o{" "}
+                <strong>Art. 9º do Código de Ética</strong>. Garanta o registro digital antes de prosseguir.
+              </p>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Informações */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          <CardContent className="space-y-4">
+            {/* 🧍 Informações do paciente */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="patient-name">Nome do Paciente</Label>
                 <Input
@@ -392,8 +389,8 @@ const ConsultationSession = () => {
                 />
               </div>
 
-              <div className="space-y-2 col-span-1">
-                <Label htmlFor="consultation-date">Data da Consulta</Label>
+              <div className="space-y-2">
+                <Label htmlFor="consultation-date">Data</Label>
                 <Input
                   id="consultation-date"
                   type="date"
@@ -402,7 +399,8 @@ const ConsultationSession = () => {
                   className="bg-muted"
                 />
               </div>
-              <div className="space-y-2 col-span-1">
+
+              <div className="space-y-2">
                 <Label htmlFor="consultation-time">Horário</Label>
                 <Input
                   id="consultation-time"
@@ -414,103 +412,95 @@ const ConsultationSession = () => {
               </div>
             </div>
 
-            {/* Gravação */}
-            <Card className="bg-muted/50">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={isRecording ? handleStop : handleStart}
-                        variant={isRecording ? "destructive" : "default"}
-                        size="lg"
-                        className="flex items-center space-x-2 text-gray-50"
-                        // disabled={isStopping}
-                        aria-busy={isStopping ? "true" : "false"}
-                      >
-                        {isRecording ? <MicOff /> : <Mic />}
-                        <span>{isRecording ? (isStopping ? "Parando..." : "Parar Gravação") : "Iniciar Gravação"}</span>
-                      </Button>
+            {/* 🎙️ Gravação */}
+            <Card className="bg-muted/40 border-none shadow-none sm:border sm:shadow-sm">
+              <CardContent className="pt-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  {/* Botão de gravação */}
+                  <Button
+                    onClick={isRecording ? handleStop : handleStart}
+                    variant={isRecording ? "destructive" : "default"}
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    {isRecording ? <MicOff /> : <Mic />}
+                    <span className="ml-2">
+                      {isRecording ? (isStopping ? "Parando..." : "Parar Gravação") : "Iniciar Gravação"}
+                    </span>
+                  </Button>
 
-                      {isRecording && (
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                            <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
-                          </div>
-                        </div>
-                      )}
+                  {isRecording && (
+                    <div className="flex justify-center sm:justify-start items-center gap-2">
+                      <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                      <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
                     </div>
-                  </div>
+                  )}
+                </div>
+
+                {/* Botões secundários — empilhados no mobile */}
+                <div className="grid grid-cols-1 sm:flex sm:gap-3 gap-2 pt-3">
                   <Button
                     onClick={openIssueModal}
                     variant="outline"
-                    className="flex items-center space-x-2"
-                    size="lg"
-                    title={!canIssueDocument ? "Finalize a consulta para emitir o documento" : "Emitir documento"}
+                    className="w-full sm:w-auto"
+                    title={!canIssueDocument ? "Finalize a consulta para emitir" : "Emitir documento"}
                   >
-                    <FileText className="w-4 h-4" />
-                    <span>Emitir Documento</span>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Emitir Documento
                   </Button>
 
                   <Button
                     onClick={handleSummarize}
-                    variant="outline"
-                    size="lg"
+                    variant="secondary"
                     disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
-                    title="Gerar resumo automático"
+                    className="w-full sm:w-auto"
                   >
-                    <FileText className="w-4 h-4" />
                     {summLoading ? "Resumindo..." : "Gerar Resumo"}
                   </Button>
 
-                  <Button onClick={saveConsultation} className="flex items-center space-x-2 text-gray-50" size="lg">
-                    <Save className="w-4 h-4" />
-                    <span>Salvar Consulta</span>
+                  <Button onClick={saveConsultation} className="w-full sm:w-auto text-white" disabled={isSubmitting}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSubmitting ? "Salvando..." : "Salvar Consulta"}
                   </Button>
                 </div>
-
-                {/* feedback de erro do gravador */}
-                {error && <p className="text-sm text-destructive mt-3">{error}</p>}
               </CardContent>
             </Card>
 
-            {/* Transcript (preview) */}
+            {/* 🧾 Transcrição */}
             {transcript && (
               <div className="space-y-2">
-                <Label>Transcrição parcial </Label>
-                <Textarea value={transcript} readOnly rows={6} className="min-h-[120px]" />
+                <Label>Transcrição Parcial</Label>
+                <Textarea value={transcript} readOnly rows={5} className="min-h-[100px]" />
               </div>
             )}
 
-            {/* Anotações */}
+            {/* 🗒️ Notas */}
             <div className="space-y-2">
               <Label htmlFor="notes">Anotações da Sessão</Label>
               <Textarea
                 id="notes"
-                placeholder="Digite suas anotações sobre a consulta..."
+                placeholder="Digite suas anotações..."
                 value={notes}
-                rows={8}
+                rows={6}
                 onChange={(e) => setNotes(e.target.value)}
-                className="min-h-[200px] resize-none"
+                className="min-h-[160px] resize-none"
               />
-              <p className="text-sm text-muted-foreground">{notes.length} caracteres</p>
+              <p className="text-xs text-muted-foreground text-right">{notes.length} caracteres</p>
             </div>
 
+            {/* 🤖 Resumo IA */}
             {aiSummary && (
-              <Card className="mt-4">
+              <Card className="mt-4 bg-muted/30 border-none sm:border">
                 <CardHeader>
-                  <CardTitle>Resumo IA</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Resumo IA</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p>{aiSummary.summary}</p>
-                  </div>
+                <CardContent className="space-y-3 text-sm">
+                  <p>{aiSummary.summary}</p>
 
-                  {!!aiSummary.key_points?.length && (
+                  {aiSummary.key_points?.length > 0 && (
                     <div>
                       <Label>Pontos-chave</Label>
-                      <ul className="list-disc ml-5 text-sm">
+                      <ul className="list-disc ml-5 space-y-1">
                         {aiSummary.key_points.map((p, i) => (
                           <li key={i}>{p}</li>
                         ))}
@@ -518,22 +508,11 @@ const ConsultationSession = () => {
                     </div>
                   )}
 
-                  {!!aiSummary.action_items?.length && (
+                  {aiSummary.action_items?.length > 0 && (
                     <div>
                       <Label>Itens de Ação</Label>
-                      <ul className="list-disc ml-5 text-sm">
+                      <ul className="list-disc ml-5 space-y-1">
                         {aiSummary.action_items.map((p, i) => (
-                          <li key={i}>{p}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {!!aiSummary.warnings?.length && (
-                    <div>
-                      <Label>Alertas</Label>
-                      <ul className="list-disc ml-5 text-sm">
-                        {aiSummary.warnings.map((p, i) => (
                           <li key={i}>{p}</li>
                         ))}
                       </ul>
@@ -542,46 +521,6 @@ const ConsultationSession = () => {
                 </CardContent>
               </Card>
             )}
-
-            {/* Ações */}
-            {/* <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
-              <Button
-                onClick={openIssueModal}
-                variant="outline"
-                className="flex items-center space-x-2"
-                size="lg"
-                title={!canIssueDocument ? "Finalize a consulta para emitir o documento" : "Emitir documento"}
-              >
-                <FileText className="w-4 h-4" />
-                <span>Emitir Documento</span>
-              </Button>
-
-              <Button
-                onClick={handleSummarize}
-                variant="secondary"
-                size="lg"
-                disabled={summLoading || (!transcript && !notes) || !!aiSummary}
-                title="Gerar resumo automático"
-              >
-                {summLoading ? "Resumindo..." : "Gerar Resumo"}
-              </Button>
-
-              <Button onClick={saveConsultation} className="flex items-center space-x-2" size="lg">
-                <Save className="w-4 h-4" />
-                <span>Salvar Consulta</span>
-              </Button>
-
-              <Button
-                onClick={finalizeAndCleanup}
-                variant="destructive"
-                className="flex items-center space-x-2"
-                size="lg"
-                disabled={finalizing || cleanupLoading}
-                title="Finaliza a sessão e apaga o áudio do servidor"
-              >
-                {finalizing || cleanupLoading ? "Finalizando..." : "Finalizar (apagar áudio)"}
-              </Button>
-            </div> */}
           </CardContent>
         </Card>
       </div>
@@ -592,7 +531,7 @@ const ConsultationSession = () => {
         templates={templates}
         templatesLoading={templatesLoading}
         docType={docType}
-        onDocTypeChange={(t: CertificateType) => setDocType(t)}
+        onDocTypeChange={setDocType}
         rg={rg}
         onChangeRg={setRg}
         cpf={cpf}
