@@ -39,7 +39,6 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
       customer: { cellphone: patient.cellphone, email: patient.email, name: patient.name, taxId: "" },
     }) // { id, checkoutUrl, qrCodeText, expiresAt }
 
-    console.log("createPixForAppointment.ts:53", resp)
     await prisma.payment.create({
       data: {
         appointmentId: app.id,

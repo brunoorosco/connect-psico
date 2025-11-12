@@ -115,6 +115,7 @@ export default function ProfessionalProfilePage() {
     try {
       await handleCreateAppointment({
         patientId: user?.id as string,
+        paymentMethod: "pix",
         professional: {
           name: nickname as string,
           phone: professional?.phone as string,

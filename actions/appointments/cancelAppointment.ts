@@ -3,10 +3,12 @@
 import { prisma } from "@/lib/db"
 import { abacatePay } from "@/infra/payments/abacatepay"
 import { differenceInHours } from "date-fns"
+import { auth } from "@/auth"
 
 type By = "PATIENT" | "PROFESSIONAL"
 
-export async function cancelAppointment(appointmentId: number, by: By) {
+export async function cancelAppointment(appointmentId: number) {
+  const session = await auth()
   const app = await prisma.appointment.findUnique({
     where: { id: appointmentId },
     include: { payment: true, patient: true, professional: true },
@@ -24,7 +26,7 @@ export async function cancelAppointment(appointmentId: number, by: By) {
   let refundAmount = 0
   let reason: "PRO_CANCEL" | "PATIENT_CANCEL_48H" | "PATIENT_CANCEL_LT48H" = "PRO_CANCEL"
 
-  if (by === "PROFESSIONAL") {
+  if (session?.user.role.toUpperCase() === "PROFESSIONAL") {
     refundAmount = app.payment.amountCents // 100%
     reason = "PRO_CANCEL"
   } else {
@@ -38,25 +40,25 @@ export async function cancelAppointment(appointmentId: number, by: By) {
     }
   }
 
-  const r = await abacatePay.refund({
-    providerPaymentId: app.payment.providerPaymentId!,
-    amountCents: refundAmount,
-    reason,
-  })
+  // const r = await abacatePay.refund({
+  //   providerPaymentId: app.payment.providerPaymentId!,
+  //   amountCents: refundAmount,
+  //   reason,
+  // })
 
-  await prisma.refund.create({
-    data: {
-      appointmentId: app.id,
-      amountCents: refundAmount,
-      reason,
-      status: "requested",
-      providerRefundId: r.id,
-    },
-  })
+  // await prisma.refund.create({
+  //   data: {
+  //     appointmentId: app.id,
+  //     amountCents: refundAmount,
+  //     reason,
+  //     status: "requested",
+  //     providerRefundId: r.id,
+  //   },
+  // })
 
   // mensagens
   const date = app.appointmentDate.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
-  if (by === "PROFESSIONAL") {
+  if (session?.user.role.toUpperCase() === "PROFESSIONAL") {
     // avisa paciente do cancelamento + opção de remarcação (você já tem área logada p/ escolher nova data)
   } else {
     // confirma ao paciente o cancelamento e o reembolso (integral ou parcial)

@@ -12,23 +12,31 @@ interface HandleAppointmentParams {
     name: string
     phone: string
   }
+  paymentMethod: "pix" | "credit"
   selectedSlot: { start: Date }
   onSuccess: () => void
 }
 
-export async function handleCreateAppointment({ patientId, professional, selectedSlot, onSuccess }: HandleAppointmentParams) {
+export async function handleCreateAppointment({
+  patientId,
+  professional,
+  paymentMethod,
+  selectedSlot,
+  onSuccess,
+}: HandleAppointmentParams) {
   try {
     const result = await createAppointment({
       patientId,
+      paymentMethod,
       professionalId: professional.userId,
       appointmentDate: selectedSlot.start,
     })
 
     if (result.error) {
-        toast.error("Erro ao agendar", { description: result.error })
-        return
+      toast.error("Erro ao agendar", { description: result.error })
+      return
     }
-    
+
     onSuccess?.()
     toast.success("Agendamento solicitado!", {
       description: `Consulta para ${formatInTimeZone(selectedSlot.start, TZ, "dd/MM/yyyy")} às ${formatInTimeZone(
@@ -43,7 +51,6 @@ export async function handleCreateAppointment({ patientId, professional, selecte
       `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
         `Confira sua agenda na plataforma para maiores detalhes. 😉`
     )
-
   } catch (err) {
     console.error(err)
     // toast.error("Erro inesperado ao agendar")
