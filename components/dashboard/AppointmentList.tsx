@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from "react"
-import { format, isSameDay } from "date-fns"
+import { format, isSameDay, isYesterday } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
 import { getInitials } from "@/utils/getInitialsName"
 import CancelAppointmentDialog from "./CancelApointmentModalMobile"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@hooks/use-mobile"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -24,7 +25,9 @@ interface AppointmentsListProps {
 
 const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
   const isToday = isSameDay(selectedDate, new Date())
+  const yesterday = isYesterday(selectedDate)
   const { data: session } = useSession()
+  const mobile = useIsMobile()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -88,7 +91,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
               <CardContent className="sm:py-1 py-3 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
                 {/* Left side */}
                 <div className="flex items-center gap-3">
-                  <Avatar className="size-12 sm:size-14">
+                  <Avatar className="size-12 sm:size-14 my-1">
                     {appointment.patient.image ? (
                       <AvatarImage src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
                     ) : (
@@ -112,7 +115,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <div className="bg-gray-200 rounded-full px-3 py-0.5 text-xs text-therapy-tertiary font-semibold">
+                      <div className="bg-gray-200 rounded-full px-3 py-1 text-xs text-therapy-tertiary font-semibold">
                         {appointment.appointmentDate.getHours()}:00
                       </div>
 
@@ -124,11 +127,10 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                     </div>
                   </div>
                 </div>
-                {/* Botões — movidos para o lado esquerdo */}
-                <>
+                {!mobile ? (
                   <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start">
                     {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
-                      <div className="hidden sm:flex items-center gap-2">
+                      <div className="sm:flex my-3 items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
@@ -149,7 +151,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                               Iniciar Sessão
                             </Button>
                           )}
-                          {appointment.status === "CONFIRMED" && (
+                          {appointment.status === "CONFIRMED" && !yesterday && (
                             <Button
                               size="sm"
                               variant="ghost"
@@ -164,8 +166,9 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2 sm:hidden w-full -mt-3">
-                    {appointment.status === "CONFIRMED" && (
+                ) : (
+                  <div className="flex flex-col gap-2 sm:hidden w-full -mb-2">
+                    {appointment.status === "CONFIRMED" && !yesterday && (
                       <div className="flex">
                         <Button
                           size="sm"
@@ -191,7 +194,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                       </div>
                     )}
                   </div>
-                </>
+                )}
               </CardContent>
             </Card>
           ))}

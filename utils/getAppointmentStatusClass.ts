@@ -9,7 +9,7 @@ export function getAppointmentStatusClass(status: StatusAppointment): string {
     case "PENDING":
       return "bg-blue-100 text-blue-800"
     case "CONFIRMED":
-      return "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300"
+      return "bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300"
     case "COMPLETED":
       return "bg-therapy-light text-therapy-tertiary"
     default:
