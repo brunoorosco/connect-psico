@@ -1,19 +1,20 @@
 "use client"
-import React from "react"
-import { format } from "date-fns"
+import React, { useState } from "react"
+import { format, isSameDay, isYesterday } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { isSameDay } from "date-fns"
-import { Calendar } from "lucide-react"
+import { CalendarCheck, CalendarX } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
-import { AppointmentModel, StatusAppointment } from "@/domain/model/appointment"
+import { AppointmentModel } from "@/domain/model/appointment"
 import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
 import { Badge } from "@components/ui/badge"
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { Avatar } from "@components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
 import { getInitials } from "@/utils/getInitialsName"
+import CancelAppointmentDialog from "./CancelApointmentModalMobile"
+import { cn } from "@/lib/utils"
+import { useIsMobile } from "@hooks/use-mobile"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -24,118 +25,190 @@ interface AppointmentsListProps {
 
 const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
   const isToday = isSameDay(selectedDate, new Date())
+  const yesterday = isYesterday(selectedDate)
   const { data: session } = useSession()
-  const filteredAppointments = appointments?.filter((appointment) => {
-    return isSameDay(appointment.appointmentDate, selectedDate)
-  })
+  const mobile = useIsMobile()
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+
+  const filteredAppointments = appointments?.filter((a) => isSameDay(a.appointmentDate, selectedDate))
 
   const handleStartConsultation = (patientId: string) => {
     window.location.href = `/app/professional/${session?.user.id}/consulta?patientId=${patientId}`
   }
 
+  const openCancelDialog = (id: number) => {
+    setSelectedId(id)
+    setIsDialogOpen(true)
+  }
+
+  const handleCancelConsultation = async (id: number | null, reason: string) => {
+    if (!id) return
+    console.log("Motivo do cancelamento:", reason)
+    setIsDialogOpen(false)
+    setSelectedId(null)
+  }
+
   if (filteredAppointments?.length === 0) {
     return (
-      <Card className="therapy-card">
-        <CardContent className="p-6">
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-gray-600 mb-2">
-              {isToday
-                ? "Não há consultas agendadas para hoje"
-                : `Não há consultas agendadas para ${format(selectedDate, "d 'de' MMMM", {
-                    locale: ptBR,
-                  })}`}
-            </h3>
-            {userRole === "SUPERVISOR" && (
-              <p className="text-gray-500">Você pode adicionar novas consultas pelo menu de agendamento</p>
-            )}
-          </div>
+      <Card className="therapy-card mt-4 mx-2">
+        <CardContent className="p-6 text-center">
+          <h3 className="text-lg font-medium text-gray-600 mb-2">
+            {isToday
+              ? "Não há consultas agendadas para hoje"
+              : `Não há consultas para ${format(selectedDate, "d 'de' MMMM", {
+                  locale: ptBR,
+                })}`}
+          </h3>
+          {userRole === "SUPERVISOR" && (
+            <p className="text-gray-500 text-sm">Você pode adicionar novas consultas pelo menu de agendamento</p>
+          )}
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-3">
-      {filteredAppointments
-        ?.slice()
-        .sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime())
-        .map((appointment) => (
-          <Card
-            key={appointment.id}
-            className={`therapy-card animate-in-subtle ${
-              appointment.status === "COMPLETED"
-                ? "border-l-4 border-l-green-400"
-                : appointment.status === "CANCELLED"
-                ? "border-l-4 border-l-gray-300 opacity-70"
-                : appointment.status === "PENDING"
-                ? "border-l-4 border-l-orange-400"
-                : "border-l-4 border-l-therapy-primary"
-            }`}
-          >
-            <CardContent className="px-4 py-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                  {/* <div className="bg-gray-200 rounded-full py-2 px-4 text-therapy-tertiary">
-                    <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
-                  </div> */}
-                  <Avatar className="size-14">
+    <>
+      <div className="space-y-3 px-2 pb-20">
+        {filteredAppointments
+          ?.slice()
+          .sort((a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime())
+          .map((appointment) => (
+            <Card
+              key={appointment.id}
+              className={`rounded-2xl shadow-sm border-l-4 ${
+                appointment.status === "COMPLETED"
+                  ? "border-l-green-500"
+                  : appointment.status === "CANCELLED"
+                  ? "border-l-gray-400 opacity-70"
+                  : appointment.status === "PENDING"
+                  ? "border-l-orange-400"
+                  : "border-l-purple-600/80"
+              }`}
+            >
+              <CardContent className="sm:py-1 py-3 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
+                {/* Left side */}
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-12 sm:size-14 my-1">
                     {appointment.patient.image ? (
-                      <AvatarImage  src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
+                      <AvatarImage src={appointment.patient.image} alt={getInitials(appointment.patient.name)} />
                     ) : (
                       <AvatarFallback>{getInitials(appointment.patient.name)}</AvatarFallback>
                     )}
                   </Avatar>
-                  <div className="flex flex-col">
-                    <h3 className="font-medium">
-                      {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
-                    </h3>
-                    {/* <p className="text-sm text-gray-500">{appointment.duration} minutos</p> */}
-                    <div className="bg-gray-200 rounded-full px-2 text-center w-2/3 text-therapy-tertiary">
-                      <span className="font-semibold text-sm">{appointment?.appointmentDate.getHours()}:00</span>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex gap-3">
+                      <h3 className="font-medium text-sm sm:text-base">
+                        {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
+                      </h3>
+                      {/* Status tag */}
+                      <span
+                        className={cn(
+                          "text-xs font-semibold px-3 py-1 rounded-full",
+                          getAppointmentStatusClass(appointment.status)
+                        )}
+                      >
+                        {getAppointmentStatusLabel(appointment.status as any)}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <div className="bg-gray-200 rounded-full px-3 py-1 text-xs text-therapy-tertiary font-semibold">
+                        {appointment.appointmentDate.getHours()}:00
+                      </div>
+
+                      {appointment.isNewPatient && (
+                        <Badge className="text-[0.65rem] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
+                          Novo Paciente
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
-                        className="text-therapy-tertiary hover:text-therapy-primary hover:bg-therapy-light/50"
-                      >
-                        Ver prontuário
-                      </Button>
-                      {appointment.status === "CONFIRMED" && isToday && (
+                {!mobile ? (
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start">
+                    {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
+                      <div className="sm:flex my-3 items-center gap-2">
                         <Button
                           size="sm"
-                          className="bg-therapy-primary hover:bg-therapy-tertiary text-white"
-                          onClick={() => handleStartConsultation(appointment.patientId)}
+                          variant="outline"
+                          onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
+                          className="text-therapy-secondary rounded-lg border-primary-foreground shadow-sm"
                         >
-                          <Calendar className="h-4 w-4 mr-1" />
-                          Iniciar
+                          Ver prontuário
                         </Button>
-                        // <ButtonStartWrapper id={appointment.patientId}/>
-                      )}
-                      <div>
-                        <div
-                          className={`text-xs px-2 py-1 rounded-full mb-2 ${getAppointmentStatusClass(
-                            appointment.status as any
-                          )}`}
-                        >
-                          {getAppointmentStatusLabel(appointment.status as any)}
+                        <div className="sm:flex sm:flex-col sm:items-center">
+                          {appointment.status === "CONFIRMED" && isToday && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-primary"
+                              onClick={() => handleStartConsultation(appointment.patientId)}
+                            >
+                              <CalendarCheck className="h-4 w-4 mr-1" />
+                              Iniciar Sessão
+                            </Button>
+                          )}
+                          {appointment.status === "CONFIRMED" && !yesterday && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-500"
+                              onClick={() => openCancelDialog(appointment.id)}
+                            >
+                              <CalendarX className="h-4 w-4 mr-1" />
+                              Cancelar
+                            </Button>
+                          )}
                         </div>
-
-                        {appointment.isNewPatient && <Badge className="px-2 text-white">Novo Paciente</Badge>}
                       </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-    </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 sm:hidden w-full -mb-2">
+                    {appointment.status === "CONFIRMED" && !yesterday && (
+                      <div className="flex">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 w-full"
+                          onClick={() => openCancelDialog(appointment.id)}
+                        >
+                          <CalendarX className="h-4 w-4 mr-1" />
+                          Cancelar
+                        </Button>
+
+                        {isToday && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-primary w-full"
+                            onClick={() => handleStartConsultation(appointment.patientId)}
+                          >
+                            <CalendarCheck className="h-4 w-4 mr-1" />
+                            Iniciar
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+      </div>
+
+      {/* Modal de cancelamento */}
+      <CancelAppointmentDialog
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
+        onConfirmCancel={(id: number, reason: string) => handleCancelConsultation(id, reason)}
+      />
+    </>
   )
 }
 

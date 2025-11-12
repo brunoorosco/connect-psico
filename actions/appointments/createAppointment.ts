@@ -8,6 +8,8 @@ import { endOfDay, startOfDay } from "date-fns"
 import { randomUUID } from "crypto"
 import { createPixForAppointment } from "../payment/createPixForAppointment"
 import { auth } from "@/auth"
+import { env } from "@/config/application"
+import { AsaasService } from "@/infra/payments/asaas"
 
 const TZ = "America/Sao_Paulo"
 
@@ -15,9 +17,15 @@ const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
   appointmentDate: z.coerce.date(),
+  paymentMethod: z.enum(["pix", "credit"]),
 })
 
 export const createAppointment = async (data: z.infer<typeof CreateAppointmentSchema>) => {
+  const asaasService = new AsaasService({
+    apiKey: env.apikeyASAAS!,
+    environment: process.env.NODE_ENV === "production" ? "production" : "sandbox",
+  })
+
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
   if (!valid.success) {
     return { error: "Dados inválidos" }
@@ -83,16 +91,40 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
 
     if (prePayment) {
       const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
-      await createPixForAppointment({
-        amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+      const action = data.paymentMethod
+
+      const payload = {
+        value: (appointment.professional.Professional?.valorAtendimento as number) / 100,
         appointmentId: appointment.id,
         idempotencyKey: idempotency.key,
-        patient: {
-          name: session?.user.name as string,
-          email: session?.user.email as string,
-          cellphone: session?.user.phone as string,
-        },
-      })
+        name: session?.user.name as string,
+        email: session?.user.email as string,
+        cellphone: session?.user.phone as string,
+      }
+      let paymentResponse
+
+      switch (action) {
+        case "credit":
+          paymentResponse = await asaasService.criarLinkPagamento({ ...payload, billingType: "CREDIT_CARD" })
+          break
+
+        case "pix":
+          // paymentResponse = await asaasService.criarCobrancaPix({ ...payload })
+          await createPixForAppointment({
+            amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+            appointmentId: appointment.id,
+            idempotencyKey: idempotency.key,
+            patient: {
+              name: session?.user.name as string,
+              email: session?.user.email as string,
+              cellphone: session?.user.phone as string,
+            },
+          })
+          break
+
+        default:
+          return { success: false, error: "Ação inválida" }
+      }
     }
     return { success: "Agendamento realizado com sucesso", data: appointment }
   } catch (error) {

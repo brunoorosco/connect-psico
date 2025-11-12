@@ -1,4 +1,5 @@
 import { getAppointmentsByPatient, getAppointmentsByUserId, getAppointmentsUsers } from "@/actions/appointments"
+import { getAppointmentsByDay } from "@/actions/appointments/getAppointmentsByProfessionalAndDay"
 import { AppointmentModel } from "@/domain/model/appointment"
 import { useEffect, useState, useTransition } from "react"
 
@@ -7,6 +8,12 @@ type TUseAppointments = {
   total: number
   loading: boolean
   fetchAppointments: (page?: number, limit?: number) => void
+}
+
+type TUseAppointmentsDay = {
+  appointments: AppointmentModel[]
+  loading: boolean
+  fetchAppointmentsDay: (selectedDate: Date) => void
 }
 
 export function useAppointments(): TUseAppointments {
@@ -30,6 +37,24 @@ export function useAppointments(): TUseAppointments {
     fetchAppointments,
   }
 }
+export function useAppointmentsDay(): TUseAppointmentsDay {
+  const [appointments, setAppointments] = useState<AppointmentModel[]>([])
+  const [loading, startTransition] = useTransition()
+
+  const fetchAppointmentsDay = async (selectedDate: Date) => {
+    startTransition(() => {
+      getAppointmentsByDay({ selectedDate }).then((res) => {
+        setAppointments(res.data ?? [])
+      })
+    })
+  }
+
+  return {
+    appointments,
+    loading,
+    fetchAppointmentsDay,
+  }
+}
 
 export function useAppointmentsByPatient() {
   const [appointments, setAppointments] = useState<any>([])
@@ -39,7 +64,7 @@ export function useAppointmentsByPatient() {
   const fetchAppointments = async (page = 1, limit = 10) => {
     startTransition(async () => {
       const res = await getAppointmentsByPatient({ page, limit })
-      setAppointments(res?? [])
+      setAppointments(res ?? [])
       setTotal(res.total ?? 0)
     })
   }
