@@ -12,17 +12,8 @@ import { getAppointmentStatusClass } from "@/utils/getAppointmentStatusClass"
 import { Badge } from "@components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
 import { getInitials } from "@/utils/getInitialsName"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Textarea } from "@components/ui"
+import CancelAppointmentDialog from "./CancelApointmentModalMobile"
+import { cn } from "@/lib/utils"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -91,10 +82,10 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   ? "border-l-gray-400 opacity-70"
                   : appointment.status === "PENDING"
                   ? "border-l-orange-400"
-                  : "border-l-therapy-primary"
+                  : "border-l-purple-600/80"
               }`}
             >
-              <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+              <CardContent className="sm:py-1 py-3 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
                 {/* Left side */}
                 <div className="flex items-center gap-3">
                   <Avatar className="size-12 sm:size-14">
@@ -111,13 +102,14 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                         {userRole === "SUPERVISOR" ? appointment.patient.name : "Consulta Psicológica"}
                       </h3>
                       {/* Status tag */}
-                      <div
-                        className={`text-xs px-2 py-0.5 rounded-full font-semibold text-center sm:mb-0 ${getAppointmentStatusClass(
-                          appointment.status as any
-                        )}`}
+                      <span
+                        className={cn(
+                          "text-xs font-semibold px-3 py-1 rounded-full",
+                          getAppointmentStatusClass(appointment.status)
+                        )}
                       >
                         {getAppointmentStatusLabel(appointment.status as any)}
-                      </div>
+                      </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <div className="bg-gray-200 rounded-full px-3 py-0.5 text-xs text-therapy-tertiary font-semibold">
@@ -125,51 +117,81 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                       </div>
 
                       {appointment.isNewPatient && (
-                        <Badge className="px-2 bg-secondary/80 text-[0.6rem] text-white">Novo Paciente</Badge>
+                        <Badge className="text-[0.65rem] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
+                          Novo Paciente
+                        </Badge>
                       )}
                     </div>
                   </div>
                 </div>
+                {/* Botões — movidos para o lado esquerdo */}
+                <>
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start">
+                    {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
+                      <div className="hidden sm:flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
+                          className="text-therapy-secondary rounded-lg border-primary-foreground shadow-sm"
+                        >
+                          Ver prontuário
+                        </Button>
+                        <div className="sm:flex sm:flex-col sm:items-center">
+                          {appointment.status === "CONFIRMED" && isToday && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-primary"
+                              onClick={() => handleStartConsultation(appointment.patientId)}
+                            >
+                              <CalendarCheck className="h-4 w-4 mr-1" />
+                              Iniciar Sessão
+                            </Button>
+                          )}
+                          {appointment.status === "CONFIRMED" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-500"
+                              onClick={() => openCancelDialog(appointment.id)}
+                            >
+                              <CalendarX className="h-4 w-4 mr-1" />
+                              Cancelar
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2 sm:hidden w-full -mt-3">
+                    {appointment.status === "CONFIRMED" && (
+                      <div className="flex">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 w-full"
+                          onClick={() => openCancelDialog(appointment.id)}
+                        >
+                          <CalendarX className="h-4 w-4 mr-1" />
+                          Cancelar
+                        </Button>
 
-                {/* Right side */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 sm:mt-0">
-                  {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
-                        className="text-therapy-secondary border-primary-foreground shadow-sm"
-                      >
-                        Ver prontuário
-                      </Button>
-                      <div className="flex w-full">
-                        {appointment.status === "CONFIRMED" && (
+                        {isToday && (
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-red-500 w-full"
-                            onClick={() => openCancelDialog(appointment.id)}
-                          >
-                            <CalendarX className="h-4 w-4 mr-1" />
-                            Cancelar
-                          </Button>
-                        )}
-                        {appointment.status === "CONFIRMED" && isToday && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="hover:bg-therapy-tertiary  w-full text-primary"
+                            className="text-primary w-full"
                             onClick={() => handleStartConsultation(appointment.patientId)}
                           >
                             <CalendarCheck className="h-4 w-4 mr-1" />
-                            Iniciar Sessão
+                            Iniciar
                           </Button>
                         )}
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </>
               </CardContent>
             </Card>
           ))}
@@ -181,92 +203,10 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
         setIsDialogOpen={setIsDialogOpen}
         selectedId={selectedId}
         setSelectedId={setSelectedId}
-        onConfirmCancel={(id, reason) => handleCancelConsultation(id, reason)}
+        onConfirmCancel={(id: number, reason: string) => handleCancelConsultation(id, reason)}
       />
     </>
   )
 }
 
 export default AppointmentsList
-
-// ==========================
-// Modal aprimorado (mobile)
-// ==========================
-const CancelAppointmentDialog = ({
-  isDialogOpen,
-  setIsDialogOpen,
-  selectedId,
-  setSelectedId,
-  onConfirmCancel,
-}: {
-  isDialogOpen: boolean
-  setIsDialogOpen: (value: boolean) => void
-  selectedId: number | null
-  setSelectedId: (value: number | null) => void
-  onConfirmCancel: (id: number, reason: string) => void
-}) => {
-  const [reason, setReason] = useState("")
-  const [touched, setTouched] = useState(false)
-
-  const MIN_LENGTH = 15
-  const isValid = reason.trim().length >= MIN_LENGTH
-
-  const handleConfirm = () => {
-    if (!selectedId || !isValid) return
-    onConfirmCancel(selectedId, reason.trim())
-    resetDialog()
-  }
-
-  const handleClose = () => resetDialog()
-
-  const resetDialog = () => {
-    setReason("")
-    setSelectedId(null)
-    setTouched(false)
-    setIsDialogOpen(false)
-  }
-
-  return (
-    <AlertDialog open={isDialogOpen} onOpenChange={(open) => !open && handleClose()}>
-      <AlertDialogContent className="max-w-sm w-[90%] p-4 rounded-2xl sm:max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold text-center">Confirmar cancelamento</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-center text-gray-600">
-            Tem certeza que deseja cancelar esta consulta?
-            <br />
-            Caso haja devolução, o valor será reembolsado em até <strong>3 dias úteis</strong>.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <div className="mt-3 space-y-1">
-          <Textarea
-            placeholder="Motivo do cancelamento (mín. 15 caracteres)"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            onBlur={() => setTouched(true)}
-            required
-            className={`resize-none h-28 text-sm ${
-              touched && !isValid ? "border-red-500 focus-visible:ring-red-500" : ""
-            }`}
-          />
-          {touched && !isValid && (
-            <span className="text-xs text-red-500">O motivo deve conter ao menos {MIN_LENGTH} caracteres.</span>
-          )}
-        </div>
-
-        <AlertDialogFooter className="mt-4 flex flex-col sm:flex-row gap-2">
-          <AlertDialogCancel onClick={handleClose} className="w-full bg-gray-100 text-gray-700">
-            Voltar
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleConfirm}
-            disabled={!isValid}
-            className={`w-full transition ${!isValid ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            Confirmar cancelamento
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
