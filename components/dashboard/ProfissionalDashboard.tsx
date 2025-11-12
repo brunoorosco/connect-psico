@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import DashboardHeader from "./DashboardHeader"
 import CalendarNavigation from "./CalendarNavigation"
 import AppointmentsList from "./AppointmentList"
-import { useAppointments } from "@/hooks/useAppointments"
+import { useAppointments, useAppointmentsDay } from "@/hooks/useAppointments"
 import { Button } from "@components/ui/button"
 import { Calendar } from "lucide-react"
 import { useCurrentUser } from "@hooks/use-current-user"
@@ -14,12 +14,12 @@ const PsychologistDashboard: React.FC = () => {
   const router = useRouter()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null)
-  const { appointments, total, loading, fetchAppointments } = useAppointments()
+  const { appointments, loading, fetchAppointmentsDay } = useAppointmentsDay()
   const user = useCurrentUser()
 
   useEffect(() => {
-    fetchAppointments()
-  }, [])
+    fetchAppointmentsDay(selectedDate)
+  }, [selectedDate])
 
   const handleViewRecord = (patientId: string) => {
     setSelectedPatient(patientId)
