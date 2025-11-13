@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from "react"
-import { format, isSameDay, isYesterday } from "date-fns"
+import { format, isPast, isSameDay, isYesterday } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import { getInitials } from "@/utils/getInitialsName"
 import CancelAppointmentDialog from "./CancelApointmentModalMobile"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@hooks/use-mobile"
+import { isCancelDisabled } from "@/utils/isCancelDisabled"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
@@ -25,7 +26,6 @@ interface AppointmentsListProps {
 
 const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
   const isToday = isSameDay(selectedDate, new Date())
-  const yesterday = isYesterday(selectedDate)
   const { data: session } = useSession()
   const mobile = useIsMobile()
 
@@ -71,7 +71,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
 
   return (
     <>
-      <div className="space-y-3 px-2 pb-20">
+      <div className="space-y-3 pb-20">
         {filteredAppointments
           ?.slice()
           .sort((a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime())
@@ -88,7 +88,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   : "border-l-purple-600/80"
               }`}
             >
-              <CardContent className="sm:py-1 py-3 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
+              <CardContent className="sm:py-1 py-2 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
                 {/* Left side */}
                 <div className="flex items-center gap-3">
                   <Avatar className="size-12 sm:size-14 my-1">
@@ -128,34 +128,36 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   </div>
                 </div>
                 {!mobile ? (
-                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start">
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start h-20">
                     {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
                       <div className="sm:flex my-3 items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
-                          className="text-therapy-secondary rounded-lg border-primary-foreground shadow-sm"
+                          className="text-primary rounded-lg border-primary-foreground shadow-sm"
                         >
                           Ver prontuário
                         </Button>
                         <div className="sm:flex sm:flex-col sm:items-center">
-                          {appointment.status === "CONFIRMED" && isToday && (
+                          {appointment.status === "CONFIRMED" && (
                             <Button
+                              disabled={!isToday}
                               size="sm"
-                              variant="ghost"
-                              className="text-primary"
+                              variant="outline"
+                              className="text-therapy-secondary w-full h-8"
                               onClick={() => handleStartConsultation(appointment.patientId)}
                             >
                               <CalendarCheck className="h-4 w-4 mr-1" />
                               Iniciar Sessão
                             </Button>
                           )}
-                          {appointment.status === "CONFIRMED" && !yesterday && (
+                          {appointment.status === "CONFIRMED" && (
                             <Button
                               size="sm"
-                              variant="ghost"
-                              className="text-red-500"
+                              disabled={isCancelDisabled(appointment.appointmentDate)}
+                              variant="outline"
+                              className="text-red-500 w-full mt-1 h-8"
                               onClick={() => openCancelDialog(appointment.id)}
                             >
                               <CalendarX className="h-4 w-4 mr-1" />
@@ -167,30 +169,30 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2 sm:hidden w-full -mb-2">
-                    {appointment.status === "CONFIRMED" && !yesterday && (
-                      <div className="flex">
+                  <div className="flex flex-col gap-2 sm:hidden w-full -mt-1 -mb-2">
+                    {appointment.status === "CONFIRMED" && (
+                      <div className="flex -mt-1">
                         <Button
+                          disabled={isCancelDisabled(appointment.appointmentDate)}
                           size="sm"
                           variant="ghost"
-                          className="text-red-500 w-full"
+                          className="text-red-500 w-full h-8"
                           onClick={() => openCancelDialog(appointment.id)}
                         >
                           <CalendarX className="h-4 w-4 mr-1" />
                           Cancelar
                         </Button>
 
-                        {isToday && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-primary w-full"
-                            onClick={() => handleStartConsultation(appointment.patientId)}
-                          >
-                            <CalendarCheck className="h-4 w-4 mr-1" />
-                            Iniciar
-                          </Button>
-                        )}
+                        <Button
+                          disabled={!isToday}
+                          size="sm"
+                          variant="ghost"
+                          className="text-therapy-secondary w-full h-8"
+                          onClick={() => handleStartConsultation(appointment.patientId)}
+                        >
+                          <CalendarCheck className="h-4 w-4 mr-1" />
+                          Iniciar
+                        </Button>
                       </div>
                     )}
                   </div>

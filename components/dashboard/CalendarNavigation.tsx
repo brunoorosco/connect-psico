@@ -33,7 +33,7 @@ const CalendarNavigation: React.FC<CalendarNavigationProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between mb-6 bg-white p-3 rounded-lg shadow-sm border">
+    <div className="flex items-center justify-between mb-2 bg-white p-3 rounded-lg shadow-sm border">
       <Button
         variant="outline"
         size="icon"
