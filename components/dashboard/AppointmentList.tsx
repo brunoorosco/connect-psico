@@ -71,7 +71,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
 
   return (
     <>
-      <div className="space-y-3 px-2 pb-20">
+      <div className="space-y-3 pb-20">
         {filteredAppointments
           ?.slice()
           .sort((a, b) => a.appointmentDate.getTime() - b.appointmentDate.getTime())
@@ -88,7 +88,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   : "border-l-purple-600/80"
               }`}
             >
-              <CardContent className="sm:py-1 py-3 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
+              <CardContent className="sm:py-1 py-2 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center ">
                 {/* Left side */}
                 <div className="flex items-center gap-3">
                   <Avatar className="size-12 sm:size-14 my-1">
@@ -128,7 +128,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                   </div>
                 </div>
                 {!mobile ? (
-                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start">
+                  <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start h-20">
                     {userRole === "SUPERVISOR" && appointment.status !== "CANCELLED" && (
                       <div className="sm:flex my-3 items-center gap-2">
                         <Button
@@ -145,7 +145,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                               disabled={!isToday}
                               size="sm"
                               variant="outline"
-                              className="text-therapy-secondary w-full"
+                              className="text-therapy-secondary w-full h-8"
                               onClick={() => handleStartConsultation(appointment.patientId)}
                             >
                               <CalendarCheck className="h-4 w-4 mr-1" />
@@ -157,7 +157,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                               size="sm"
                               disabled={isCancelDisabled(appointment.appointmentDate)}
                               variant="outline"
-                              className="text-red-500 w-full mt-1"
+                              className="text-red-500 w-full mt-1 h-8"
                               onClick={() => openCancelDialog(appointment.id)}
                             >
                               <CalendarX className="h-4 w-4 mr-1" />
@@ -169,14 +169,14 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                     )}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-2 sm:hidden w-full -mb-2">
+                  <div className="flex flex-col gap-2 sm:hidden w-full -mt-1 -mb-2">
                     {appointment.status === "CONFIRMED" && (
-                      <div className="flex">
+                      <div className="flex -mt-1">
                         <Button
                           disabled={isCancelDisabled(appointment.appointmentDate)}
                           size="sm"
                           variant="ghost"
-                          className="text-red-500 w-full"
+                          className="text-red-500 w-full h-8"
                           onClick={() => openCancelDialog(appointment.id)}
                         >
                           <CalendarX className="h-4 w-4 mr-1" />
@@ -187,7 +187,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                           disabled={!isToday}
                           size="sm"
                           variant="ghost"
-                          className="text-therapy-secondary w-full"
+                          className="text-therapy-secondary w-full h-8"
                           onClick={() => handleStartConsultation(appointment.patientId)}
                         >
                           <CalendarCheck className="h-4 w-4 mr-1" />
