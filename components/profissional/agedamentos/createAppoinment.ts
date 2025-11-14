@@ -46,11 +46,11 @@ export async function handleAppointment({
       )}.`,
     })
 
-    await sendMessageApiWhatsapp(
-      professional.phone,
-      `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
-        `Confira sua agenda na plataforma para maiores detalhes. 😉`
-    )
+    // await sendMessageApiWhatsapp(
+    //   professional.phone,
+    //   `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
+    //     `Confira sua agenda na plataforma para maiores detalhes. 😉`
+    // )
   } catch (err) {
     console.error(err)
     // toast.error("Erro inesperado ao agendar")
