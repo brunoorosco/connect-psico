@@ -43,6 +43,7 @@ model User {
   PatientProfessional      PatientProfessional[]  @relation("PatientProfessional")
   PatientProfessional1     PatientProfessional[]  @relation("PatientProfessional1")
   BankAccount              BankAccount[]
+  appointmentHistories     AppointmentHistory[]
 
   @@index([id, email])
   @@map("users")
@@ -207,23 +208,25 @@ model ResetPasswordToken {
 }
 
 model Appointment {
-  professionalId  String        @map("professional_id")
-  patientId       String        @map("patient_id")
-  appointmentDate DateTime      @map("appointment_date")
-  status          Status        @default(PENDING)
-  createdAt       DateTime      @default(now()) @map("created_at")
-  id              Int           @id @default(autoincrement())
-  roomId          String?       @default(cuid()) @map("room_id")
-  tipoAtendimento String?       @default("ambos") @map("tipo_atendimento")
-  review          Boolean       @default(false)
-  priceCents      Int           @default(0)
-  expiresAt       DateTime?
-  patient         User          @relation("PatientAppointments", fields: [patientId], references: [id])
-  professional    User          @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
-  Comentarios     Comentarios[]
-  payment         Payment?
-  Payout          Payout?
-  Refund          Refund?
+  professionalId       String               @map("professional_id")
+  patientId            String               @map("patient_id")
+  appointmentDate      DateTime             @map("appointment_date")
+  status               Status               @default(PENDING)
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @default(now()) @map("updated_at")
+  id                   Int                  @id @default(autoincrement())
+  roomId               String?              @default(cuid()) @map("room_id")
+  tipoAtendimento      String?              @default("ambos") @map("tipo_atendimento")
+  review               Boolean              @default(false)
+  priceCents           Int                  @default(0)
+  expiresAt            DateTime?
+  patient              User                 @relation("PatientAppointments", fields: [patientId], references: [id])
+  professional         User                 @relation("ProfessionalAppointments", fields: [professionalId], references: [id])
+  Comentarios          Comentarios[]
+  payment              Payment?
+  Payout               Payout?
+  Refund               Refund?
+  appointmentHistories AppointmentHistory[]
 
   @@index([professionalId, patientId, status])
   @@map("appointments")
@@ -376,6 +379,24 @@ model IdempotencyKey {
   createdAt DateTime @default(now())
 
   @@map("idempotencyKey")
+}
+
+model AppointmentHistory {
+  id            Int       @id @default(autoincrement())
+  appointmentId Int
+  action        String // RESCHEDULED, CANCELLED, CONFIRMED, etc
+  previousDate  DateTime?
+  newDate       DateTime?
+  reason        String? // Motivo do cancelamento ou reagendamento
+  performedBy   String // ID do usuário que realizou a ação
+  performedAt   DateTime  @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [performedBy], references: [id])
+
+  @@index([appointmentId])
+  @@index([performedBy])
+  @@map("appointment_histories")
 }
 
 enum UserRole {

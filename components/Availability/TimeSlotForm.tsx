@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -6,18 +6,63 @@ import { Plus, AlertCircle } from "lucide-react"
 import { TimeSlot } from "@presentation/pages/availability"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
-import { addMinutes, format } from "date-fns"
+import { addMinutes, format, isSameDay } from "date-fns"
 
 interface TimeSlotFormProps {
   onAddTimeSlot: (timeSlot: Omit<TimeSlot, "id">) => void
   disabled?: boolean
+  selectedDate?: Date
 }
 
-const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot, disabled = false }) => {
+const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot, disabled = false, selectedDate }) => {
   const [startTime, setStartTime] = useState("08:00")
-  const [endTime, setEndTime] = useState("17:00")
+  const [endTime, setEndTime] = useState("18:00")
   const [error, setError] = useState<string | null>(null)
   const [singleSession, setSingleSession] = useState(false)
+  const [allowedHours, setAllowedHours] = useState<string[]>([])
+
+  /**
+   * Gera os horários permitidos de acordo com a regra:
+   * 08:00–18:00 normalmente
+   * Hoje → hora atual + 1 até 18:00
+   * Depois das 17:00 → nenhum horário
+   */
+  const computeAllowedHours = (date?: Date) => {
+    if (!date) return []
+
+    const now = new Date()
+    const startHour = 8
+    const endHour = 18
+    let firstHour = startHour
+
+    if (isSameDay(now, date)) {
+      const currentHour = now.getHours()
+      if (currentHour >= 17) return [] // nenhum horário hoje
+
+      firstHour = Math.max(startHour, currentHour + 1)
+    }
+
+    const hours: string[] = []
+    for (let h = firstHour; h <= endHour; h++) {
+      const hh = String(h).padStart(2, "0")
+      hours.push(`${hh}:00`)
+    }
+
+    return hours
+  }
+
+  // Atualiza lista de horários sempre que a data mudar
+  useEffect(() => {
+    const hours = computeAllowedHours(selectedDate)
+
+    setAllowedHours(hours)
+
+    // Ajusta valores iniciais do input
+    if (hours.length > 0) {
+      setStartTime(hours[0])
+      setEndTime("18:00")
+    }
+  }, [selectedDate])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,8 +99,7 @@ const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot, disabled = f
     onAddTimeSlot({ startTime, endTime: finalEndTime })
 
     // Reset
-    setStartTime("08:00")
-    setEndTime("17:00")
+    setEndTime("18:00")
     setSingleSession(false)
   }
 
@@ -93,9 +137,7 @@ const TimeSlotForm: React.FC<TimeSlotFormProps> = ({ onAddTimeSlot, disabled = f
           <div>
             <Label htmlFor="end-time-modal">
               Última Sessão{" "}
-              {singleSession && (
-                <span className="hidden lg:inline text-sm text-muted-foreground">(automático)</span>
-              )}
+              {singleSession && <span className="hidden lg:inline text-sm text-muted-foreground">(automático)</span>}
             </Label>
             <Input
               id="end-time-modal"

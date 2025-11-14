@@ -3,7 +3,7 @@ import { format } from "date-fns"
 import useSWR from "swr"
 import { fetchProfessionalSchedule } from "@/hooks/useProfissionals"
 
-export function useAvailableSlots(professionalId: number, selectedDate: Date) {
+export function useAvailableSlots(professionalId: string, selectedDate: Date) {
   const [availableSlots, setAvailableSlots] = useState<{ start: Date }[]>([])
 
   const { data, error, isLoading, mutate } = useSWR(

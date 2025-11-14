@@ -24,7 +24,7 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
   const [errorPayment, setErrorPayment] = useState(false)
 
   const { availableSlots, availableDatesSet, isLoading, error, mutate } = useAvailableSlots(
-    professionalData.id,
+    professionalData.userId,
     selectedDate
   )
 

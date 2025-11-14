@@ -1,10 +1,10 @@
 "use client"
 import React, { useState } from "react"
-import { format, isPast, isSameDay, isYesterday } from "date-fns"
+import { format, isSameDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CalendarCheck, CalendarX } from "lucide-react"
+import { CalendarCheck, LucideCalendarSearch } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { AppointmentModel } from "@/domain/model/appointment"
@@ -13,24 +13,38 @@ import { Badge } from "@components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
 import { getInitials } from "@/utils/getInitialsName"
 import CancelAppointmentDialog from "./CancelApointmentModalMobile"
+import { RescheduleAppointmentDialog } from "./RescheduleAppointmentDialog"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@hooks/use-mobile"
 import { isCancelDisabled } from "@/utils/isCancelDisabled"
+import { rescheduleAppointment } from "@/actions/appointments/rescheduleAppointment"
+import { toast } from "sonner"
 
 interface AppointmentsListProps {
   appointments: AppointmentModel[]
   selectedDate: Date
   userRole: "SUPERVISOR" | "DEFAULT"
   onViewRecord?: (patientId: string) => void
+  professionalId: string // Adicione esta prop
 }
 
-const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selectedDate, userRole, onViewRecord }) => {
+const AppointmentsList: React.FC<AppointmentsListProps> = ({
+  appointments,
+  selectedDate,
+  userRole,
+  onViewRecord,
+  professionalId,
+}) => {
   const isToday = isSameDay(selectedDate, new Date())
   const { data: session } = useSession()
   const mobile = useIsMobile()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+
+  // Estados para modal de reagendamento
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentModel | null>(null)
 
   const filteredAppointments = appointments?.filter((a) => isSameDay(a.appointmentDate, selectedDate))
 
@@ -43,11 +57,28 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
     setIsDialogOpen(true)
   }
 
+  const openRescheduleDialog = (appointment: AppointmentModel) => {
+    setSelectedAppointment(appointment)
+    setIsRescheduleOpen(true)
+  }
+
   const handleCancelConsultation = async (id: number | null, reason: string) => {
     if (!id) return
     console.log("Motivo do cancelamento:", reason)
     setIsDialogOpen(false)
     setSelectedId(null)
+  }
+
+  const handleConfirmReschedule = async (appointmentId: number, date: Date) => {
+    try {
+      await rescheduleAppointment({ appointmentId, newAppointmentDate: date })
+      toast.success("Consulta reagendada com sucesso!")
+
+      // Atualiza lista
+      window.location.reload()
+    } catch (error) {
+      toast.error("Erro ao reagendar consulta.")
+    }
   }
 
   if (filteredAppointments?.length === 0) {
@@ -157,11 +188,11 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                               size="sm"
                               disabled={isCancelDisabled(appointment.appointmentDate)}
                               variant="outline"
-                              className="text-red-500 w-full mt-1 h-8"
-                              onClick={() => openCancelDialog(appointment.id)}
+                              className="text-orange-600 w-full mt-1 h-8"
+                              onClick={() => openRescheduleDialog(appointment)}
                             >
-                              <CalendarX className="h-4 w-4 mr-1" />
-                              Cancelar
+                              <LucideCalendarSearch className="h-4 w-4 mr-1" />
+                              Reagendar
                             </Button>
                           )}
                         </div>
@@ -177,10 +208,10 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
                           size="sm"
                           variant="ghost"
                           className="text-red-500 w-full h-8"
-                          onClick={() => openCancelDialog(appointment.id)}
+                          onClick={() => openRescheduleDialog(appointment)}
                         >
-                          <CalendarX className="h-4 w-4 mr-1" />
-                          Cancelar
+                          <LucideCalendarSearch className="h-4 w-4 mr-1" />
+                          Reagendar
                         </Button>
 
                         <Button
@@ -210,6 +241,21 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({ appointments, selec
         setSelectedId={setSelectedId}
         onConfirmCancel={(id: number, reason: string) => handleCancelConsultation(id, reason)}
       />
+
+      {/* Modal de reagendamento */}
+      {selectedAppointment && (
+        <RescheduleAppointmentDialog
+          isOpen={isRescheduleOpen}
+          onClose={() => {
+            setIsRescheduleOpen(false)
+            setSelectedAppointment(null)
+          }}
+          appointmentId={selectedAppointment.id}
+          professionalId={professionalId}
+          currentDate={selectedAppointment.appointmentDate}
+          onConfirmReschedule={handleConfirmReschedule}
+        />
+      )}
     </>
   )
 }

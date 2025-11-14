@@ -51,7 +51,7 @@ export function useProfessionalsUsername() {
   return { professional, loading, getProfissionalByUsername }
 }
 
-export const fetchProfessionalSchedule = async (userId: number, date: Date) => {
+export const fetchProfessionalSchedule = async (userId: string, date: Date) => {
   return await getProfessionalSchedule(userId, date)
 }
 
