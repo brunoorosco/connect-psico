@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import DashboardHeader from "./DashboardHeader"
 import CalendarNavigation from "./CalendarNavigation"
 import AppointmentsList from "./AppointmentList"
-import { useAppointments, useAppointmentsDay } from "@/hooks/useAppointments"
+import { useAppointmentsDay } from "@/hooks/useAppointments"
 import { Button } from "@components/ui/button"
 import { Calendar } from "lucide-react"
 import { useCurrentUser } from "@hooks/use-current-user"
@@ -70,6 +70,7 @@ const PsychologistDashboard: React.FC = () => {
             selectedDate={selectedDate}
             userRole="SUPERVISOR"
             onViewRecord={handleViewRecord}
+            professionalId={user?.id as string}
           />
         </div>
 

@@ -28,10 +28,10 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
   return freeIntervals
 }
 
-export const getProfessionalSchedule = async (userId: number, date: Date) => {
+export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const dayOfWeek = date.getDay() // 0=domingo, 1=segunda, etc.
   const professional = await prisma.professional.findUnique({
-    where: { id: userId, user: { active: true } },
+    where: { userId: userId, user: { active: true } },
     select: { id: true, userId: true },
   })
 
