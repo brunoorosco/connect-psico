@@ -77,8 +77,6 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
     <p>Olá ${patient.name},</p>
     <p>Segue o QR Code para pagamento:</p>
     <img src="cid:qrcodepix" alt="QR Code PIX" style="max-width: 200px; border-radius: 8px;" />
-    <p>Código PIX:</p>
-    <pre style="background:#f3f3f3;padding:10px">${resp.data.brCode}</pre>
     <a
     href="https://psicomais.com/copy?code=${encodeURIComponent(resp.data.brCode)}"
     style="padding:12px 20px;background:#4f46e5;color:#fff;border-radius:6px;text-decoration:none;"
