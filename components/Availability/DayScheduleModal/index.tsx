@@ -160,7 +160,12 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
             <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 text-center sm:text-left">
               {isEditing ? "Adicionar novo horário" : "Definir horários para este dia"}
             </h3>
-            <TimeSlotForm key={date.toISOString()} onAddTimeSlot={handleAddTimeSlot} disabled={isPastDay} />
+            <TimeSlotForm
+              key={date.toISOString()}
+              onAddTimeSlot={handleAddTimeSlot}
+              disabled={isPastDay}
+              selectedDate={date}
+            />
           </div>
 
           {/* Botões */}

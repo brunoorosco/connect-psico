@@ -62,10 +62,10 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
       `📝 Descrição: ${resp.data.description}\n` +
       `⏳ Válidade até: ${date}\n` +
       `📌 Copie o código Pix abaixo e pague no seu app bancário:\n`
-    const msg2 = `\`\`\`${resp.data.brCode}\`\`\``
+
     if (app.patient.phone) {
       await sendMessageApiWhatsapp(app.patient.phone, msg1)
-      await delay(500)
+      await delay(10)
       await sendMediaApiWhatsapp(app.patient.phone, "QRCode", base64Data, false)
     }
 
@@ -79,6 +79,13 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
     <img src="cid:qrcodepix" alt="QR Code PIX" style="max-width: 200px; border-radius: 8px;" />
     <p>Código PIX:</p>
     <pre style="background:#f3f3f3;padding:10px">${resp.data.brCode}</pre>
+    <a
+    href="https://psicomais.com/copy?code=${encodeURIComponent(resp.data.brCode)}"
+    style="padding:12px 20px;background:#4f46e5;color:#fff;border-radius:6px;text-decoration:none;"
+    target="_blank"
+  >
+    Copiar código PIX
+  </a>
   `,
       attachments: [
         {
