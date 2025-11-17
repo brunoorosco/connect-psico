@@ -139,7 +139,15 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                       <span
                         className={cn(
                           "text-xs font-semibold px-3 py-1 rounded-full",
-                          getAppointmentStatusClass(appointment.status)
+                          appointment.status === "CONFIRMED" &&
+                            "bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300",
+                          appointment.status === "CANCELLED" && "bg-gray-100 text-gray-800",
+                          appointment.status === "PENDING" && "bg-blue-100 text-blue-800",
+                          appointment.status === "CONCLUDED" && "bg-green-100 text-green-800",
+                          appointment.status === "COMPLETED" && "bg-therapy-light text-therapy-tertiary",
+                          !["CONFIRMED", "CANCELLED", "PENDING", "CONCLUDED", "COMPLETED"].includes(
+                            appointment.status
+                          ) && "bg-gray-100 text-gray-800"
                         )}
                       >
                         {getAppointmentStatusLabel(appointment.status as any)}
@@ -151,7 +159,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
                       </div>
 
                       {appointment.isNewPatient && (
-                        <Badge className="text-[0.65rem] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
+                        <Badge className="text-[0.65rem] hover:bg-emerald-100 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
                           Novo Paciente
                         </Badge>
                       )}
