@@ -8,7 +8,8 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
     if (!result.success) {
       throw new Error("Dados inválidos")
     }
-    return await prisma.pacientes.update({
+
+    const resp = await prisma.pacientes.update({
       where: { medicalRecordId: prontuarioId },
       data: {
         patient: { update: { phone: result.data.phone, name: result.data.name.trim() } },
@@ -22,7 +23,25 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
         state: result.data.state || null,
         number: result.data.number || null,
       },
+      select: {
+        patientId: true,
+      },
     })
+
+    const relation = await prisma.patientProfessional.findFirst({
+      where: { patientId: resp.patientId, professionalId: result.data.profissionalId },
+    })
+
+    if (!relation) {
+      // cria relação automaticamente
+      await prisma.patientProfessional.create({
+        data: {
+          patientId: resp.patientId,
+          professionalId: result.data.profissionalId,
+        },
+      })
+    }
+    return resp
   } catch (error) {
     console.error("error", error)
     throw new Error("Error patient updated")
