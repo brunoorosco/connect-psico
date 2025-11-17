@@ -7,7 +7,7 @@ export function getAppointmentStatusLabel(status: StatusAppointment): string {
     case "CONCLUDED":
       return "Concluído";
     case "PENDING":
-      return "Aguardando Confirmação";
+      return "Aguardando Pagamento";
     case "CANCELLED":
       return "Cancelado";
     default:

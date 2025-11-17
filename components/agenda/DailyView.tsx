@@ -43,8 +43,8 @@ const DailyView: React.FC<DailyViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 gap-2">
-            {Array.from({ length: 10 }).map((_, i) => {
-              const hour = i + 9; // Começa às 9h
+            {Array.from({ length: 14 }).map((_, i) => {
+              const hour = i + 7; // Começa às 9h
               const timeStr = `${hour.toString().padStart(2, "0")}:00`;
 
               const appointmentsAtTime = appointments.filter((apt) => {

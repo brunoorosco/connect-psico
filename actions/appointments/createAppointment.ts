@@ -37,6 +37,20 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
   const session = await auth()
 
   try {
+    const relation = await prisma.patientProfessional.findFirst({
+      where: { patientId, professionalId },
+    })
+
+    if (!relation) {
+      // cria relação automaticamente
+      await prisma.patientProfessional.create({
+        data: {
+          patientId,
+          professionalId,
+        },
+      })
+    }
+
     // 1. Verificar disponibilidade do profissional no dia/hora
     const dayOfWeek = appointmentDate.getDay()
     const availability = await prisma.availability.findFirst({
