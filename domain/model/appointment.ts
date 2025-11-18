@@ -15,7 +15,7 @@ export type AppointmentModel = {
   isLinkedToMedicalRecord?: boolean
   createdAt?: Date
   patient: { id: string; name: string; telefone: string; email: string; image?: string }
-  professional: { id: string; name: string; telefone: string; email: string }
+  professional: { id: string; name: string; telefone: string; email: string; image: string }
 }
 
 export type CalendarViewType = "daily" | "weekly" | "monthly"

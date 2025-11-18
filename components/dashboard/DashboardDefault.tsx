@@ -1,15 +1,26 @@
 "use client"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import DashboardHeader from "./DashboardHeader"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAppointmentsByPatient } from "@/hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
 import { getSession } from "next-auth/react"
 import { useCurrentUser } from "@hooks/use-current-user"
+import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
+import { getInitials } from "@/utils/getInitialsName"
+import { Badge } from "lucide-react"
+import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
+import { cn } from "@/lib/utils"
+import AppointmentCard from "./AppointmentCard"
+import { isSameDay } from "date-fns"
+import { useIsMobile } from "@hooks/use-mobile"
 
 const PatientDashboard: React.FC = () => {
   const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient()
   const user = useCurrentUser()
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const isToday = isSameDay(selectedDate, new Date())
+  const mobile = useIsMobile()
 
   useEffect(() => {
     getSession()
@@ -78,23 +89,16 @@ const PatientDashboard: React.FC = () => {
 
           <div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
-            <div className="space-y-3">
+            <div className="items-center gap-3">
               {pastAppointments?.map((appointment: AppointmentModel) => (
-                <Card key={appointment.id} className="therapy-card border-l-4 border-l-slate-400">
-                  <CardContent className="p-2">
-                    <div className="flex justify-between">
-                      <div>
-                        <h3 className="font-xs text-gray-500">
-                          Consulta com {appointment.professional.name || "Nome do Médico"}
-                        </h3>
-                      </div>
-                      <WrapperDateTime consulta={appointment.appointmentDate} />
-                    </div>
-                    {appointment.notes && (
-                      <div className="mt-2 text-sm bg-gray-50 p-2 rounded">{appointment.notes}</div>
-                    )}
-                  </CardContent>
-                </Card>
+                <AppointmentCard
+                  appointment={appointment}
+                  isMobile={mobile}
+                  isToday={isToday}
+                  userRole={user?.role as 'DEFAULT'}
+                  image={appointment.professional.image}
+                  name={appointment.professional.name}
+                />
               ))}
             </div>
           </div>

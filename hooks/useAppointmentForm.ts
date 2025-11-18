@@ -80,6 +80,7 @@ export function useAppointmentForm({
         name: "Dr. Fulano",
         telefone: "00000000",
         email: "dr@clinic.com",
+        image:""
       },
       patientId: selectedPatient.userId,
       patient: {

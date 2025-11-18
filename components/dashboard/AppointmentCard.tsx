@@ -1,0 +1,197 @@
+import React from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { CalendarCheck, LucideCalendarSearch } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getInitials } from "@/utils/getInitialsName"
+import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
+import { cn } from "@/lib/utils"
+import { AppointmentModel } from "@/domain/model/appointment"
+import { isCancelDisabled } from "@/utils/isCancelDisabled"
+import { format } from "date-fns"
+
+interface AppointmentCardProps {
+  appointment: AppointmentModel
+  userRole: "SUPERVISOR" | "DEFAULT"
+  isToday: boolean
+  isMobile: boolean
+  onStartConsultation?: (patientId: string) => void
+  onViewRecord?: (patientId: string) => void
+  onReschedule?: (appointment: AppointmentModel) => void
+  image: string
+  name: string
+}
+
+const AppointmentCard: React.FC<AppointmentCardProps> = ({
+  appointment,
+  userRole,
+  isToday,
+  isMobile,
+  onStartConsultation,
+  onViewRecord,
+  onReschedule,
+  image,
+  name,
+}) => {
+  const getBorderColor = () => {
+    switch (appointment.status) {
+      case "COMPLETED":
+        return "border-l-green-500"
+      case "CANCELLED":
+        return "border-l-gray-400 opacity-70"
+      case "PENDING":
+        return "border-l-orange-400"
+      case "CONCLUDED":
+        return "border-l-blue-400"
+      default:
+        return "border-l-gray-400/80"
+    }
+  }
+
+  const getStatusStyle = () => {
+    const baseStyle = "text-xs font-semibold px-3 py-1 rounded-full"
+    switch (appointment.status) {
+      case "CONFIRMED":
+        return cn(baseStyle, "bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300")
+      case "CANCELLED":
+        return cn(baseStyle, "bg-gray-100 text-gray-800")
+      case "PENDING":
+        return cn(baseStyle, "bg-blue-100 text-blue-800")
+      case "CONCLUDED":
+        return cn(baseStyle, "bg-green-100 text-green-800")
+      case "COMPLETED":
+        return cn(baseStyle, "bg-therapy-light text-therapy-tertiary")
+      default:
+        return cn(baseStyle, "bg-gray-100 text-gray-800")
+    }
+  }
+
+  return (
+    <Card className={`rounded-2xl shadow-sm border-l-4 ${getBorderColor()}`}>
+      <CardContent className="sm:py-2 py-2 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+        {/* Left side - Avatar e Informações */}
+        <div className="flex items-center gap-3 mt-1">
+          <Avatar className="size-12 sm:size-14">
+            {image ? (
+              <AvatarImage src={image} alt={getInitials(name)} />
+            ) : (
+              <AvatarFallback>{getInitials(name)}</AvatarFallback>
+            )}
+          </Avatar>
+
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-3 -mt-2">
+              <h3 className=" text-sm sm:text-base font-sans">
+                {userRole === "SUPERVISOR" ? (
+                  <span className="font-medium">{name}</span>
+                ) : (
+                  <>
+                    <span>Terapeuta: </span>
+                    <span className="font-medium">{name}</span>
+                  </>
+                )}
+              </h3>
+              <span className={getStatusStyle()}>{getAppointmentStatusLabel(appointment.status as any)}</span>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {userRole === "DEFAULT" && (
+                <div className="bg-blue-300 rounded-full px-3 py-1 my-1 text-xs text-therapy-tertiary font-semibold">
+                  {format(appointment.appointmentDate, "dd/MM/yyyy")}
+                </div>
+              )}
+              <div className="bg-gray-200 rounded-full px-3 py-1 text-xs my-1 text-therapy-tertiary font-semibold">
+                {appointment.appointmentDate.getHours()}:00
+              </div>
+
+              {appointment.isNewPatient && (
+                <Badge className="text-[0.65rem] hover:bg-emerald-100 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
+                  Novo Paciente
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right side - Actions */}
+        {!isMobile ? (
+          // Desktop Actions
+          <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start h-20">
+            {appointment.status !== "CANCELLED" && (
+              <div className="sm:flex my-3 items-center gap-2">
+                {userRole === "SUPERVISOR" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onViewRecord && onViewRecord(appointment.patientId)}
+                    className="text-primary rounded-lg border-primary-foreground shadow-sm"
+                  >
+                    Ver prontuário
+                  </Button>
+                )}
+                <div className="sm:flex sm:flex-col sm:items-center">
+                  {appointment.status === "CONFIRMED" && (
+                    <Button
+                      disabled={!isToday}
+                      size="sm"
+                      variant="outline"
+                      className="text-therapy-secondary w-full h-8"
+                      onClick={() => onStartConsultation && onStartConsultation(appointment.patientId)}
+                    >
+                      <CalendarCheck className="h-4 w-4 mr-1" />
+                      Iniciar Sessão
+                    </Button>
+                  )}
+                  {appointment.status === "CONFIRMED" && (
+                    <Button
+                      size="sm"
+                      disabled={isCancelDisabled(appointment.appointmentDate)}
+                      variant="outline"
+                      className="text-orange-600 w-full mt-1 h-8"
+                      onClick={() => onReschedule && onReschedule(appointment)}
+                    >
+                      <LucideCalendarSearch className="h-4 w-4 mr-1" />
+                      Reagendar
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Mobile Actions
+          <div className="flex flex-col gap-2 sm:hidden w-full -mt-1 -mb-2">
+            {appointment.status === "CONFIRMED" && (
+              <div className="flex -mt-1">
+                <Button
+                  disabled={isCancelDisabled(appointment.appointmentDate)}
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-500 w-full h-8"
+                  onClick={() => onReschedule && onReschedule(appointment)}
+                >
+                  <LucideCalendarSearch className="h-4 w-4 mr-1" />
+                  Reagendar
+                </Button>
+
+                <Button
+                  disabled={!isToday}
+                  size="sm"
+                  variant="ghost"
+                  className="text-therapy-secondary w-full h-8"
+                  onClick={() => onStartConsultation && onStartConsultation(appointment.patientId)}
+                >
+                  <CalendarCheck className="h-4 w-4 mr-1" />
+                  Iniciar
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+export default AppointmentCard
