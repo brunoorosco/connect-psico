@@ -8,12 +8,13 @@ import { getInitials } from "@/utils/getInitialsName"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { cn } from "@/lib/utils"
 import { AppointmentModel } from "@/domain/model/appointment"
-import { isCancelDisabled } from "@/utils/isCancelDisabled"
-import { format } from "date-fns"
+import { format, differenceInMinutes, differenceInHours, isBefore } from "date-fns"
+import { useRouter } from "next/navigation"
+import { User } from "next-auth"
 
 interface AppointmentCardProps {
   appointment: AppointmentModel
-  userRole: "SUPERVISOR" | "DEFAULT"
+  user: User
   isToday: boolean
   isMobile: boolean
   onStartConsultation?: (patientId: string) => void
@@ -25,7 +26,7 @@ interface AppointmentCardProps {
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({
   appointment,
-  userRole,
+  user,
   isToday,
   isMobile,
   onStartConsultation,
@@ -34,6 +35,33 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   image,
   name,
 }) => {
+  const router = useRouter()
+
+  const appointmentDate = appointment.appointmentDate
+  const now = new Date()
+
+  const isDefault = user.role === "DEFAULT"
+  const isSupervisor = user.role === "SUPERVISOR"
+
+  // CARD DESABILITADO SE A CONSULTA JÁ PASSOU
+  const cardIsPast = isBefore(appointmentDate, now)
+
+  // Diferenças de tempo
+  const hoursUntilAppointment = differenceInHours(appointmentDate, now)
+  const minutesUntilAppointment = differenceInMinutes(appointmentDate, now)
+
+  // REGRAS DE REAGENDAR
+  const canReschedule = (isDefault && hoursUntilAppointment > 24) || (isSupervisor && hoursUntilAppointment > 1)
+
+  // REGRAS PARA INICIAR SESSÃO
+  /*
+   * PACIENTE - botão liberado 10 minutos antes de iniciar a sessão
+   * PROFISSIONAL - botão liberado 30 minutos antes de iniciar a sessão
+   */
+  const canStartAppointment =
+    (isDefault && minutesUntilAppointment <= 10 && minutesUntilAppointment >= -59) ||
+    (isSupervisor && minutesUntilAppointment <= 50 && minutesUntilAppointment >= -59)
+
   const getBorderColor = () => {
     switch (appointment.status) {
       case "COMPLETED":
@@ -44,6 +72,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "border-l-orange-400"
       case "CONCLUDED":
         return "border-l-blue-400"
+      case "CONFIRMED":
+        return "border-l-purple-500"
       default:
         return "border-l-gray-400/80"
     }
@@ -67,10 +97,23 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     }
   }
 
+  const handleStartAppointment = () => {
+    if (user.role === "DEFAULT") {
+      router.push(`./app/${user?.id}/videochamada/room/${appointment.roomId}`)
+    }
+    router.push(`/app/professional/${user.id}/consulta?patientId=${appointment.patientId}`)
+  }
+
   return (
-    <Card className={`rounded-2xl shadow-sm border-l-4 ${getBorderColor()}`}>
+    <Card
+      className={cn(
+        "rounded-2xl shadow-sm border-l-4 transition-opacity",
+        getBorderColor(),
+        cardIsPast && "opacity-50 pointer-events-none"
+      )}
+    >
       <CardContent className="sm:py-2 py-2 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-        {/* Left side - Avatar e Informações */}
+        {/* Left side */}
         <div className="flex items-center gap-3 mt-1">
           <Avatar className="size-12 sm:size-14">
             {image ? (
@@ -82,8 +125,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
           <div className="flex flex-col gap-1">
             <div className="flex gap-3 -mt-2">
-              <h3 className=" text-sm sm:text-base font-sans">
-                {userRole === "SUPERVISOR" ? (
+              <h3 className="text-sm sm:text-base font-sans">
+                {user?.role === "SUPERVISOR" ? (
                   <span className="font-medium">{name}</span>
                 ) : (
                   <>
@@ -96,17 +139,18 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {userRole === "DEFAULT" && (
+              {user?.role === "DEFAULT" && (
                 <div className="bg-blue-300 rounded-full px-3 py-1 my-1 text-xs text-therapy-tertiary font-semibold">
-                  {format(appointment.appointmentDate, "dd/MM/yyyy")}
+                  {format(appointmentDate, "dd/MM/yyyy")}
                 </div>
               )}
+
               <div className="bg-gray-200 rounded-full px-3 py-1 text-xs my-1 text-therapy-tertiary font-semibold">
-                {appointment.appointmentDate.getHours()}:00
+                {appointmentDate.getHours()}:00
               </div>
 
               {appointment.isNewPatient && (
-                <Badge className="text-[0.65rem] hover:bg-emerald-100 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full">
+                <Badge className="text-xs my-auto hover:bg-emerald-100 bg-emerald-100 text-emerald-600 font-semibold px-3 py-1 rounded-full h-5">
                   Novo Paciente
                 </Badge>
               )}
@@ -114,13 +158,12 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           </div>
         </div>
 
-        {/* Right side - Actions */}
+        {/* Right side - Desktop */}
         {!isMobile ? (
-          // Desktop Actions
           <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:self-start h-20">
             {appointment.status !== "CANCELLED" && (
               <div className="sm:flex my-3 items-center gap-2">
-                {userRole === "SUPERVISOR" && (
+                {user?.role === "SUPERVISOR" && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -130,23 +173,25 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                     Ver prontuário
                   </Button>
                 )}
+
                 <div className="sm:flex sm:flex-col sm:items-center">
                   {appointment.status === "CONFIRMED" && (
                     <Button
-                      disabled={!isToday}
+                      disabled={!canStartAppointment}
                       size="sm"
                       variant="outline"
                       className="text-therapy-secondary w-full h-8"
-                      onClick={() => onStartConsultation && onStartConsultation(appointment.patientId)}
+                      onClick={handleStartAppointment}
                     >
                       <CalendarCheck className="h-4 w-4 mr-1" />
                       Iniciar Sessão
                     </Button>
                   )}
+
                   {appointment.status === "CONFIRMED" && (
                     <Button
                       size="sm"
-                      disabled={isCancelDisabled(appointment.appointmentDate)}
+                      disabled={!canReschedule}
                       variant="outline"
                       className="text-orange-600 w-full mt-1 h-8"
                       onClick={() => onReschedule && onReschedule(appointment)}
@@ -165,7 +210,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
             {appointment.status === "CONFIRMED" && (
               <div className="flex -mt-1">
                 <Button
-                  disabled={isCancelDisabled(appointment.appointmentDate)}
+                  disabled={!canReschedule}
                   size="sm"
                   variant="ghost"
                   className="text-red-500 w-full h-8"
@@ -176,7 +221,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 </Button>
 
                 <Button
-                  disabled={!isToday}
+                  disabled={!canStartAppointment}
                   size="sm"
                   variant="ghost"
                   className="text-therapy-secondary w-full h-8"

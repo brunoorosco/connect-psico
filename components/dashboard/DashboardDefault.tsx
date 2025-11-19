@@ -6,19 +6,16 @@ import { useAppointmentsByPatient } from "@/hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
 import { getSession } from "next-auth/react"
 import { useCurrentUser } from "@hooks/use-current-user"
-import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
-import { getInitials } from "@/utils/getInitialsName"
-import { Badge } from "lucide-react"
-import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
-import { cn } from "@/lib/utils"
 import AppointmentCard from "./AppointmentCard"
 import { isSameDay } from "date-fns"
 import { useIsMobile } from "@hooks/use-mobile"
+import { Skeleton } from "@/components/ui/skeleton"
+import { CalendarX2 } from "lucide-react"
 
 const PatientDashboard: React.FC = () => {
-  const { appointments, total, loading, fetchAppointments } = useAppointmentsByPatient()
+  const { appointments, loading, fetchAppointments } = useAppointmentsByPatient()
   const user = useCurrentUser()
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate] = useState(new Date())
   const isToday = isSameDay(selectedDate, new Date())
   const mobile = useIsMobile()
 
@@ -27,132 +24,97 @@ const PatientDashboard: React.FC = () => {
     fetchAppointments()
   }, [])
 
-  const HOUR = 60 * 60 * 1000
-  const now = Date.now()
+  if (!user) return null
 
-  // helper pra garantir sempre timestamp UTC
-  const toMs = (d: Date | string | number) => (d instanceof Date ? d.getTime() : new Date(d).getTime())
+  // Normalizando datas
+  const now = new Date().getTime()
+  const toMs = (d: any) => new Date(d).getTime()
 
-  const list = Array.isArray(appointments) ? appointments : []
+  const list: AppointmentModel[] = Array.isArray(appointments) ? appointments : []
 
-  const pastAppointments = list.filter((app: AppointmentModel) => toMs(app.appointmentDate) < now - HOUR)
+  const future = list.filter((a) => toMs(a.appointmentDate) >= now)
+  const past = list.filter((a) => toMs(a.appointmentDate) < now)
 
-  const nextAppointments = list.filter((app: AppointmentModel) => {
-    const appTime = toMs(app.appointmentDate)
-    return appTime >= now - HOUR && appTime <= now + HOUR
-  })
+  // ========== COMPONENTES DE APOIO ==========
+  const LoadingSkeleton = () => (
+    <div className="space-y-4">
+      {[1, 2, 3].map((n) => (
+        <Card key={n} className="p-4">
+          <Skeleton className="h-6 w-1/3 mb-3" />
+          <Skeleton className="h-16 w-full" />
+        </Card>
+      ))}
+    </div>
+  )
+
+  const EmptyState = ({ label }: { label: string }) => (
+    <div className="flex flex-col items-center text-center p-10 text-gray-500">
+      <CalendarX2 className="w-12 h-12 mb-3 opacity-60" />
+      <p className="text-md font-medium">{label}</p>
+    </div>
+  )
 
   return (
-    <div className="space-y-4 mt-4 px-4 sm:px-6 lg:px-6">
+    <div className="space-y-8 mt-4 px-4 sm:px-6 lg:px-6">
       <DashboardHeader title="Meu Acompanhamento" subtitle="Histórico e agenda de consultas" userRole="DEFAULT" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-8">
-          <div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* COLUNA PRINCIPAL */}
+        <div className="lg:col-span-2 space-y-12">
+          {/* =================== PRÓXIMAS =================== */}
+          <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximas Consultas</h2>
-            {/* <CalendarNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} /> */}
-            {/* <AppointmentsList 
-              appointments={futureAppointments}
-              selectedDate={selectedDate}
-              userRole="DEFAULT"
-            /> */}
-            {nextAppointments &&
-              nextAppointments.map((consulta: AppointmentModel) => (
-                <Card key={consulta.id} className="therapy-card border-l-4 border-l-green-400 mb-2">
-                  <CardContent className="p-2 pl-4">
-                    <div className="flex justify-between items-start text-sm">
-                      {/* Lado esquerdo: Nome + Local ou Link */}
-                      <div className="flex flex-col">
-                        <div className="font-medium">
-                          Consulta com: <b>{consulta.professional.name}</b>
-                        </div>
-                        {consulta.tipoAtendimento === "presencial" ? (
-                          <p className="text-green-600 font-medium">Local: --</p>
-                        ) : (
-                          <a
-                            href={`./app/${user?.id}/videochamada/room/${consulta.roomId}`}
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline font-medium"
-                          >
-                            Link para consulta
-                          </a>
-                        )}
-                      </div>
+            {future && (
+              <p className="text-base text-yellow-600 bg-yellow-100 px-2 py-1 rounded-sm border border-yellow-300 mb-1">
+                O botão "Iniciar Sessão" será liberado 10 minutos antes do início da sessão.
+              </p>
+            )}
 
-                      {/* Lado direito: Data e Horário */}
-                      <WrapperDateTime consulta={consulta.appointmentDate} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
-            <div className="items-center gap-3">
-              {pastAppointments?.map((appointment: AppointmentModel) => (
+            {loading ? (
+              <LoadingSkeleton />
+            ) : future.length === 0 ? (
+              <EmptyState label="Você ainda não tem consultas agendadas" />
+            ) : (
+              future.map((appointment) => (
                 <AppointmentCard
+                  key={appointment.id}
                   appointment={appointment}
                   isMobile={mobile}
                   isToday={isToday}
-                  userRole={user?.role as 'DEFAULT'}
+                  user={user}
                   image={appointment.professional.image}
                   name={appointment.professional.name}
                 />
-              ))}
-            </div>
-          </div>
+              ))
+            )}
+          </section>
+
+          {/* =================== ANTERIORES =================== */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Consultas Anteriores</h2>
+
+            {loading ? (
+              <LoadingSkeleton />
+            ) : past.length === 0 ? (
+              <EmptyState label="Nenhuma consulta realizada até o momento" />
+            ) : (
+              past.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  isMobile={mobile}
+                  isToday={isToday}
+                  user={user}
+                  image={appointment.professional.image}
+                  name={appointment.professional.name}
+                />
+              ))
+            )}
+          </section>
         </div>
-
-        {/* <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Seu Progresso</h2>
-          <Card className="therapy-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium text-therapy-tertiary">
-                Notas de Evolução
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-4">
-                {mockProgressNotes.map((note, index) => (
-                  <div key={note.id}>
-                    {index > 0 && <Separator className="my-3" />}
-                    <div className="mb-1 flex justify-between">
-                      <h4 className="font-medium text-sm">{note.title}</h4>
-                      <span className="text-xs text-gray-500">{note.date}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{note.content}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div> */}
       </div>
     </div>
   )
 }
+
 export default PatientDashboard
-
-type TProps = {
-  consulta: Date
-}
-const WrapperDateTime = ({ consulta }: TProps) => {
-  return (
-    <div className="text-right font-xs">
-      <div className="">
-        <label className="text-sm text-muted-foreground mr-1">Data:</label>
-        <label className="text-gray-600 font-semibold">
-          {String(consulta.getUTCDate()).padStart(2, "0")}/{String(consulta.getUTCMonth() + 1).padStart(2, "0")}/
-          {consulta.getUTCFullYear()}
-        </label>
-      </div>
-      <div className="">
-        <label className="text-sm text-muted-foreground mr-1">Horário:</label>
-        <label className="text-gray-600 font-semibold">
-          {String(consulta.getUTCHours() - 3).padStart(2, "0")}h{String(consulta.getUTCMinutes()).padStart(2, "0")}m
-        </label>
-      </div>
-    </div>
-  )
-}
