@@ -42,8 +42,6 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
     },
     [availableDatesSet]
   )
-  console.log(paymentMethod)
-
   return (
     <TabsContent value="schedule" className="pt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -30,6 +30,7 @@ function getFreeIntervals(availability: Interval, appointments: Interval[]): Int
 
 export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const dayOfWeek = date.getDay() // 0=domingo, 1=segunda, etc.
+  const now = new Date()
   const professional = await prisma.professional.findUnique({
     where: { userId: userId, user: { active: true } },
     select: { id: true, userId: true },
@@ -40,9 +41,8 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const availabilities = await prisma.availability.findMany({
     where: {
       professionalId: professional.userId,
-      // dayOfWeek,
       isAvailable: true,
-      startTime: {
+      endTime: {
         gte: new Date(), // pega horários >= agora
       }, // busca apenas horários futuros (>= agora)
     },
@@ -120,5 +120,9 @@ export const getProfessionalSchedule = async (userId: string, date: Date) => {
   const slotsOrdened = slotsUnique
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .map((s) => ({ start: s.start.toISOString() })) // enviar ISO UTC ao front (ok)
-  return slotsOrdened
+  
+    return slotsOrdened.filter((slot) => {
+    const slotDate = new Date(slot.start)
+    return slotDate.getTime() > now.getTime()
+  })
 }
