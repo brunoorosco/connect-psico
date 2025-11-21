@@ -80,7 +80,6 @@ const PatientDashboard: React.FC = () => {
                   key={appointment.id}
                   appointment={appointment}
                   isMobile={mobile}
-                  isToday={isToday}
                   user={user}
                   image={appointment.professional.image}
                   name={appointment.professional.name}
