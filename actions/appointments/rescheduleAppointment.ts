@@ -6,6 +6,7 @@ import { fromZonedTime } from "date-fns-tz"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { endOfDay, startOfDay } from "date-fns"
 import { auth } from "@/auth"
+import { axiosInstance } from "@/infra/httpClient/psicomaisApiMessage"
 
 const TZ = "America/Sao_Paulo"
 
@@ -153,6 +154,11 @@ export const rescheduleAppointment = async (data: z.infer<typeof RescheduleAppoi
         performedBy: session.user.id,
         performedAt: new Date(),
       },
+    })
+    const userId = isPatient ? existingAppointment.professionalId : existingAppointment.patientId
+    await axiosInstance.post(`/notification/reagendamento/${userId}`, {
+      appointmentId,
+      date: existingAppointment.appointmentDate
     })
 
     // TODO: Enviar notificações por email/SMS para paciente e profissional

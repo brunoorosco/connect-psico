@@ -7,22 +7,35 @@ import { AppointmentModel } from "@/domain/model/appointment"
 import { getSession } from "next-auth/react"
 import { useCurrentUser } from "@hooks/use-current-user"
 import AppointmentCard from "./AppointmentCard"
-import { isSameDay } from "date-fns"
 import { useIsMobile } from "@hooks/use-mobile"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CalendarX2 } from "lucide-react"
+import { useSocket } from "@/infra/contexts/SocketContext"
 
 const PatientDashboard: React.FC = () => {
   const { appointments, loading, fetchAppointments } = useAppointmentsByPatient()
   const user = useCurrentUser()
-  const [selectedDate] = useState(new Date())
-  const isToday = isSameDay(selectedDate, new Date())
   const mobile = useIsMobile()
+  const { socket } = useSocket()
 
   useEffect(() => {
     getSession()
     fetchAppointments()
   }, [])
+
+  useEffect(() => {
+    if (!socket) return
+
+    const refetch = () => {
+      fetchAppointments()
+    }
+
+    socket.on("appointment:updated", refetch)
+
+    return () => {
+      socket.off("appointment:updated", refetch)
+    }
+  }, [socket])
 
   if (!user) return null
 
@@ -98,14 +111,16 @@ const PatientDashboard: React.FC = () => {
               <EmptyState label="Nenhuma consulta realizada até o momento" />
             ) : (
               past.map((appointment) => (
-                <AppointmentCard
-                  key={appointment.id}
-                  appointment={appointment}
-                  isMobile={mobile}
-                  user={user}
-                  image={appointment.professional.image}
-                  name={appointment.professional.name}
-                />
+                <div className="mb-2">
+                  <AppointmentCard
+                    key={appointment.id}
+                    appointment={appointment}
+                    isMobile={mobile}
+                    user={user}
+                    image={appointment.professional.image}
+                    name={appointment.professional.name}
+                  />
+                </div>
               ))
             )}
           </section>
