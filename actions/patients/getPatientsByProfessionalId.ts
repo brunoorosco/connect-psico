@@ -1,14 +1,24 @@
-"use server";
-import { prisma } from "@/lib/db"; // ou qualquer cliente DB que usar
-import { auth } from "@/auth"; // Certifique-se de que está importando corretamente
-import { Patient } from "@/types/appointment";
+"use server"
+import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
+import { auth } from "@/auth" // Certifique-se de que está importando corretamente
+import { Patient } from "@/types/appointment"
 
 export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error: string }> => {
-  const session = await auth(); // Obtém a sessão do usuário autenticado
+  const session = await auth() // Obtém a sessão do usuário autenticado
+  const getPatient = await prisma.patientProfessional.findMany({
+    where: {
+      professionalId: session?.user.id,
+    },
+    select: {
+      patientId: true,
+    },
+  })
+  const ids: string[] = getPatient.map((p) => p.patientId)
+
   try {
     const patients = await prisma.pacientes.findMany({
       where: {
-        professionalId: session?.user.id,
+        patientId: { in: ids },
         deletedAt: null,
       },
       select: {
@@ -34,7 +44,7 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
           },
         },
       },
-    });
+    })
     const patientMapper = patients.map((item) => ({
       id: item.id,
       medicalRecordId: item.medicalRecordId,
@@ -53,12 +63,11 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
       phone: item.patient.phone,
       image: item.patient.image,
       active: item.patient.active,
-    }));
+    }))
 
-    return patientMapper as Patient[];
+    return patientMapper as Patient[]
   } catch (error) {
-    console.error("Erro ao buscar pacientes:", error);
-    return { error: "Erro ao buscar pacientes" };
+    console.error("Erro ao buscar pacientes:", error)
+    return { error: "Erro ao buscar pacientes" }
   }
-};
-
+}
