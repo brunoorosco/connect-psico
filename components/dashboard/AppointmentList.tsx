@@ -253,7 +253,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
           ))}
       </div>
 
-      {/* Modal de cancelamento */}
+      {/* Modal de cancelamento
       <CancelAppointmentDialog
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
@@ -263,7 +263,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
       />
 
       {/* Modal de reagendamento */}
-      {selectedAppointment && (
+      {/* {selectedAppointment && (
         <RescheduleAppointmentDialog
           isOpen={isRescheduleOpen}
           onClose={() => {
@@ -275,7 +275,7 @@ const AppointmentsList: React.FC<AppointmentsListProps> = ({
           currentDate={selectedAppointment.appointmentDate}
           onConfirmReschedule={handleConfirmReschedule}
         />
-      )}
+      )}  */}
     </>
   )
 }

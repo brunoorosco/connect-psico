@@ -64,7 +64,7 @@ const PatientDashboard: React.FC = () => {
           {/* =================== PRÓXIMAS =================== */}
           <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Próximas Consultas</h2>
-            {future && (
+            {future.length > 0 && (
               <p className="text-base text-yellow-600 bg-yellow-100 px-2 py-1 rounded-sm border border-yellow-300 mb-1">
                 O botão "Iniciar Sessão" será liberado 10 minutos antes do início da sessão.
               </p>
