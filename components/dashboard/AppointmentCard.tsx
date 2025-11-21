@@ -18,11 +18,9 @@ import { rescheduleAppointment } from "@/actions/appointments/rescheduleAppointm
 interface AppointmentCardProps {
   appointment: AppointmentModel
   user: User
-  isToday: boolean
   isMobile: boolean
   onStartConsultation?: (patientId: string) => void
   onViewRecord?: (patientId: string) => void
-  onReschedule?: (appointment: AppointmentModel) => void
   image: string
   name: string
 }
@@ -30,11 +28,9 @@ interface AppointmentCardProps {
 const AppointmentCard: React.FC<AppointmentCardProps> = ({
   appointment,
   user,
-  isToday,
   isMobile,
   onStartConsultation,
   onViewRecord,
-  onReschedule,
   image,
   name,
 }) => {
@@ -70,7 +66,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     setSelectedAppointment(appointment)
     setIsRescheduleOpen(true)
   }
-  
+
   const getBorderColor = () => {
     switch (appointment.status) {
       case "COMPLETED":

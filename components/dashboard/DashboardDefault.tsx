@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import DashboardHeader from "./DashboardHeader"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { useAppointmentsByPatient } from "@/hooks/useAppointments"
 import { AppointmentModel } from "@/domain/model/appointment"
 import { getSession } from "next-auth/react"
