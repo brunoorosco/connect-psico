@@ -34,6 +34,7 @@ const AppointmentCalendar = () => {
 
   const handleSaveAppointment = async (appointment: AppointmentModel) => {
     try {
+      console.log('appointment :>> ', appointment);
       if (editingAppointment) {
         // Você pode implementar a lógica de edição aqui se necessário
         toast.success("Consulta atualizada", {
