@@ -123,9 +123,10 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
                       <Button variant="ghost" size="sm" onClick={() => onEditAppointment(appointment)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                    
 
-                      <DeleteAppointmentDialog appointmentId={appointment.id} onConfirm={onDeleteAppointment} />
+                      {appointment.status === "PENDING" && (
+                        <DeleteAppointmentDialog appointmentId={appointment.id} onConfirm={onDeleteAppointment} />
+                      )}
                     </div>
                   </div>
                 ))}

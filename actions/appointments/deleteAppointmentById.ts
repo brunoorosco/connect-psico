@@ -19,10 +19,10 @@ export async function deleteAppointment(id: number) {
 
     // 🔎 Verifica se o agendamento pertence ao profissional
     const appointment = await prisma.appointment.findFirst({
-      where: { id, professionalId },
+      where: { id, professionalId, status: "PENDING" },
       select: { id: true },
     })
-
+   
     if (!appointment) {
       return {
         success: false,

@@ -46,6 +46,9 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
           },
         },
         patient: { select: { name: true, image: true } },
+        payment: {
+          select: { status: true, amountCents: true, paidAt: true, providerPaymentId: true },
+        },
       },
       skip,
       take: limit,
@@ -81,6 +84,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     }
   })
 
+  console.log('mappedAppointments :>> ', mappedAppointments);
   return {
     data: mappedAppointments as any,
     total,
