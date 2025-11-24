@@ -2,19 +2,27 @@ import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { format, isSameDay, isSameWeek, isSameMonth } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Clock, Edit } from "lucide-react"
+import { Clock, Edit, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AppointmentModel } from "@/domain/model/appointment"
+import { DeleteAppointmentDialog } from "./AppointmentModal/AppoinmentDelete"
 
 interface AppointmentListProps {
   appointments: AppointmentModel[]
   selectedDate: Date
   onEditAppointment: (appointment: AppointmentModel) => void
+  onDeleteAppointment: (id: number) => void
   view: "daily" | "weekly" | "monthly"
 }
 
-const AppointmentList: React.FC<AppointmentListProps> = ({ appointments, selectedDate, onEditAppointment, view }) => {
+const AppointmentList: React.FC<AppointmentListProps> = ({
+  appointments,
+  selectedDate,
+  onEditAppointment,
+  view,
+  onDeleteAppointment,
+}) => {
   // Filter appointments based on view and selected date
   const filteredAppointments = React.useMemo(() => {
     return appointments.filter((apt) => {
@@ -115,6 +123,9 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ appointments, selecte
                       <Button variant="ghost" size="sm" onClick={() => onEditAppointment(appointment)}>
                         <Edit className="h-4 w-4" />
                       </Button>
+                    
+
+                      <DeleteAppointmentDialog appointmentId={appointment.id} onConfirm={onDeleteAppointment} />
                     </div>
                   </div>
                 ))}

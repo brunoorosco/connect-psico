@@ -9,29 +9,29 @@ import { useAppointmentForm } from "@hooks/useAppointmentForm"
 import { FormDateField } from "./FormDateField"
 import { FormTimeFields } from "./FormTimeFields"
 import { FormNotesField } from "./FormNotesField"
-import FormPatientField from "./FormPatientField"
+import { FormPatientField } from "./FormPatientField"
 
 export default function AppointmentForm({ onSubmit, onCancel, selectedDate, editingAppointment }: IAppointmentForm) {
   const { form } = useAppointmentForm({ selectedDate, editingAppointment, onSubmit })
 
   const handleSubmit = (data: any) => {
-    console.log("AppointmentForm.tsx:18", data)
-
-    // ✅ SOLUÇÃO: Garante que patientId está presente no modo edit
     if (editingAppointment && editingAppointment.patient?.id && !data.patientId) {
       data.patientId = editingAppointment.patient.id
     }
 
     onSubmit(data)
   }
-  useEffect(() => {
-    console.log("🔥 Tipo do patientId:", typeof form.watch("patientId"), form.watch("patientId"))
-    console.log(editingAppointment)
-  }, [form.watch("patientId")])
+
+ useEffect(() => {
+  if (editingAppointment) {
+    form.setValue("id", editingAppointment.id)
+  }
+}, [editingAppointment])
+
   return (
     <Form {...form}>
-      {JSON.stringify(form.formState.errors)}
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {editingAppointment && <input type="hidden" {...form.register("id")} />}
         <FormPatientField
           form={form}
           patient={{
