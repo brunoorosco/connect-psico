@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { CheckCircle, Copy } from "lucide-react"
+import { CheckCircle, Copy, Loader2 } from "lucide-react"
+import { getStatusPaymentPix } from "@/actions/payment/getStatusPayment"
 
 export default function CopyPixPage() {
   const [copied, setCopied] = useState(false)
   const [code, setCode] = useState("")
+  const [status, setStatus] = useState<"loading" | "pending" | "paid" | "error">("loading")
 
   const copyToClipboard = async (value: string) => {
     try {
@@ -18,44 +20,83 @@ export default function CopyPixPage() {
     }
   }
 
+  const fetchStatus = async (pixCode: string) => {
+    try {
+      const resp = await getStatusPaymentPix(pixCode)
+
+      if (resp?.status === "PAID") {
+        setStatus("paid")
+      } else {
+        setStatus("pending")
+      }
+
+      return resp
+    } catch {
+      setStatus("error")
+    }
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const pixCode = params.get("code") || ""
-    setCode(pixCode)
 
-    if (pixCode) copyToClipboard(pixCode)
+    if (!pixCode) {
+      setStatus("error")
+      return
+    }
+
+    setCode(pixCode)
+    fetchStatus(pixCode)
+
+    // Auto-refresh status a cada 5 segundos enquanto estiver pendente
+    const interval = setInterval(() => {
+      if (status !== "paid") fetchStatus(pixCode)
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   return (
     <div className="min-h-screen bg-[#F4F2FF] flex flex-col items-center justify-center px-6 py-4">
-      
       {/* Logo */}
       <div className="mb-6">
-        <Image
-          src="/logo.png"
-          alt="PsicoMais"
-          width={160}
-          height={60}
-        />
+        <Image src="/logo.png" alt="PsicoMais" width={160} height={60} />
       </div>
 
       {/* Card */}
       <div className="w-full max-w-xl bg-white shadow-2xl rounded-2xl p-8 border border-[#E4E0FF]">
-        
         <h1 className="text-2xl font-semibold text-center text-[#4F46E5] mb-3">
-          Seu código PIX
+          {status === "paid" ? "Pagamento Confirmado!" : "Seu código PIX"}
         </h1>
 
-        <p className="text-center text-gray-600 mb-6">
-          O código foi gerado e está pronto para pagamento.
-        </p>
+        {/* Loading */}
+        {status === "loading" && (
+          <div className="flex flex-col items-center py-10">
+            <Loader2 className="animate-spin h-10 w-10 text-[#4F46E5]" />
+            <p className="mt-4 text-gray-500">Verificando pagamento...</p>
+          </div>
+        )}
 
-        {code ? (
+        {/* Pagamento aprovado */}
+        {status === "paid" && (
+          <div className="text-center py-10">
+            <CheckCircle className="h-14 w-14 text-green-600 mx-auto" />
+            <h2 className="text-xl font-semibold mt-4">Pagamento realizado com sucesso 🎉</h2>
+            <p className="text-gray-600 mt-2">
+              Obrigado! Sua consulta está confirmada.
+            </p>
+          </div>
+        )}
+
+        {/* Pagamento pendente */}
+        {status === "pending" && code && (
           <>
+            <p className="text-center text-gray-600 mb-6">
+              O código foi gerado e está pronto para pagamento.
+            </p>
+
             {/* Código PIX */}
-            <div
-              className="w-full bg-gray-100 p-4 rounded-md text-sm font-mono break-all border border-gray-300 select-all"
-            >
+            <div className="w-full bg-gray-100 p-4 rounded-md text-sm font-mono break-all border border-gray-300 select-all">
               {code}
             </div>
 
@@ -80,15 +121,19 @@ export default function CopyPixPage() {
               Copiar novamente
             </button>
 
+            {/* Aguardando pagamento */}
+            <div className="mt-6 text-center text-sm text-gray-500 animate-pulse">
+              Aguardando confirmação do pagamento...
+            </div>
           </>
-        ) : (
-          <p className="text-red-600 text-center">
-            Nenhum código PIX foi informado.
-          </p>
+        )}
+
+        {/* Erro */}
+        {status === "error" && (
+          <p className="text-red-600 text-center py-6">Erro ao carregar o pagamento.</p>
         )}
       </div>
 
-      {/* Rodapé simples */}
       <p className="mt-6 text-sm text-gray-500 text-center">
         PsicoMais • Pagamentos mais fáceis para sua consulta 💜
       </p>
