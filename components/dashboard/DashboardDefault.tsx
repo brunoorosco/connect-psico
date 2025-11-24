@@ -11,6 +11,7 @@ import { useIsMobile } from "@hooks/use-mobile"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CalendarX2 } from "lucide-react"
 import { useSocket } from "@/infra/contexts/SocketContext"
+import { addMinutes } from "date-fns"
 
 const PatientDashboard: React.FC = () => {
   const { appointments, loading, fetchAppointments } = useAppointmentsByPatient()
@@ -41,12 +42,18 @@ const PatientDashboard: React.FC = () => {
 
   // Normalizando datas
   const now = new Date().getTime()
-  const toMs = (d: any) => new Date(d).getTime()
 
   const list: AppointmentModel[] = Array.isArray(appointments) ? appointments : []
 
-  const future = list.filter((a) => toMs(a.appointmentDate) >= now)
-  const past = list.filter((a) => toMs(a.appointmentDate) < now)
+  const future = list.filter((a) => {
+    const limit = addMinutes(new Date(a.appointmentDate), 59).getTime()
+    return limit >= now // ainda dentro da tolerância
+  })
+
+  const past = list.filter((a) => {
+    const limit = addMinutes(new Date(a.appointmentDate), 59).getTime()
+    return limit < now
+  })
 
   // ========== COMPONENTES DE APOIO ==========
   const LoadingSkeleton = () => (
@@ -110,18 +117,20 @@ const PatientDashboard: React.FC = () => {
             ) : past.length === 0 ? (
               <EmptyState label="Nenhuma consulta realizada até o momento" />
             ) : (
-              past.map((appointment) => (
-                <div className="mb-2">
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    isMobile={mobile}
-                    user={user}
-                    image={appointment.professional.image}
-                    name={appointment.professional.name}
-                  />
-                </div>
-              ))
+              past
+                .sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime())
+                .map((appointment) => (
+                  <div className="mb-2">
+                    <AppointmentCard
+                      key={appointment.id}
+                      appointment={appointment}
+                      isMobile={mobile}
+                      user={user}
+                      image={appointment.professional.image}
+                      name={appointment.professional.name}
+                    />
+                  </div>
+                ))
             )}
           </section>
         </div>

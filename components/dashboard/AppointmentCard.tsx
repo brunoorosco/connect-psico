@@ -8,7 +8,7 @@ import { getInitials } from "@/utils/getInitialsName"
 import { getAppointmentStatusLabel } from "@/utils/getAppointmentStatus"
 import { cn } from "@/lib/utils"
 import { AppointmentModel } from "@/domain/model/appointment"
-import { format, differenceInMinutes, differenceInHours, isBefore } from "date-fns"
+import { format, differenceInMinutes, differenceInHours, isBefore, addMinutes } from "date-fns"
 import { useRouter } from "next/navigation"
 import { User } from "next-auth"
 import { RescheduleAppointmentDialog } from "./RescheduleAppointmentDialog"
@@ -44,7 +44,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   const isSupervisor = user.role === "SUPERVISOR"
 
   // CARD DESABILITADO SE A CONSULTA JÁ PASSOU
-  const cardIsPast = isBefore(appointmentDate, now)
+  const cardIsPast = isBefore(addMinutes(appointmentDate, 59), now)
 
   // Diferenças de tempo
   const hoursUntilAppointment = differenceInHours(appointmentDate, now)
@@ -62,6 +62,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     (isDefault && minutesUntilAppointment <= 10 && minutesUntilAppointment >= -59) ||
     (isSupervisor && minutesUntilAppointment <= 50 && minutesUntilAppointment >= -59)
 
+    console.log(canStartAppointment)
   const openRescheduleDialog = (appointment: AppointmentModel) => {
     setSelectedAppointment(appointment)
     setIsRescheduleOpen(true)
