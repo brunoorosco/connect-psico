@@ -15,6 +15,7 @@ import DailyView from "./DailyView"
 import WeeklyView from "./WeeklyView"
 import MonthlyView from "./MonthlyView"
 import AppointmentList from "./AppointmentList"
+import { FancyLoader } from "@components/LoadingSpinner"
 
 // 🔁 SWR fetcher
 const fetchAppointments = () => getAppointmentsUsers({ page: 1, limit: 100 })
@@ -27,7 +28,7 @@ const AppointmentCalendar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingAppointment, setEditingAppointment] = useState<AppointmentModel | null>(null)
 
-  if (isLoading) return <div>Carregando agendamentos...</div>
+  if (isLoading) return <FancyLoader/>
   if (error || !data || "error" in data) return <div>Erro ao carregar agendamentos</div>
 
   const appointments = data.data ?? []
@@ -180,3 +181,4 @@ const AppointmentCalendar = () => {
 }
 
 export default AppointmentCalendar
+
