@@ -1,96 +1,78 @@
-// FormPatientField.tsx
 "use client"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { cn } from "@/lib/utils"
+
 import { useEffect, useState } from "react"
-import { IFormPatientField } from "./types"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getPatientsByProfessionalId } from "@/actions/patients"
 import { Patient } from "@/types/appointment"
+import { IFormPatientField } from "./types"
 
 type Props = IFormPatientField & {
-  initialPatientName?: string; // <- NOVO
+  patient?: { name: string; id: string }
+  edit: boolean
 }
 
-export const FormPatientField: React.FC<Props> = ({ form, initialPatientName }) => {
-  const [open, setOpen] = useState(false)
+export const FormPatientField: React.FC<Props> = ({ form, patient, edit }) => {
   const [patients, setPatients] = useState<Patient[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
-        const patientsList = await getPatientsByProfessionalId()
-        if (Array.isArray(patientsList)) setPatients(patientsList)
-      } catch {
-        // opcional: tratar erro
+        const list = await getPatientsByProfessionalId()
+        if (Array.isArray(list)) setPatients(list)
+      } finally {
+        setLoading(false)
       }
     })()
   }, [])
+
+  useEffect(() => {
+    if (edit && patient?.id && !form.getValues("patientId")) {
+      form.setValue("patientId", patient.id)
+    }
+  }, [edit, patient])
 
   return (
     <FormField
       control={form.control}
       name="patientId"
-      render={({ field }) => {
-        const selected = patients.find(
-          (p: any) => (p.userId ?? p.id) === field.value // <- aceita userId ou id
-        )
-        const buttonLabel = selected?.name ?? initialPatientName ?? "Selecione um paciente"
+      render={({ field }) => (
+        <FormItem className="flex flex-col">
+          <FormLabel>Paciente</FormLabel>
 
-        return (
-          <FormItem className="flex flex-col">
-            <FormLabel>Paciente</FormLabel>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
-                  >
-                    {buttonLabel}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-[400px] p-0">
-                <Command>
-                  <CommandInput placeholder="Buscar paciente..." />
-                  <CommandEmpty>Nenhum paciente encontrado.</CommandEmpty>
-                  <CommandGroup>
-                    {patients.map((patient: any) => {
-                      const value = patient.userId ?? patient.id
-                      return (
-                        <CommandItem
-                          key={value}
-                          value={value}
-                          onSelect={() => {
-                            field.onChange(value)
-                            setOpen(false)
-                          }}
-                        >
-                          <Check className={cn("mr-2 h-4 w-4", value === field.value ? "opacity-100" : "opacity-0")} />
-                          <div className="flex flex-col">
-                            <span>{patient.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {patient.medicalRecordId ? `Prontuário: ${patient.medicalRecordId}` : "Sem prontuário vinculado"}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      )
-                    })}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )
-      }}
+          <Select
+            onValueChange={field.onChange}
+            value={field.value}
+            disabled={edit || loading}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue
+                  className="text-left"
+                  placeholder={edit ? patient?.name : loading ? "Carregando pacientes..." : "Selecione um paciente"}
+                />
+              </SelectTrigger>
+            </FormControl>
+
+            <SelectContent>
+              {!loading &&
+                patients.map((p: any) => (
+                  <SelectItem key={p.userId ?? p.id} value={String(p.userId ?? p.id)}>
+                    <div className="flex flex-col text-left">
+                      <span className="text-base">{p.name}</span>
+                      <span className="text-xs -mt-1 text-muted-foreground">
+                        {p.medicalRecordId ? `Prontuário: ${p.medicalRecordId}` : "Sem prontuário"}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+
+          <FormMessage />
+        </FormItem>
+      )}
     />
   )
 }

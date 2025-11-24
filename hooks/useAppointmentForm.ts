@@ -9,6 +9,7 @@ import { TIME_REGEX } from "@/utils/formatMessageTime"
 import { mockPatients } from "@components/agenda/mockData"
 
 const appointmentSchema = z.object({
+  id: z.number().optional(),
   patientId: z.string().min(1, "Selecione um paciente"),
   appointmentDate: z.string().min(1, "Selecione uma data"),
   startTime: z.string().regex(TIME_REGEX, "Formato inválido. Use HH:MM"),
@@ -60,47 +61,5 @@ export function useAppointmentForm({
     }
   }, [editingAppointment, selectedDate])
 
-  const handleSubmit = (values: AppointmentFormValues) => {
-    const selectedPatient = patients.find((p) => p.userId === values.patientId)
-    if (!selectedPatient) {
-      toast({ title: "Erro", description: "Paciente não encontrado", variant: "destructive" })
-      return
-    }
-
-    const appointmentDate = new Date(`${values.appointmentDate}T${values.startTime}:00`)
-    const [startHour, startMinute] = values.startTime.split(":").map(Number)
-    const [endHour, endMinute] = values.endTime.split(":").map(Number)
-    const duration = endHour * 60 + endMinute - (startHour * 60 + startMinute)
-
-    const newAppointment: Omit<AppointmentModel, "roomId"> = {
-      id: editingAppointment?.id || Math.random(),
-      professionalId: "prof1",
-      professional: {
-        id: "prof1",
-        name: "Dr. Fulano",
-        telefone: "00000000",
-        email: "dr@clinic.com",
-        image:""
-      },
-      patientId: selectedPatient.userId,
-      patient: {
-        id: selectedPatient.userId,
-        name: selectedPatient.name,
-        telefone: selectedPatient.phone ?? "",
-        email: selectedPatient.email ?? "",
-      },
-      appointmentDate,
-      status: "PENDING",
-      createdAt: new Date(),
-      notes: values.notes,
-      duration,
-      isLinkedToMedicalRecord: !!selectedPatient.medicalRecordId,
-      review: false,
-      tipoAtendimento: "ambos"
-    }
-
-    onSubmit(newAppointment)
-  }
-
-  return { form, handleSubmit }
+  return { form }
 }
