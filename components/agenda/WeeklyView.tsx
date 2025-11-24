@@ -42,7 +42,7 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({
       <Card>
         <CardContent className="p-6">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50">
+            <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50 sm:w-40 w-full">
               <Plus className="h-4 w-4 mr-2" />
               Nova Consulta
             </Button>

@@ -39,12 +39,12 @@ const MonthlyView: React.FC<MonthlyViewProps> = ({
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6 ">
         <div className="flex justify-between items-center mb-4">
           {/* <h3 className="text-lg font-medium">
             {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
           </h3> */}
-          <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50">
+          <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50 sm:w-40 w-full">
             <Plus className="h-4 w-4 mr-2" />
             Nova Consulta
           </Button>

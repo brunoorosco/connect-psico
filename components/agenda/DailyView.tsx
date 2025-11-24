@@ -33,10 +33,10 @@ const DailyView: React.FC<DailyViewProps> = ({
       <Card>
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">
+            <h3 className="text-lg font-medium hidden sm:block">
               {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
             </h3>
-            <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50">
+            <Button onClick={() => onAddAppointment(selectedDate)} className="text-gray-50 sm:w-40 w-full">
               <Plus className="h-4 w-4 mr-2" />
               Nova Consulta
             </Button>

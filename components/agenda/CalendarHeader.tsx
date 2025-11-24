@@ -81,7 +81,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </div>
 
       {/* Mudança de visualização */}
-      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
+      <div className="grid grid-cols-3 items-center justify-center sm:justify-end gap-2">
         <Button
           variant={view === 'daily' ? 'default' : 'outline'}
           onClick={() => onViewChange('daily')}
