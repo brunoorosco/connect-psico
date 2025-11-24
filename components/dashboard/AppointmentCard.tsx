@@ -114,10 +114,14 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   }
 
   const handleStartAppointment = () => {
-    if (user.role === "DEFAULT") {
-      router.push(`./app/${user?.id}/videochamada/room/${appointment.roomId}`)
-    }
-    router.push(`/app/professional/${user.id}/consulta?patientId=${appointment.patientId}`)
+    // if (user.role === "DEFAULT") {
+    //   router.push(`./app/${user?.id}/videochamada/room/${appointment.roomId}`)
+    //   console.log("user.role :>> ", user.role)
+    //   return
+    // }
+    router.push(`./app/${user?.id}/videochamada/room/${appointment.roomId}`)
+    // router.push(`/app/professional/${user.id}/consulta?patientId=${appointment.patientId}`)
+    return
   }
 
   return (
