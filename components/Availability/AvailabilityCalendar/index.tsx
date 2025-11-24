@@ -77,13 +77,13 @@ export const AvailabilityCalendar: React.FC<IAvailabilityCalendar> = ({
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-xl">
             <Clock className="h-5 w-5 mr-2" />
             Calendário de Disponibilidade
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="">
             <Calendar
               mode="single"
               selected={selectedDate}

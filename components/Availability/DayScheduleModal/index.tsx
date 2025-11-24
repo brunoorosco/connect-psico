@@ -98,12 +98,13 @@ export const DayScheduleModal: React.FC<IDayScheduleModal> = ({
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl text-center sm:text-left">
-            {titlePrefix} — {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          <DialogTitle className="text-center sm:text-center">
+            <p className="text-xl sm:text-xl">{titlePrefix}</p>{" "}
+            <p className="text-sm sm:text-base text-gray-500">{format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-6 mt-2">
           {/* Lista de horários */}
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
