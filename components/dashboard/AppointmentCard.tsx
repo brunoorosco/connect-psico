@@ -62,7 +62,6 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     (isDefault && minutesUntilAppointment <= 10 && minutesUntilAppointment >= -59) ||
     (isSupervisor && minutesUntilAppointment <= 50 && minutesUntilAppointment >= -59)
 
-    console.log(canStartAppointment)
   const openRescheduleDialog = (appointment: AppointmentModel) => {
     setSelectedAppointment(appointment)
     setIsRescheduleOpen(true)

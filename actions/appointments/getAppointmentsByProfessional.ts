@@ -84,7 +84,6 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
     }
   })
 
-  console.log('mappedAppointments :>> ', mappedAppointments);
   return {
     data: mappedAppointments as any,
     total,
