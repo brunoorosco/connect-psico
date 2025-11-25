@@ -119,7 +119,7 @@ const PaymentHistory = () => {
       <main className="max-w-7xl mx-auto py-2 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Back button */}
-          <Button variant="ghost" onClick={() => router.push("/professional-dashboard")} className="mb-6">
+          <Button variant="ghost" onClick={() => router.push("/app")} className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Dashboard
           </Button>
