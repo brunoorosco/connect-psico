@@ -319,11 +319,6 @@ model BankAccount {
   @@map("bank_account")
 }
 
-enum AccountType {
-  CHECKING // Conta Corrente
-  SAVINGS // Conta Poupança
-}
-
 //pagamentos
 model Payment {
   id                String        @id @default(cuid())
@@ -334,6 +329,7 @@ model Payment {
   checkoutUrl       String?
   qrCodeText        String?
   expiresAt         DateTime?
+  type              PaymentType?  @default(PIX)
   amountCents       Int
   paidAt            DateTime?
   createdAt         DateTime      @default(now())
@@ -418,6 +414,19 @@ enum PaymentStatus {
   REFUNDED
   CANCELED
   FAILED
+}
+
+enum AccountType {
+  CHECKING // Conta Corrente
+  SAVINGS // Conta Poupança
+}
+
+enum PaymentType {
+  PIX
+  CREDIT_CARD
+  CASH
+  DEBIT_CARD
+  TRANSFER_BANK
 }
 
 enum RefundReason {

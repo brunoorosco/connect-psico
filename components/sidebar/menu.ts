@@ -14,6 +14,7 @@ import {
   StarIcon,
   InfoIcon,
   Search,
+  DollarSign,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -123,6 +124,12 @@ export const menus = [
     url: `/app/{userId}/help-center`,
     icon: InfoIcon,
     rules: ["SUPERVISOR"],
+  },
+  {
+    title: "Pagamentos",
+    url: `/app/{userId}/payments`,
+    icon: DollarSign,
+    rules: ["DEFAULT"],
   },
   {
     title: "Comentários",
