@@ -132,6 +132,12 @@ export const menus = [
     rules: ["DEFAULT"],
   },
   {
+    title: "Anamenese",
+    url: `/app/{userId}/anamenese`,
+    icon: DollarSign,
+    rules: ["DEFAULT"],
+  },
+  {
     title: "Comentários",
     url: `/app/{userId}/reviews`,
     icon: StarIcon,
