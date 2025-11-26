@@ -58,7 +58,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
 
   // 🔹 Opcional: otimizar a busca de pacientes já existentes
   const patientIds = appointments.map((a) => a.patientId)
-  const existingPatients = await prisma.pacientes.findMany({
+  const existingPatients = await prisma.patientProfessional.findMany({
     where: {
       patientId: { in: patientIds },
       professionalId: session.user.id,
@@ -67,6 +67,7 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
   })
 
   const existingPatientIds = new Set(existingPatients.map((p) => p.patientId))
+  console.log(existingPatientIds)
 
   // 🔹 Montagem dos dados
   const mappedAppointments = appointments.map((app) => {

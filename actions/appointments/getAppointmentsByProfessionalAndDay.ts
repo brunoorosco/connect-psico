@@ -27,36 +27,47 @@ export const getAppointmentsByDay = async ({ selectedDate }: TParams): Promise<R
   const endOfDay = new Date(selectedDate)
   endOfDay.setHours(23, 59, 59, 999)
 
-  const appointments = await prisma.appointment.findMany({
-    where: {
-      professionalId: session.user.id, // Filtra apenas agendamentos do profissional logado
-      appointmentDate: {
-        gte: startOfDay, // maior ou igual ao início do dia
-        lte: endOfDay, // menor ou igual ao fim do dia
-      },
-    },
-    select: {
-      id: true,
-      appointmentDate: true,
-      status: true,
-      professionalId: true,
-      patientId: true,
-      roomId: true,
-      professional: {
-        select: {
-          name: true,
-          Professional: {
-            select: { tempoConsulta: true },
-          },
+  const [appointments, appointmentConcluded] = await Promise.all([
+    prisma.appointment.findMany({
+      where: {
+        professionalId: session.user.id, // Filtra apenas agendamentos do profissional logado
+        appointmentDate: {
+          gte: startOfDay, // maior ou igual ao início do dia
+          lte: endOfDay, // menor ou igual ao fim do dia
         },
       },
-      patient: { select: { name: true, image: true } },
-    },
-  })
+      select: {
+        id: true,
+        appointmentDate: true,
+        status: true,
+        professionalId: true,
+        patientId: true,
+        roomId: true,
+        professional: {
+          select: {
+            name: true,
+            Professional: {
+              select: { tempoConsulta: true },
+            },
+          },
+        },
+        patient: { select: { name: true, image: true } },
+      },
+    }),
+    prisma.appointment.findMany({
+      where: {
+        professionalId: session.user.id, // Filtra apenas agendamentos do profissional logado
+        status: "CONCLUDED",
+      },
+      select: {
+        patientId: true,
+      },
+    }),
+  ])
 
   // 🔹 Opcional: otimizar a busca de pacientes já existentes
-  const patientIds = appointments.map((a) => a.patientId)
-  const existingPatients = await prisma.pacientes.findMany({
+  const patientIds = appointmentConcluded.map((a) => a.patientId)
+  const existingPatients = await prisma.patientProfessional.findMany({
     where: {
       patientId: { in: patientIds },
       professionalId: session.user.id,
