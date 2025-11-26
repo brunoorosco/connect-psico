@@ -394,6 +394,49 @@ model AppointmentHistory {
   @@index([performedBy])
   @@map("appointment_histories")
 }
+model AnamnesisAdult {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+
+  fullName          String
+  birthDate         String
+  phone             String
+  email             String
+  address           String?
+  emergencyContact  String?
+  emergencyPhone    String?
+  maritalStatus     String?
+  occupation        String?
+  education         String?
+  referredBy        String?
+
+  currentComplaint  String
+  complaintHistory  String?
+  previousTreatment String?
+  medications       String?
+
+  familyHistory     String?
+  personalHistory   String?
+
+  sleepPattern      String?
+  appetite          String?
+  mood              String?
+  anxiety           String?
+  stressLevel       String?
+
+  suicidalThoughts  Boolean @default(false)
+  selfHarm          Boolean @default(false)
+  violence          Boolean @default(false)
+  additionalInfo    String?
+
+  consent           Boolean @default(false)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("anamnesis_adult")
+}
+
 
 enum UserRole {
   DEFAULT
