@@ -15,6 +15,7 @@ import {
   InfoIcon,
   Search,
   DollarSign,
+  ClipboardEdit,
 } from "lucide-react"
 
 const useDynamicMenus = async () => {
@@ -134,7 +135,7 @@ export const menus = [
   {
     title: "Anamenese",
     url: `/app/{userId}/anamenese`,
-    icon: DollarSign,
+    icon: ClipboardEdit,
     rules: ["DEFAULT"],
   },
   {
