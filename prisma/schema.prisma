@@ -44,6 +44,8 @@ model User {
   PatientProfessional1     PatientProfessional[]  @relation("PatientProfessional1")
   BankAccount              BankAccount[]
   appointmentHistories     AppointmentHistory[]
+  anamnesisTokens          AnamnesisTokens[]      @relation("relation_anamnesis_token_user")
+  anamnesisAdult           AnamnesisAdult?        @relation("relation_anamnesis_user")
 
   @@index([id, email])
   @@map("users")
@@ -227,6 +229,7 @@ model Appointment {
   Payout               Payout?
   Refund               Refund?
   appointmentHistories AppointmentHistory[]
+  anamnesisTokens      AnamnesisTokens[]    @relation("relation_anamnesis_token_appointment")
 
   @@index([professionalId, patientId, status])
   @@map("appointments")
@@ -394,49 +397,65 @@ model AppointmentHistory {
   @@index([performedBy])
   @@map("appointment_histories")
 }
-model AnamnesisAdult {
-  id                String   @id @default(cuid())
-  userId            String   @unique
 
-  fullName          String
-  birthDate         String
-  phone             String
-  email             String
-  address           String?
-  emergencyContact  String?
-  emergencyPhone    String?
-  maritalStatus     String?
-  occupation        String?
-  education         String?
-  referredBy        String?
+model AnamnesisAdult {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  fullName         String
+  birthDate        String
+  phone            String
+  email            String
+  address          String?
+  emergencyContact String?
+  emergencyPhone   String?
+  maritalStatus    String?
+  occupation       String?
+  education        String?
+  referredBy       String?
 
   currentComplaint  String
   complaintHistory  String?
   previousTreatment String?
   medications       String?
 
-  familyHistory     String?
-  personalHistory   String?
+  familyHistory   String?
+  personalHistory String?
 
-  sleepPattern      String?
-  appetite          String?
-  mood              String?
-  anxiety           String?
-  stressLevel       String?
+  sleepPattern String?
+  appetite     String?
+  mood         String?
+  anxiety      String?
+  stressLevel  String?
 
-  suicidalThoughts  Boolean @default(false)
-  selfHarm          Boolean @default(false)
-  violence          Boolean @default(false)
-  additionalInfo    String?
+  suicidalThoughts Boolean @default(false)
+  selfHarm         Boolean @default(false)
+  violence         Boolean @default(false)
+  additionalInfo   String?
 
-  consent           Boolean @default(false)
+  consent Boolean @default(false)
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("relation_anamnesis_user", fields: [userId], references: [id])
 
   @@map("anamnesis_adult")
 }
 
+model AnamnesisTokens {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  appointmentId Int      @map("session_id")
+  token         String
+  expiresAt     DateTime @map("expires_at")
+  used          Boolean  @default(false)
+
+  appointment Appointment @relation("relation_anamnesis_token_appointment", fields: [appointmentId], references: [id], onDelete: Cascade)
+  user        User        @relation("relation_anamnesis_token_user", fields: [userId], references: [id])
+
+  @@map("anamnesis_tokens")
+}
 
 enum UserRole {
   DEFAULT
