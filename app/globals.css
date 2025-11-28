@@ -16,13 +16,15 @@
     --primary: 255 70% 75%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 160 84% 39%; /* Esmeralda */
+    --secondary: 160 84% 39%;
+    /* Esmeralda */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 33 90% 50%; /* Âmbar */
+    --accent: 33 90% 50%;
+    /* Âmbar */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -54,16 +56,19 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 246 80% 70%; /* Índigo mais claro */
+    --primary: 246 80% 70%;
+    /* Índigo mais claro */
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 159 84% 54%; /* Esmeralda mais claro */
+    --secondary: 159 84% 54%;
+    /* Esmeralda mais claro */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 35 92% 65%; /* Âmbar mais claro */
+    --accent: 35 92% 65%;
+    /* Âmbar mais claro */
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -92,8 +97,13 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif tracking-tight;
   }
 }
@@ -102,12 +112,22 @@
   .transition-all-200 {
     @apply transition-all duration-200;
   }
-  
+
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-[1.02];
   }
-  
+
   .text-balance {
     text-wrap: balance;
+  }
+
+  .bg-hatched {
+    background-color: transparent;
+    background-size: 12.0208152802px 12.0208152802px;
+    background-image: repeating-linear-gradient(-45deg,
+        #e2e5ea,
+        #e2e5ea 1px,
+        transparent 0,
+        transparent 50%);
   }
 }
