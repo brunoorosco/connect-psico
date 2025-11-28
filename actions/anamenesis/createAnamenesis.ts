@@ -20,11 +20,17 @@ import { prisma } from "@/lib/db"
 //   },
 // }
 
-export const anamnesisCreate = (data: AnamnesisAdultModel & { userId: string }) => {
+export const anamnesisCreate =async (data: AnamnesisAdultModel & { userId: string }) => {
   // Valida com Zod
   const validated = AnamnesisAdultSchema.parse(data)
 
-  return prisma.anamnesisAdult.create({
+  return await prisma.anamnesisAdult.create({
     data: validated,
   })
+}
+
+export const getAnamnesisByToken =async (token: string) => {
+  const resp = await prisma.anamnesisTokens.findFirst({ where: { token: token } })
+  console.log('resp :>> ', resp);
+  return resp
 }
