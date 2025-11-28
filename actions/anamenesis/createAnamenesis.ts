@@ -31,6 +31,5 @@ export const anamnesisCreate =async (data: AnamnesisAdultModel & { userId: strin
 
 export const getAnamnesisByToken =async (token: string) => {
   const resp = await prisma.anamnesisTokens.findFirst({ where: { token: token } })
-  console.log('resp :>> ', resp);
   return resp
 }

@@ -20,6 +20,12 @@ const AnamnesisPage = () => {
         return
       }
 
+      if (resp.used) {
+        toast.error("Formulário já preenchido!")
+        router.push("/")
+        return
+      }
+
       setShowPage(true)
     } catch (err) {
       console.error(err)
