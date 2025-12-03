@@ -8,7 +8,6 @@ import { usePatientStore } from "@/infra/stores/usePatientStore"
 import { Patient } from "@/types/appointment"
 import { useState } from "react"
 import { useChatStore } from "@/infra/stores/useChatStore"
-import { useCurrentUser } from "@hooks/use-current-user"
 import { PatientActions } from "./buttonsActions"
 import { MessageDialog } from "../DialogMessagePatient"
 import { formatPhone } from "@/utils/formatPhone"
@@ -24,8 +23,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
   const { messages } = useChatStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
-  const user = useCurrentUser()
-
+ 
   const handleStartConsultation = (item: Patient) => {
     usePatientStore.getState().setPatient(item)
   }

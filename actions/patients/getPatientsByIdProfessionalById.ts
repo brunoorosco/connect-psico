@@ -5,11 +5,22 @@ import { Patient } from "@/types/appointment"
 
 export const getPatientsByIdProfessionalById = async (patientId: string): Promise<Patient[] | { error: string }> => {
   const session = await auth() // Obtém a sessão do usuário autenticado
+
+  const getPatient = await prisma.patientProfessional.findFirst({
+    where: {
+      professionalId: session?.user.id,
+      patientId: patientId
+    },
+    select: {
+      patientId: true,
+    },
+  })
+ 
+  if(!getPatient) throw Error("Paciente não encontrado")
   try {
     const patients = await prisma.pacientes.findMany({
       where: {
-        professionalId: session?.user.id,
-        patientId: patientId,
+        patientId: getPatient.patientId,
         deletedAt: null,
       },
       select: {

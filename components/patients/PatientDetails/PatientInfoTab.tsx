@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IPatient } from "./types"
 import { format, parseISO } from "date-fns"
 import { formatPhone } from "@/utils/formatPhone"
+import { formatAddress } from "@/utils/formatAddress"
 
 export const PatientInfoTab: React.FC<IPatient> = (props) => {
   const { patient } = props || {}
@@ -14,9 +15,9 @@ export const PatientInfoTab: React.FC<IPatient> = (props) => {
 
   const { email, phone, birthDate, emergencyContact, street, number, neighborhood, city, state, cep, notes } = patient
 
-  const formattedAddress = `${street}, ${number} - ${neighborhood}, ${city} - ${state}, ${cep}`
-  const parsedDate = birthDate ? parseISO(birthDate) : ''
-  const formattedDate = format(parsedDate, "dd/MM/yyyy")
+  const formattedAddress = formatAddress(street, number, neighborhood, city, state, cep)
+  const parsedDate = birthDate ? parseISO(birthDate) : ""
+  const formattedDate = parsedDate ? format(parsedDate, "dd/MM/yyyy") : "-"
 
   return (
     <Card>
@@ -27,7 +28,7 @@ export const PatientInfoTab: React.FC<IPatient> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoField label="Email" value={email} />
           <InfoField label="Telefone" value={formatPhone(phone)} />
-          <InfoField label="Data de Nascimento" value={formattedDate} />
+          <InfoField label="Data de Nascimento" value={formattedDate ?? "-"} />
           <InfoField label="Contato de Emergência" value={emergencyContact || "Não informado"} />
           <InfoField label="Endereço" value={formattedAddress} fullWidth />
           <InfoField label="Observações" value={notes || "Sem observações"} fullWidth />

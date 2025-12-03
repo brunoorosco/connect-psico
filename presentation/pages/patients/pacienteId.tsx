@@ -24,6 +24,7 @@ export function PatientsIdPage() {
   const { mutate } = useSWR(patientId ? `patients/${patientId}` : null, () =>
     fetchPatientById(patientId!)
   )
+
   const patientFormHook = usePatientForm({
     patient: editingPatient ?? selectedPatient,
     mutate,
@@ -34,6 +35,7 @@ export function PatientsIdPage() {
       fetchPatientById(patientId)
     }
   }, [patientId])
+  console.log(selectedPatient)
 
   if (!selectedPatient) {
     return (
