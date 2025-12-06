@@ -1,3 +1,4 @@
+'use server'
 import { prisma } from "@/lib/db";
 import { randomUUID as uuid } from "crypto";
 
