@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { NewPasswordSchema } from "@/schemas/auth"
-import { LoaderIcon, CheckCircle2, XCircle, AlertCircle } from "lucide-react"
+import { LoaderIcon, CheckCircle2, XCircle, AlertCircle, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import AuthCard from "./auth-card"
 import AuthFormMessage from "./auth-form-message"
 
-type TokenStatus = "loading" | "valid" | "invalid" | "expired" | "used"
+type TokenStatus = "loading" | "valid" | "invalid"
 
 export const ChangePasswordForm = () => {
   const [error, setError] = useState<string | undefined>("")
@@ -25,8 +25,12 @@ export const ChangePasswordForm = () => {
   const [isCompleted, setIsCompleted] = useState(false)
   const [tokenStatus, setTokenStatus] = useState<TokenStatus>("loading")
   const [tokenError, setTokenError] = useState<string>("")
+  
+  // Estados para visualização de senha
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  
   const router = useRouter()
-
   const searchParam = useSearchParams()
   const token = searchParam?.get("token")
 
@@ -34,6 +38,7 @@ export const ChangePasswordForm = () => {
     resolver: zodResolver(NewPasswordSchema),
     defaultValues: {
       password: "",
+      confirmPassword: "",
     },
   })
 
@@ -87,6 +92,7 @@ export const ChangePasswordForm = () => {
   }
 
   const isDisabled = isPending || isCompleted
+  const watchPassword = form.watch("password")
 
   // Loading state
   if (tokenStatus === "loading") {
@@ -110,7 +116,9 @@ export const ChangePasswordForm = () => {
           </div>
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">{tokenError}</p>
-            <p className="text-xs text-muted-foreground">O link pode ter expirado ou já foi utilizado.</p>
+            <p className="text-xs text-muted-foreground">
+              O link pode ter expirado ou já foi utilizado.
+            </p>
           </div>
           <div className="flex flex-col gap-2 w-full pt-4">
             <Button asChild variant="default" className="w-full">
@@ -131,6 +139,7 @@ export const ChangePasswordForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
+            {/* Campo Nova Senha */}
             <FormField
               control={form.control}
               name="password"
@@ -138,7 +147,74 @@ export const ChangePasswordForm = () => {
                 <FormItem>
                   <FormLabel>Nova senha</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isDisabled} placeholder="Digite sua nova senha" type="password" />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        disabled={isDisabled}
+                        placeholder="Digite sua nova senha"
+                        type={showPassword ? "text" : "password"}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isDisabled}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        </span>
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Campo Confirmar Senha */}
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar senha</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        disabled={isDisabled}
+                        placeholder="Confirme sua nova senha"
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isDisabled}
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="sr-only">
+                          {showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                        </span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +222,7 @@ export const ChangePasswordForm = () => {
             />
 
             {/* Indicador de requisitos da senha */}
-            <PasswordRequirements password={form.watch("password")} />
+            <PasswordRequirements password={watchPassword} />
           </div>
 
           {error && <AuthFormMessage type="error" message={error} title="Erro" />}
@@ -190,7 +266,9 @@ const PasswordRequirements = ({ password }: { password: string }) => {
             ) : (
               <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
             )}
-            <span className={req.valid ? "text-green-600" : "text-muted-foreground"}>{req.label}</span>
+            <span className={req.valid ? "text-green-600" : "text-muted-foreground"}>
+              {req.label}
+            </span>
           </li>
         ))}
       </ul>
