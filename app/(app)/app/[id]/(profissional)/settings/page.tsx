@@ -1,11 +1,11 @@
-// components/SettingsScreen.tsx
 "use client"
-import { useState } from "react"
-import Head from "next/head"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { FaFileMedical, FaUserMd, FaClinicMedical, FaStethoscope, FaCog } from "react-icons/fa"
+import { FaFileMedical, FaUserMd, FaClinicMedical } from "react-icons/fa"
 import { useCurrentUser } from "@hooks/use-current-user"
-import { Receipt } from "lucide-react"
+import { Receipt, Shield } from "lucide-react"
+import { userByProvider } from "@/actions/provider/getProvider"
 
 interface SettingsCardProps {
   title: string
@@ -53,7 +53,16 @@ const SettingsCard: React.FC<SettingsCardProps> = ({ title, description, icon, h
 
 export default function SettingsScreen() {
   const [activeTab, setActiveTab] = useState("settings")
+  const [isProvider, setIsProvider] = useState<boolean | null>(null)
   const user = useCurrentUser()
+
+  useEffect(() => {
+    const checkProvider = async () => {
+      const result = await userByProvider()
+      setIsProvider(result.provider ?? false)
+    }
+    checkProvider()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,13 +72,6 @@ export default function SettingsScreen() {
             <h2 className="text-2xl font-bold mb-8 text-gray-800">Configurações do Sistema</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* <SettingsCard
-                title="Atestado Médico"
-                description="Configure o modelo de atestado médico, incluindo logo, rodapé e campos personalizados"
-                icon={<FaFileMedical className="text-2xl" />}
-                href="./settings/atestado"
-              /> */}
-
               <SettingsCard
                 title="Perfil do Profissional"
                 description="Gerencie suas informações profissionais, especialidades e horários de atendimento"
@@ -98,12 +100,15 @@ export default function SettingsScreen() {
                 href="./settings/payments"
               />
 
-              {/* <SettingsCard
-                title="Configurações Gerais"
-                description="Ajustes de sistema, notificações e preferências de uso"
-                icon={<FaCog className="text-2xl" />}
-                href="/settings/general"
-              /> */}
+              {/* Só mostra se NÃO for provider */}
+              {isProvider === false && (
+                <SettingsCard
+                  title="Segurança"
+                  description="Troca de senha e habilitação de autenticação em 2 fatores"
+                  icon={<Shield className="text-2xl" />}
+                  href="./settings/password"
+                />
+              )}
             </div>
           </div>
         )}

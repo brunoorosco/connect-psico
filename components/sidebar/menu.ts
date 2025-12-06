@@ -118,7 +118,7 @@ export const menus = [
     title: "Configurações",
     url: `/app/{userId}/settings`,
     icon: Settings2Icon,
-    rules: ["SUPERVISOR"],
+    rules: ["SUPERVISOR", "DEFAULT"],
   },
   {
     title: "Ajuda",
