@@ -82,7 +82,7 @@ export const ChangePasswordForm = () => {
 
         setTimeout(() => {
           router.push("/auth/login")
-        }, 2000)
+        }, 1500)
       } catch (err) {
         setSuccess("")
         setError("Algo deu errado.")
