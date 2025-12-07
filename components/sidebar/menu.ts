@@ -93,7 +93,7 @@ export const menus = [
     title: "Video Chamada",
     url: `/app/{userId}/videochamada`,
     icon: WebcamIcon,
-    rules: ["SUPERVISOR", "DEFAULT"],
+    rules: ["SUPERVISOR"],
   },
 
   {
