@@ -16,7 +16,6 @@ interface SettingsCardProps {
 
 const SettingsCard: React.FC<SettingsCardProps> = ({ title, description, icon, href }) => {
   const [isHovered, setIsHovered] = useState(false)
-
   return (
     <Link
       href={href}
@@ -72,33 +71,37 @@ export default function SettingsScreen() {
             <h2 className="text-2xl font-bold mb-8 text-gray-800">Configurações do Sistema</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <SettingsCard
-                title="Perfil do Profissional"
-                description="Gerencie suas informações profissionais, especialidades e horários de atendimento"
-                icon={<FaUserMd className="text-2xl" />}
-                href={`/app/professional/${user?.id}/profile`}
-              />
+              {user?.role === "SUPERVISOR" && (
+                <>
+                  <SettingsCard
+                    title="Perfil do Profissional"
+                    description="Gerencie suas informações profissionais, especialidades e horários de atendimento"
+                    icon={<FaUserMd className="text-2xl" />}
+                    href={`/app/professional/${user?.id}/profile`}
+                  />
 
-              <SettingsCard
-                title="Endereço de Atendimento"
-                description="Configure informações do endereço de atendimento"
-                icon={<FaClinicMedical className="text-2xl" />}
-                href="./settings/address/clinic"
-              />
+                  <SettingsCard
+                    title="Endereço de Atendimento"
+                    description="Configure informações do endereço de atendimento"
+                    icon={<FaClinicMedical className="text-2xl" />}
+                    href="./settings/address/clinic"
+                  />
 
-              <SettingsCard
-                title="Modelos de Documentos"
-                description="Crie e gerencie modelos de documentos personalizados para diferentes tipos de atestados"
-                icon={<FaFileMedical className="text-2xl" />}
-                href="./settings/atestado"
-              />
+                  <SettingsCard
+                    title="Modelos de Documentos"
+                    description="Crie e gerencie modelos de documentos personalizados para diferentes tipos de atestados"
+                    icon={<FaFileMedical className="text-2xl" />}
+                    href="./settings/atestado"
+                  />
 
-              <SettingsCard
-                title="Pagamentos"
-                description="Dados bancário para pagamento e ativação de pagamento via plataforma"
-                icon={<Receipt className="text-2xl" />}
-                href="./settings/payments"
-              />
+                  <SettingsCard
+                    title="Pagamentos"
+                    description="Dados bancário para pagamento e ativação de pagamento via plataforma"
+                    icon={<Receipt className="text-2xl" />}
+                    href="./settings/payments"
+                  />
+                </>
+              )}
 
               {/* Só mostra se NÃO for provider */}
               {isProvider === false && (
