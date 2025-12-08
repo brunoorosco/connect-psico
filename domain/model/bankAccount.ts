@@ -25,7 +25,7 @@ const bankNameSchema = z.string().trim().min(1, "Nome do banco é obrigatório")
 const pixKeySchema = z
   .string()
   .trim()
-  .max(20)
+  .max(50)
   .optional()
   .refine((val) => {
     if (!val) return true
