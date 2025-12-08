@@ -81,7 +81,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                       style: "currency",
                       currency: "BRL",
                     })}
-                    / sessão
+                    / Sessão
                   </span>
                 </div>
               </div>
