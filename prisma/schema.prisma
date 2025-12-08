@@ -310,7 +310,7 @@ model BankAccount {
   bankName          String
   branchNumber      String      @db.VarChar(10)
   accountNumber     String      @db.VarChar(20)
-  pixKey            String?     @db.VarChar(20)
+  pixKey            String?     @db.VarChar(50)
   prepaymentEnabled Boolean     @default(false)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
