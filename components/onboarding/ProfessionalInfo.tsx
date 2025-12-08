@@ -1,37 +1,47 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
-import { ufCRP } from '@/utils/ufCRP';
+import React, { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2 } from "lucide-react"
+import { ufCRP } from "@/utils/ufCRP"
 
 interface ProfessionalInfoProps {
-  onNext: (data: { numberConselho: string; ufConselho: string }) => void;
-  isLoading: boolean;
+  onNext: (data: { numberConselho: string | null; ufConselho: string| null }) => void
+  isLoading: boolean
 }
 
 const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({ onNext, isLoading }) => {
-  const [numberConselho, setNumberConselho] = useState('');
-  const [ufConselho, setUfConselho] = useState('');
+  const [numberConselho, setNumberConselho] = useState("")
+  const [ufConselho, setUfConselho] = useState("")
+  const [noRegistration, setNoRegistration] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (numberConselho && ufConselho) {
-      onNext({ numberConselho, ufConselho });
-    }
-  };
+    e.preventDefault()
+
+    onNext({
+      numberConselho: noRegistration ? null : numberConselho,
+      ufConselho: noRegistration ? null : ufConselho,
+    })
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Informações Profissionais</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Para validar seu perfil profissional, precisamos de algumas informações.
-        </p>
-      </div>
+      <h3 className="text-lg font-semibold mb-2">Informações Profissionais</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Checkbox */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="no-reg"
+            checked={noRegistration}
+            onChange={(e) => setNoRegistration(e.target.checked)}
+          />
+          <Label htmlFor="no-reg">Ainda não possuo registro profissional</Label>
+        </div>
+
+        {/* Número do conselho */}
         <div>
           <Label htmlFor="registration">Registro Profissional</Label>
           <Input
@@ -41,16 +51,15 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({ onNext, isLoading }
             placeholder="123456"
             value={numberConselho}
             onChange={(e) => setNumberConselho(e.target.value)}
-            required
+            disabled={noRegistration}
+            required={!noRegistration}
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Informe seu número de registro profissional (CRP ou equivalente).
-          </p>
         </div>
 
+        {/* Estado */}
         <div>
           <Label htmlFor="state">Estado</Label>
-          <Select value={ufConselho} onValueChange={setUfConselho} required>
+          <Select value={ufConselho} onValueChange={setUfConselho} disabled={noRegistration} required={!noRegistration}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione seu estado" />
             </SelectTrigger>
@@ -64,23 +73,19 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({ onNext, isLoading }
           </Select>
         </div>
 
-        <Button 
-          type="submit"
-          disabled={!numberConselho || !ufConselho || isLoading}
-          className="w-full"
-        >
+        <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               Finalizando...
             </>
           ) : (
-            'Finalizar Cadastro'
+            "Finalizar Cadastro"
           )}
         </Button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default ProfessionalInfo;
+export default ProfessionalInfo

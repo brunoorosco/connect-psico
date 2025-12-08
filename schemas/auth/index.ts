@@ -17,22 +17,23 @@ export const RegisterSchema = z
     publico: z.string().optional(),
     professional: z.coerce.boolean(),
     phone: z.string().min(14, "Número muito curto").max(15),
+    noRegistration: z.boolean().default(false),
     // .regex(/^\(\d{2}\) 9\d{4}-\d{4}$/, "Número inválido"),
   })
   .superRefine((data, ctx) => {
-    if (data.professional) {
-      if (!data.ufConselho || data.ufConselho.length !== 2) {
+    if (data.professional && !data.noRegistration) {
+      if (!data.numConselho) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Deve ter 2 caracteres.",
-          path: ["ufConselho"],
+          code: "custom",
+          path: ["numConselho"],
+          message: "Informe o número do conselho ou marque que não possui.",
         })
       }
-      if (!data.numConselho || data.numConselho.length < 4) {
+      if (!data.ufConselho) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Deve ter pelo menos 4 dígitos.",
-          path: ["numConselho"],
+          code: "custom",
+          path: ["ufConselho"],
+          message: "Informe a UF ou marque que não possui.",
         })
       }
     }

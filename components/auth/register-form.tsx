@@ -34,6 +34,7 @@ export default function RegisterForm() {
       especialidade: "",
       professional: false,
       phone: "",
+      noRegistration: false
     },
   })
 
@@ -150,51 +151,82 @@ export default function RegisterForm() {
               />
 
               {form.watch("professional") && (
-                <div className="flex gap-2">
-                  <div className="w-2/3">
-                    <FormField
-                      control={form.control}
-                      name="ufConselho"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>UF</FormLabel>
-                          <FormControl>
-                            <select
-                              {...field}
-                              disabled={isPending}
-                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none"
-                            >
-                              <option value="">Selecione a UF</option>
-                              {ufCRP.map((uf) => (
-                                <option key={uf} value={uf}>
-                                  CRP - {uf}
-                                </option>
-                              ))}
-                            </select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="space-y-3">
+                  {/* Checkbox para quem ainda não possui registro */}
+                  <FormField
+                    control={form.control}
+                    name="noRegistration"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={(e) => form.setValue("noRegistration", e.target.checked)}
+                          />
+                        </FormControl>
+                        <FormLabel>Ainda não possuo registro profissional</FormLabel>
+                      </FormItem>
+                    )}
+                  />
 
-                  <div className="w-full">
-                    <FormField
-                      control={form.control}
-                      name="numConselho"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nº de Registro</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123412" {...field} disabled={isPending} maxLength={6} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  {/* Só exige UF e número se NÃO estiver marcado `noRegistration` */}
+                  {!form.watch("noRegistration") && (
+                    <div className="flex gap-2">
+                      <div className="w-2/3">
+                        <FormField
+                          control={form.control}
+                          name="ufConselho"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>UF</FormLabel>
+                              <FormControl>
+                                <select
+                                  {...field}
+                                  disabled={isPending}
+                                  required={!form.watch("noRegistration")}
+                                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm"
+                                >
+                                  <option value="">Selecione a UF</option>
+                                  {ufCRP.map((uf) => (
+                                    <option key={uf} value={uf}>
+                                      CRP - {uf}
+                                    </option>
+                                  ))}
+                                </select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="w-full">
+                        <FormField
+                          control={form.control}
+                          name="numConselho"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nº de Registro</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="123412"
+                                  {...field}
+                                  disabled={isPending}
+                                  maxLength={6}
+                                  required={!form.watch("noRegistration")}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
+
               {error && <AuthFormMessage type="error" message={error} title="Erro" />}
               {success && <AuthFormMessage type="success" message={success} title="Sucesso" />}
               <Button variant={"default"} className="w-full" disabled={isPending}>
