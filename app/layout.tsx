@@ -22,6 +22,8 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#1a73e8" />
         {/* Pixel da Meta */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
@@ -60,7 +62,6 @@ export default async function RootLayout({
           `}
         </Script>
         {/* End Google Tag Manager */}
-   
       </head>
       <body className={roboto.className} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}
