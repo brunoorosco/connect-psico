@@ -67,7 +67,6 @@ export const getAppointmentsUsers = async ({ page = 1, limit = 10 }: PaginationP
   })
 
   const existingPatientIds = new Set(existingPatients.map((p) => p.patientId))
-  console.log(existingPatientIds)
 
   // 🔹 Montagem dos dados
   const mappedAppointments = appointments.map((app) => {

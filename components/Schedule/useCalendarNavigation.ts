@@ -14,6 +14,22 @@ export function useCalendarNavigation(initialDate: Date = new Date()) {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1))
   }, [])
 
+  const previousWeek = useCallback((): void => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev)
+      newDate.setDate(prev.getDate() - 7)
+      return newDate
+    })
+  }, [])
+
+  const nextWeek = useCallback((): void => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev)
+      newDate.setDate(prev.getDate() + 7)
+      return newDate
+    })
+  }, [])
+
   const getDaysInMonth = useCallback((date: Date): DayObject[] => {
     const year = date.getFullYear()
     const month = date.getMonth()
@@ -41,10 +57,14 @@ export function useCalendarNavigation(initialDate: Date = new Date()) {
     return days
   }, [])
 
-  const getWeekDates = useCallback((startDay: number = 23): WeekDate[] => {
+  const getWeekDates = useCallback((): WeekDate[] => {
     const dates: WeekDate[] = []
+
+    // Find the sunday of the current week
+    const day = currentDate.getDay()
+    const diff = currentDate.getDate() - day
     const startOfWeek = new Date(currentDate)
-    startOfWeek.setDate(startDay)
+    startOfWeek.setDate(diff)
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek)
@@ -52,11 +72,12 @@ export function useCalendarNavigation(initialDate: Date = new Date()) {
       dates.push({
         day: date.getDate(),
         weekDay: weekDaysFull[date.getDay()],
-        isToday: date.getDate() === selectedDate,
+        isToday: date.toDateString() === new Date().toDateString(),
+        fullDate: new Date(date) // Add full date for reference
       })
     }
     return dates
-  }, [currentDate, selectedDate])
+  }, [currentDate])
 
   return {
     currentDate,
@@ -64,6 +85,8 @@ export function useCalendarNavigation(initialDate: Date = new Date()) {
     setSelectedDate,
     previousMonth,
     nextMonth,
+    previousWeek,
+    nextWeek,
     getDaysInMonth,
     getWeekDates,
     days: getDaysInMonth(currentDate),

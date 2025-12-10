@@ -19,5 +19,5 @@ export type AppointmentModel = {
 }
 
 export type AppointmentPatient = { id: string; name: string; telefone: string; email: string; image?: string }
-export type AppointmentProfessional = { id: string; name: string; telefone: string; email: string; image: string }
+export type AppointmentProfessional = { id: string; name: string; telefone: string; email: string; image: string; tempoConsulta: number }
 export type CalendarViewType = "daily" | "weekly" | "monthly"

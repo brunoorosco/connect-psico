@@ -19,6 +19,7 @@ export type Appointment = {
   status: "confirmed" | "pending" | "cancelled"
   color: string
   notes: string
+  fullDate?: Date
 }
 
 export type DayObject = {
@@ -30,9 +31,11 @@ export type WeekDate = {
   day: number
   weekDay: string
   isToday: boolean
+  fullDate: Date
 }
 
 export type SelectedSlot = {
   day: number
   time: string
+  fullDate?: Date
 }
