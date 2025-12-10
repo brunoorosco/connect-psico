@@ -23,7 +23,9 @@ import { useAudioRecorder } from "@hooks/useAudioRecorder"
 import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 
 // serviços
-import { getPresignedPutForKey, transcribeChunk } from "@/services/minioUpload"
+import { startAsyncTranscription } from "@/services/consultationService"
+import { useSocket } from "@/infra/contexts/SocketContext"
+import { getPresignedPutForKey, transcribeChunk, putToPresignedUrl } from "@/services/minioUpload"
 import { SummaryResult, summarizeAllText } from "@services/summarize"
 
 type CertificateConfig = any
@@ -78,6 +80,7 @@ const ConsultationSession = () => {
   const [sintomas, setSintomas] = useState("")
   const [aiSummary, setAiSummary] = useState<SummaryResult | null>(null)
   const [summLoading, setSummLoading] = useState(false)
+  const { socket } = useSocket()
 
   const setPatient = usePatientStore((state) => state.setPatient)
   const patient = usePatientStore((state) => state.patient)
@@ -138,6 +141,28 @@ const ConsultationSession = () => {
       console.error("Falha ao restaurar rascunho:", e)
     }
   }, [storageKey])
+
+  useEffect(() => {
+    if (!socket) return
+
+    function onProcessed(data: any) {
+      // data: { sessionId, text, summary: { summary, key_points... } }
+      console.log("Consultation processed:", data)
+      if (data.sessionId === sessionIdRef.current) {
+        if (data.text) setTranscript(data.text)
+        if (data.summary) {
+          setAiSummary(data.summary)
+          toast.success("Resumo gerado com sucesso!")
+        }
+        setSummLoading(false)
+      }
+    }
+
+    socket.on("consultation.processed", onProcessed)
+    return () => {
+      socket.off("consultation.processed", onProcessed)
+    }
+  }, [socket])
 
   // Autosave
   useEffect(() => {
@@ -346,12 +371,37 @@ const ConsultationSession = () => {
     try {
       setSummLoading(true)
       const fullText = [transcript, notes].filter(Boolean).join("\n\n")
-      const result = await summarizeAllText({ text: fullText, language: "pt-BR" })
-      setAiSummary(result)
-    } catch (e) {
+
+      // If we have audio blob, upload and process async
+      if (audioBlob && sessionIdRef.current) {
+        toast.info("Iniciando processamento em segundo plano...", { description: "Isso pode levar alguns minutos." })
+        const sid = sessionIdRef.current
+        const key = `sessions/${sid}/full.webm`
+
+        // Upload full audio
+        await withRetry(async () => {
+          const { url } = await getPresignedPutForKey(key)
+          await putToPresignedUrl(url, audioBlob)
+        }, 3)
+
+        // Trigger async process
+        await startAsyncTranscription(sid, key, "pt-BR", currentUser?.id, fullText)
+        // Loading state remains true until socket event arrives
+      } else {
+        // Fallback or text-only (restored session)
+        if (transcript || notes) {
+          toast.info("Gerando resumo a partir do texto...", { description: "Processando em segundo plano." })
+          const sid = sessionIdRef.current || `s-${Date.now()}`
+          sessionIdRef.current = sid // ensure session id
+          await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, fullText)
+        } else {
+          toast.error("Nada para resumir (sem áudio/texto)")
+          setSummLoading(false)
+        }
+      }
+    } catch (e: any) {
       console.error(e)
-      toast.error("Falha ao gerar resumo")
-    } finally {
+      toast.error(`Falha ao solicitar resumo: ${e?.message ?? "Erro desconhecido"}`)
       setSummLoading(false)
     }
   }

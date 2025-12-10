@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const newSocket = io(env.baseUrlPsicomaisApi, {
       transports: ["websocket"],
-      query: { userId }, 
+      query: { userId },
     })
 
     setSocket(newSocket)
@@ -35,7 +35,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       newSocket.disconnect()
     }
-  }, [])
+  }, [userId])
 
   return <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>
 }
