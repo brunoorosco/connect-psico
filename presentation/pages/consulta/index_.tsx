@@ -26,7 +26,7 @@ import IssueDocumentDialog from "@components/consulta/ModalTemplateGenerator"
 import { startAsyncTranscription } from "@/services/consultationService"
 import { useSocket } from "@/infra/contexts/SocketContext"
 import { getPresignedPutForKey, transcribeChunk, putToPresignedUrl } from "@/services/minioUpload"
-import { SummaryResult, summarizeAllText } from "@services/summarize"
+import { SummaryResult } from "./types"
 
 type CertificateConfig = any
 
