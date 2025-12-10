@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -8,7 +8,8 @@ interface AppointmentModalProps {
   isOpen: boolean
   selectedSlot: SelectedSlot | null
   onClose: () => void
-  onSubmit: () => void
+  onSubmit: (data: any) => void
+  patients?: any[]
 }
 
 export const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -16,8 +17,44 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
   selectedSlot,
   onClose,
   onSubmit,
+  patients = []
 }) => {
+  const [formData, setFormData] = useState({
+    patientId: "",
+    date: "",
+    time: "",
+    notes: "",
+    duration: "60",
+    roomId: ""
+  })
+
+  // Initialize form when slot changes
+  useEffect(() => {
+    if (selectedSlot) {
+      // Format date YYYY-MM-DD for input type=date
+      let dateStr = ""
+      if (selectedSlot.fullDate) {
+        dateStr = selectedSlot.fullDate.toISOString().split('T')[0]
+      } else {
+        // Fallback if no fullDate (should exist closely)
+        const tempDate = new Date()
+        tempDate.setDate(selectedSlot.day)
+        dateStr = tempDate.toISOString().split('T')[0]
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        date: dateStr,
+        time: selectedSlot.time
+      }))
+    }
+  }, [selectedSlot, isOpen])
+
   if (!isOpen) return null
+
+  const handleSubmit = () => {
+    onSubmit(formData)
+  }
 
   return (
     <div
@@ -41,34 +78,39 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <input
                 type="date"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                defaultValue={selectedSlot ? `2025-11-${String(selectedSlot.day).padStart(2, "0")}` : ""}
+                value={formData.date}
+                onChange={e => setFormData({ ...formData, date: e.target.value })}
               />
             </FormField>
             <FormField label="Horário">
               <input
                 type="time"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                defaultValue={selectedSlot?.time || ""}
+                value={formData.time}
+                onChange={e => setFormData({ ...formData, time: e.target.value })}
               />
             </FormField>
           </div>
 
-          <FormSelect label="Paciente" placeholder="Selecione o paciente">
-            <SelectItem value="joao">João Silva</SelectItem>
-            <SelectItem value="maria">Maria Santos</SelectItem>
-            <SelectItem value="pedro">Pedro Costa</SelectItem>
-          </FormSelect>
+          <FormField label="Paciente">
+            <Select onValueChange={(val) => setFormData({ ...formData, patientId: val })} value={formData.patientId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione o paciente" />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.map(p => (
+                  <SelectItem key={p.userId} value={p.userId}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
 
-          <FormSelect label="Profissional" placeholder="Selecione o profissional">
-            <SelectItem value="carlos">Dr. Carlos Mendes</SelectItem>
-            <SelectItem value="ana">Dra. Ana Paula</SelectItem>
-          </FormSelect>
+          {/* <FormSelect label="Profissional" placeholder="Selecione o profissional">
+            <SelectItem value="me">Eu (Logado)</SelectItem>
+          </FormSelect> */}
 
           <FormSelect label="Procedimento" placeholder="Selecione o procedimento">
-            <SelectItem value="consulta">Consulta Inicial</SelectItem>
-            <SelectItem value="retorno">Retorno</SelectItem>
-            <SelectItem value="avaliacao">Avaliação</SelectItem>
-            <SelectItem value="tratamento">Tratamento</SelectItem>
+            <SelectItem value="consulta">Consulta</SelectItem>
           </FormSelect>
 
           <div className="grid grid-cols-2 gap-4">
@@ -77,13 +119,13 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 type="number"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="60"
-                defaultValue="60"
+                value={formData.duration}
+                onChange={e => setFormData({ ...formData, duration: e.target.value })}
               />
             </FormField>
             <FormSelect label="Sala" placeholder="Selecione a sala">
+              {/* Populate dynamically if needed */}
               <SelectItem value="sala1">Sala 1</SelectItem>
-              <SelectItem value="sala2">Sala 2</SelectItem>
-              <SelectItem value="sala3">Sala 3</SelectItem>
             </FormSelect>
           </div>
 
@@ -92,6 +134,8 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               rows={3}
               placeholder="Observações sobre o agendamento..."
+              value={formData.notes}
+              onChange={e => setFormData({ ...formData, notes: e.target.value })}
             />
           </FormField>
         </div>
@@ -100,9 +144,9 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button 
+          <Button
             className="bg-purple-600 hover:bg-purple-700 text-white"
-            onClick={onSubmit}
+            onClick={handleSubmit}
           >
             Criar Agendamento
           </Button>
@@ -113,9 +157,9 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
 }
 
 // Componentes auxiliares internos
-const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({ 
-  label, 
-  children 
+const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({
+  label,
+  children
 }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
@@ -123,10 +167,10 @@ const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({
   </div>
 )
 
-const FormSelect: React.FC<{ 
+const FormSelect: React.FC<{
   label: string
   placeholder: string
-  children: React.ReactNode 
+  children: React.ReactNode
 }> = ({ label, placeholder, children }) => (
   <FormField label={label}>
     <Select>

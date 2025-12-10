@@ -37,7 +37,9 @@ const CalendarScheduler: React.FC = () => {
     getAppointmentForSlot,
     closeModal,
     closeDrawer,
-    appointments // Expose for debugging if needed
+    appointments, // Expose for debugging if needed
+    patients,
+    handleSaveAppointment
   } = useAppointments()
 
   const { timeSlots, isWorkingHour } = useTimeSlots({
@@ -103,7 +105,8 @@ const CalendarScheduler: React.FC = () => {
         isOpen={isModalOpen}
         selectedSlot={selectedSlot}
         onClose={closeModal}
-        onSubmit={handleCreateAppointment}
+        onSubmit={handleSaveAppointment}
+        patients={patients}
       />
 
       <AppointmentDrawer
