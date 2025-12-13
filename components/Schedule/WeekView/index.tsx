@@ -3,6 +3,7 @@ import { WeekDate, Appointment } from "../types"
 import { WeekHeader } from "./WeekHeader"
 import { TimeColumn } from "./TimeColumn"
 import { DayColumn } from "./DayColumn"
+import { CurrentTimeIndicator } from "./CurrentTimeIndicator"
 
 interface WeekViewProps {
   weekDates: WeekDate[]
@@ -22,8 +23,8 @@ export const WeekView: React.FC<WeekViewProps> = ({
   return (
     <div className="flex-1 overflow-auto bg-white">
       <WeekHeader weekDates={weekDates} />
-      
-      <div className="grid grid-cols-[50px,repeat(7,1fr)]">
+
+      <div className="grid grid-cols-[50px,repeat(7,1fr)] relative">
         <TimeColumn timeSlots={timeSlots} />
         {weekDates.map((date, i) => (
           <DayColumn
@@ -35,6 +36,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
             onSlotClick={onSlotClick}
           />
         ))}
+        <CurrentTimeIndicator />
       </div>
     </div>
   )

@@ -89,12 +89,12 @@ export const menus = [
     icon: MessageCircle,
     rules: ["DEFAULT"],
   },
-  {
-    title: "Video Chamada",
-    url: `/app/{userId}/videochamada`,
-    icon: WebcamIcon,
-    rules: ["SUPERVISOR"],
-  },
+  // {
+  //   title: "Video Chamada",
+  //   url: `/app/{userId}/videochamada`,
+  //   icon: WebcamIcon,
+  //   rules: ["SUPERVISOR"],
+  // },
 
   {
     title: "Agendamentos",
