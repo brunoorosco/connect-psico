@@ -29,6 +29,7 @@ axiosInstanceEvo.interceptors.request.use(
 )
 
 export const sendMessageApiWhatsapp = async (userPhone: string, message: string, signature = true) => {
+  if (!userPhone || userPhone === "") return
   const msg = signature ? `*PsicoMais:*\n${message}` : message
   await axiosInstanceChatz.post("/messages/send", {
     // body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
@@ -38,6 +39,7 @@ export const sendMessageApiWhatsapp = async (userPhone: string, message: string,
 }
 
 export const sendMediaApiWhatsapp = async (userPhone: string, message: string, mediaUrl: string, signature = true) => {
+  if (!userPhone || userPhone === "") return
   const msg = signature ? `*PsicoMais:*\n${message}` : message
 
   await axiosInstanceEvo.post(`/message/sendMedia/${env.instanceEVO}`, {
@@ -51,6 +53,7 @@ export const sendMediaApiWhatsapp = async (userPhone: string, message: string, m
 }
 
 export const sendPixCodeViaWhatsapp = async (userPhone: string, pixCode: string, signature = true) => {
+  if (!userPhone || userPhone === "") return
   const msg = signature
     ? `*PsicoMais:*\nCódigo PIX para pagamento:\n${pixCode}`
     : `Código PIX para pagamento:\n${pixCode}`
