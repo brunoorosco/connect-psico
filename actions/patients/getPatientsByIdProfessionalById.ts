@@ -15,8 +15,8 @@ export const getPatientsByIdProfessionalById = async (patientId: string): Promis
       patientId: true,
     },
   })
- 
-  if(!getPatient) throw Error("Paciente não encontrado")
+
+  if (!getPatient) throw Error("Paciente não encontrado")
   try {
     const patients = await prisma.pacientes.findMany({
       where: {
@@ -35,6 +35,8 @@ export const getPatientsByIdProfessionalById = async (patientId: string): Promis
         city: true,
         number: true,
         notes: true,
+        responsibleName: true,
+        responsiblePhone: true,
         patient: {
           select: {
             email: true,
@@ -65,6 +67,8 @@ export const getPatientsByIdProfessionalById = async (patientId: string): Promis
       phone: item.patient.phone,
       image: item.patient.image,
       active: item.patient.active,
+      responsibleName: item.responsibleName,
+      responsiblePhone: item.responsiblePhone,
     }))
 
     return patientMapper as Patient[]

@@ -48,6 +48,8 @@ export const createPatient = async (params: any) => {
             city: validPatient.data.city || null,
             state: validPatient.data.state || null,
             number: validPatient.data.number || null,
+            responsibleName: validPatient.data.responsibleName || null,
+            responsiblePhone: validPatient.data.responsiblePhone || null,
             professionalId: validPatient.data.profissionalId as string,
           },
         },

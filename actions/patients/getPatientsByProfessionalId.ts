@@ -33,6 +33,8 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
         city: true,
         number: true,
         notes: true,
+        responsibleName: true,
+        responsiblePhone: true,
         patient: {
           select: {
             email: true,
@@ -63,6 +65,8 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
       phone: item.patient.phone,
       image: item.patient.image,
       active: item.patient.active,
+      responsibleName: item.responsibleName,
+      responsiblePhone: item.responsiblePhone,
     }))
 
     return patientMapper as Patient[]

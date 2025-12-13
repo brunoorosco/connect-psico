@@ -29,6 +29,8 @@ const schema = z.object({
   state: z.string().optional(),
   number: z.string().optional(),
   profissionalId: z.string().optional(),
+  responsibleName: z.string().optional(),
+  responsiblePhone: z.string().optional(),
 })
 
 export type PatientFormData = z.infer<typeof schema>
@@ -59,6 +61,8 @@ export function usePatientForm({ patient, mutate }: { patient?: Patient | null; 
       city: (patient as any)?.city || "",
       state: (patient as any)?.state || "",
       number: (patient as any)?.number || "",
+      responsibleName: (patient as any)?.responsibleName || "",
+      responsiblePhone: (patient as any)?.responsiblePhone || "",
       profissionalId: session?.user.id || "",
     },
   })

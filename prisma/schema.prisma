@@ -119,6 +119,8 @@ model Pacientes {
   number             String?
   state              String?
   street             String?
+  responsibleName    String?       @map("responsible_name")
+  responsiblePhone   String?       @map("responsible_phone")
   deletedAt          DateTime?     @map("deleted_at")
   consentRecording   Boolean       @default(false) @map("consent_record")
   consentVersion     String?

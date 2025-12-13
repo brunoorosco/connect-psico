@@ -26,49 +26,70 @@ type Props = {
 export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form, handleCepChange, isEdit, reset }) => {
   const user = useCurrentUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
-useEffect(() => {
-  if (patient) {
-    const birthDateFormatted =
-      patient.birthDate && typeof patient.birthDate !== "string"
-        ? new Date(patient.birthDate).toISOString().substring(0, 10)
-        : patient.birthDate || ""
+  const birthDate = form.watch("birthDate")
+  const [isMinor, setIsMinor] = useState(false)
 
-    reset({
-      name: patient.name || "",
-      email: patient.email || "",
-      phone: patient.phone || "",
-      medicalRecordId: patient.medicalRecordId || "",
-      birthDate: birthDateFormatted || "",
-      emergencyContact: patient.emergencyContact || "",
-      notes: patient.notes || "",
-      cep: patient.cep || "",
-      street: patient.street || "",
-      neighborhood: patient.neighborhood || "",
-      city: patient.city || "",
-      state: patient.state || "",
-      number: patient.number || "",
-      profissionalId: user?.id,
-    })
-  } else {
-    reset({
-      name: "",
-      email: "",
-      phone: "",
-      medicalRecordId: `PR-${nanoid()}`,  // Gera novo ID aqui
-      birthDate: "",
-      emergencyContact: "",
-      notes: "",
-      cep: "",
-      street: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      number: "",
-      profissionalId: user?.id,
-    })
-  }
-}, [patient, reset, user?.id])
+  useEffect(() => {
+    if (birthDate) {
+      const today = new Date()
+      const birth = new Date(birthDate)
+      let age = today.getFullYear() - birth.getFullYear()
+      const m = today.getMonth() - birth.getMonth()
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--
+      }
+      setIsMinor(age < 18)
+    } else {
+      setIsMinor(false)
+    }
+  }, [birthDate])
+
+  useEffect(() => {
+    if (patient) {
+      const birthDateFormatted =
+        patient.birthDate && typeof patient.birthDate !== "string"
+          ? new Date(patient.birthDate).toISOString().substring(0, 10)
+          : patient.birthDate || ""
+
+      reset({
+        name: patient.name || "",
+        email: patient.email || "",
+        phone: patient.phone || "",
+        medicalRecordId: patient.medicalRecordId || "",
+        birthDate: birthDateFormatted || "",
+        emergencyContact: patient.emergencyContact || "",
+        notes: patient.notes || "",
+        cep: patient.cep || "",
+        street: patient.street || "",
+        neighborhood: patient.neighborhood || "",
+        city: patient.city || "",
+        state: patient.state || "",
+        number: patient.number || "",
+        responsibleName: patient.responsibleName || "",
+        responsiblePhone: patient.responsiblePhone || "",
+        profissionalId: user?.id,
+      })
+    } else {
+      reset({
+        name: "",
+        email: "",
+        phone: "",
+        medicalRecordId: `PR-${nanoid()}`,  // Gera novo ID aqui
+        birthDate: "",
+        responsibleName: "",
+        responsiblePhone: "",
+        emergencyContact: "",
+        notes: "",
+        cep: "",
+        street: "",
+        neighborhood: "",
+        city: "",
+        state: "",
+        number: "",
+        profissionalId: user?.id,
+      })
+    }
+  }, [patient, reset, user?.id])
 
   const internalSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true)
@@ -172,6 +193,43 @@ useEffect(() => {
             )}
           />
         </div>
+
+        {/* Responsible Contact for Minors */}
+        {isMinor && (
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 border-2 border-yellow-100 p-4 rounded-md bg-yellow-50/10">
+            <div className="col-span-full">
+              <h4 className="font-semibold text-yellow-600 mb-2">Dados do Responsável (Menor de Idade)</h4>
+            </div>
+            <FormField
+              control={form.control}
+              name="responsibleName"
+              render={({ field }) => (
+                <FormItem className="col-span-1 md:col-span-3">
+                  <FormLabel>Nome do Responsável</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nome completo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="responsiblePhone"
+              render={({ field }) => (
+                <FormItem className="col-span-1 md:col-span-3">
+                  <FormLabel>Telefone do Responsável</FormLabel>
+                  <FormControl>
+                    <InputMask mask="(99) 99999-9999" placeholder="(99) 99999-9999" {...field} onChange={field.onChange}>
+                      {(inputProps: any) => <Input {...inputProps} />}
+                    </InputMask>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         {/* Linha 3 */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">

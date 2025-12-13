@@ -22,6 +22,8 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
         city: result.data.city || null,
         state: result.data.state || null,
         number: result.data.number || null,
+        responsibleName: result.data.responsibleName || null,
+        responsiblePhone: result.data.responsiblePhone || null,
       },
       select: {
         patientId: true,

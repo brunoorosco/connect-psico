@@ -24,6 +24,8 @@ export type Patient = User & {
   userId: string
   cpf?: string
   rg?: string
+  responsibleName?: string
+  responsiblePhone?: string
 }
 
 export type Professional = User

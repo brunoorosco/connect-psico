@@ -15,6 +15,8 @@ export const patientSchema = z.object({
   state: z.string().optional(),
   number: z.string().optional(),
   profissionalId: z.string().cuid("ID do profissional inválido").optional(),
+  responsibleName: z.string().optional(),
+  responsiblePhone: z.string().optional(),
 });
 
 export type PatientFormData = z.infer<typeof patientSchema>;
