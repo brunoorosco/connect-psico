@@ -246,7 +246,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
                     size="sm"
                     variant="ghost"
                     className="text-therapy-secondary w-full h-8"
-                    onClick={() => onStartConsultation && onStartConsultation(appointment.patientId)}
+                    onClick={handleStartAppointment}
                   >
                     <CalendarCheck className="h-4 w-4 mr-1" />
                     Iniciar
