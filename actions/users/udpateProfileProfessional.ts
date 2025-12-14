@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db"
 import { profileSchema, ProfileFormValues } from "@/schemas/PsicologoProfileSchema"
 import type { z } from "zod"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
+import { deleteImageFromCloudinary } from "@/actions/deleteImage"
 
 /**
  * Atualiza o perfil profissional do usuário
@@ -21,6 +22,21 @@ export const updateProfessionalProfile = async (userId: string, data: z.infer<ty
   }
 
   try {
+    // Se houver uma nova foto, deletar a antiga antes de atualizar
+    console.log(data)
+    if (data.profilePhoto) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { image: true }
+      })
+
+      if (currentUser?.image && currentUser.image !== data.profilePhoto) {
+        // Deletar a imagem antiga do Cloudinary
+        console.log("chegouuuu", currentUser.image)
+        await deleteImageFromCloudinary(currentUser.image)
+      }
+    }
+
     await prisma.user.update({
       where: { id: userId },
       data: {
