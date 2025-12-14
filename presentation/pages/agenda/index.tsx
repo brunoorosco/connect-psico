@@ -15,6 +15,7 @@ import { WeekView } from "@components/Schedule/WeekView"
 
 const CalendarScheduler: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("Cancelado")
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const {
     currentDate,
@@ -22,9 +23,11 @@ const CalendarScheduler: React.FC = () => {
     setSelectedDate,
     previousMonth,
     nextMonth,
+    previousWeek, // New
+    nextWeek, // New
     days,
     weekDates,
-  } = useCalendarNavigation(new Date(2025, 10, 27))
+  } = useCalendarNavigation(new Date()) // Remove hardcoded date
 
   const {
     isModalOpen,
@@ -35,6 +38,9 @@ const CalendarScheduler: React.FC = () => {
     getAppointmentForSlot,
     closeModal,
     closeDrawer,
+    appointments, // Expose for debugging if needed
+    patients,
+    handleSaveAppointment
   } = useAppointments()
 
   const { timeSlots, isWorkingHour } = useTimeSlots({
@@ -51,6 +57,13 @@ const CalendarScheduler: React.FC = () => {
     closeModal()
   }
 
+  // Format date range for header
+  const startDate = weekDates[0]?.fullDate
+  const endDate = weekDates[6]?.fullDate
+  const dateRange = startDate && endDate
+    ? `${startDate.getDate()} – ${endDate.getDate()} de ${startDate.toLocaleString('default', { month: 'short' })}. de ${startDate.getFullYear()}`
+    : ""
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar
@@ -63,33 +76,41 @@ const CalendarScheduler: React.FC = () => {
         onSelectDate={setSelectedDate}
         onClearFilters={handleClearFilters}
         onStatusChange={setStatusFilter}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header
-          dateRange="23 – 29 de nov. de 2025"
+          dateRange={dateRange}
           onToday={() => setSelectedDate(new Date().getDate())}
-          onPreviousWeek={() => {}}
-          onNextWeek={() => {}}
+          onPreviousWeek={previousWeek}
+          onNextWeek={nextWeek}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
         />
 
         <WeekView
           weekDates={weekDates}
           timeSlots={timeSlots}
           isWorkingHour={isWorkingHour}
-          getAppointmentForSlot={getAppointmentForSlot}
-          onSlotClick={handleSlotClick}
+          getAppointmentForSlot={(day, time) => getAppointmentForSlot(day, time, currentDate)} // Pass currentDate to match correct month
+          onSlotClick={(day, time, appointment) => {
+            // Find the specific date from weekDates
+            const dateObj = weekDates.find(w => w.day === day)?.fullDate
+            handleSlotClick(day, time, appointment, dateObj)
+          }}
         />
       </div>
 
-      <FloatingActions onNewAppointment={() => {}} />
+      <FloatingActions onNewAppointment={() => { }} />
       <ProgressWidget progress={0} />
 
       <AppointmentModal
         isOpen={isModalOpen}
         selectedSlot={selectedSlot}
         onClose={closeModal}
-        onSubmit={handleCreateAppointment}
+        onSubmit={handleSaveAppointment}
+        patients={patients}
       />
 
       <AppointmentDrawer

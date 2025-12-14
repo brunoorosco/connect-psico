@@ -7,18 +7,21 @@ interface AppointmentCardProps {
   onClick: () => void
 }
 
-export const AppointmentCard: React.FC<AppointmentCardProps> = ({ 
-  appointment, 
-  onClick 
+export const AppointmentCard: React.FC<AppointmentCardProps> = ({
+  appointment,
+  onClick
 }) => {
   const height = calculateAppointmentHeight(
-    appointment.startTime, 
+    appointment.startTime,
     appointment.endTime
   )
 
   return (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
       className={`absolute inset-x-1 ${appointment.color} text-white rounded p-2 shadow-sm overflow-hidden z-10 hover:shadow-md transition-shadow cursor-pointer`}
       style={{ height: `${height}px` }}
     >

@@ -24,7 +24,12 @@ export const TimeSlot: React.FC<TimeSlotProps> = ({
         ${!isWorking ? "bg-hatched" : ""}
         ${isToday && isWorking ? "bg-purple-50/30" : ""} 
         ${isWorking ? "hover:bg-gray-50 cursor-pointer" : ""}
+        ${appointment ? "z-20" : "z-0"}
       `}
+      style={{
+        zIndex: appointment ? 30 : 0,
+        position: 'relative'
+      }}
     >
       {appointment && (
         <AppointmentCard
