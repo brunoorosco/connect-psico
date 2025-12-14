@@ -17,6 +17,7 @@ model User {
   image                    String?
   phone                    String?
   role                     UserRole               @default(DEFAULT)
+  asaasCustomerId          String?                @map("asaas_customer_id")
   password                 String?
   isTwoFactorAuthEnabled   Boolean                @default(false)
   twoFactorAuthVerified    DateTime?
