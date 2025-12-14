@@ -1,0 +1,73 @@
+/* Custom styles for driver.js tour */
+.therapy-tour-popover {
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+    max-width: 400px !important;
+}
+
+.therapy-tour-popover .driver-popover-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #7c3aed !important;
+    /* therapy-primary */
+    margin-bottom: 8px !important;
+}
+
+.therapy-tour-popover .driver-popover-description {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    color: #4b5563 !important;
+}
+
+.therapy-tour-popover .driver-popover-footer {
+    margin-top: 16px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid #e5e7eb !important;
+}
+
+.therapy-tour-popover .driver-popover-next-btn {
+    background-color: #7c3aed !important;
+    /* therapy-primary */
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s !important;
+}
+
+.therapy-tour-popover .driver-popover-next-btn:hover {
+    background-color: #6d28d9 !important;
+    /* darker purple */
+}
+
+.therapy-tour-popover .driver-popover-prev-btn,
+.therapy-tour-popover .driver-popover-close-btn {
+    background-color: transparent !important;
+    color: #6b7280 !important;
+    border: 1px solid #d1d5db !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+.therapy-tour-popover .driver-popover-prev-btn:hover,
+.therapy-tour-popover .driver-popover-close-btn:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+}
+
+.therapy-tour-popover .driver-popover-progress-text {
+    font-size: 12px !important;
+    color: #9ca3af !important;
+    font-weight: 500 !important;
+}
+
+/* Highlighted element styling */
+.driver-active-element {
+    border-radius: 8px !important;
+}

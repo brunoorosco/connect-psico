@@ -48,7 +48,7 @@ export async function AppSidebar() {
               </Link>
             </div>
           </SidebarGroupLabel>
-          <div className="mt-8">
+          <div className="mt-8" id="sidebar-navigation">
             <SidebarGroupContent>
               <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
               <SidebarMenu>
@@ -57,7 +57,7 @@ export async function AppSidebar() {
                     !item.rules || item.rules.length === 0 || item.rules.includes(session?.user.role as string)
 
                   return hasPermission ? (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={item.title} id={`${item.title.toLowerCase().replace(/\s+/g, '-')}-menu-item`}>
                       <SidebarMenuButton asChild>
                         <Link href={item.url.replace("/{userId}", `/${session?.user.id}`)}>
                           <item.icon />
@@ -76,7 +76,7 @@ export async function AppSidebar() {
       <SidebarFooter className="p-4 border-t mt-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center space-x-3 cursor-pointer max-w-full overflow-hidden">
+            <div id="user-menu" className="flex items-center space-x-3 cursor-pointer max-w-full overflow-hidden">
               <Avatar className="flex-shrink-0">
                 <AvatarImage src={session?.user?.image as string} />
                 <AvatarFallback className="bg-primary text-primary-foreground">

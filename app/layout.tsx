@@ -1,4 +1,5 @@
 import "./globals.css"
+import "./tour.css"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { Roboto } from "next/font/google"
 import { Toaster } from "sonner"

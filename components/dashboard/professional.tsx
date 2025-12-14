@@ -6,10 +6,12 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { useProductTour } from "@/hooks/useProductTour";
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { startTour, hasSeenTour } = useProductTour();
 
   const mustCompleteProfile =
     session?.user.role === "SUPERVISOR" &&
@@ -20,6 +22,22 @@ const Dashboard = () => {
       router.push(`/app/professional/${session?.user?.id}/profile`);
     }
   }, [mustCompleteProfile, router, session?.user?.id]);
+
+  // Iniciar tour automaticamente após onboarding
+  useEffect(() => {
+    if (
+      status === "authenticated" &&
+      session?.user.isProfileCompleted &&
+      !hasSeenTour &&
+      !mustCompleteProfile
+    ) {
+      // Delay para garantir que o DOM está pronto
+      const timer = setTimeout(() => {
+        startTour("dashboard");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, session?.user.isProfileCompleted, hasSeenTour, mustCompleteProfile, startTour]);
 
   if (status === "loading") {
     return <div className="min-h-screen" />;
