@@ -18,4 +18,6 @@ export const env = {
   instanceEVO: process.env.EVO_INSTANCE || "psicomais",
   apiKeyEVO: process.env.EVO_APIKEY as string,
   apikeyASAAS: process.env.ASAAS_API_KEY as string || 'api_key_asaas',
+  asaasWebhookSecret: process.env.ASAAS_WEBHOOK_SECRET,
+  asaasFallbackTaxId: process.env.ASAAS_FALLBACK_TAXID || "00000000000",
 }
