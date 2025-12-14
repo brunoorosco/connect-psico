@@ -15,6 +15,7 @@ import { WeekView } from "@components/Schedule/WeekView"
 
 const CalendarScheduler: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("Cancelado")
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const {
     currentDate,
@@ -75,14 +76,17 @@ const CalendarScheduler: React.FC = () => {
         onSelectDate={setSelectedDate}
         onClearFilters={handleClearFilters}
         onStatusChange={setStatusFilter}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header
           dateRange={dateRange}
           onToday={() => setSelectedDate(new Date().getDate())}
           onPreviousWeek={previousWeek}
           onNextWeek={nextWeek}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
         />
 
         <WeekView
@@ -90,10 +94,10 @@ const CalendarScheduler: React.FC = () => {
           timeSlots={timeSlots}
           isWorkingHour={isWorkingHour}
           getAppointmentForSlot={(day, time) => getAppointmentForSlot(day, time, currentDate)} // Pass currentDate to match correct month
-          onSlotClick={(day, time) => {
+          onSlotClick={(day, time, appointment) => {
             // Find the specific date from weekDates
             const dateObj = weekDates.find(w => w.day === day)?.fullDate
-            handleSlotClick(day, time, null, dateObj)
+            handleSlotClick(day, time, appointment, dateObj)
           }}
         />
       </div>

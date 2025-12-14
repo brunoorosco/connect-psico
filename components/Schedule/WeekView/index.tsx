@@ -20,11 +20,22 @@ export const WeekView: React.FC<WeekViewProps> = ({
   getAppointmentForSlot,
   onSlotClick,
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    // Auto-scroll to today
+    const todayColumn = document.getElementById("day-column-today")
+    if (todayColumn && containerRef.current) {
+      // Simple scroll into view logic
+      todayColumn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
+    }
+  }, [weekDates]) // Re-run when dates change (navigating to current week)
+
   return (
-    <div className="flex-1 overflow-auto bg-white">
+    <div ref={containerRef} className="flex-1 overflow-auto bg-white">
       <WeekHeader weekDates={weekDates} />
 
-      <div className="grid grid-cols-[50px,repeat(7,1fr)] relative">
+      <div className="grid grid-cols-[50px,repeat(7,minmax(120px,1fr))] relative">
         <TimeColumn timeSlots={timeSlots} />
         {weekDates.map((date, i) => (
           <DayColumn

@@ -18,7 +18,10 @@ export const DayColumn: React.FC<DayColumnProps> = ({
   onSlotClick,
 }) => {
   return (
-    <div className="border-r border-gray-200 relative">
+    <div
+      className="border-r border-gray-200 relative"
+      id={date.isToday ? "day-column-today" : undefined}
+    >
       {timeSlots.map((time, j) => {
         const appointment = getAppointmentForSlot(date.day, time)
         const isWorking = isWorkingHour(time)

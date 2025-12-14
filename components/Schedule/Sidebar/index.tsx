@@ -13,6 +13,8 @@ interface SidebarProps {
   onSelectDate: (day: number) => void
   onClearFilters: () => void
   onStatusChange: (value: string) => void
+  isOpen: boolean
+  onClose: () => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -25,22 +27,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectDate,
   onClearFilters,
   onStatusChange,
+  isOpen,
+  onClose,
 }) => {
   return (
-    <div className="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto">
-      <MiniCalendar
-        currentDate={currentDate}
-        selectedDate={selectedDate}
-        days={days}
-        onPreviousMonth={onPreviousMonth}
-        onNextMonth={onNextMonth}
-        onSelectDate={onSelectDate}
-      />
-      <Filters
-        statusFilter={statusFilter}
-        onClearFilters={onClearFilters}
-        onStatusChange={onStatusChange}
-      />
-    </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar Container */}
+      <div
+        className={`
+          w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto
+          fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+          md:static md:translate-x-0
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        <MiniCalendar
+          currentDate={currentDate}
+          selectedDate={selectedDate}
+          days={days}
+          onPreviousMonth={onPreviousMonth}
+          onNextMonth={onNextMonth}
+          onSelectDate={onSelectDate}
+        />
+        <Filters
+          statusFilter={statusFilter}
+          onClearFilters={onClearFilters}
+          onStatusChange={onStatusChange}
+        />
+      </div>
+    </>
   )
 }
