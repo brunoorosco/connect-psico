@@ -24,8 +24,9 @@ export async function POST(req: NextRequest) {
   const normalizedStatus = String(event.payment.status || "").toUpperCase()
 
   await withIdem(`asaas:${event.payment.id}:${normalizedStatus}`, async () => {
+    const paymentId = event.payment.id.split("pay_")[1]
     const payment = await prisma.payment.findFirst({
-      where: { providerPaymentId: event.payment.id },
+      where: { providerPaymentId: paymentId },
       include: { appointment: { include: { patient: true, professional: true } } },
     })
 

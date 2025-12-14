@@ -34,7 +34,7 @@ export async function handleAppointment({
 
     if (result.error) {
       toast.error("Erro ao agendar", { description: result.error })
-      return
+      return result
     }
 
     onSuccess()
@@ -51,8 +51,10 @@ export async function handleAppointment({
     //   `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
     //     `Confira sua agenda na plataforma para maiores detalhes. 😉`
     // )
+    return result
   } catch (err) {
     console.error(err)
     // toast.error("Erro inesperado ao agendar")
   }
+  return null
 }

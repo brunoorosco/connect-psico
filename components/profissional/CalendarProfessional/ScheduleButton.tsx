@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { ptBR } from "date-fns/locale"
@@ -20,6 +21,7 @@ export function ScheduleButton({
   setErrorPayment: (v: boolean) => void
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleClick = async () => {
     console.log(paymentMethod)
@@ -29,13 +31,19 @@ export function ScheduleButton({
     }
 
     setIsLoading(true)
-    await handleAppointment({
+    const result = await handleAppointment({
       patientId: userId,
       professional,
       selectedSlot,
       paymentMethod,
       onSuccess,
     })
+    if (result?.payment?.type === "CREDIT_CARD" && result.payment.checkoutUrl) {
+      window.open(result.payment.checkoutUrl, "_blank", "noopener")
+    }
+    if (result?.payment?.type === "PIX" && result.payment.qrCodeText) {
+      router.push(`/copy?code=${encodeURIComponent(result.payment.qrCodeText)}`)
+    }
     setIsLoading(false)
     setErrorPayment(false)
   }

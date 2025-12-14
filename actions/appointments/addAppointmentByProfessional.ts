@@ -82,14 +82,9 @@ export const addAppointmentByProfessional = async (data: z.infer<typeof CreateAp
     if (prePayment) {
       const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
       await createPixForAppointment({
-        amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+        amountCents: appointment.professional.Professional?.valorAtendimento as number,
         appointmentId: appointment.id,
         idempotencyKey: idempotency.key,
-        patient: {
-          name: session.user.name as string,
-          email: session.user.email as string,
-          cellphone: session.user.phone as string,
-        },
       })
     }
 

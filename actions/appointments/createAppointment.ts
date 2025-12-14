@@ -7,9 +7,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { endOfDay, startOfDay } from "date-fns"
 import { randomUUID } from "crypto"
 import { createPixForAppointment } from "../payment/createPixForAppointment"
-import { auth } from "@/auth"
-import { env } from "@/config/application"
-import { AsaasService } from "@/infra/payments/asaas"
+import { createCreditPaymentLink } from "../payment/createCreditPaymentLink"
 
 const TZ = "America/Sao_Paulo"
 
@@ -21,10 +19,6 @@ const CreateAppointmentSchema = z.object({
 })
 
 export const createAppointment = async (data: z.infer<typeof CreateAppointmentSchema>) => {
-  const asaasService = new AsaasService({
-    apiKey: env.apikeyASAAS!,
-    environment: process.env.NODE_ENV === "production" ? "production" : "sandbox",
-  })
 
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
   if (!valid.success) {
@@ -33,8 +27,6 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
 
   const { professionalId, patientId, appointmentDate } = valid.data
   const appointmentUtc = fromZonedTime(appointmentDate, TZ)
-
-  const session = await auth()
 
   try {
     const relation = await prisma.patientProfessional.findFirst({
@@ -94,45 +86,53 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     if (existingAppointment) {
       return { error: "Já existe um agendamento pra este dia" }
     }
-    // 3. Criar agendamento
-    const [appointment, prePayment] = await Promise.all([
-      prisma.appointment.create({
-        data: { professionalId, patientId, appointmentDate, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
-        select: { id: true, professional: { select: { Professional: { select: { valorAtendimento: true } } } } },
+    // 3. Preparar informações financeiras e criar agendamento
+    const [professionalProfile, prePaymentSettings] = await Promise.all([
+      prisma.professional.findUnique({
+        where: { userId: professionalId },
+        select: { valorAtendimento: true },
       }),
       prisma.bankAccount.findFirst({ where: { userId: professionalId }, select: { prepaymentEnabled: true } }),
     ])
 
-    if (prePayment) {
+    const priceCents = professionalProfile?.valorAtendimento ?? 0
+
+    if (prePaymentSettings?.prepaymentEnabled && priceCents <= 0) {
+      return { error: "Profissional sem valor de atendimento configurado para cobrança antecipada" }
+    }
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        professionalId,
+        patientId,
+        appointmentDate,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        priceCents,
+      },
+      select: { id: true },
+    })
+
+    let paymentResult: { checkoutUrl?: string | null; qrCodeText?: string | null; type?: "PIX" | "CREDIT_CARD" } | null =
+      null
+
+    if (prePaymentSettings?.prepaymentEnabled && priceCents > 0) {
       const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
       const action = data.paymentMethod
 
-      const payload = {
-        value: (appointment.professional.Professional?.valorAtendimento as number) / 100,
-        appointmentId: appointment.id,
-        idempotencyKey: idempotency.key,
-        name: session?.user.name as string,
-        email: session?.user.email as string,
-        cellphone: session?.user.phone as string,
-      }
-      let paymentResponse
-
       switch (action) {
         case "credit":
-          paymentResponse = await asaasService.criarLinkPagamento({ ...payload, billingType: "CREDIT_CARD" })
+          paymentResult = await createCreditPaymentLink({
+            amountCents: priceCents,
+            appointmentId: appointment.id,
+            idempotencyKey: idempotency.key,
+          })
           break
 
         case "pix":
-          // paymentResponse = await asaasService.criarCobrancaPix({ ...payload })
-          await createPixForAppointment({
-            amountBRL: appointment.professional.Professional?.valorAtendimento as number,
+          paymentResult = await createPixForAppointment({
+            amountCents: priceCents,
             appointmentId: appointment.id,
             idempotencyKey: idempotency.key,
-            patient: {
-              name: session?.user.name as string,
-              email: session?.user.email as string,
-              cellphone: session?.user.phone as string,
-            },
           })
           break
 
@@ -140,7 +140,7 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
           return { success: false, error: "Ação inválida" }
       }
     }
-    return { success: "Agendamento realizado com sucesso", data: appointment }
+    return { success: "Agendamento realizado com sucesso", data: appointment, payment: paymentResult }
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       return { error: "Erro ao criar agendamento" }
