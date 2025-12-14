@@ -23,30 +23,30 @@ export const profileSchema = z
       message: "Selecione o tipo de atendimento",
     }),
   })
-  .superRefine((data, ctx) => {
-    const especialidades = data.especialidade || []
+// .superRefine((data, ctx) => {
+//   const especialidades = data.especialidade || []
 
-    const exigeCRP = especialidades.length > 0 &&
-      especialidades.some((esp) => !especialidadesSemCRP.includes(esp))
+//   const exigeCRP = especialidades.length > 0 &&
+//     especialidades.some((esp) => !especialidadesSemCRP.includes(esp))
 
-    if (exigeCRP) {
-      if (!data.numConselho || data.numConselho.trim().length < 3) {
-        ctx.addIssue({
-          path: ["numConselho"],
-          code: z.ZodIssueCode.custom,
-          message: "Número do conselho é obrigatório para essa especialidade",
-        })
-      }
+//   if (exigeCRP) {
+//     if (!data.numConselho || data.numConselho.trim().length < 3) {
+//       ctx.addIssue({
+//         path: ["numConselho"],
+//         code: z.ZodIssueCode.custom,
+//         message: "Número do conselho é obrigatório para essa especialidade",
+//       })
+//     }
 
-      if (!data.ufConselho || data.ufConselho.trim().length < 2) {
-        ctx.addIssue({
-          path: ["ufConselho"],
-          code: z.ZodIssueCode.custom,
-          message: "UF do conselho é obrigatória para essa especialidade",
-        })
-      }
-    }
-  })
+//     if (!data.ufConselho || data.ufConselho.trim().length < 2) {
+//       ctx.addIssue({
+//         path: ["ufConselho"],
+//         code: z.ZodIssueCode.custom,
+//         message: "UF do conselho é obrigatória para essa especialidade",
+//       })
+//     }
+//   }
+// })
 
 export type ProfileFormValues = z.infer<typeof profileSchema>
 
