@@ -36,7 +36,7 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
                 <FormItem>
                   <FormLabel>UF</FormLabel>
                   <FormControl>
-                    <Input placeholder="SP" {...field} />
+                    <Input placeholder="SP" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -49,7 +49,7 @@ export const ProfessionalInfoForm = ({ profile }: Props) => {
                 <FormItem>
                   <FormLabel>Registro Profissional</FormLabel>
                   <FormControl>
-                    <Input placeholder="12345" {...field} />
+                    <Input placeholder="12345" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

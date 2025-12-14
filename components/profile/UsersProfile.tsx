@@ -20,7 +20,7 @@ import { ProfileSkeleton } from "./ProfileUserSkeleton"
 
 const UserProfileForm: React.FC = () => {
   const { id } = useParams() as { id: string }
-  const { data: session } = useSession()
+  const { data: session, update } = useSession()
   const router = useRouter()
 
   useEffect(() => {
@@ -59,9 +59,25 @@ const UserProfileForm: React.FC = () => {
   const onSubmit = async (data: TUser) => {
     try {
       const result = await updateUserProfile(id, data)
-      toast.success(result.success, {
-        description: "Suas informações foram salvas.",
-      })
+
+      if (result.success) {
+        toast.success(result.success, {
+          description: "Suas informações foram salvas.",
+        })
+
+        // 🔹 Atualiza sessão do NextAuth imediatamente
+        if (session?.user) {
+          await update({
+            ...session.user,
+            name: data.name,
+            email: data.email,
+            phone: data.telefone,
+            image: data.image,
+          })
+        }
+      } else if (result.error) {
+        toast.error(result.error)
+      }
     } catch (error) {
       console.error("Erro ao enviar os dados:", error)
       toast.error("Erro ao atualizar o perfil. Por favor, tente novamente.")

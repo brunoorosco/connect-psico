@@ -52,23 +52,30 @@ const ProfileProfessionalForm: React.FC = () => {
 
         const result = await updateProfessionalProfile(session.user.id, payload)
 
-        toast.success(result.success!, {
-          description: "Suas informações foram salvas.",
-        })
+        if (result.error) {
+          toast.error(result.error)
+          return
+        }
 
-        // 🔹 Atualiza sessão do NextAuth
-        await update({
-          ...session!.user,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          image: data.profilePhoto,
-          username: data.username,
-          isProfileCompleted: true,
-        })
+        if (result.success) {
+          toast.success(result.success, {
+            description: "Suas informações foram salvas.",
+          })
+
+          // 🔹 Atualiza sessão do NextAuth
+          await update({
+            ...session!.user,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            image: data.profilePhoto,
+            username: data.username,
+            isProfileCompleted: true,
+          })
+        }
       } catch (error) {
         toast.error("Erro ao atualizar perfil.")
-        console.error(error)
+        console.error("❌ Erro no onSubmit:", error)
       }
     })
   }
@@ -147,7 +154,52 @@ const ProfileProfessionalForm: React.FC = () => {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            // Mapear campos para steps
+            const step1Fields = ["name", "phone", "bio", "profilePhoto", "username"]
+            const step2Fields = ["education", "experiencia"]
+            const step3Fields = ["especialidade", "publicoAlvo"]
+            const step4Fields = ["valorAtendimento", "tempoConsulta", "tipoAtendimento"]
+
+            const errorFields = Object.keys(errors)
+            let targetStep = step
+
+            // Identificar em qual step está o erro
+            if (errorFields.some(field => step1Fields.includes(field))) {
+              targetStep = 1
+            } else if (errorFields.some(field => step2Fields.includes(field))) {
+              targetStep = 2
+            } else if (errorFields.some(field => step3Fields.includes(field))) {
+              targetStep = 3
+            } else if (errorFields.some(field => step4Fields.includes(field))) {
+              targetStep = 4
+            }
+
+            console.log("🎯 Target step:", targetStep)
+
+            // Voltar para o step com erro
+            if (targetStep !== step) {
+              setStep(targetStep)
+              toast.error(`Por favor, preencha todos os campos obrigatórios no passo ${targetStep}.`)
+            } else {
+              toast.error("Por favor, preencha todos os campos obrigatórios.")
+            }
+
+            // Focar no primeiro campo com erro após um pequeno delay
+            setTimeout(() => {
+              const firstErrorField = errorFields[0]
+              const element = document.querySelector(`[name="${firstErrorField}"]`) as HTMLElement
+              if (element) {
+                element.focus()
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              } else {
+                console.log("❌ Campo não encontrado no DOM")
+              }
+            }, 300)
+          })}
+          className="space-y-8"
+        >
 
           {/* Step 1: Personal Info */}
           {(!isOnboarding || step === 1) && (
