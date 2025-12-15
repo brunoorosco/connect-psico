@@ -16,7 +16,8 @@ export const patientSchema = z.object({
   responsiblePhone: z.string().optional(),
   notes: z.string().optional(),
   phone: z.string().optional(),
-  name: z.string()
+  name: z.string(),
+  cpf: z.string().optional(),
 })
 
 export type PatientInput = z.infer<typeof patientSchema>

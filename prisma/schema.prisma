@@ -17,6 +17,7 @@ model User {
   image                    String?
   phone                    String?
   role                     UserRole               @default(DEFAULT)
+  asaasCustomerId          String?                @map("asaas_customer_id")
   password                 String?
   isTwoFactorAuthEnabled   Boolean                @default(false)
   twoFactorAuthVerified    DateTime?
@@ -112,6 +113,7 @@ model Pacientes {
   birthDate          String?       @map("birth_date")
   emergencyContact   String?       @map("emergency_contact")
   medicalRecordId    String        @unique @map("prontuario_id")
+  cpf                String?       @db.VarChar(14)
   cep                String?
   city               String?
   neighborhood       String?

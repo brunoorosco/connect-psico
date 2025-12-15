@@ -1,4 +1,7 @@
+"use client"
+
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { ptBR } from "date-fns/locale"
@@ -6,6 +9,7 @@ import { IScheduleButton } from "./types"
 import { formatInTimeZone } from "date-fns-tz"
 import { handleAppointment } from "../agedamentos/createAppoinment"
 import { env } from "@/config/application"
+import { getValidTaxId } from "@/utils/taxId"
 
 export function ScheduleButton({
   selectedSlot,
@@ -15,29 +19,57 @@ export function ScheduleButton({
   paymentMethod,
   errorPayment,
   setErrorPayment,
+  pixCpf,
+  onCpfError,
 }: IScheduleButton & {
   errorPayment: boolean
   setErrorPayment: (v: boolean) => void
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleClick = async () => {
-    console.log(paymentMethod)
     if (!paymentMethod) {
       setErrorPayment(true)
       return
     }
 
+    let taxId: string | undefined
+    if (paymentMethod === "pix") {
+      const validTaxId = getValidTaxId(pixCpf)
+      if (!validTaxId) {
+        onCpfError("Informe um CPF válido para gerar o pagamento via PIX.")
+        return
+      }
+      taxId = validTaxId
+      onCpfError(null)
+    } else {
+      onCpfError(null)
+    }
+
     setIsLoading(true)
-    await handleAppointment({
-      patientId: userId,
-      professional,
-      selectedSlot,
-      paymentMethod,
-      onSuccess,
-    })
-    setIsLoading(false)
-    setErrorPayment(false)
+    try {
+      const result = await handleAppointment({
+        patientId: userId,
+        professional,
+        selectedSlot,
+        paymentMethod,
+        onSuccess,
+        taxId,
+      })
+
+      if (result?.payment?.type === "CREDIT_CARD" && result.payment.checkoutUrl) {
+        window.open(result.payment.checkoutUrl, "_blank", "noopener")
+      }
+
+      if (result?.payment?.type === "PIX" && result.payment.qrCodeText) {
+        router.push(`/copy?code=${encodeURIComponent(result.payment.qrCodeText)}`)
+      }
+
+      setErrorPayment(false)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -53,7 +85,9 @@ export function ScheduleButton({
       {errorPayment && (
         <Alert variant="destructive" className="mt-3">
           <AlertTitle className="font-sans">Forma de pagamento não selecionada</AlertTitle>
-          <AlertDescription className="font-sans">Por favor, escolha entre PIX ou Cartão de Crédito antes de continuar.</AlertDescription>
+          <AlertDescription className="font-sans">
+            Por favor, escolha entre PIX ou Cartão de Crédito antes de continuar.
+          </AlertDescription>
         </Alert>
       )}
 

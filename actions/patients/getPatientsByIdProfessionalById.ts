@@ -26,6 +26,7 @@ export const getPatientsByIdProfessionalById = async (patientId: string): Promis
       select: {
         id: true,
         medicalRecordId: true,
+        cpf: true,
         cep: true,
         state: true,
         street: true,
@@ -52,6 +53,7 @@ export const getPatientsByIdProfessionalById = async (patientId: string): Promis
     const patientMapper = patients.map((item) => ({
       id: item.id,
       medicalRecordId: item.medicalRecordId,
+      cpf: item.cpf || "",
       cep: item.cep,
       state: item.state,
       street: item.street,

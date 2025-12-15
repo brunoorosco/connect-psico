@@ -15,6 +15,7 @@ interface HandleAppointmentParams {
   }
   selectedSlot: { start: Date }
   onSuccess: () => void
+  taxId?: string
 }
 
 export async function handleAppointment({
@@ -23,6 +24,7 @@ export async function handleAppointment({
   selectedSlot,
   onSuccess,
   paymentMethod,
+  taxId,
 }: HandleAppointmentParams) {
   try {
     const result = await createAppointment({
@@ -30,11 +32,12 @@ export async function handleAppointment({
       paymentMethod,
       professionalId: professional.userId,
       appointmentDate: selectedSlot.start,
+      taxId,
     })
 
     if (result.error) {
       toast.error("Erro ao agendar", { description: result.error })
-      return
+      return result
     }
 
     onSuccess()
@@ -51,8 +54,10 @@ export async function handleAppointment({
     //   `Oi ${professional.name.split(" ")[0]}. Você tem um novo agendamento. ` +
     //     `Confira sua agenda na plataforma para maiores detalhes. 😉`
     // )
+    return result
   } catch (err) {
     console.error(err)
     // toast.error("Erro inesperado ao agendar")
   }
+  return null
 }

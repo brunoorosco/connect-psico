@@ -22,6 +22,8 @@ import { handleCreateAppointment } from "@components/profissional/me/handleCreat
 import { useAvailableWeek } from "@components/profissional/me/useAvailableWeek"
 import { Button } from "@components/ui"
 import { buildEmptyWeek } from "@/utils/scheduleHelpers"
+import { PaymentSelector } from "@components/profissional/CalendarProfessional/PaymentSelector"
+import { getValidTaxId } from "@/utils/taxId"
 
 export default function ProfessionalProfilePage() {
   const user = useCurrentUser()
@@ -36,6 +38,10 @@ export default function ProfessionalProfilePage() {
   const [loginOpen, setLoginOpen] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
   const [loadSkeleton, setLoadSkeleton] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit" | null>("pix")
+  const [paymentError, setPaymentError] = useState(false)
+  const [pixCpf, setPixCpf] = useState("")
+  const [cpfError, setCpfError] = useState<string | null>(null)
   const { getProfissionalByUsername, loading, professional } = useProfessionalsUsername()
   const currentMondayUTC = useMemo(() => startOfWeekMonday(new Date()), [])
 
@@ -110,12 +116,31 @@ export default function ProfessionalProfilePage() {
   }
   async function handleSave() {
     if (!selected) return
+
+    if (!paymentMethod) {
+      setPaymentError(true)
+      return
+    }
+
+    let taxId: string | undefined
+    if (paymentMethod === "pix") {
+      const validTaxId = getValidTaxId(pixCpf)
+      if (!validTaxId) {
+        setCpfError("Informe um CPF válido para gerar o pagamento via PIX.")
+        return
+      }
+      taxId = validTaxId
+      setCpfError(null)
+    } else {
+      setCpfError(null)
+    }
+
     const date = new Date(`${selected.ymd}T${selected.time}:00`)
 
     try {
       await handleCreateAppointment({
         patientId: user?.id as string,
-        paymentMethod: "pix",
+        paymentMethod,
         professional: {
           name: nickname as string,
           phone: professional?.phone as string,
@@ -123,9 +148,9 @@ export default function ProfessionalProfilePage() {
         },
         selectedSlot: { start: date },
         onSuccess,
+        taxId,
       })
-
-      // toast.success("Agendamento realizado com sucesso", { icon: <CheckCheck /> })
+      setPaymentError(false)
     } catch (error) {
       toast.error("Erro ao agendar", { icon: <X /> })
       console.error(error)
@@ -137,6 +162,7 @@ export default function ProfessionalProfilePage() {
       // força revalidação (se mutate existir)
       await mutate?.()
       setSelected(null)
+      setPixCpf("")
       toast.success("Agendamento realizado com sucesso", { icon: <CheckCheck /> })
     } catch (err) {
       console.error("Erro no onSuccess:", err)
@@ -344,6 +370,18 @@ export default function ProfessionalProfilePage() {
                       isLoading={availableIsLoading}
                       error={availableError}
                     />
+                    {isLogged && selected && (
+                      <PaymentSelector
+                        paymentMethod={paymentMethod}
+                        setPaymentMethod={setPaymentMethod}
+                        errorPayment={paymentError}
+                        setErrorPayment={setPaymentError}
+                        pixCpf={pixCpf}
+                        onChangePixCpf={setPixCpf}
+                        setCpfError={setCpfError}
+                        cpfError={cpfError}
+                      />
+                    )}
                     <div className="mt-6 p-4 bg-muted rounded-lg">
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">

@@ -19,9 +19,10 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
   const { data: session, status } = useSession()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date } | null>(null)
-  // estado global de pagamento
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "credit" | null>("pix")
   const [errorPayment, setErrorPayment] = useState(false)
+  const [pixCpf, setPixCpf] = useState("")
+  const [cpfError, setCpfError] = useState<string | null>(null)
 
   const { availableSlots, availableDatesSet, isLoading, error, mutate } = useAvailableSlots(
     professionalData.userId,
@@ -88,6 +89,10 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
                 setPaymentMethod={setPaymentMethod}
                 errorPayment={errorPayment}
                 setErrorPayment={setErrorPayment}
+                pixCpf={pixCpf}
+                onChangePixCpf={setPixCpf}
+                setCpfError={setCpfError}
+                cpfError={cpfError}
               />
 
               <ScheduleButton
@@ -98,6 +103,8 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
                 errorPayment={errorPayment}
                 setErrorPayment={setErrorPayment}
                 paymentMethod={paymentMethod}
+                pixCpf={pixCpf}
+                onCpfError={setCpfError}
               />
             </>
           )}

@@ -1,6 +1,7 @@
 "use server"
 import { prisma } from "@/lib/db" // ou qualquer cliente DB que usar
 import { patientSchema } from "@/domain/model/patient"
+import { getValidTaxId } from "@/utils/taxId"
 
 export const updatePatient = async (prontuarioId: string, data: any) => {
   try {
@@ -9,10 +10,13 @@ export const updatePatient = async (prontuarioId: string, data: any) => {
       throw new Error("Dados inválidos")
     }
 
+    const sanitizedCpf = getValidTaxId(result.data.cpf)
+
     const resp = await prisma.pacientes.update({
       where: { medicalRecordId: prontuarioId },
       data: {
         patient: { update: { phone: result.data.phone, name: result.data.name.trim() } },
+        cpf: sanitizedCpf,
         cep: result.data.cep,
         birthDate: result.data.birthDate,
         emergencyContact: result.data.emergencyContact || null,

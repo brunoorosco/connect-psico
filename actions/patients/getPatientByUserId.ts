@@ -9,6 +9,7 @@ export const getPatientByUserId = async (id: string) => {
       select: {
         id: true,
         medicalRecordId: true,
+        cpf: true,
         cep: true,
         state: true,
         street: true,
@@ -49,6 +50,7 @@ export const getPatientByUserId = async (id: string) => {
         email: patient.patient.email,
         phone: patient.patient.phone,
         image: patient.patient.image,
+        cpf: patient.cpf || "",
         active: patient.patient.active,
       } as Patient
     }
