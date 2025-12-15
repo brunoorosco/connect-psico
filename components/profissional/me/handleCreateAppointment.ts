@@ -15,6 +15,7 @@ interface HandleAppointmentParams {
   paymentMethod: "pix" | "credit"
   selectedSlot: { start: Date }
   onSuccess: () => void
+  taxId?: string
 }
 
 export async function handleCreateAppointment({
@@ -23,6 +24,7 @@ export async function handleCreateAppointment({
   paymentMethod,
   selectedSlot,
   onSuccess,
+  taxId,
 }: HandleAppointmentParams) {
   try {
     const result = await createAppointment({
@@ -30,6 +32,7 @@ export async function handleCreateAppointment({
       paymentMethod,
       professionalId: professional.userId,
       appointmentDate: selectedSlot.start,
+      taxId,
     })
 
     if (result.error) {

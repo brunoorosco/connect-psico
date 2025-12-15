@@ -16,6 +16,7 @@ const CreateAppointmentSchema = z.object({
   patientId: z.string(),
   appointmentDate: z.coerce.date(),
   paymentMethod: z.enum(["pix", "credit"]),
+  taxId: z.string().min(11).max(18).optional(),
 })
 
 export const createAppointment = async (data: z.infer<typeof CreateAppointmentSchema>) => {
@@ -25,7 +26,7 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
     return { error: "Dados inválidos" }
   }
 
-  const { professionalId, patientId, appointmentDate } = valid.data
+  const { professionalId, patientId, appointmentDate, taxId } = valid.data
   const appointmentUtc = fromZonedTime(appointmentDate, TZ)
 
   try {
@@ -129,11 +130,19 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
           break
 
         case "pix":
-          paymentResult = await createPixForAppointment({
-            amountCents: priceCents,
-            appointmentId: appointment.id,
-            idempotencyKey: idempotency.key,
-          })
+          try {
+            paymentResult = await createPixForAppointment({
+              amountCents: priceCents,
+              appointmentId: appointment.id,
+              idempotencyKey: idempotency.key,
+              customerTaxId: taxId,
+            })
+          } catch (error) {
+            if (error instanceof Error) {
+              return { error: error.message }
+            }
+            throw error
+          }
           break
 
         default:

@@ -24,6 +24,7 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
       select: {
         id: true,
         medicalRecordId: true,
+        cpf: true,
         cep: true,
         state: true,
         street: true,
@@ -50,6 +51,7 @@ export const getPatientsByProfessionalId = async (): Promise<Patient[] | { error
     const patientMapper = patients.map((item) => ({
       id: item.id,
       medicalRecordId: item.medicalRecordId,
+      cpf: item.cpf || "",
       cep: item.cep,
       state: item.state,
       street: item.street,

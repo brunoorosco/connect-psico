@@ -11,6 +11,7 @@ import { format } from "date-fns"
 import { createPatient } from "@/actions/patients/addPatient"
 import { updatePatient } from "@/actions/patients/updatePatient"
 import { Patient } from "@/types/appointment"
+import { getValidTaxId } from "@/utils/taxId"
 
 const nanoid = customAlphabet("1234567890", 5)
 
@@ -19,6 +20,11 @@ const schema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   phone: z.string().min(10).optional().or(z.literal("")),
   medicalRecordId: z.string().optional(),
+  cpf: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || !!getValidTaxId(value), { message: "CPF inválido" }),
   birthDate: z.string().optional(),
   emergencyContact: z.string().optional(),
   notes: z.string().optional(),
@@ -52,6 +58,7 @@ export function usePatientForm({ patient, mutate }: { patient?: Patient | null; 
       email: patient?.email || "",
       phone: patient?.phone || "",
       medicalRecordId: generateMedicalRecordId(),
+      cpf: (patient as any)?.cpf || "",
       birthDate: birthDateFormatted,
       emergencyContact: (patient as any)?.emergencyContact || "",
       notes: (patient as any)?.notes || "",

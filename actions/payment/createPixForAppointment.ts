@@ -9,11 +9,13 @@ import { sendMediaApiWhatsapp, sendMessageApiWhatsapp } from "@/infra/httpClient
 import { sendEmail } from "@/infra/email/sendEmail"
 import { delay } from "@/utils/delay"
 import { format } from "date-fns"
+import { getValidTaxId } from "@/utils/taxId"
 
 const CreatePaymentSchema = z.object({
   appointmentId: z.number().int(),
   amountCents: z.number().int().positive(),
   idempotencyKey: z.string().min(12),
+  customerTaxId: z.string().min(11).max(18).optional(),
 })
 
 type PixPaymentResult = {
@@ -23,14 +25,7 @@ type PixPaymentResult = {
   type: "PIX"
 }
 
-const sanitizeTaxId = (value?: string | null) => {
-  if (!value) return null
-  const digits = value.replace(/\D/g, "")
-  if (digits.length === 11 || digits.length === 14) return digits
-  return null
-}
-
-async function ensureAsaasCustomer(userId: string, asaasService: AsaasService) {
+async function ensureAsaasCustomer(userId: string, asaasService: AsaasService, providedTaxId?: string | null) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, name: true, email: true, phone: true, asaasCustomerId: true },
@@ -43,14 +38,28 @@ async function ensureAsaasCustomer(userId: string, asaasService: AsaasService) {
 
   const patientProfile = await prisma.pacientes.findFirst({
     where: { patientId: userId },
-    select: { medicalRecordId: true },
+    select: { medicalRecordId: true, cpf: true, id: true },
   })
 
-  const taxId =
-    sanitizeTaxId(patientProfile?.medicalRecordId) ??
-    sanitizeTaxId(user.phone) ??
-    sanitizeTaxId(env.asaasFallbackTaxId) ??
-    "00000000000"
+  const storedTaxId =
+    getValidTaxId(patientProfile?.cpf) ?? getValidTaxId(patientProfile?.medicalRecordId) ?? null
+
+  const requestTaxId = getValidTaxId(providedTaxId)
+  const fallbackTaxId =
+    process.env.NODE_ENV !== "production" ? getValidTaxId(env.asaasFallbackTaxId ?? null) : null
+
+  const taxId = storedTaxId ?? requestTaxId ?? fallbackTaxId
+
+  if (!taxId) {
+    throw new Error("CPF/CNPJ do paciente é obrigatório para gerar o pagamento via PIX.")
+  }
+
+  if (requestTaxId && patientProfile?.id && requestTaxId !== storedTaxId) {
+    await prisma.pacientes.update({
+      where: { id: patientProfile.id },
+      data: { cpf: requestTaxId },
+    })
+  }
 
   const customer = await asaasService.criarCliente({
     name: user.name,
@@ -169,7 +178,7 @@ const notifyPatientWithPix = async ({
 }
 
 export async function createPixForAppointment(input: z.infer<typeof CreatePaymentSchema>): Promise<PixPaymentResult> {
-  const { appointmentId, amountCents, idempotencyKey } = CreatePaymentSchema.parse(input)
+  const { appointmentId, amountCents, idempotencyKey, customerTaxId } = CreatePaymentSchema.parse(input)
 
   const asaasService = new AsaasService({
     apiKey: env.apikeyASAAS!,
@@ -188,7 +197,7 @@ export async function createPixForAppointment(input: z.infer<typeof CreatePaymen
     const valueBRL = Number((cents / 100).toFixed(2))
     const dueDate = format(appointment.appointmentDate, "yyyy-MM-dd")
 
-    const customerId = await ensureAsaasCustomer(appointment.patientId, asaasService)
+    const customerId = await ensureAsaasCustomer(appointment.patientId, asaasService, customerTaxId)
 
     const charge: any = await asaasService.criarCobrancaPix({
       customer: customerId,

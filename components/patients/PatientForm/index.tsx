@@ -56,6 +56,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form
         email: patient.email || "",
         phone: patient.phone || "",
         medicalRecordId: patient.medicalRecordId || "",
+        cpf: (patient as any)?.cpf || "",
         birthDate: birthDateFormatted || "",
         emergencyContact: patient.emergencyContact || "",
         notes: patient.notes || "",
@@ -75,6 +76,7 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form
         email: "",
         phone: "",
         medicalRecordId: `PR-${nanoid()}`,  // Gera novo ID aqui
+        cpf: "",
         birthDate: "",
         responsibleName: "",
         responsiblePhone: "",
@@ -142,6 +144,24 @@ export const PatientForm: React.FC<Props> = ({ patient, onSubmit, onCancel, form
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
                   <InputMask mask="(99) 99999-9999" placeholder="(99) 99999-9999" {...field} onChange={field.onChange}>
+                    {(inputProps: any) => <Input {...inputProps} />}
+                  </InputMask>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <FormField
+            control={form.control}
+            name="cpf"
+            render={({ field }) => (
+              <FormItem className="col-span-1 md:col-span-2">
+                <FormLabel>CPF</FormLabel>
+                <FormControl>
+                  <InputMask mask="999.999.999-99" placeholder="000.000.000-00" {...field} onChange={field.onChange}>
                     {(inputProps: any) => <Input {...inputProps} />}
                   </InputMask>
                 </FormControl>

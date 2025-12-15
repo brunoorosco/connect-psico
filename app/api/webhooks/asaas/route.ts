@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   await withIdem(`asaas:${event.payment.id}:${normalizedStatus}`, async () => {
     const paymentId = event.payment.id.split("pay_")[1]
+
     const payment = await prisma.payment.findFirst({
       where: { providerPaymentId: paymentId },
       include: { appointment: { include: { patient: true, professional: true } } },
@@ -50,18 +51,24 @@ export async function POST(req: NextRequest) {
 
       const appointment = payment.appointment
       const date = appointment.appointmentDate.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+      const d = new Date(date)
+
+      const formattedDate = `${d.toLocaleDateString("pt-BR")} às ${d.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`
 
       if (appointment.patient.phone) {
         await sendMessageApiWhatsapp(
           appointment.patient.phone,
-          `🎉 Pagamento confirmado! Sua consulta está agendada para ${date}.`
+          `🎉 Pagamento confirmado! Sua consulta está agendada para ${formattedDate}.`
         )
       }
 
       if (appointment.professional.phone) {
         await sendMessageApiWhatsapp(
           appointment.professional.phone,
-          `✅ Consulta confirmada em ${date}. Veja mais detalhes na plataforma.`
+          `✅ Consulta confirmada em ${formattedDate}. Veja mais detalhes na plataforma.`
         )
       }
     } else if (REFUNDED_STATUSES.has(normalizedStatus)) {

@@ -14,6 +14,8 @@ export interface IScheduleButton {
   onSuccess: () => void
   disabled?: boolean
   paymentMethod?: "pix" | "credit" | null
+  pixCpf: string
+  onCpfError: (value: string | null) => void
 }
 
 export interface ICalendarProfessional {

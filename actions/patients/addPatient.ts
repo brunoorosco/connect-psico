@@ -5,6 +5,7 @@ import { patientSchema } from "@/domain/model/patient";
 import { RegisterSchema } from "@/schemas/auth";
 import bcryptjs from "bcryptjs";
 import { randomInt } from "node:crypto";
+import { getValidTaxId } from "@/utils/taxId";
 
 export const createPatient = async (params: any) => {
   const randow = randomInt(6);
@@ -28,6 +29,7 @@ export const createPatient = async (params: any) => {
   }
 
   const { name, email, phone, password } = validUser.data;
+  const sanitizedCpf = getValidTaxId(validPatient.data.cpf);
 
   try {
     const newUser = await prisma.user.create({
@@ -39,6 +41,7 @@ export const createPatient = async (params: any) => {
         patientUser: {
           create: {
             medicalRecordId: validPatient.data.medicalRecordId,
+            cpf: sanitizedCpf,
             birthDate: validPatient.data.birthDate,
             emergencyContact: validPatient.data.emergencyContact || null,
             notes: validPatient.data.notes || null,

@@ -113,6 +113,7 @@ model Pacientes {
   birthDate          String?       @map("birth_date")
   emergencyContact   String?       @map("emergency_contact")
   medicalRecordId    String        @unique @map("prontuario_id")
+  cpf                String?       @db.VarChar(14)
   cep                String?
   city               String?
   neighborhood       String?
