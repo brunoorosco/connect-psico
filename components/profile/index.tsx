@@ -13,7 +13,7 @@ import { AppointmentDetailsForm } from "@/components/profile/AppointmentDetails"
 import { useSession } from "next-auth/react"
 import { useGetProfessionalById } from "@/hooks/useProfissionals"
 import { updateProfessionalProfile } from "@/actions/users/udpateProfileProfessional"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { checkUsernameAvailability } from "@/actions/professionals/checkUsername"
 
 const ProfileProfessionalForm: React.FC = () => {
@@ -22,6 +22,7 @@ const ProfileProfessionalForm: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: defaultProfileValues,
   })
+  const router = useRouter()
 
   const params = useParams()
   const id = params.id as string
@@ -234,7 +235,7 @@ const ProfileProfessionalForm: React.FC = () => {
             {!isOnboarding ? (
               // Edit Mode Buttons
               <>
-                <Button variant="outline" type="button" onClick={() => form.reset()}>
+                <Button variant="outline" type="button" onClick={() => router.push('/app')}>
                   Cancelar
                 </Button>
                 <Button disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary text-gray-50">
