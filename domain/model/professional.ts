@@ -25,6 +25,7 @@ export type TProfessional = {
   updatedAt: Date
   phone: string
   username: string
+  prepaymentEnabled?: boolean
 }
 
 export const addressSchema = z.object({

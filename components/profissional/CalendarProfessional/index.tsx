@@ -84,16 +84,18 @@ export const CalendarProfessional = ({ professionalData }: ICalendarProfessional
 
           {selectedSlot && status === "authenticated" && session?.user?.id && (
             <>
-              <PaymentSelector
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
-                errorPayment={errorPayment}
-                setErrorPayment={setErrorPayment}
-                pixCpf={pixCpf}
-                onChangePixCpf={setPixCpf}
-                setCpfError={setCpfError}
-                cpfError={cpfError}
-              />
+              {professionalData.prepaymentEnabled && (
+                <PaymentSelector
+                  paymentMethod={paymentMethod}
+                  setPaymentMethod={setPaymentMethod}
+                  errorPayment={errorPayment}
+                  setErrorPayment={setErrorPayment}
+                  pixCpf={pixCpf}
+                  onChangePixCpf={setPixCpf}
+                  setCpfError={setCpfError}
+                  cpfError={cpfError}
+                />
+              )}
 
               <ScheduleButton
                 selectedSlot={selectedSlot}
