@@ -43,3 +43,14 @@ export type ProfessionalChat = {
   // type: "professional"
   // patients: Patient[]
 }
+
+export type PatientFile = {
+  id: string
+  patientId: string
+  patientName: string
+  fileName: string
+  fileType: string
+  fileSize: string
+  uploadedAt: string
+  category: "exam" | "report" | "prescription" | "other"
+}
