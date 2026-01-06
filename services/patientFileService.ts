@@ -38,7 +38,7 @@ class PatientFilesService {
   }
 
   // Listar arquivos de um paciente
-  async getPatientFiles(patientId: number): Promise<PatientFileData[]> {
+  async getPatientFiles(patientId: string): Promise<PatientFileData[]> {
     try {
       const response = await this.api.get(`/patients/${patientId}/files`)
       return response.data
@@ -50,7 +50,7 @@ class PatientFilesService {
 
   // Upload de arquivo com progresso
   async uploadFile(
-    patientId: number,
+    patientId: string,
     file: File,
     category: string,
     onProgress?: (progress: UploadProgress) => void
@@ -84,7 +84,7 @@ class PatientFilesService {
   }
 
   // Obter URL de download
-  async getDownloadUrl(patientId: number, fileId: string): Promise<string> {
+  async getDownloadUrl(patientId: string, fileId: string): Promise<string> {
     try {
       const response = await this.api.get(`/patients/${patientId}/files/${fileId}/download`)
       return response.data.url
@@ -95,7 +95,7 @@ class PatientFilesService {
   }
 
   // Download de arquivo
-  async downloadFile(patientId: number, fileId: string, fileName: string): Promise<void> {
+  async downloadFile(patientId: string, fileId: string, fileName: string): Promise<void> {
     try {
       const url = await this.getDownloadUrl(patientId, fileId)
 
@@ -114,7 +114,7 @@ class PatientFilesService {
   }
 
   // Deletar arquivo
-  async deleteFile(patientId: number, fileId: string): Promise<void> {
+  async deleteFile(patientId: string, fileId: string): Promise<void> {
     try {
       await this.api.delete(`/patients/${patientId}/files/${fileId}`)
     } catch (error) {
@@ -124,7 +124,7 @@ class PatientFilesService {
   }
 
   // Atualizar categoria
-  async updateFileCategory(patientId: number, fileId: string, category: string): Promise<PatientFileData> {
+  async updateFileCategory(patientId: string, fileId: string, category: string): Promise<PatientFileData> {
     try {
       const response = await this.api.patch(`/patients/${patientId}/files/${fileId}`, { category })
       return response.data
