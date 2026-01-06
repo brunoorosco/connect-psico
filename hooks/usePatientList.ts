@@ -30,7 +30,6 @@ export function usePatientList({
       onDeletePatient(id)
     },
     [onDeletePatient]
-    
   )
 
   const handleSendMessage = useCallback((patient: Patient) => {

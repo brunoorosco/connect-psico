@@ -7,10 +7,11 @@ import { PatientRecordsTab } from "./PatientRecordsTab"
 import { usePatientDetails } from "@hooks/usePatients"
 import { IPatientDetails } from "./types"
 import { MessageDialog } from "../DialogMessagePatient"
+import { PatientDocumentsTab } from "./PatientDocumentsTab"
 
 export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onEdit }) => {
-  const { patientAppointments,  handleScheduleAppointment } = usePatientDetails(patient)
-  
+  const { patientAppointments, handleScheduleAppointment } = usePatientDetails(patient)
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const handleSendMessage = () => {
     setIsDialogOpen(true)
@@ -31,6 +32,7 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
           <TabsTrigger value="info">Informações Pessoais</TabsTrigger>
           <TabsTrigger value="appointments">Consultas</TabsTrigger>
           <TabsTrigger value="records">Prontuário</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
@@ -44,12 +46,12 @@ export const PatientDetails: React.FC<IPatientDetails> = ({ patient, onBack, onE
         <TabsContent value="records">
           <PatientRecordsTab patientId={patient.userId} />
         </TabsContent>
+
+        <TabsContent value="documents">
+          <PatientDocumentsTab patientId={patient.userId} />
+        </TabsContent>
       </Tabs>
-        <MessageDialog
-        patient={patient}
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
+      <MessageDialog patient={patient} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   )
 }

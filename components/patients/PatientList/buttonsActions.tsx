@@ -1,10 +1,13 @@
+// components/PatientActions.tsx
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, MessageSquare, SquarePlay, FileText, Paperclip, Video } from "lucide-react"
+import { Edit, Trash2, MessageSquare, Video, Paperclip } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Patient } from "@/types/appointment"
+import { UploadFileDialog } from "../UploadDileDialog"
 
 export function PatientActions({
   item,
@@ -20,6 +23,12 @@ export function PatientActions({
   onSendMessage: (item: Patient) => void
 }) {
   const router = useRouter()
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setUploadDialogOpen(true)
+  }
 
   return (
     <>
@@ -52,7 +61,7 @@ export function PatientActions({
               e.stopPropagation()
               onEdit(item)
             }}
-              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -71,7 +80,7 @@ export function PatientActions({
               e.stopPropagation()
               onSendMessage(item)
             }}
-             className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            className="text-green-600 hover:text-green-700 hover:bg-green-50"
           >
             <MessageSquare className="h-4 w-4" />
           </Button>
@@ -86,10 +95,7 @@ export function PatientActions({
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              // onDelete(item.id) // item.id agora é number
-            }}
+            onClick={handleUploadClick}
             className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
           >
             <Paperclip className="h-4 w-4" />
@@ -99,6 +105,7 @@ export function PatientActions({
           <p>Anexar Arquivo</p>
         </TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -106,9 +113,9 @@ export function PatientActions({
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
-              onDelete(item.id) // item.id agora é number
+              onDelete(item.id)
             }}
-             className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -117,6 +124,17 @@ export function PatientActions({
           <p>Excluir Paciente</p>
         </TooltipContent>
       </Tooltip>
+
+      {/* Dialog de Upload */}
+      <UploadFileDialog
+        patient={item}
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUploadComplete={(file) => {
+          console.log("Arquivo enviado:", file)
+          // Aqui você pode adicionar lógica adicional, como atualizar uma lista global
+        }}
+      />
     </>
   )
 }

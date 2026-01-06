@@ -23,7 +23,7 @@ export default function PatientList({ patients, onViewPatient, onEditPatient, on
   const { messages } = useChatStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
- 
+
   const handleStartConsultation = (item: Patient) => {
     usePatientStore.getState().setPatient(item)
   }
