@@ -53,7 +53,7 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
   const loadFiles = async () => {
     try {
       setLoading(true)
-      const data = await patientFilesService.getPatientFiles(parseInt(patientId))
+      const data = await patientFilesService.getPatientFiles(patientId)
       setFiles(data)
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error)
@@ -107,7 +107,7 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
     setUploadComplete(false)
 
     try {
-      await patientFilesService.uploadFile(parseInt(patientId), selectedFile, selectedCategory, (progress) => {
+      await patientFilesService.uploadFile(patientId, selectedFile, selectedCategory, (progress) => {
         setUploadProgress(progress)
       })
 
@@ -144,7 +144,7 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
         title: "Download",
         description: `Baixando ${file.fileName}...`,
       })
-      await patientFilesService.downloadFile(parseInt(patientId), file.id, file.fileName)
+      await patientFilesService.downloadFile(patientId, file.id, file.fileName)
     } catch (error) {
       toast({
         title: "Erro",
@@ -160,7 +160,7 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
     }
 
     try {
-      await patientFilesService.deleteFile(parseInt(patientId), fileId)
+      await patientFilesService.deleteFile(patientId, fileId)
       setFiles(files.filter((f) => f.id !== fileId))
       toast({
         title: "Arquivo removido",
