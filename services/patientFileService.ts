@@ -21,7 +21,7 @@ export interface UploadProgress {
 
 class PatientFilesService {
   private api = axios.create({
-    baseURL: env.baseUrlPsicomaisApi,
+    baseURL: env.baseUrlPsicomaisApi+'/api',
   })
 
   constructor() {
