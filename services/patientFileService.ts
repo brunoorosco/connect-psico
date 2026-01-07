@@ -1,8 +1,6 @@
 // services/patientFilesService.ts
 import axios, { AxiosProgressEvent } from "axios"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
-
+import { env } from "@/config/application"
 export interface PatientFileData {
   id: string
   patientId: number
@@ -23,7 +21,7 @@ export interface UploadProgress {
 
 class PatientFilesService {
   private api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: env.baseUrlPsicomaisApi,
   })
 
   constructor() {
