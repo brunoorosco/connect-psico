@@ -18,12 +18,13 @@ import {
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Upload, Download, Trash2, FileText, Image, File, X, CheckCircle2, Loader2 } from "lucide-react"
+import { Search, Upload, Download, Trash2, FileText, Image, File, X, CheckCircle2, Loader2, Eye } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import { useToast } from "@/hooks/useToast"
 
 import { format } from "date-fns"
 import { PatientFileData, patientFilesService, UploadProgress } from "@services/patientFileService"
+import { isPreviewable } from "@/utils/formatFileSize"
 
 type PatientDocumentsTabProps = {
   patientId: string
@@ -37,11 +38,17 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>("other")
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFile, setSelectedFile] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null)
   const [uploadComplete, setUploadComplete] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
+  const handleView = (file: any) => {
+    setSelectedFile(file)
+    setIsPreviewOpen(true)
+  }
 
   // Carregar arquivos do paciente
   useEffect(() => {
@@ -141,10 +148,14 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
   const handleDownload = async (file: PatientFileData) => {
     try {
       toast({
-        title: "Download",
+        title: "Iniciando download",
         description: `Baixando ${file.fileName}...`,
       })
       await patientFilesService.downloadFile(patientId, file.id, file.fileName)
+      toast({
+        title: "Download concluído",
+        description: `${file.fileName} baixado com sucesso!`,
+      })
     } catch (error) {
       toast({
         title: "Erro",
@@ -215,8 +226,8 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
   }
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.includes("image")) return <Image className="h-4 w-4" />
-    if (fileType.includes("pdf")) return <FileText className="h-4 w-4" />
+    if (fileType?.includes("image")) return <Image className="h-4 w-4" />
+    if (fileType?.includes("pdf")) return <FileText className="h-4 w-4" />
     return <File className="h-4 w-4" />
   }
 
@@ -438,10 +449,19 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
                     <TableCell>
                       <Badge variant={getCategoryVariant(file.category)}>{getCategoryLabel(file.category)}</Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{file.fileSize}</TableCell>
+                    <TableCell className="text-sm">{formatFileSize(file.fileSize)}</TableCell>
                     <TableCell className="text-sm">{formatDate(file.uploadedAt)}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleView(file)}
+                          disabled={!isPreviewable(file.fileType)}
+                          className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -465,6 +485,31 @@ export const PatientDocumentsTab: React.FC<PatientDocumentsTabProps> = ({ patien
                   </TableRow>
                 ))}
               </TableBody>
+              <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>{selectedFile?.fileName}</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="flex-1 w-full overflow-hidden rounded-md border bg-muted">
+                    {selectedFile?.fileType === "application/pdf" ? (
+                      <iframe
+                        src={`${selectedFile?.url}#toolbar=0`} // #toolbar=0 esconde a barra do PDF se quiser
+                        className="w-full h-full"
+                        title="PDF Preview"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-4">
+                        <img
+                          src={selectedFile?.url}
+                          alt={selectedFile?.fileName}
+                          className="max-h-full max-w-full object-contain shadow-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
             </Table>
           )}
         </ScrollArea>

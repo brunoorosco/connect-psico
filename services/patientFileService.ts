@@ -21,7 +21,7 @@ export interface UploadProgress {
 
 class PatientFilesService {
   private api = axios.create({
-    baseURL: env.baseUrlPsicomaisApi+'/api',
+    baseURL: env.baseUrlPsicomaisApi + "/api",
   })
 
   constructor() {
@@ -95,16 +95,19 @@ class PatientFilesService {
   // Download de arquivo
   async downloadFile(patientId: string, fileId: string, fileName: string): Promise<void> {
     try {
+      // Certifique-se que esta URL aponte para sua rota de streaming no backend
       const url = await this.getDownloadUrl(patientId, fileId)
 
-      // Criar link temporário e clicar
       const link = document.createElement("a")
-      link.href = url
-      link.download = fileName
-      link.target = "_blank"
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      //link.href = url
+      window.open(url, '_blank');
+
+      // Opcional: força o nome do arquivo, embora o backend já deva enviar o header correto
+      // link.setAttribute("download", fileName)
+
+      // // Removido o target="_blank" para evitar abas fantasmas
+      // document.body.appendChild(link)
+      // link.click()
     } catch (error) {
       console.error("Erro ao fazer download:", error)
       throw this.handleError(error)
