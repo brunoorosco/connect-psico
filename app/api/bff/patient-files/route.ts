@@ -19,6 +19,7 @@ export async function GET(req: Request) {
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   api.defaults.headers.Authorization = `Bearer ${session.accessToken}`
+  console.log(session.accessToken)
 
   const res = await api.get(`/patients/${patientId}/files`)
   return Response.json(res.data)
