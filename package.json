@@ -111,8 +111,5 @@
   "prettier": {
     "printWidth": 120,
     "semi": false
-  },
-  "overrides": {
-    "@auth/core": "0.35.3"
   }
 }
