@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 
     const res = await api.get(`/patients/${patientId}/files`)
 
-    console.info("[BFF:LIST]", res.status, res.data)
+    if (process.env.NODE_ENV !== "production") console.debug("[BFF:LIST]", res.status, res.data)
     return Response.json(res.data, { status: res.status })
   } catch (error) {
     return bffError(error, "LIST")
