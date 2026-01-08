@@ -47,6 +47,7 @@ model User {
   appointmentHistories     AppointmentHistory[]
   anamnesisTokens          AnamnesisTokens[]      @relation("relation_anamnesis_token_user")
   anamnesisAdult           AnamnesisAdult?        @relation("relation_anamnesis_user")
+  patientFiles             PatientFile[]          @relation("relation_patient_files")
 
   @@index([id, email])
   @@map("users")
@@ -161,6 +162,23 @@ model NotePatient {
   @@map("note_patients")
 }
 
+model PatientFile {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id")
+  fileName   String   @map("file_name")
+  fileType   String   @map("file_type")
+  fileSize   Int      @map("file_size") // Tamanho em bytes
+  fileKey    String   @map("file_key") // Caminho/ID no MinIO
+  category   String   @default("other")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  // Relacionamento: Se o paciente for deletado, os registros dos arquivos também são (Cascade)
+  patient User @relation("relation_patient_files", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("patient_files")
+}
+
 model Comentarios {
   id             Int         @id @default(autoincrement())
   userId         String
@@ -178,10 +196,10 @@ model Comentarios {
 }
 
 model VerificationToken {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  token     String    @unique
-  expires   DateTime
+  id      String   @id @default(cuid())
+  email   String   @unique
+  token   String   @unique
+  expires DateTime
 
   @@unique([email, token])
 }
@@ -205,10 +223,10 @@ model TwoFactorToken {
 }
 
 model ResetPasswordToken {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  token     String    @unique
-  expires   DateTime
+  id      String   @id @default(cuid())
+  email   String   @unique
+  token   String   @unique
+  expires DateTime
 
   @@unique([email, token])
 }
