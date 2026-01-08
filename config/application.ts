@@ -20,4 +20,5 @@ export const env = {
   apikeyASAAS: process.env.ASAAS_API_KEY as string || 'api_key_asaas',
   asaasWebhookSecret: process.env.ASAAS_WEBHOOK_SECRET,
   asaasFallbackTaxId: process.env.ASAAS_FALLBACK_TAXID || "00000000000",
+  jwtSecret: process.env.AUTH_SECRET || "secret@2026"
 }
