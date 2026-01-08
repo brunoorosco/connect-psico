@@ -3,6 +3,7 @@
 import { getToken } from "next-auth/jwt"
 import { cookies } from "next/headers"
 import jwt from "jsonwebtoken"
+import { auth } from "@/auth"
 
 export async function getAccessToken() {
   const token = await getToken({
@@ -10,8 +11,9 @@ export async function getAccessToken() {
     secret: process.env.AUTH_SECRET || "secret",
     salt: process.env.AUTH_SECRET!,
   })
-  const acessToken = cookies().get("authjs.session-token")
-  if (!token || !token.sub || !acessToken?.value) {
+  const session = await auth()
+  console.log(session)
+  if (!token || !token.sub || !session?.accessToken) {
     return { ok: false, error: "Token inválido" }
   }
 

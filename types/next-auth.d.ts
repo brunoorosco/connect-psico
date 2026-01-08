@@ -4,6 +4,7 @@ import { JWT } from "next-auth/jwt"
 type UserRole = "ADMIN" | "DEFAULT" | "SUPERVISOR"
 declare module "next-auth" {
   interface Session extends DefaultSession {
+    accessToken: string
     user: {
       role: string
       isTwoFactorEnabled?: boolean
