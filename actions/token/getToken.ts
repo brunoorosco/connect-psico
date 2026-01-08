@@ -8,6 +8,7 @@ export async function getAccessToken() {
   const token = await getToken({
     req: { headers: { cookie: cookies().toString() } },
     secret: process.env.AUTH_SECRET || "secret",
+    salt: process.env.AUTH_SECRET!,
   })
   const acessToken = cookies().get("authjs.session-token")
   if (!token || !token.sub || !acessToken?.value) {
