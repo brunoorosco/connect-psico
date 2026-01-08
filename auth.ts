@@ -5,6 +5,7 @@ import authConfig from "./auth.config"
 import { prisma } from "./lib/db"
 import { findUserbyEmail } from "./services"
 import { isProfileCompleteDb, isTwoFactorAutenticationEnabled } from "./services/auth"
+import jwt from "jsonwebtoken"
 
 export const {
   handlers: { GET, POST },
@@ -71,16 +72,35 @@ export const {
           select: {
             role: true,
             isNewProfile: true,
+            email: true,
+            name: true,
             Professional: { select: { numConselho: true, ufConselho: true, username: true } },
-            phone: true
+            phone: true,
           },
         })
+
+        // ============================================
+        // NOVO: Gerar JWT para usar no backend
+        // ============================================
+        const backendToken = jwt.sign(
+          {
+            id: user.id,
+            email: userDb?.email,
+            name: userDb?.name,
+            role: userDb?.role,
+          },
+          process.env.AUTH_SECRET!, // Use o mesmo secret do backend
+          {
+            expiresIn: "7d", // Mesmo tempo do maxAge da sessão
+          }
+        )
 
         token.id = user.id
         token.role = userDb?.role || UserRole.DEFAULT
         token.isTwoFactorEnabled = isTwoFactorEnabled
         token.isNewProfile = userDb?.isNewProfile ?? false
         token.phone = userDb?.phone || ""
+        token.accessToken = backendToken
         if (userDb?.role !== "DEFAULT") {
           token.isProfileCompleted = isProfileComplete
           token.username = userDb?.Professional?.username as string
@@ -95,6 +115,7 @@ export const {
 
       return {
         ...session,
+        accessToken: token.accessToken, // ← JWT para usar no backend
         user: {
           ...session.user,
           id: token.sub as string,
