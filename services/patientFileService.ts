@@ -1,6 +1,5 @@
 // services/patientFilesService.ts
 import axios, { AxiosProgressEvent } from "axios"
-import { env } from "@/config/application"
 export interface PatientFileData {
   id: string
   patientId: number
@@ -21,24 +20,24 @@ export interface UploadProgress {
 
 class PatientFilesService {
   private api = axios.create({
-    baseURL: env.baseUrlPsicomaisApi + "/api",
+    baseURL: "/api/bff/patient-files",
   })
 
   constructor() {
-    // Interceptor para adicionar token de autenticação
-    this.api.interceptors.request.use((config) => {
-      const token = localStorage.getItem("authToken")
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-      return config
-    })
+    // // Interceptor para adicionar token de autenticação
+    // this.api.interceptors.request.use((config) => {
+    //   const token = this.getToken()
+    //   if (token) {
+    //     config.headers.Authorization = `Bearer ${token}`
+    //   }
+    //   return config
+    // })
   }
 
   // Listar arquivos de um paciente
   async getPatientFiles(patientId: string): Promise<PatientFileData[]> {
     try {
-      const response = await this.api.get(`/patients/${patientId}/files`)
+      const response = await this.api.get(`?patientId=${patientId}`)
       return response.data
     } catch (error) {
       console.error("Erro ao buscar arquivos:", error)
@@ -58,7 +57,7 @@ class PatientFilesService {
       formData.append("file", file)
       formData.append("category", category)
 
-      const response = await this.api.post(`/patients/${patientId}/files`, formData, {
+      const response = await this.api.post(`?patientId=${patientId}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -84,8 +83,8 @@ class PatientFilesService {
   // Obter URL de download
   async getDownloadUrl(patientId: string, fileId: string): Promise<string> {
     try {
-      const response = await this.api.get(`/patients/${patientId}/files/${fileId}/download`)
-      return response.data.url
+      const { data } = await this.api.put(`?patientId=${patientId}&fileId=${fileId}`)
+      return data.url
     } catch (error) {
       console.error("Erro ao obter URL de download:", error)
       throw this.handleError(error)
@@ -100,7 +99,7 @@ class PatientFilesService {
 
       const link = document.createElement("a")
       //link.href = url
-      window.open(url, '_blank');
+      window.open(url, "_blank")
 
       // Opcional: força o nome do arquivo, embora o backend já deva enviar o header correto
       // link.setAttribute("download", fileName)
@@ -117,7 +116,7 @@ class PatientFilesService {
   // Deletar arquivo
   async deleteFile(patientId: string, fileId: string): Promise<void> {
     try {
-      await this.api.delete(`/patients/${patientId}/files/${fileId}`)
+      await this.api.delete(`?patientId=${patientId}&fileId=${fileId}`)
     } catch (error) {
       console.error("Erro ao deletar arquivo:", error)
       throw this.handleError(error)
@@ -127,8 +126,8 @@ class PatientFilesService {
   // Atualizar categoria
   async updateFileCategory(patientId: string, fileId: string, category: string): Promise<PatientFileData> {
     try {
-      const response = await this.api.patch(`/patients/${patientId}/files/${fileId}`, { category })
-      return response.data
+      const { data } = await this.api.patch(`?patientId=${patientId}&fileId=${fileId}`, { category })
+      return data
     } catch (error) {
       console.error("Erro ao atualizar arquivo:", error)
       throw this.handleError(error)
