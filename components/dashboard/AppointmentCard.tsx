@@ -42,7 +42,6 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
   const isDefault = user.role === "DEFAULT"
   const isSupervisor = user.role === "SUPERVISOR"
-  console.log('user :>> ', user);
 
   // CARD DESABILITADO SE A CONSULTA JÁ PASSOU
   const cardIsPast = isBefore(addMinutes(appointmentDate, 59), now)
@@ -131,7 +130,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         className={cn(
           "rounded-2xl shadow-sm border-l-4 transition-opacity",
           getBorderColor(),
-          cardIsPast && "opacity-50 pointer-events-none"
+          cardIsPast && "opacity-50 pointer-events-none",
         )}
       >
         <CardContent className="sm:py-2 py-2 px-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
