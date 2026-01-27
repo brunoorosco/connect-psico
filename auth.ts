@@ -75,6 +75,7 @@ export const {
             email: true,
             name: true,
             Professional: { select: { numConselho: true, ufConselho: true, username: true } },
+            BankAccount: { select: { prepaymentEnabled: true } },
             phone: true,
           },
         })
@@ -92,7 +93,7 @@ export const {
           process.env.AUTH_SECRET!, // Use o mesmo secret do backend
           {
             expiresIn: "7d", // Mesmo tempo do maxAge da sessão
-          }
+          },
         )
 
         token.id = user.id
@@ -104,7 +105,8 @@ export const {
         if (userDb?.role !== "DEFAULT") {
           token.isProfileCompleted = isProfileComplete
           token.username = userDb?.Professional?.username as string
-          token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho
+          token.crp = userDb?.Professional?.ufConselho + "/" + userDb?.Professional?.numConselho,
+          token.isPrePayment = userDb?.BankAccount[0]?.prepaymentEnabled
         }
       }
 
@@ -127,6 +129,7 @@ export const {
             crp: token.crp,
             isProfileCompleted: token.isProfileCompleted,
             username: token.username,
+            isPrePayment: token.isPrePayment,
           }),
         },
       }

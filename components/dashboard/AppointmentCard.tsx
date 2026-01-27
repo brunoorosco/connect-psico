@@ -42,6 +42,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
   const isDefault = user.role === "DEFAULT"
   const isSupervisor = user.role === "SUPERVISOR"
+  console.log('user :>> ', user);
 
   // CARD DESABILITADO SE A CONSULTA JÁ PASSOU
   const cardIsPast = isBefore(addMinutes(appointmentDate, 59), now)

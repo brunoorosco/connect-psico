@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Mic, MicOff, Save, FileText, Download, AlertTriangle } from "lucide-react"
+import { Mic, MicOff, Save, FileText, AlertTriangle, Video, Copy, Check, ExternalLink, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useParams, useRouter } from "next/navigation"
 import { useConsultationForm } from "@hooks/useConsultation"
@@ -60,11 +60,17 @@ const ConsultationSession = () => {
   const [withTimestamps, setWithTimestamps] = useState(false)
   const sessionIdRef = useRef<string | null>(null)
 
+  // ====== VIDEOCHAMADA RÁPIDA ======
+  const [roomId, setRoomId] = useState<string | null>(null)
+  const [roomUrl, setRoomUrl] = useState<string>("")
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false)
+  const [copied, setCopied] = useState(false)
+
   // ====== CAMPOS ======
   const [consultationDate, setConsultationDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [consultationTime, setConsultationTime] = useState(format(new Date(), "HH:mm"))
   const [notes, setNotes] = useState("")
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null) // se quiser download local
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [canIssueDocument, setCanIssueDocument] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { form, handleSubmit } = useConsultationForm({})
@@ -137,6 +143,7 @@ const ConsultationSession = () => {
       if (typeof obj?.notes === "string") setNotes(obj.notes)
       if (typeof obj?.transcript === "string") setTranscript(obj.transcript)
       if (typeof obj?.updatedAt === "number") setLastSavedAt(obj.updatedAt)
+      if (typeof obj?.roomId === "string") setRoomId(obj.roomId)
     } catch (e) {
       console.error("Falha ao restaurar rascunho:", e)
     }
@@ -146,7 +153,6 @@ const ConsultationSession = () => {
     if (!socket) return
 
     function onProcessed(data: any) {
-      // data: { sessionId, text, summary: { summary, key_points... } }
       console.log("Consultation processed:", data)
       if (data.sessionId === sessionIdRef.current) {
         if (data.text) setTranscript(data.text)
@@ -168,7 +174,7 @@ const ConsultationSession = () => {
   useEffect(() => {
     const h = setTimeout(() => {
       try {
-        const payload = { notes, transcript, updatedAt: Date.now() }
+        const payload = { notes, transcript, roomId, updatedAt: Date.now() }
         localStorage.setItem(storageKey, JSON.stringify(payload))
         setLastSavedAt(payload.updatedAt)
       } catch (e) {
@@ -176,11 +182,20 @@ const ConsultationSession = () => {
       }
     }, 800)
     return () => clearTimeout(h)
-  }, [notes, transcript, storageKey])
+  }, [notes, transcript, roomId, storageKey])
 
   useEffect(() => {
     setPatientName(patient?.name ?? "")
   }, [patient?.name])
+
+  // Atualiza URL da sala quando roomId muda
+  useEffect(() => {
+    if (roomId && currentUser?.id) {
+      const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
+      const url = `${baseUrl}/app/${currentUser.id}/videochamada/room/${roomId}`
+      setRoomUrl(url)
+    }
+  }, [roomId, currentUser?.id])
 
   const { requestPermission, start, stop, isRecording, recordingTime, isStopping, canRecord, error } = useAudioRecorder(
     {
@@ -192,7 +207,6 @@ const ConsultationSession = () => {
         const sid = sessionIdRef.current!
         const key = `sessions/${sid}/part-${String(index).padStart(5, "0")}.webm`
 
-        // upload com retry
         await withRetry(
           async () => {
             const { url } = await getPresignedPutForKey(key)
@@ -203,7 +217,6 @@ const ConsultationSession = () => {
           300
         )
 
-        // transcrever com retry
         const stt = await withRetry(
           () =>
             transcribeChunk({
@@ -222,14 +235,13 @@ const ConsultationSession = () => {
           setTranscript((prev) => mergeTranscripts(prev, piece))
           setSummary((prev) => mergeTranscripts(prev ?? "", piece, "\n"))
         }
-        // 3) Apagar o arquivo do MinIO (após transcrição)
+
         try {
           await withRetry(
             async () => {
               const resp = await fetch("/api/audio/recordings/cleanup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                // softDelete: true -> move para trash/sessions/..., em vez de deletar
                 body: JSON.stringify({ key, softDelete: false }),
               })
               if (!resp.ok) throw new Error(await resp.text())
@@ -238,18 +250,15 @@ const ConsultationSession = () => {
             400
           )
         } catch (e) {
-          // se falhar, não bloqueia o fluxo; ficará para um cleanup posterior (opcional)
           console.warn("Falha ao remover parte após STT:", e, { key })
         }
       },
       onStop: async (fullBlob) => {
-        // opcional: manter arquivo final local pra download
         setAudioBlob(fullBlob)
       },
     }
   )
 
-  // Start: garante sessionId e permissão antes de iniciar o hook
   const handleStart = async () => {
     if (!sessionIdRef.current) {
       const s = (crypto as any)?.randomUUID ? crypto.randomUUID() : `s-${Date.now()}`
@@ -286,7 +295,6 @@ const ConsultationSession = () => {
     }
   }
 
-  // ====== Templates ======
   async function loadTemplates() {
     try {
       setTemplatesLoading(true)
@@ -348,7 +356,7 @@ const ConsultationSession = () => {
       dias: days || 0,
       dataExtenso: format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
     }
-  }, [patient?.name, rg, cpf, idade, consultationTime, cid, days])
+  }, [patient?.name, rg, cpf, idade, consultationTime, cid, days, consultationDate])
 
   async function handleEmitDocument() {
     if (!selectedConfig) return
@@ -372,27 +380,22 @@ const ConsultationSession = () => {
       setSummLoading(true)
       const fullText = [transcript, notes].filter(Boolean).join("\n\n")
 
-      // If we have audio blob, upload and process async
       if (audioBlob && sessionIdRef.current) {
         toast.info("Iniciando processamento em segundo plano...", { description: "Isso pode levar alguns minutos." })
         const sid = sessionIdRef.current
         const key = `sessions/${sid}/full.webm`
 
-        // Upload full audio
         await withRetry(async () => {
           const { url } = await getPresignedPutForKey(key)
           await putToPresignedUrl(url, audioBlob)
         }, 3)
 
-        // Trigger async process
         await startAsyncTranscription(sid, key, "pt-BR", currentUser?.id, fullText)
-        // Loading state remains true until socket event arrives
       } else {
-        // Fallback or text-only (restored session)
         if (transcript || notes) {
           toast.info("Gerando resumo a partir do texto...", { description: "Processando em segundo plano." })
           const sid = sessionIdRef.current || `s-${Date.now()}`
-          sessionIdRef.current = sid // ensure session id
+          sessionIdRef.current = sid
           await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, fullText)
         } else {
           toast.error("Nada para resumir (sem áudio/texto)")
@@ -403,6 +406,94 @@ const ConsultationSession = () => {
       console.error(e)
       toast.error(`Falha ao solicitar resumo: ${e?.message ?? "Erro desconhecido"}`)
       setSummLoading(false)
+    }
+  }
+
+  /**
+   * Cria uma sala de videochamada ad-hoc e abre em nova aba
+   */
+  const handleCreateAndJoinRoom = async () => {
+    if (!currentUser?.id) {
+      toast.error("Erro ao identificar usuário")
+      return
+    }
+
+    setIsCreatingRoom(true)
+    
+    try {
+      const response = await fetch("/api/rooms/quick-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          therapistId: currentUser.id,
+          patientId: patientId,
+          scheduledFor: `${consultationDate}T${consultationTime}`,
+          type: "ad-hoc",
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Falha ao criar sala")
+      }
+
+      const data = await response.json()
+      const newRoomId = data.roomId
+      
+      setRoomId(newRoomId)
+      
+      // Abrir sala em nova aba
+      const roomUrl = `/app/${currentUser.id}/videochamada/room/${newRoomId}`
+      const newWindow = window.open(roomUrl, "_blank", "noopener,noreferrer")
+      
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+        toast.warning("Pop-up bloqueado", {
+          description: "Clique no botão 'Abrir Sala' para entrar manualmente",
+        })
+      } else {
+        toast.success("Sala criada com sucesso!", {
+          description: "A videochamada foi aberta em uma nova aba",
+        })
+      }
+      
+    } catch (error) {
+      console.error("Erro ao criar sala:", error)
+      toast.error("Erro ao criar sala online", {
+        description: "Tente novamente em alguns instantes",
+      })
+    } finally {
+      setIsCreatingRoom(false)
+    }
+  }
+
+  /**
+   * Copia o link da sala para a área de transferência
+   */
+  const handleCopyRoomLink = async () => {
+    if (!roomUrl) return
+
+    try {
+      await navigator.clipboard.writeText(roomUrl)
+      setCopied(true)
+      toast.success("Link copiado!", {
+        description: "Compartilhe com o paciente para iniciar a sessão",
+      })
+      
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      toast.error("Erro ao copiar link", {
+        description: "Tente copiar manualmente",
+      })
+    }
+  }
+
+  /**
+   * Abre a sala novamente (caso o terapeuta feche a aba)
+   */
+  const handleRejoinRoom = () => {
+    if (roomUrl) {
+      window.open(roomUrl, "_blank", "noopener,noreferrer")
     }
   }
 
@@ -462,11 +553,94 @@ const ConsultationSession = () => {
               </div>
             </div>
 
+            {/* 📹 VIDEOCHAMADA RÁPIDA */}
+            <Card className="border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium text-blue-900 dark:text-blue-100 flex items-center">
+                  <Video className="h-5 w-5 mr-2" />
+                  Videochamada Online
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {!roomId ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      Inicie uma sessão por videochamada sem necessidade de agendamento prévio.
+                    </p>
+                    <Button
+                      onClick={handleCreateAndJoinRoom}
+                      disabled={isCreatingRoom}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      size="lg"
+                    >
+                      {isCreatingRoom ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Criando sala...
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-5 h-5 mr-2" />
+                          Iniciar Videochamada
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-2 rounded">
+                      <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                      <span className="font-medium">Sala ativa</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">
+                        Link da Sala (compartilhe com o paciente)
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={roomUrl}
+                          readOnly
+                          className="font-mono text-xs bg-white dark:bg-gray-900"
+                          onClick={(e) => e.currentTarget.select()}
+                        />
+                        <Button
+                          onClick={handleCopyRoomLink}
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0"
+                          title="Copiar link"
+                        >
+                          {copied ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                      ID da Sala: <span className="font-mono font-semibold">{roomId}</span>
+                    </div>
+
+                    <Button
+                      onClick={handleRejoinRoom}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Abrir Sala Novamente
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* 🎙️ Gravação */}
             <Card className="bg-muted/40 border-none shadow-none sm:border sm:shadow-sm">
               <CardContent className="pt-4 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  {/* Botão de gravação */}
                   <Button
                     onClick={isRecording ? handleStop : handleStart}
                     variant={isRecording ? "destructive" : "default"}
@@ -487,7 +661,6 @@ const ConsultationSession = () => {
                   )}
                 </div>
 
-                {/* Botões secundários — empilhados no mobile */}
                 <div className="grid grid-cols-1 sm:flex sm:gap-3 gap-2 pt-3">
                   <Button
                     onClick={openIssueModal}
