@@ -39,7 +39,7 @@ export function useProfessionalsUsername() {
   const getProfissionalByUsername = useCallback((username: string) => {
     startTransition(async () => {
       try {
-        const res = await getProfessionalByUsername(username)
+        const res = await getProfessionalByUsername(username.trim())
         //@ts-ignore
         setProfessional(res)
       } catch (error) {

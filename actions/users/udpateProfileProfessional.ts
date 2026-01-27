@@ -58,7 +58,7 @@ export const updateProfessionalProfile = async (userId: string, data: z.infer<ty
               tempoConsulta: data.tempoConsulta,
               publicoAlvo: data.publicoAlvo,
               tipoAtendimento: data.tipoAtendimento,
-              username: data.username,
+              username: data.username.trim(),
             },
             update: {
               bio: data.bio,
@@ -72,7 +72,7 @@ export const updateProfessionalProfile = async (userId: string, data: z.infer<ty
               tempoConsulta: data.tempoConsulta,
               publicoAlvo: data.publicoAlvo,
               tipoAtendimento: data.tipoAtendimento,
-              username: data.username,
+              username: data.username.trim(),
             },
           },
         },
