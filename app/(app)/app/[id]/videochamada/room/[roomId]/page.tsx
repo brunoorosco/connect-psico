@@ -113,7 +113,7 @@ export default function VideoCallPage() {
       stopRecording()
     }
     setHasJoined(false)
-    window.location.href = "../"
+    window.location.href = "../../../"
   }
 
   const handleJoinRoom = () => {
