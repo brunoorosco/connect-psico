@@ -27,6 +27,8 @@ import { startAsyncTranscription } from "@/services/consultationService"
 import { useSocket } from "@/infra/contexts/SocketContext"
 import { getPresignedPutForKey, transcribeChunk, putToPresignedUrl } from "@/services/minioUpload"
 import { SummaryResult } from "./types"
+import { useChatStore } from "@/infra/stores/useChatStore"
+import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
 
 type CertificateConfig = any
 
@@ -92,10 +94,11 @@ const ConsultationSession = () => {
   const patient = usePatientStore((state) => state.patient)
   const [patientName, setPatientName] = useState(patient?.name ?? "")
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+  const { sendMessage } = useChatStore()
 
   const storageKey = useMemo(
     () => `consult:draft:${patientId}:${id}:${consultationDate}`,
-    [patientId, id, consultationDate]
+    [patientId, id, consultationDate],
   )
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -194,8 +197,20 @@ const ConsultationSession = () => {
       const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
       const url = `${baseUrl}/app/${currentUser.id}/videochamada/room/${roomId}`
       setRoomUrl(url)
+      sendMessageLinkUrlRoom(url)
     }
   }, [roomId, currentUser?.id])
+
+  const sendMessageLinkUrlRoom = async (url: string) => {
+    await sendMessage({
+      text: url,
+      image: "",
+      receiverId: patientId,
+      senderId: currentUser?.id as string,
+    })
+    const message = `Link da Sessão!\n ${url}`
+    // await sendMessageApiWhatsapp(patientPhone, message)
+  }
 
   const { requestPermission, start, stop, isRecording, recordingTime, isStopping, canRecord, error } = useAudioRecorder(
     {
@@ -214,7 +229,7 @@ const ConsultationSession = () => {
             if (!resp.ok) throw new Error(`PUT failed: ${resp.status}`)
           },
           4,
-          300
+          300,
         )
 
         const stt = await withRetry(
@@ -227,7 +242,7 @@ const ConsultationSession = () => {
               language: "pt",
             }),
           3,
-          500
+          500,
         )
 
         const piece = stt?.text?.trim()
@@ -247,7 +262,7 @@ const ConsultationSession = () => {
               if (!resp.ok) throw new Error(await resp.text())
             },
             3,
-            400
+            400,
           )
         } catch (e) {
           console.warn("Falha ao remover parte após STT:", e, { key })
@@ -256,7 +271,7 @@ const ConsultationSession = () => {
       onStop: async (fullBlob) => {
         setAudioBlob(fullBlob)
       },
-    }
+    },
   )
 
   const handleStart = async () => {
@@ -301,7 +316,7 @@ const ConsultationSession = () => {
       const res = await fetch(`/api/templates?scope=all`)
       if (!res.ok) throw new Error(await res.text())
       const raw = await res.json()
-      const items: TemplateItem[] = Array.isArray(raw) ? raw : raw?.items ?? []
+      const items: TemplateItem[] = Array.isArray(raw) ? raw : (raw?.items ?? [])
       const normalized = items
         .map((it) => {
           const t = (it?.name || it?.configJson?.type || "atestado") as CertificateType
@@ -419,7 +434,7 @@ const ConsultationSession = () => {
     }
 
     setIsCreatingRoom(true)
-    
+
     try {
       const response = await fetch("/api/rooms/quick-session", {
         method: "POST",
@@ -440,13 +455,13 @@ const ConsultationSession = () => {
 
       const data = await response.json()
       const newRoomId = data.roomId
-      
+
       setRoomId(newRoomId)
-      
+
       // Abrir sala em nova aba
       const roomUrl = `/app/${currentUser.id}/videochamada/room/${newRoomId}`
       const newWindow = window.open(roomUrl, "_blank", "noopener,noreferrer")
-      
+
       if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
         toast.warning("Pop-up bloqueado", {
           description: "Clique no botão 'Abrir Sala' para entrar manualmente",
@@ -456,7 +471,6 @@ const ConsultationSession = () => {
           description: "A videochamada foi aberta em uma nova aba",
         })
       }
-      
     } catch (error) {
       console.error("Erro ao criar sala:", error)
       toast.error("Erro ao criar sala online", {
@@ -479,7 +493,7 @@ const ConsultationSession = () => {
       toast.success("Link copiado!", {
         description: "Compartilhe com o paciente para iniciar a sessão",
       })
-      
+
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       toast.error("Erro ao copiar link", {
@@ -594,9 +608,7 @@ const ConsultationSession = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">
-                        Link da Sala (compartilhe com o paciente)
-                      </Label>
+                      <Label className="text-sm font-medium">Link da Sala (compartilhe com o paciente)</Label>
                       <div className="flex gap-2">
                         <Input
                           value={roomUrl}
@@ -611,11 +623,7 @@ const ConsultationSession = () => {
                           className="flex-shrink-0"
                           title="Copiar link"
                         >
-                          {copied ? (
-                            <Check className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
+                          {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                         </Button>
                       </div>
                     </div>
@@ -624,11 +632,7 @@ const ConsultationSession = () => {
                       ID da Sala: <span className="font-mono font-semibold">{roomId}</span>
                     </div>
 
-                    <Button
-                      onClick={handleRejoinRoom}
-                      variant="outline"
-                      className="w-full"
-                    >
+                    <Button onClick={handleRejoinRoom} variant="outline" className="w-full">
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Abrir Sala Novamente
                     </Button>

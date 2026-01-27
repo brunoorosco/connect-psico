@@ -73,7 +73,7 @@ const ChatContainer = () => {
                     "text-sm sm:text-base",
                     // cores e canto “aberto” por lado:
                     isCurrentUser
-                      ? "bg-primary text-primary-foreground rounded-tr-none"
+                      ? "bg-primary text-white rounded-tr-none"
                       : "bg-base-200 text-base-content rounded-tl-none",
                   ].join(" ")}
                 >

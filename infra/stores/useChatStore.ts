@@ -9,9 +9,9 @@ import { TMessage } from "@components/chat/ChatContainer"
 import { ingestDigest } from "@/actions/digest"
 
 // ─── Cache config ──────────────────────────────────────────────────────────────
-const TTL_MS = 60_000;                // 1 min; ajuste como quiser
-const MAX_CACHE_ENTRIES = 50;         // simples LRU (limita crescimento)
-type MessageCacheEntry = { items: TMessage[]; fetchedAt: number };
+const TTL_MS = 60_000 // 1 min
+const MAX_CACHE_ENTRIES = 50
+type MessageCacheEntry = { items: TMessage[]; fetchedAt: number }
 
 type TMessageSend = Omit<TMessage, "_id" | "createdAt">
 type State = {
@@ -44,7 +44,7 @@ export const useChatStore = create<State>((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
 
-  // cache Map para permitir LRU por ordem de inserção
+  // cache Map
   messageCache: new Map<string, MessageCacheEntry>(),
 
   // ── Helpers de cache ────────────────────────────────────────────────────────
@@ -58,13 +58,13 @@ export const useChatStore = create<State>((set, get) => ({
     set({ messageCache: new Map(messageCache) })
   },
 
-  // ── Users (sem alterações relevantes) ───────────────────────────────────────
+  // ── Users ───────────────────────────────────────────────────────────────────
   getUsers: async (user: User): Promise<void> => {
     set({ isUsersLoading: true })
     try {
       const [usersChat, usershat] = await Promise.all([
         user.role === "SUPERVISOR" ? getUserChat() : Promise.resolve([]),
-        getContactsApi(), // retorna string[]
+        getContactsApi(),
       ])
 
       let chatIds: Set<string> = new Set()
@@ -95,9 +95,10 @@ export const useChatStore = create<State>((set, get) => ({
     }
   },
 
-  // ── Selecionar usuário: carrega do cache se existir ─────────────────────────
+  // ── Selecionar usuário ──────────────────────────────────────────────────────
   setSelectedUser: (user) => {
     const { messageCache } = get()
+    
     if (!user) {
       set({ selectedUser: null, messages: [] })
       return
@@ -106,7 +107,7 @@ export const useChatStore = create<State>((set, get) => ({
     const entry = messageCache.get(user.userId)
     set({
       selectedUser: user,
-      messages: entry ? entry.items : [], // mostra mensagens imediatamente se estiverem em cache
+      messages: entry ? entry.items : [],
     })
   },
 
@@ -117,10 +118,9 @@ export const useChatStore = create<State>((set, get) => ({
 
     // 1) Tentar cache fresco
     const entry = messageCache.get(userId)
-    const fresh = entry && (Date.now() - entry.fetchedAt) < TTL_MS
+    const fresh = entry && Date.now() - entry.fetchedAt < TTL_MS
 
     if (entry && fresh && !force) {
-      // já temos mensagens frescas: só garantir que o estado exiba isso
       set({ messages: entry.items })
       return
     }
@@ -129,19 +129,16 @@ export const useChatStore = create<State>((set, get) => ({
     set({ isMessagesLoading: true })
     try {
       const res = await getMessageApi(userId)
-
-      // normaliza (evita undefined)
       const items: TMessage[] = Array.isArray(res) ? res : []
 
-      // atualiza estado
       set({ messages: items })
 
-      // atualiza cache (LRU: se passar do limite, remove o primeiro)
+      // LRU: remove o mais antigo se passar do limite
       if (!messageCache.has(userId) && messageCache.size >= MAX_CACHE_ENTRIES) {
         const oldestKey = messageCache.keys().next().value
         messageCache.delete(oldestKey ?? "")
       }
-      // para manter ordem LRU, re-seta a chave
+      
       messageCache.delete(userId)
       messageCache.set(userId, { items, fetchedAt: Date.now() })
       set({ messageCache: new Map(messageCache) })
@@ -152,55 +149,88 @@ export const useChatStore = create<State>((set, get) => ({
     }
   },
 
-  // ── Enviar mensagem: atualiza estado + cache (otimista já com resp) ────────
+  // ── Enviar mensagem (CORRIGIDO) ─────────────────────────────────────────────
   sendMessage: async (messageData: TMessageSend) => {
     const { selectedUser, messages, messageCache } = get()
-    if (!selectedUser) return
+
+    // CRÍTICO: receiverId deve vir de messageData, não do selectedUser
+    const targetUserId = messageData.receiverId
+    
+    if (!targetUserId) {
+      console.error("receiverId não especificado em messageData")
+      toast.error("Erro: destinatário não especificado")
+      return
+    }
 
     try {
-      const resp = await sendMessageApi(selectedUser.userId, messageData)
-      await ingestDigest(selectedUser.userId)
+      // Enviar para a API
+      const resp = await sendMessageApi(targetUserId, messageData)
+      
+      // Ingerir digest apenas para o destinatário correto
+      await ingestDigest(targetUserId)
 
-      // de-dup por _id
-      const next = messages.some(m => m._id === resp._id) ? messages : [...messages, resp]
-      set({ messages: next })
+      // IMPORTANTE: Só atualiza o estado se a mensagem for para o usuário selecionado
+      const isForSelectedUser = selectedUser?.userId === targetUserId
 
-      // cache: LRU “touch” + atualizar itens
-      const cached = messageCache.get(selectedUser.userId)
-      const items = cached ? [...cached.items, resp] : next
-      messageCache.delete(selectedUser.userId)
-      messageCache.set(selectedUser.userId, { items, fetchedAt: Date.now() })
+      if (isForSelectedUser) {
+        // Atualizar estado de mensagens (deduplica por _id)
+        const messageExists = messages.some((m) => m._id === resp._id)
+        const updatedMessages = messageExists ? messages : [...messages, resp]
+        set({ messages: updatedMessages })
+      }
+
+      // SEMPRE atualiza o cache para o destinatário correto
+      const cached = messageCache.get(targetUserId)
+      const cachedItems = cached?.items ?? []
+      const hasCached = cachedItems.some((m) => m._id === resp._id)
+      const updatedCacheItems = hasCached ? cachedItems : [...cachedItems, resp]
+
+      // Atualizar cache (LRU touch)
+      messageCache.delete(targetUserId)
+      messageCache.set(targetUserId, { 
+        items: updatedCacheItems, 
+        fetchedAt: Date.now() 
+      })
       set({ messageCache: new Map(messageCache) })
+
+      // Log para debug
+      console.log(`Mensagem enviada para ${targetUserId}, selectedUser: ${selectedUser?.userId}`)
+
     } catch (error: any) {
-      console.error(error)
+      console.error("Erro ao enviar mensagem:", error)
       toast.error(error?.response?.data?.message || "Erro ao enviar mensagem")
     }
   },
 
-  // ── Socket: ao chegar nova mensagem do contato aberto, atualiza cache ──────
+  // ── Socket ──────────────────────────────────────────────────────────────────
   subscribeToMessages: () => {
     const { selectedUser } = get()
     const socket = useAuthStore.getState().socket
     if (!selectedUser || !socket) return
 
     socket.on("newMessage", (newMessage: TMessage) => {
-      // só mensagens vindas do contato selecionado (ou endereçadas a mim)
+      // Só processa mensagens do usuário selecionado
       const isFromSelected = newMessage.senderId === selectedUser.userId
       if (!isFromSelected) return
 
       const { messages, messageCache } = get()
-      // de-dup
-      const has = messages.some(m => m._id === newMessage._id)
-      const next = has ? messages : [...messages, newMessage]
-      set({ messages: next })
+      
+      // Atualizar estado (deduplica)
+      const messageExists = messages.some((m) => m._id === newMessage._id)
+      const updatedMessages = messageExists ? messages : [...messages, newMessage]
+      set({ messages: updatedMessages })
 
+      // Atualizar cache
       const cached = messageCache.get(selectedUser.userId)
       const cachedItems = cached?.items ?? []
-      const hasCached = cachedItems.some(m => m._id === newMessage._id)
-      const updated = hasCached ? cachedItems : [...cachedItems, newMessage]
+      const hasCached = cachedItems.some((m) => m._id === newMessage._id)
+      const updatedCacheItems = hasCached ? cachedItems : [...cachedItems, newMessage]
 
       messageCache.delete(selectedUser.userId)
-      messageCache.set(selectedUser.userId, { items: updated, fetchedAt: Date.now() })
+      messageCache.set(selectedUser.userId, { 
+        items: updatedCacheItems, 
+        fetchedAt: Date.now() 
+      })
       set({ messageCache: new Map(messageCache) })
     })
   },
