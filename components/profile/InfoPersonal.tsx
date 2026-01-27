@@ -101,7 +101,18 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                   render={({ field }) => {
                     const username = useWatch({ control, name: "username" })
                     const [availability, setAvailability] = useState<string | null>(null)
-                    const { data: session } = useSession() // 🔹 pega usuário logado
+                    const { data: session } = useSession()
+
+                    // 🔹 Função para sanitizar o input
+                    const sanitizeUsername = (value: string) => {
+                      // Remove todos os caracteres exceto letras, números, -_.@
+                      return value.replace(/[^a-zA-Z0-9\-_.@]/g, "")
+                    }
+
+                    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      const sanitized = sanitizeUsername(e.target.value)
+                      field.onChange(sanitized)
+                    }
 
                     const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
                       field.onBlur()
@@ -144,10 +155,15 @@ export const PersonalInfoForm = ({ profile }: Props) => {
                           <FormControl>
                             <Input
                               placeholder="ex: joao.silva"
-                              {...field}
+                              value={field.value}
+                              onChange={handleChange}
                               onBlur={handleBlur}
+                              name={field.name}
+                              ref={field.ref}
                               className={`${
-                                availability && !availability.includes("disponível") ? "focus:ring-red-500 border-red-500 border-2 focus-visible:outline-none focus-visible:ring-0" : ""
+                                availability && !availability.includes("disponível")
+                                  ? "focus:ring-red-500 border-red-500 border-2 focus-visible:outline-none focus-visible:ring-0"
+                                  : ""
                               }`}
                             />
                           </FormControl>
