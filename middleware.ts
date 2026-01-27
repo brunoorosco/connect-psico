@@ -9,10 +9,10 @@ const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const {
-    isPublicRoute,
+    // isPublicRoute,
     isProtectedRoute,
-    isApiRoute,
-    isAuthRoute,
+    // isApiRoute,
+    // isAuthRoute,
     isStudentRoute,
     isSupervisorRoute,
   } = createRouteMatchers(configRoutes, req);
