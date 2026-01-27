@@ -42,7 +42,7 @@ export function PatientActions({
               onStart(item)
               router.push(`./pacientes/${item.userId}/consulta`)
             }}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-200"
           >
             <Video className="h-5 w-5" />
           </Button>
@@ -61,7 +61,7 @@ export function PatientActions({
               e.stopPropagation()
               onEdit(item)
             }}
-            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+            className="text-orange-600 hover:text-orange-700 hover:bg-orange-200"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -80,7 +80,7 @@ export function PatientActions({
               e.stopPropagation()
               onSendMessage(item)
             }}
-            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            className="text-green-600 hover:text-green-700 hover:bg-green-200"
           >
             <MessageSquare className="h-4 w-4" />
           </Button>
@@ -96,7 +96,7 @@ export function PatientActions({
             variant="ghost"
             size="sm"
             onClick={handleUploadClick}
-            className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+            className="text-gray-600 hover:text-gray-700 hover:bg-gray-300"
           >
             <Paperclip className="h-4 w-4" />
           </Button>
@@ -115,7 +115,7 @@ export function PatientActions({
               e.stopPropagation()
               onDelete(item.id)
             }}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-red-600 hover:text-red-700 hover:bg-red-200"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
