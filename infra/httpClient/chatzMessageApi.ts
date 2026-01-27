@@ -17,7 +17,7 @@ axiosInstanceChatz.interceptors.request.use(
     config.headers.Authorization = env.apiKeyChatz
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 axiosInstanceEvo.interceptors.request.use(
@@ -25,15 +25,16 @@ axiosInstanceEvo.interceptors.request.use(
     config.headers.apikey = env.apiKeyEVO
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 export const sendMessageApiWhatsapp = async (userPhone: string, message: string, signature = true) => {
   if (!userPhone || userPhone === "") return
   const msg = signature ? `*PsicoMais:*\n${message}` : message
-  await axiosInstanceChatz.post("/messages/send", {
+
+  await axiosInstanceEvo.post(`/message/sendText/${env.instanceEVO}`, {
     // body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
-    body: msg,
+    text: msg,
     number: "55" + userPhone,
   })
 }

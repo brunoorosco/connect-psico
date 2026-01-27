@@ -202,14 +202,16 @@ const ConsultationSession = () => {
   }, [roomId, currentUser?.id])
 
   const sendMessageLinkUrlRoom = async (url: string) => {
+    console.log("patient :>> ", patient)
     await sendMessage({
       text: url,
       image: "",
       receiverId: patientId,
       senderId: currentUser?.id as string,
     })
-    const message = `Link da Sessão!\n ${url}`
-    // await sendMessageApiWhatsapp(patientPhone, message)
+    if (!patient?.phone) return
+    const message = `🔗 *Link da Sessão*\n\n${url}`
+    await sendMessageApiWhatsapp(patient.phone, message)
   }
 
   const { requestPermission, start, stop, isRecording, recordingTime, isStopping, canRecord, error } = useAudioRecorder(
