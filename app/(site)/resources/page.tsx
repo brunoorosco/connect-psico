@@ -12,7 +12,7 @@ const Resources = () => {
       {
         title: "Terapia Individual Online",
         description: "Sessões de terapia por videoconferência com total privacidade e segurança.",
-        icon: <VideoIcon className="h-10 w-10 text-therapy-primary" />,
+        icon: <VideoIcon className="h-10 w-10 text-primary" />,
         benefits: [
           "Flexibilidade de horário",
           "Acesso de qualquer lugar",
@@ -25,7 +25,7 @@ const Resources = () => {
         title: "Terapia Individual Presencial",
         description:
           "Atendimento face a face em consultório, com toda a atenção personalizada para seu processo terapêutico.",
-        icon: <UserCheck className="h-10 w-10 text-therapy-primary" />,
+        icon: <UserCheck className="h-10 w-10 text-primary" />,
         benefits: [
           "Ambiente terapêutico dedicado",
           "Comunicação não-verbal facilitada",
@@ -36,7 +36,7 @@ const Resources = () => {
       {
         title: "Aconselhamento Pontual",
         description: "Sessões únicas para situações específicas que necessitam de orientação profissional.",
-        icon: <Calendar className="h-10 w-10 text-therapy-primary" />,
+        icon: <Calendar className="h-10 w-10 text-primary" />,
         benefits: ["Resolução de questões específicas", "Sem compromisso continuado", "Orientação especializada"],
         link: "/terapeutas?type=counseling",
       },
@@ -45,7 +45,7 @@ const Resources = () => {
       {
         title: "Terapia em Grupo",
         description: "Sessões terapêuticas em grupo para compartilhar experiências e construir redes de apoio.",
-        icon: <Users className="h-10 w-10 text-therapy-primary" />,
+        icon: <Users className="h-10 w-10 text-primary" />,
         benefits: [
           "Custo mais acessível",
           "Aprendizado com diferentes perspectivas",
@@ -57,7 +57,7 @@ const Resources = () => {
       {
         title: "Grupos Temáticos",
         description: "Grupos focados em temas específicos como ansiedade, luto, relacionamentos, entre outros.",
-        icon: <MessageCircle className="h-10 w-10 text-therapy-primary" />,
+        icon: <MessageCircle className="h-10 w-10 text-primary" />,
         benefits: [
           "Foco em questões específicas",
           "Compartilhamento de estratégias",
@@ -68,7 +68,7 @@ const Resources = () => {
       {
         title: "Workshops Terapêuticos",
         description: "Atividades práticas em grupo para desenvolvimento de habilidades específicas.",
-        icon: <BookOpen className="h-10 w-10 text-therapy-primary" />,
+        icon: <BookOpen className="h-10 w-10 text-primary" />,
         benefits: ["Aprendizado prático", "Duração definida", "Objetivos claros", "Materiais de apoio"],
         link: "/terapeutas?type=workshop",
       },
@@ -77,7 +77,7 @@ const Resources = () => {
       {
         title: "Supervisão Individual",
         description: "Acompanhamento personalizado para estudantes e profissionais em formação.",
-        icon: <HeadphonesIcon className="h-10 w-10 text-therapy-primary" />,
+        icon: <HeadphonesIcon className="h-10 w-10 text-primary" />,
         benefits: [
           "Feedback detalhado sobre casos",
           "Desenvolvimento de habilidades clínicas",
@@ -88,7 +88,7 @@ const Resources = () => {
       {
         title: "Supervisão em Grupo",
         description: "Supervisão clínica em grupo para troca de experiências entre profissionais.",
-        icon: <Users className="h-10 w-10 text-therapy-primary" />,
+        icon: <Users className="h-10 w-10 text-primary" />,
         benefits: [
           "Aprendizado compartilhado",
           "Networking profissional",
@@ -100,7 +100,7 @@ const Resources = () => {
       {
         title: "Mentoria para Carreira",
         description: "Orientação profissional para desenvolvimento de carreira na área da psicologia e psicanálise.",
-        icon: <Link className="h-10 w-10 text-therapy-primary" />,
+        icon: <Link className="h-10 w-10 text-primary" />,
         benefits: [
           "Planejamento de carreira",
           "Orientação sobre especialização",
@@ -235,7 +235,7 @@ const Resources = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/terapeutas">
-                  <Button size="lg" className="bg-therapy-primary hover:bg-therapy-primary/90">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90">
                     Encontrar Terapeuta
                   </Button>
                 </Link>
@@ -268,7 +268,7 @@ const ResourceCard = ({ resource }: { resource: any }) => {
         <ul className="space-y-2">
           {resource.benefits.map((benefit: string, index: number) => (
             <li key={index} className="flex items-start">
-              <div className="mr-2 mt-1 text-therapy-primary">
+              <div className="mr-2 mt-1 text-primary">
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"

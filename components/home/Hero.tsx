@@ -15,7 +15,7 @@ import { env } from "@/config/application";
 //         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
 //           <div className="lg:w-1/2 lg:pr-12">
 //             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-therapy-dark leading-tight">
-//               Cuidado psicológico <span className="text-therapy-primary">acessível</span> e <span className="text-therapy-primary">personalizado</span>
+//               Cuidado psicológico <span className="text-primary">acessível</span> e <span className="text-primary">personalizado</span>
 //             </h1>
 //             <p className="mt-6 text-lg text-therapy-dark/80 max-w-2xl text-balance">
 //               Conectamos você aos melhores profissionais de psicologia, oferecendo suporte para sua saúde mental de forma simples e eficaz. Consultas online ou presenciais com psicólogos qualificados.
@@ -32,7 +32,7 @@ import { env } from "@/config/application";
 //             <div className="mt-10 flex items-center space-x-4">
 //               <div className="flex -space-x-2">
 //                 {[1, 2, 3, 4, 5].map((i) => (
-//                   <div key={i} className={`h-10 w-10 rounded-full border-2 border-white bg-therapy-light flex items-center justify-center text-therapy-primary/70 font-medium`}>
+//                   <div key={i} className={`h-10 w-10 rounded-full border-2 border-white bg-therapy-light flex items-center justify-center text-primary/70 font-medium`}>
 //                     {String.fromCharCode(64 + i)}
 //                   </div>
 //                 ))}
@@ -49,9 +49,9 @@ import { env } from "@/config/application";
 //               <div className="aspect-[4/3] bg-therapy-light/30 rounded-xl overflow-hidden relative">
 //                 <div className="absolute inset-0 flex items-center justify-center">
 //                   <div className="text-center p-8">
-//                     <div className="w-20 h-20 rounded-full bg-therapy-primary/20 mx-auto flex items-center justify-center">
-//                       <div className="w-16 h-16 rounded-full bg-therapy-primary/30 flex items-center justify-center">
-//                         <div className="w-12 h-12 rounded-full bg-therapy-primary flex items-center justify-center text-white">
+//                     <div className="w-20 h-20 rounded-full bg-primary/20 mx-auto flex items-center justify-center">
+//                       <div className="w-16 h-16 rounded-full bg-primary/30 flex items-center justify-center">
+//                         <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white">
 //                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
 //                             <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
 //                           </svg>
@@ -105,7 +105,7 @@ const Hero = () => {
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
                   <Link href="/terapeutas">
-                    <Button variant="outline" size="lg" className="w-full">Encontre um Profissional</Button>
+                    <Button variant="outline" size="lg" className="w-full border-primary">Encontre um Profissional</Button>
                   </Link>
                 </div>
               </div>

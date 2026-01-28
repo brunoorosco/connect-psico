@@ -44,7 +44,7 @@ export async function AppSidebar() {
               <Link href="/" className="flex items-center">
                 <Logo />
 
-                <span className="text-2xl font-bold text-therapy-primary">{env.applicationName}</span>
+                <span className="text-2xl font-bold text-primary">{env.applicationName}</span>
               </Link>
             </div>
           </SidebarGroupLabel>

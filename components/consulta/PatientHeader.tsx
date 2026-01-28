@@ -16,12 +16,12 @@ export const PatientHeader = ({ name, date, time, isEditing, onEditToggle }: IPa
     </div>
     {!isEditing && (
       <div className="mt-3 sm:mt-0 flex items-center text-sm text-gray-600">
-        <Calendar className="h-4 w-4 mr-1 text-therapy-primary" />
+        <Calendar className="h-4 w-4 mr-1 text-primary" />
         <span>{format(date, "dd 'de' MMMM, yyyy", { locale: ptBR })}</span>
         <span className="mx-2">•</span>
-        <Clock className="h-4 w-4 mr-1 text-therapy-primary" />
+        <Clock className="h-4 w-4 mr-1 text-primary" />
         <span>{time}</span>
-        <Button onClick={onEditToggle} variant="ghost" size="sm" className="ml-2 h-7 text-therapy-tertiary hover:text-therapy-primary">
+        <Button onClick={onEditToggle} variant="ghost" size="sm" className="ml-2 h-7 text-therapy-tertiary hover:text-primary">
           Editar
         </Button>
       </div>

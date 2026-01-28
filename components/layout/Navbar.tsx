@@ -11,7 +11,7 @@ import Logo from "../logo";
 const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
   const linkClass = isMobile
     ? "block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-    : "text-therapy-secondary hover:text-therapy-primary transition-all-200";
+    : "text-therapy-secondary hover:text-primary transition-all-200";
 
   return (
     <>
@@ -59,7 +59,7 @@ const AuthButtons = ({ isMobile = false }: { isMobile?: boolean }) => {
   return (
     <>
       <Link href="/auth/login" className={isMobile ? "w-full" : ""}>
-        <Button variant="outline" className={isMobile ? "w-full" : ""}>
+        <Button variant="outline" className={`${isMobile ? "w-full" : ""} border-primary text-primary`}>
           Entrar
         </Button>
       </Link>
@@ -95,7 +95,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
             <Logo />
-              <span className="text-2xl font-bold text-therapy-primary text-gradient">{env.applicationName}</span>
+              <span className="text-2xl font-bold text-primary text-gradient">{env.applicationName}</span>
             </Link>
           </div>
 
@@ -109,7 +109,7 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-therapy-dark hover:text-therapy-primary focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-therapy-dark hover:text-primary focus:outline-none"
               aria-expanded={isMenuOpen}
             >
               <span className="sr-only">Abrir menu principal</span>

@@ -40,7 +40,7 @@ const HowItWorks = () => {
         
         <div className="relative">
           {/* Linha de conexão */}
-          <div className="absolute hidden lg:block left-[50%] top-24 bottom-24 w-0.5 bg-therapy-primary/30"></div>
+          <div className="absolute hidden lg:block left-[50%] top-24 bottom-24 w-0.5 bg-primary/30"></div>
           
           <div className="space-y-12 lg:space-y-0">
             {steps.map((step, index) => (
@@ -48,7 +48,7 @@ const HowItWorks = () => {
                 <div className="lg:w-1/2 flex justify-center">
                   <div className="w-full max-w-md">
                     <div className="bg-white rounded-xl shadow-md p-6 relative animate-fade-in" style={{animationDelay: `${index * 0.2}s`}}>
-                      <div className="absolute -top-5 -left-5 w-12 h-12 rounded-full bg-therapy-primary text-white flex items-center justify-center font-bold text-xl shadow-md">
+                      <div className="absolute -top-5 -left-5 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl shadow-md">
                         {step.number}
                       </div>
                       <h3 className="text-xl font-bold text-therapy-dark mt-2">{step.title}</h3>
@@ -59,8 +59,8 @@ const HowItWorks = () => {
                 
                 <div className="lg:w-1/2 hidden lg:flex justify-center items-center">
                   <div className="w-32 h-32 rounded-full border-4 border-therapy-primary/30 bg-therapy-light flex items-center justify-center">
-                    <div className="w-24 h-24 rounded-full bg-therapy-primary/10 flex items-center justify-center">
-                      <div className="text-therapy-primary text-4xl font-bold">{step.number}</div>
+                    <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="text-primary text-4xl font-bold">{step.number}</div>
                     </div>
                   </div>
                 </div>

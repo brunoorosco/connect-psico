@@ -110,14 +110,14 @@ const SidebarChat = () => {
               onClick={() => setSelectedUser(u)}
               className={`
                 w-full p-3 flex items-center gap-3
-                ${isSelected ? "bg-gray-200" : "hover:bg-[#9b87f555]"}
+                ${isSelected ? "bg-gray-200" : "hover:bg-primary"}
                 transition-colors rounded-md
               `}
             >
               <div className="relative">
                 <Avatar>
                   <AvatarImage src={u.image || ""} />
-                  <AvatarFallback className="bg-therapy-primary text-white">{getInitials(u.name || "")}</AvatarFallback>
+                  <AvatarFallback className="bg-primary text-white">{getInitials(u.name || "")}</AvatarFallback>
                 </Avatar>
                 {isOnline && (
                   <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />

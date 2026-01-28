@@ -57,7 +57,7 @@ const PsychologistDashboard: React.FC = () => {
             {selectedPatient && isTodayOrFuture(selectedDate) && (
               <Button
                 onClick={() => handleStartConsultation(selectedPatient)}
-                className="bg-therapy-primary hover:bg-therapy-tertiary text-white"
+                className="bg-primary hover:bg-therapy-tertiary text-white"
                 size="sm"
               >
                 <Calendar className="h-4 w-4 mr-2" />

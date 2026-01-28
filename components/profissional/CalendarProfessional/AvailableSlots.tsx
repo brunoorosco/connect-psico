@@ -22,7 +22,7 @@ export function AvailableSlots({ selectedDate, availableSlots, selectedSlot, onS
           <Button
             key={String(slot.start.getTime())}
             variant={isSelected ? "default" : "outline"}
-            className={isSelected ? "bg-therapy-primary text-gray-50 hover:bg-therapy-tertiary" : ""}
+            className={isSelected ? "bg-primary text-gray-50 hover:bg-therapy-tertiary" : ""}
             onClick={() => onSelectSlot(slot)}
           >
             {formatInTimeZone(slot.start, env.timezone, "HH:mm")}

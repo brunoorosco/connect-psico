@@ -63,7 +63,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
 
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-therapy-primary" />
+                  <MapPin className="h-4 w-4 text-primary" />
                   <span className="text-sm">
                     Atendimento:{" "}
                     {professional.tipoAtendimento === "remoto"
@@ -75,7 +75,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-therapy-primary" />
+                  <DollarSign className="h-4 w-4 text-primary" />
                   <span className="text-sm">
                     {(Number(professional?.valorAtendimento) / 100).toLocaleString("pt-BR", {
                       style: "currency",
@@ -89,7 +89,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
             <div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <BookCopyIcon className="h-4 w-4 text-therapy-primary" />
+                  <BookCopyIcon className="h-4 w-4 text-primary" />
                   <h4 className="font-medium">Especialidade:</h4>
                 </div>
                 <ul className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm line-clamp-3 overflow-hidden">
@@ -102,7 +102,7 @@ export const ProfessionalDetailsModal: React.FC<ProfessionalDetailsModalProps> =
               </div>
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <User2 className="h-4 w-4 text-therapy-primary" />
+                  <User2 className="h-4 w-4 text-primary" />
                   <h4 className="font-medium">Público Alvo:</h4>
                 </div>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm">

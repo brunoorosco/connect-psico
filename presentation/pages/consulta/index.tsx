@@ -255,7 +255,7 @@ export const ConsultationStart = () => {
           <Button
             onClick={handleFinishConsultation}
             disabled={!clinicalEvolution || isSubmitting}
-            className="bg-therapy-primary hover:bg-therapy-tertiary transition-colors"
+            className="bg-primary hover:bg-therapy-tertiary transition-colors"
           >
             {isSubmitting ? "Salvando..." : "Finalizar Consulta"}
           </Button>
@@ -389,7 +389,7 @@ export const ConsultationStart = () => {
             <Button
               onClick={handleEmitDocument}
               disabled={!selectedConfig || templatesLoading}
-              className="bg-therapy-primary hover:bg-therapy-tertiary"
+              className="bg-primary hover:bg-therapy-tertiary"
             >
               Gerar PDF
             </Button>

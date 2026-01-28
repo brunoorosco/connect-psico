@@ -28,21 +28,21 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Heart size={16} className="text-therapy-primary" />
+            <Heart size={16} className="text-primary" />
             <p className="text-sm text-gray-600 flex-1">
               <span className="font-medium">{professional.experiencia}</span> anos de experiência
             </p>
           </div>
           
           <div className="flex items-center gap-2">
-            <DollarSign size={16} className="text-therapy-primary" />
+            <DollarSign size={16} className="text-primary" />
             <p className="text-sm text-gray-600">
               <span className="font-medium">R${professional.valorAtendimento}</span>/sessão
             </p>
           </div>
           
           <div className="flex items-center gap-2">
-            <Clock size={16} className="text-therapy-primary" />
+            <Clock size={16} className="text-primary" />
             <p className="text-sm text-gray-600">
               <span className="font-medium">{professional.tempoConsulta || 60}</span> minutos
             </p>
@@ -54,7 +54,7 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
           
           <Button 
             onClick={() => onShowDetails(professional)} 
-            className="w-full mt-3 bg-therapy-primary hover:bg-therapy-tertiary"
+            className="w-full mt-3 bg-primary hover:bg-therapy-tertiary"
           >
             Ver detalhes
           </Button>

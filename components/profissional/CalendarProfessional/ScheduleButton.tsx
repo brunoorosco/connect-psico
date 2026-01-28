@@ -75,7 +75,7 @@ export function ScheduleButton({
   return (
     <div className="mt-6">
       <Button
-        className="w-full bg-therapy-primary text-gray-50 hover:bg-therapy-tertiary"
+        className="w-full bg-primary text-gray-50 hover:bg-therapy-tertiary"
         onClick={handleClick}
         disabled={isLoading}
       >

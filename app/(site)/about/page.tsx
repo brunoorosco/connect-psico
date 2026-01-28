@@ -40,25 +40,25 @@ const About = () => {
       title: "Acessibilidade",
       description:
         "Tornamos o cuidado com a saúde mental acessível para todos, independentemente de localização geográfica ou limitações físicas.",
-      icon: <Globe className="h-8 w-8 text-therapy-primary" />,
+      icon: <Globe className="h-8 w-8 text-primary" />,
     },
     {
       title: "Confidencialidade",
       description:
         "Garantimos a privacidade e segurança das informações compartilhadas na plataforma, seguindo os mais rigorosos padrões éticos.",
-      icon: <Shield className="h-8 w-8 text-therapy-primary" />,
+      icon: <Shield className="h-8 w-8 text-primary" />,
     },
     {
       title: "Educação Contínua",
       description:
         "Incentivamos o desenvolvimento profissional através de supervisão de qualidade e recursos educacionais atualizados.",
-      icon: <BookOpen className="h-8 w-8 text-therapy-primary" />,
+      icon: <BookOpen className="h-8 w-8 text-primary" />,
     },
     {
       title: "Comunidade",
       description:
         "Promovemos a formação de uma comunidade colaborativa entre profissionais, estudantes e pacientes.",
-      icon: <Users className="h-8 w-8 text-therapy-primary" />,
+      icon: <Users className="h-8 w-8 text-primary" />,
     },
   ];
 
@@ -146,7 +146,7 @@ const About = () => {
                     />
                   </div>
                   <h3 className="text-xl font-semibold">{member.name}</h3>
-                  <p className="text-therapy-primary font-medium mb-2">{member.role}</p>
+                  <p className="text-primary font-medium mb-2">{member.role}</p>
                   <p className="text-center text-therapy-dark/70">{member.bio}</p>
                 </div>
               ))}
@@ -179,7 +179,7 @@ const About = () => {
         </section>
 
         {/* CTA - Contato */}
-        <section className="py-16 bg-therapy-primary/10">
+        <section className="py-16 bg-primary/10">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-semibold mb-6">Entre em Contato Conosco</h2>
             <p className="text-lg mb-8 max-w-2xl mx-auto">
@@ -189,7 +189,7 @@ const About = () => {
             <div className="flex justify-center gap-4">
               <a
                 href="mailto:contato@psicomais.com"
-                className="bg-therapy-primary text-white px-6 py-3 rounded-md font-medium hover:bg-therapy-primary/90 transition-colors flex gap-1"
+                className="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-primary/90 transition-colors flex gap-1"
               >
                 <Mail className="w-5 h-5" />
                 Fale pelo E-mail

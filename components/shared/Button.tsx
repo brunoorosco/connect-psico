@@ -12,11 +12,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, icon, children, ...props }, ref) => {
     const variants = {
-      primary: 'bg-therapy-primary text-white hover:bg-therapy-primary/90',
+      primary: 'bg-primary text-white hover:bg-primary/90',
       secondary: 'bg-therapy-secondary text-white hover:bg-therapy-secondary/90',
-      outline: 'border border-therapy-primary text-therapy-primary hover:bg-therapy-primary/10',
-      ghost: 'text-therapy-primary hover:bg-therapy-primary/10',
-      link: 'text-therapy-primary underline-offset-4 hover:underline p-0 height-auto'
+      outline: 'border border-therapy-primary text-primary hover:bg-primary/10',
+      ghost: 'text-primary hover:bg-primary/10',
+      link: 'text-primary underline-offset-4 hover:underline p-0 height-auto'
     };
 
     const sizes = {

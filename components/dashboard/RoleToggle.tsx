@@ -8,7 +8,7 @@ interface RoleToggleProps {
 
 const RoleToggle: React.FC<RoleToggleProps> = ({ currentRole, onRoleChange }) => {
   return (
-    <div className="fixed bottom-6 right-6 z-50 bg-therapy-primary rounded-lg shadow-lg p-1">
+    <div className="fixed bottom-6 right-6 z-50 bg-primary rounded-lg shadow-lg p-1">
       <div className="flex items-center">
         <Button
           variant={currentRole === "SUPERVISOR" ? "default" : "ghost"}
