@@ -26,10 +26,10 @@ const NavbarButtons = async () => {
   );
 
   return (
-    <div className="pt-4 pb-2 border-t border-gray-200 flex gap-2 px-2">
+    <div className="pt-4 pb-2 border-t border-primary flex gap-2 px-2">
       {isAuthenticated ? (
         <>
-          <NavLink href="/app" label="Dashboard" variant="outline" />
+          <NavLink href="/app" label="Dashboard" variant="outline"/>
           <LogoutButton>
             <Button variant="primary" className="w-full" aria-label="Sair">
               Sair
