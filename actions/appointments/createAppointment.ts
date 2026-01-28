@@ -15,12 +15,11 @@ const CreateAppointmentSchema = z.object({
   professionalId: z.string(),
   patientId: z.string(),
   appointmentDate: z.coerce.date(),
-  paymentMethod: z.enum(["pix", "credit"]),
+  paymentMethod: z.enum(["pix", "credit"]).optional(),
   taxId: z.string().min(11).max(18).optional(),
 })
 
 export const createAppointment = async (data: z.infer<typeof CreateAppointmentSchema>) => {
-
   const valid = await CreateAppointmentSchema.safeParseAsync(data)
   if (!valid.success) {
     return { error: "Dados inválidos" }
@@ -113,8 +112,11 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
       select: { id: true },
     })
 
-    let paymentResult: { checkoutUrl?: string | null; qrCodeText?: string | null; type?: "PIX" | "CREDIT_CARD" } | null =
-      null
+    let paymentResult: {
+      checkoutUrl?: string | null
+      qrCodeText?: string | null
+      type?: "PIX" | "CREDIT_CARD"
+    } | null = null
 
     if (prePaymentSettings?.prepaymentEnabled && priceCents > 0) {
       const idempotency = await prisma.idempotencyKey.create({ data: { key: randomUUID() } })
@@ -148,6 +150,14 @@ export const createAppointment = async (data: z.infer<typeof CreateAppointmentSc
         default:
           return { success: false, error: "Ação inválida" }
       }
+    }
+    if (!prePaymentSettings?.prepaymentEnabled) {
+      await prisma.appointment.update({
+        where: { id: appointment.id },
+        data: {
+          status: "CONFIRMED",
+        },
+      })
     }
     return { success: "Agendamento realizado com sucesso", data: appointment, payment: paymentResult }
   } catch (error) {

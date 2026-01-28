@@ -29,44 +29,57 @@ export function ScheduleButton({
   const router = useRouter()
 
   const handleClick = async () => {
-    if (!paymentMethod) {
-      setErrorPayment(true)
-      return
-    }
+    try {
+      let taxId: string | undefined
+      if (professional.prepaymentEnabled) {
+        if (!paymentMethod) {
+          setErrorPayment(true)
+          return
+        }
+        if (paymentMethod === "pix") {
+          const validTaxId = getValidTaxId(pixCpf)
+          if (!validTaxId) {
+            onCpfError("Informe um CPF válido para gerar o pagamento via PIX.")
+            return
+          }
+          taxId = validTaxId
+          onCpfError(null)
+        } else {
+          onCpfError(null)
+        }
 
-    let taxId: string | undefined
-    if (paymentMethod === "pix") {
-      const validTaxId = getValidTaxId(pixCpf)
-      if (!validTaxId) {
-        onCpfError("Informe um CPF válido para gerar o pagamento via PIX.")
+        setIsLoading(true)
+
+        const result = await handleAppointment({
+          patientId: userId,
+          professional,
+          selectedSlot,
+          paymentMethod,
+          onSuccess,
+          taxId,
+        })
+
+        if (result?.payment?.type === "CREDIT_CARD" && result.payment.checkoutUrl) {
+          window.open(result.payment.checkoutUrl, "_blank", "noopener")
+        }
+
+        if (result?.payment?.type === "PIX" && result.payment.qrCodeText) {
+          router.push(`/copy?code=${encodeURIComponent(result.payment.qrCodeText)}`)
+        }
+
+        setErrorPayment(false)
         return
       }
-      taxId = validTaxId
-      onCpfError(null)
-    } else {
-      onCpfError(null)
-    }
 
-    setIsLoading(true)
-    try {
+      setIsLoading(true)
+
       const result = await handleAppointment({
         patientId: userId,
         professional,
         selectedSlot,
-        paymentMethod,
-        onSuccess,
         taxId,
+        onSuccess,
       })
-
-      if (result?.payment?.type === "CREDIT_CARD" && result.payment.checkoutUrl) {
-        window.open(result.payment.checkoutUrl, "_blank", "noopener")
-      }
-
-      if (result?.payment?.type === "PIX" && result.payment.qrCodeText) {
-        router.push(`/copy?code=${encodeURIComponent(result.payment.qrCodeText)}`)
-      }
-
-      setErrorPayment(false)
     } finally {
       setIsLoading(false)
     }

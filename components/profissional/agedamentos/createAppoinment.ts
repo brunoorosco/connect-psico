@@ -7,7 +7,7 @@ const TZ = "America/Sao_Paulo"
 
 interface HandleAppointmentParams {
   patientId: string
-  paymentMethod: "pix" | "credit"
+  paymentMethod?: "pix" | "credit"
   professional: {
     userId: string
     name: string
