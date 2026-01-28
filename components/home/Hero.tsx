@@ -92,7 +92,7 @@ const Hero = () => {
             <div className="text-center lg:text-left">
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
                 <span className="block xl:inline">{`${env.applicationName}`}</span>{' '}
-                <span className="block text-psychology-primary xl:inline">Cuidado psicológico acessível e personalizado</span>
+                <span className="block text-primary xl:inline">Cuidado psicológico acessível e personalizado</span>
               </h1>
               <p className="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto lg:mx-0 md:mt-5 md:text-xl">
               Conectamos você aos melhores profissionais de psicologia, oferecendo suporte para sua saúde mental de forma simples e eficaz. Consultas online ou presenciais com psicólogos qualificados.
