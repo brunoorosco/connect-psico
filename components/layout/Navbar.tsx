@@ -43,7 +43,7 @@ const AuthButtons = ({ isMobile = false }: { isMobile?: boolean }) => {
     return (
       <>
         <Link href="/app" className={isMobile ? "w-full" : ""}>
-          <Button variant="outline" className={isMobile ? "w-full" : ""}>
+          <Button variant="outline" className={`${isMobile ? "w-full" : ""}border-primary`}>
             Dashboard
           </Button>
         </Link>
