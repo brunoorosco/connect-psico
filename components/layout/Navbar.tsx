@@ -10,8 +10,8 @@ import Logo from "../logo";
 
 const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => {
   const linkClass = isMobile
-    ? "block px-3 py-2 text-base text-therapy-dark hover:bg-therapy-light"
-    : "text-therapy-secondary hover:text-primary transition-all-200";
+    ? "block px-3 py-2 text-base text-primary hover:bg-therapy-light"
+    : "text-primary hover:text-primary transition-all-200";
 
   return (
     <>
