@@ -22,7 +22,7 @@ const calendarClassNames = {
   cell: "relative h-20 w-full text-center text-sm transition-colors duration-150 hover:bg-transparent focus-within:z-10",
   day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
   day_today: "ring-1 ring-medical text-medical-dark font-bold",
-  day_selected: "bg-[#5847eb88] text-white font-semibold  hover:text-white",
+  day_selected: "bg-primary text-white font-semibold  hover:text-white",
 }
 
 // ✅ Normaliza qualquer formato de slot para "HH:mm" no fuso de São Paulo
