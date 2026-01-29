@@ -1,10 +1,11 @@
-"use server";
+"use server"
 
-import { prisma } from "@/lib/db";
-import { findUserbyEmail } from "@/services";
-import { findVerificationTokenbyToken } from "@/services/auth";
-import type { User } from "@prisma/client";
-import { sendVerificationEmail } from "@/infra/email";
+import { prisma } from "@/lib/db"
+import { findUserbyEmail } from "@/services"
+import { findVerificationTokenbyToken } from "@/services/auth"
+import type { User } from "@prisma/client"
+import { sendVerificationEmail } from "@/infra/email"
+import { sendWelcomeEmail } from "@/infra/email/sendBoasVindas"
 /**
  * This method uses nodemailer to send an email to the user to verify
  * the ownership of the email by the user.
@@ -14,31 +15,30 @@ import { sendVerificationEmail } from "@/infra/email";
  * @returns {Promise<{ error?: string, success?: string }>} An object indicating the result of the operation.
  */
 export const sendAccountVerificationEmail = async (user: User, token: string) => {
-  const { VERIFICATION_SUBJECT, NEXT_PUBLIC_URL, VERIFICATION_URL } =
-    process.env;
+  const { VERIFICATION_SUBJECT, NEXT_PUBLIC_URL, VERIFICATION_URL } = process.env
   if (!VERIFICATION_SUBJECT || !NEXT_PUBLIC_URL || !VERIFICATION_URL) {
     return {
       error: "Configuração de ambiente insuficiente para envio de e-mail.",
-    };
+    }
   }
 
-  const verificationUrl = `${NEXT_PUBLIC_URL}${VERIFICATION_URL}?token=${token}`;
+  const verificationUrl = `${NEXT_PUBLIC_URL}${VERIFICATION_URL}?token=${token}`
   // const verificationUrl = `https://api.orostec.online/psiconnect/p/${token}`;
-  const { email } = user;
+  const { email } = user
   try {
-    const { data, error, success } = await sendVerificationEmail(email, verificationUrl);
+    const { data, error, success } = await sendVerificationEmail(email, verificationUrl)
 
     if (!success)
       return {
         error,
-      };
+      }
     return {
       success: "E-mail enviado com sucesso",
-    };
+    }
   } catch (error) {
-    return { error };
+    return { error }
   }
-};
+}
 
 /**
  * This method updates the user's record with the date the email was verified.
@@ -47,25 +47,25 @@ export const sendAccountVerificationEmail = async (user: User, token: string) =>
  * @returns {Promise<{ error?: string, success?: string }>} An object indicating the result of the operation.
  */
 export const verifyToken = async (token: string) => {
-  const existingToken = await findVerificationTokenbyToken(token);
+  const existingToken = await findVerificationTokenbyToken(token)
   if (!existingToken) {
     return {
       error: "Código de verificação não encontrado",
-    };
+    }
   }
 
-  const isTokenExpired = new Date(existingToken.expires) < new Date();
+  const isTokenExpired = new Date(existingToken.expires) < new Date()
   if (isTokenExpired) {
     return {
       error: "Código de verificação expirado",
-    };
+    }
   }
 
-  const user = await findUserbyEmail(existingToken.email);
+  const user = await findUserbyEmail(existingToken.email)
   if (!user) {
     return {
       error: "Usuário não encontrado",
-    };
+    }
   }
 
   try {
@@ -74,18 +74,20 @@ export const verifyToken = async (token: string) => {
       data: {
         emailVerified: new Date(),
       },
-    });
+    })
 
     await prisma.verificationToken.delete({
       where: {
         id: existingToken.id,
       },
-    });
-
+    })
+    if (user.role !== "ADMIN") {
+      await sendWelcomeEmail({ emailTo: existingToken.email, userName: user.name, userType: user.role })
+    }
     return {
       success: "E-mail verificado",
-    };
+    }
   } catch (err) {
-    return { error: "Erro ao atualizar verificação de e-mail" };
+    return { error: "Erro ao atualizar verificação de e-mail" }
   }
-};
+}
