@@ -514,7 +514,7 @@ const ConsultationSession = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-2 sm:p-4">
+    <div className="min-h-screen bg-background sm:p-2">
       <div className="max-w-6xl mx-auto space-y-4">
         <Card className="shadow-sm border-none sm:border">
           <CardHeader className="pb-2 sm:pb-4">
@@ -568,133 +568,133 @@ const ConsultationSession = () => {
                 />
               </div>
             </div>
-
-            {/* 📹 VIDEOCHAMADA RÁPIDA */}
-            <Card className="border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-medium text-blue-900 dark:text-blue-100 flex items-center">
-                  <Video className="h-5 w-5 mr-2" />
-                  Videochamada Online
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {!roomId ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Inicie uma sessão por videochamada sem necessidade de agendamento prévio.
-                    </p>
-                    <Button
-                      onClick={handleCreateAndJoinRoom}
-                      disabled={isCreatingRoom}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                      size="lg"
-                    >
-                      {isCreatingRoom ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Criando sala...
-                        </>
-                      ) : (
-                        <>
-                          <Video className="w-5 h-5 mr-2" />
-                          Iniciar Videochamada
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-2 rounded">
-                      <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                      <span className="font-medium">Sala ativa</span>
+            <div className="grid xl:grid-cols-2 grid-cols-1">
+              {/* 📹 VIDEOCHAMADA RÁPIDA */}
+              <Card className="border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-medium text-blue-900 dark:text-blue-100 flex items-center">
+                    <Video className="h-5 w-5 mr-2" />
+                    Videochamada Online
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {!roomId ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Inicie uma sessão por videochamada sem necessidade de agendamento prévio.
+                      </p>
+                      <Button
+                        onClick={handleCreateAndJoinRoom}
+                        disabled={isCreatingRoom}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        size="lg"
+                      >
+                        {isCreatingRoom ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Criando sala...
+                          </>
+                        ) : (
+                          <>
+                            <Video className="w-5 h-5 mr-2" />
+                            Iniciar Videochamada
+                          </>
+                        )}
+                      </Button>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Link da Sala (compartilhe com o paciente)</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={roomUrl}
-                          readOnly
-                          className="font-mono text-xs bg-white dark:bg-gray-900"
-                          onClick={(e) => e.currentTarget.select()}
-                        />
-                        <Button
-                          onClick={handleCopyRoomLink}
-                          variant="outline"
-                          size="icon"
-                          className="flex-shrink-0"
-                          title="Copiar link"
-                        >
-                          {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                        </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-2 rounded">
+                        <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                        <span className="font-medium">Sala ativa</span>
                       </div>
-                    </div>
 
-                    <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                      ID da Sala: <span className="font-mono font-semibold">{roomId}</span>
-                    </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Link da Sala (compartilhe com o paciente)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={roomUrl}
+                            readOnly
+                            className="font-mono text-xs bg-white dark:bg-gray-900"
+                            onClick={(e) => e.currentTarget.select()}
+                          />
+                          <Button
+                            onClick={handleCopyRoomLink}
+                            variant="outline"
+                            size="icon"
+                            className="flex-shrink-0"
+                            title="Copiar link"
+                          >
+                            {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      </div>
 
-                    <Button onClick={handleRejoinRoom} variant="outline" className="w-full">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Abrir Sala Novamente
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        ID da Sala: <span className="font-mono font-semibold">{roomId}</span>
+                      </div>
 
-            {/* 🎙️ Gravação */}
-            <Card className="bg-muted/40 border-none shadow-none sm:border sm:shadow-sm">
-              <CardContent className="pt-4 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <Button
-                    onClick={isRecording ? handleStop : handleStart}
-                    variant={isRecording ? "destructive" : "default"}
-                    size="lg"
-                    className="w-full sm:w-auto"
-                  >
-                    {isRecording ? <MicOff /> : <Mic />}
-                    <span className="ml-2">
-                      {isRecording ? (isStopping ? "Parando..." : "Parar Gravação") : "Iniciar Gravação"}
-                    </span>
-                  </Button>
-
-                  {isRecording && (
-                    <div className="flex justify-center sm:justify-start items-center gap-2">
-                      <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                      <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+                      <Button onClick={handleRejoinRoom} variant="outline" className="w-full">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Sala Novamente
+                      </Button>
                     </div>
                   )}
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="grid grid-cols-1 sm:flex sm:gap-3 gap-2 pt-3">
-                  <Button
-                    onClick={openIssueModal}
-                    variant="outline"
-                    className="w-full sm:w-auto"
-                    title={!canIssueDocument ? "Finalize a consulta para emitir" : "Emitir documento"}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Emitir Documento
-                  </Button>
+              {/* 🎙️ Gravação */}
+              <Card className="bg-muted/40 border-none shadow-none sm:border sm:shadow-sm">
+                <CardContent className="pt-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <Button
+                      onClick={isRecording ? handleStop : handleStart}
+                      variant={isRecording ? "destructive" : "default"}
+                      size="lg"
+                      className="w-full sm:w-auto"
+                    >
+                      {isRecording ? <MicOff /> : <Mic />}
+                      <span className="ml-2">
+                        {isRecording ? (isStopping ? "Parando..." : "Parar Gravação") : "Iniciar Gravação"}
+                      </span>
+                    </Button>
 
-                  <Button
-                    onClick={handleSummarize}
-                    variant="secondary"
-                    disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
-                    className="w-full sm:w-auto"
-                  >
-                    {summLoading ? "Resumindo..." : "Gerar Resumo"}
-                  </Button>
+                    {isRecording && (
+                      <div className="flex justify-center sm:justify-start items-center gap-2">
+                        <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
+                        <span className="text-sm font-mono">{formatTime(recordingTime)}</span>
+                      </div>
+                    )}
+                  </div>
 
-                  <Button onClick={saveConsultation} className="w-full sm:w-auto text-white" disabled={isSubmitting}>
-                    <Save className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Salvando..." : "Salvar Consulta"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="grid xl:grid-cols-3 grid-cols-1 sm:gap-3 gap-2 pt-3">
+                    <Button
+                      onClick={openIssueModal}
+                      variant="outline"
+                      className="grid-cols-1 "
+                      title={!canIssueDocument ? "Finalize a consulta para emitir" : "Emitir documento"}
+                    >
+                      <FileText className="w-4 h-4 mr-20" color="#2563eb"/>
+                      Emitir Documento
+                    </Button>
 
+                    <Button
+                      onClick={handleSummarize}
+                      variant="secondary"
+                      disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
+                      className=" grid-cols-1"
+                    >
+                      {summLoading ? "Resumindo..." : "Gerar Resumo"}
+                    </Button>
+
+                    <Button onClick={saveConsultation} className="w-full sm:w-auto text-white grid-cols-1" disabled={isSubmitting}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {isSubmitting ? "Salvando..." : "Salvar Consulta"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             {/* 🧾 Transcrição */}
             {transcript && (
               <div className="space-y-2">
