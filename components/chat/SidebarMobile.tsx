@@ -115,13 +115,13 @@ const SidebarMobile = () => {
                   className={[
                     "w-full px-4 py-3 flex items-center gap-3",
                     "transition-colors",
-                    isSelected ? "bg-gray-200" : "hover:bg-[#9b87f555]",
+                    isSelected ? "bg-gray-200" : "hover:bg-primary",
                   ].join(" ")}
                 >
                   <div className="relative shrink-0">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={u.image || ""} />
-                      <AvatarFallback className="bg-therapy-primary text-white">
+                      <AvatarFallback className="bg-primary text-white">
                         {getInitials(u.name || "")}
                       </AvatarFallback>
                     </Avatar>

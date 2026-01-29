@@ -76,7 +76,7 @@ const FeatureSection = () => {
           {features.map((feature, index) => (
             <Card key={index} variant="feature" className="hover-scale">
               <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-therapy-primary/10 flex items-center justify-center text-therapy-primary mb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                   {feature.icon}
                 </div>
                 <CardTitle>{feature.title}</CardTitle>

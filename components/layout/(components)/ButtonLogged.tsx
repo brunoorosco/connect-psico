@@ -12,8 +12,8 @@ const ButtonsNavbar = ({ userLoggedIn }: NavbarProps) => {
 
   const renderLoggedInMenu = () => (
     <>
-      <Button variant="outline" size="sm">
-        <Link href="/app" className="text-therapy-purple-primary hover:text-therapy-primary transition-all-200">
+      <Button variant="outline" size="sm" className=''>
+        <Link href="/app" className="text-therapy-purple-primary hover:text-primary transition-all-200">
           Dashboard
         </Link>
       </Button>

@@ -60,7 +60,7 @@ export const TextMessage: React.FC<ProfessionalProps> = ({ professional }) => {
       <div className="flex justify-between items-center">
         <p className="text-xs text-muted-foreground">{message.length}/500 caracteres</p>
         <Button
-          className="bg-therapy-primary text-gray-50 hover:bg-therapy-tertiary"
+          className="bg-primary text-gray-50 hover:bg-therapy-tertiary"
           onClick={handleSendMessage}
           disabled={
             !message || message.trim() === "" || status !== "authenticated" || isSending

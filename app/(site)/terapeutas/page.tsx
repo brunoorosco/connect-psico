@@ -34,7 +34,7 @@ const FindTherapist = () => {
       <Navbar />
       <div className="container mx-auto p-6">
         <div className="flex flex-col lg:flex-row justify-between mb-6 gap-4">
-          <h1 className="text-3xl font-bold text-therapy-primary">Encontre seu Terapeuta</h1>
+          <h1 className="text-3xl font-bold text-primary">Encontre seu Terapeuta</h1>
           <TherapistFilter selectedSpecialty={selectedSpecialty} onSpecialtyChange={onSpecialtyChange} />
         </div>
 

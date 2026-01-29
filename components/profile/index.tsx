@@ -132,14 +132,14 @@ const ProfileProfessionalForm: React.FC = () => {
     <div className="lg:container mx-auto py-6 max-w-5xl">
       {isOnboarding && (
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-therapy-primary mb-2">{`Seja Bem-vindo, ${user?.name}!`}</h1>
+          <h1 className="text-2xl font-bold text-primary mb-2">{`Seja Bem-vindo, ${user?.name}!`}</h1>
           <p className="text-muted-foreground">
             Vamos configurar seu perfil profissional em poucos passos.
           </p>
           {/* Progress Bar */}
           <div className="w-full bg-gray-200 h-2 rounded-full mt-4">
             <div
-              className="bg-therapy-primary h-2 rounded-full transition-all duration-300"
+              className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
@@ -238,7 +238,7 @@ const ProfileProfessionalForm: React.FC = () => {
                 <Button variant="outline" type="button" onClick={() => router.push('/app')}>
                   Cancelar
                 </Button>
-                <Button disabled={isPending} className="bg-therapy-primary hover:bg-therapy-tertiary text-gray-50">
+                <Button disabled={isPending} className="bg-primary hover:bg-therapy-tertiary text-gray-50">
                   Salvar perfil
                 </Button>
               </>
@@ -252,7 +252,7 @@ const ProfileProfessionalForm: React.FC = () => {
                 )}
 
                 {step < 4 ? (
-                  <Button type="button" onClick={nextStep} className="bg-therapy-primary text-white">
+                  <Button type="button" onClick={nextStep} className="bg-primary text-white">
                     Próximo
                   </Button>
                 ) : (

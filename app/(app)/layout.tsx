@@ -8,17 +8,16 @@ import { CallFloatingWindow } from "@components/videoChat/CallFloatingWindow"
 import { SocketProvider } from "@/infra/contexts/SocketContext"
 import ConsentGate from "@components/Consentimento/ConsentGate"
 import { acceptConsent, declineConsent, getConsentStatus } from "@/actions/consent"
+import { cache } from "react"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-  if (!session) return redirect("/")
-
-  if (session.user.isNewProfile === true) {
-    return redirect(`/onboarding/${session.user.id}`)
-  }
+  if (!session) redirect("/")
+  if (session.user.isNewProfile) redirect(`/onboarding/${session.user.id}`)
 
   // Decide SSR se abrir modal
-  const status = await getConsentStatus()
+  const getConsent = cache(getConsentStatus)
+  const status = await getConsent()
   const shouldOpen = !!(status.loggedIn && session.user.role === "DEFAULT" && !status.hasRecordedChoice)
 
   // Bind das actions p/ uso no cliente via startTransition/FormData

@@ -26,7 +26,7 @@ const ChatHeader = () => {
           <div className="flex items-center gap-3 min-w-0">
             <Avatar>
               <AvatarImage src={selectedUser.image || ""} />
-              <AvatarFallback className="bg-therapy-primary text-white">
+              <AvatarFallback className="bg-primary text-white">
                 {getInitials(selectedUser.name ?? "")}
               </AvatarFallback>
             </Avatar>

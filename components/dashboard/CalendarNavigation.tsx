@@ -38,7 +38,7 @@ const CalendarNavigation: React.FC<CalendarNavigationProps> = ({
         variant="outline"
         size="icon"
         onClick={handlePreviousDay}
-        className="border-therapy-light text-therapy-tertiary hover:text-therapy-primary hover:bg-therapy-light/50"
+        className="border-therapy-light text-therapy-tertiary hover:text-primary hover:bg-therapy-light/50"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -48,7 +48,7 @@ const CalendarNavigation: React.FC<CalendarNavigationProps> = ({
           variant="outline" 
           size="sm"
           onClick={handleToday}
-          className="text-sm hover:bg-therapy-light/50 hover:text-therapy-primary"
+          className="text-sm hover:bg-therapy-light/50 hover:text-primary"
         >
           Hoje
         </Button>
@@ -57,7 +57,7 @@ const CalendarNavigation: React.FC<CalendarNavigationProps> = ({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="pl-3 pr-2 flex items-center gap-1 hover:bg-therapy-light/50 hover:text-therapy-primary"
+              className="pl-3 pr-2 flex items-center gap-1 hover:bg-therapy-light/50 hover:text-primary"
             >
               {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
               <CalendarDays className="ml-2 h-4 w-4" />
@@ -80,7 +80,7 @@ const CalendarNavigation: React.FC<CalendarNavigationProps> = ({
         variant="outline" 
         size="icon"
         onClick={handleNextDay}
-        className="border-therapy-light text-therapy-tertiary hover:text-therapy-primary hover:bg-therapy-light/50"
+        className="border-therapy-light text-therapy-tertiary hover:text-primary hover:bg-therapy-light/50"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
