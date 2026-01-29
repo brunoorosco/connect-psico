@@ -667,11 +667,11 @@ const ConsultationSession = () => {
                     )}
                   </div>
 
-                  <div className="grid xl:grid-cols-3 grid-cols-1 sm:gap-3 gap-2 pt-3">
+                  <div className="grid md:grid-cols-3 sm:grid-cols-1 sm:gap-3 gap-2 pt-3">
                     <Button
                       onClick={openIssueModal}
                       variant="outline"
-                      className="grid-cols-1 "
+                      className="grid-cols-1"
                       title={!canIssueDocument ? "Finalize a consulta para emitir" : "Emitir documento"}
                     >
                       <FileText className="w-4 h-4 mr-20" color="#2563eb"/>
@@ -687,7 +687,7 @@ const ConsultationSession = () => {
                       {summLoading ? "Resumindo..." : "Gerar Resumo"}
                     </Button>
 
-                    <Button onClick={saveConsultation} className="w-full sm:w-auto text-white grid-cols-1" disabled={isSubmitting}>
+                    <Button onClick={saveConsultation} className="text-white grid-cols-1" disabled={isSubmitting}>
                       <Save className="w-4 h-4 mr-2" />
                       {isSubmitting ? "Salvando..." : "Salvar Consulta"}
                     </Button>
