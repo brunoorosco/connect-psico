@@ -1,49 +1,22 @@
-import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-import authConfig from "./auth.config";
-import { configRoutes } from "./config/routes";
-import { createRouteMatchers } from "./lib/route";
-import { auth as midAuth } from "@/auth";
+import type { NextRequest } from "next/server";
 
-const { auth } = NextAuth(authConfig);
+export function middleware(req: NextRequest) {
+  const isLoggedIn =
+    req.cookies.has("next-auth.session-token") ||
+    req.cookies.has("__Secure-next-auth.session-token");
 
-export default auth(async (req) => {
-  const {
-    // isPublicRoute,
-    isProtectedRoute,
-    // isApiRoute,
-    // isAuthRoute,
-    isStudentRoute,
-    isSupervisorRoute,
-  } = createRouteMatchers(configRoutes, req);
+  const { pathname } = req.nextUrl;
 
-  const isLoggedIn = !!req.auth;
-
-  const session = await midAuth();
-
-  const userRole = session?.user.role;
-
-  const hasAccess =
-    (userRole === "SUPERVISOR" && isSupervisorRoute) ||
-    (userRole === "DEFAULT" && isStudentRoute) ||
-    userRole === "ADMIN";
-
-  if (isProtectedRoute && isLoggedIn && !hasAccess) {
-    return NextResponse.redirect(new URL("/auth/access-denied", req.url));
-  }
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin");
 
   if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
-});
+}
 
 export const config = {
-  /*
-   * Match all request paths except for the ones starting with:
-   * - api (API routes)
-   * - _next/static (static files)
-   * - _next/image (image optimization files)
-   * - favicon.ico (favicon file)
-   */
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };
