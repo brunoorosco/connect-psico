@@ -105,7 +105,7 @@ export async function sendPasswordResetEmail(emailTo: string, resetUrl: string):
                     Cuidando da sua saúde mental
                   </p>
                   <div style="margin-bottom: 16px;">
-                    <a href="https://www.instagram.com/psicomais.oficial" style="display: inline-block; margin: 0 6px; color: #9ca3af; text-decoration: none;">
+                    <a href="https://www.instagram.com/psicomais.br" style="display: inline-block; margin: 0 6px; color: #9ca3af; text-decoration: none;">
                       <img src="https://img.icons8.com/fluency/24/instagram-new.png" alt="Instagram" style="width: 20px; height: 20px;" />
                     </a>
                     <a href="#" style="display: inline-block; margin: 0 6px; color: #9ca3af; text-decoration: none;">
