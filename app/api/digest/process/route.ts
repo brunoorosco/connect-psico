@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { getProfessionalById } from "@/actions/users"
-import { axiosInstanceChatz } from "@/infra/httpClient/chatzMessageApi"
+import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
 import { reopenWindow, takeDueDigests } from "@/actions/digest"
 import { inQuietHours, nextQuietEndISO } from "@/lib/time"
 import { PROCESS_BATCH_SIZE } from "@/lib/digest-config"
@@ -28,10 +28,10 @@ export async function GET() {
         if (!user || !phoneRaw) continue
 
         const firstName = String(user.name || "").split(" ")[0] ?? ""
-        const resp = await axiosInstanceChatz.post("/messages/send", {
-          body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
-          number: "55" + phoneRaw,
-        })
+        const res = await sendMessageApiWhatsapp(
+          "55" + phoneRaw,
+          `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
+        )
         processed++
       } catch (e) {
         //@ts-ignore
