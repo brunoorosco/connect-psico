@@ -1,4 +1,4 @@
-import ConsultationSessionAudioPart from "@presentation/pages/consulta/index_"
+import ConsultationSessionAudioPart from "@presentation/pages/consulta"
 
 const Consultation = () => {
   // return <ConsultationStart />;

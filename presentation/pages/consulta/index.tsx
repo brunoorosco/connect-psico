@@ -674,16 +674,18 @@ const ConsultationSession = () => {
                       className="grid-cols-1"
                       title={!canIssueDocument ? "Finalize a consulta para emitir" : "Emitir documento"}
                     >
-                      <FileText className="w-4 h-4 mr-20" color="#2563eb"/>
+                      <FileText className="w-4 h-4 mr-20" color="#2563eb" />
                       Emitir Documento
                     </Button>
 
                     <Button
                       onClick={handleSummarize}
-                      variant="secondary"
+                      variant="outline"
                       disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
                       className=" grid-cols-1"
                     >
+                      {!summLoading && <img src="/icons/generative.png" alt="Gerar resumo" className="w-5 h-5" />}
+
                       {summLoading ? "Resumindo..." : "Gerar Resumo"}
                     </Button>
 
