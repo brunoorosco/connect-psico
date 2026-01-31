@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderIcon } from "lucide-react"
 import Link from "next/link"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { Switch } from "@/components/ui/switch"
@@ -34,16 +34,32 @@ export default function RegisterForm() {
       especialidade: "",
       professional: false,
       phone: "",
-      noRegistration: false
+      noRegistration: false,
     },
   })
+
+  // Auto-dismiss da mensagem de sucesso após 5 segundos
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("")
+      }, 5000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [success])
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
     startTransition(async () => {
       try {
         const { success, error } = await register(values)
-        if (error) setError(error)
-        setSuccess(success || "")
+        if (error) {
+          setError(error)
+          setSuccess("")
+        } else {
+          setSuccess(success || "")
+          setError("")
+        }
         form.reset()
       } catch (error) {
         setSuccess("")
@@ -88,9 +104,13 @@ export default function RegisterForm() {
                         required
                         {...field}
                         disabled={isPending}
+                        maxLength={100}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <div className="flex justify-between items-center">
+                      <FormMessage />
+                      <span className="text-xs text-muted-foreground">{field.value?.length || 0}/100</span>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -101,9 +121,19 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="voce@provedor.com.br" required {...field} disabled={isPending} />
+                      <Input
+                        type="email"
+                        placeholder="voce@provedor.com.br"
+                        required
+                        {...field}
+                        disabled={isPending}
+                        maxLength={100}
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <div className="flex justify-between items-center">
+                      <FormMessage />
+                      <span className="text-xs text-muted-foreground">{field.value?.length || 0}/100</span>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -119,6 +149,7 @@ export default function RegisterForm() {
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
+                        disabled={isPending}
                       >
                         {(inputProps: any) => (
                           <Input
@@ -163,6 +194,7 @@ export default function RegisterForm() {
                             type="checkbox"
                             checked={field.value}
                             onChange={(e) => form.setValue("noRegistration", e.target.checked)}
+                            disabled={isPending}
                           />
                         </FormControl>
                         <FormLabel>Ainda não possuo registro profissional</FormLabel>
