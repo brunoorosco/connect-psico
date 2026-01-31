@@ -18,11 +18,18 @@ axiosInstanceEvo.interceptors.request.use(
 export const sendMessageApiWhatsapp = async (userPhone: string, message: string, signature = true) => {
   if (!userPhone || userPhone === "") return
   const msg = signature ? `*PsicoMais:*\n${message}` : message
+  let apenasNumeros = userPhone.replace(/\D/g, "")
+
+  if (apenasNumeros.startsWith(`55`)) {
+    return apenasNumeros
+  } else {
+    apenasNumeros = "55" + apenasNumeros
+  }
 
   await axiosInstanceEvo.post(`/message/sendText/${env.instanceEVO}`, {
     // body: `*PsicoMais:*\nOi ${firstName}, você recebeu ${row.msgCount} nova(s) mensagem(ns) na plataforma nos últimos minutos. Acesse: https://psicomais.com/app`,
     text: msg,
-    number: "55" + userPhone,
+    number: apenasNumeros,
   })
 }
 
