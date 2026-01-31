@@ -6,6 +6,7 @@ import { findVerificationTokenbyToken } from "@/services/auth"
 import type { User } from "@prisma/client"
 import { sendVerificationEmail } from "@/infra/email"
 import { sendWelcomeEmail } from "@/infra/email/sendBoasVindas"
+import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
 /**
  * This method uses nodemailer to send an email to the user to verify
  * the ownership of the email by the user.
@@ -83,6 +84,13 @@ export const verifyToken = async (token: string) => {
     })
     if (user.role !== "ADMIN") {
       await sendWelcomeEmail({ emailTo: existingToken.email, userName: user.name, userType: user.role })
+      const msg =
+        `Oi! 😄\n` +
+        `Que bom ter você com a gente!\n` +
+        `Seu cadastro já está ativo e você pode começar a usar a plataforma agora mesmo 🚀\n` +
+        `Se precisar de ajuda em qualquer etapa, é só falar com a gente por aqui 😉`
+        
+      if (user?.phone) await sendMessageApiWhatsapp(user.phone, msg)
     }
     return {
       success: "E-mail verificado",
