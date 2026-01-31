@@ -18,15 +18,15 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Confirmação de E-mail</title>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #f4f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f7fa; padding: 40px 20px;">
+    <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F9FAFB; padding: 40px 20px;">
         <tr>
           <td align="center">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); overflow: hidden;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(107, 68, 140, 0.12); overflow: hidden;">
               
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 40px 32px; text-align: center;">
+                <td style="background: linear-gradient(135deg, #6B448C 0%, #8B5CF6 100%); padding: 40px 40px 32px; text-align: center;">
                   <div style="width: 64px; height: 64px; background-color: rgba(255, 255, 255, 0.2); border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
                     <img src="https://img.icons8.com/fluency/48/approval.png" alt="Check" style="width: 40px; height: 40px;" />
                   </div>
@@ -39,11 +39,11 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
               <!-- Content -->
               <tr>
                 <td style="padding: 40px;">
-                  <p style="margin: 0 0 16px; color: #1f2937; font-size: 16px; line-height: 1.6;">
+                  <p style="margin: 0 0 16px; color: #111827; font-size: 16px; line-height: 1.6;">
                     Olá! 👋
                   </p>
                   <p style="margin: 0 0 8px; color: #4b5563; font-size: 15px; line-height: 1.7;">
-                    Obrigado por se cadastrar no <strong>PsicoMais</strong>! 🎉
+                    Obrigado por se cadastrar no <strong style="color: #6B448C;">PsicoMais</strong>! 🎉
                   </p>
                   <p style="margin: 0 0 24px; color: #4b5563; font-size: 15px; line-height: 1.7;">
                     Para ativar sua conta e começar a usar nossos serviços, confirme seu e-mail clicando no botão abaixo:
@@ -53,7 +53,7 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                       <td align="center" style="padding: 8px 0 32px;">
-                        <a href="${verificationUrl}" target="_blank" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-size: 15px; font-weight: 600; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                        <a href="${verificationUrl}" target="_blank" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #6B448C 0%, #8B5CF6 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-size: 15px; font-weight: 600; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(107, 68, 140, 0.4);">
                           Confirmar meu e-mail
                         </a>
                       </td>
@@ -63,8 +63,8 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
                   <!-- Info Box -->
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td style="background-color: #ecfdf5; border-left: 4px solid #10b981; border-radius: 8px; padding: 16px;">
-                        <p style="margin: 0; color: #065f46; font-size: 13px; line-height: 1.6;">
+                      <td style="background-color: #EFEBF0; border-left: 4px solid #6B448C; border-radius: 8px; padding: 16px;">
+                        <p style="margin: 0; color: #111827; font-size: 13px; line-height: 1.6;">
                           ✨ <strong>Após confirmar</strong>, você terá acesso completo a todas as funcionalidades da plataforma.
                         </p>
                       </td>
@@ -80,7 +80,7 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
               <!-- Divider -->
               <tr>
                 <td style="padding: 0 40px;">
-                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0;" />
+                  <hr style="border: none; border-top: 1px solid #EFEBF0; margin: 0;" />
                 </td>
               </tr>
 
@@ -91,7 +91,7 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
                     Caso o botão não funcione, copie e cole o link abaixo no seu navegador:
                   </p>
                   <p style="margin: 0; word-break: break-all;">
-                    <a href="${verificationUrl}" style="color: #10b981; font-size: 12px; text-decoration: underline;">
+                    <a href="${verificationUrl}" style="color: #6B448C; font-size: 12px; text-decoration: underline;">
                       ${verificationUrl}
                     </a>
                   </p>
@@ -100,22 +100,16 @@ export async function sendVerificationEmail(emailTo: string, verificationUrl: st
 
               <!-- Footer -->
               <tr>
-                <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
-                  <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; font-weight: 500;">
+                <td style="background-color: #EFEBF0; padding: 24px 40px; text-align: center; border-top: 1px solid #EFEBF0;">
+                  <p style="margin: 0 0 8px; color: #6B448C; font-size: 13px; font-weight: 500;">
                     PsicoMais
                   </p>
-                  <p style="margin: 0 0 16px; color: #9ca3af; font-size: 12px;">
+                  <p style="margin: 0 0 16px; color: #6b7280; font-size: 12px;">
                     Cuidando da sua saúde mental
                   </p>
                   <div style="margin-bottom: 16px;">
                      <a href="https://www.instagram.com/psicomais.br" style="display: inline-block; margin: 0 6px; color: #9ca3af; text-decoration: none;">
                       <img src="https://img.icons8.com/fluency/24/instagram-new.png" alt="Instagram" style="width: 20px; height: 20px;" />
-                    </a>
-                    <a href="#" style="display: inline-block; margin: 0 6px;">
-                      <img src="https://img.icons8.com/fluency/24/facebook-new.png" alt="Facebook" style="width: 20px; height: 20px;" />
-                    </a>
-                    <a href="#" style="display: inline-block; margin: 0 6px;">
-                      <img src="https://img.icons8.com/fluency/24/linkedin.png" alt="LinkedIn" style="width: 20px; height: 20px;" />
                     </a>
                   </div>
                   <p style="margin: 0; color: #9ca3af; font-size: 11px;">

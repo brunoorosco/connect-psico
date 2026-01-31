@@ -101,7 +101,7 @@ export async function sendWelcomeEmail({
                   <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                     <tr>
                       <td align="center" style="width: 80px; height: 80px; background-color: rgba(255, 255, 255, 0.15); border-radius: 20px; backdrop-filter: blur(10px);">
-                        <img src="https://img.icons8.com/fluency/64/brain.png" alt="Brain" width="48" height="48" style="display: block;" />
+                        <img src="https://psicomais.com/logo.png" alt="Brain" width="48" height="48" style="display: block;" />
                       </td>
                     </tr>
                   </table>
@@ -226,16 +226,6 @@ export async function sendWelcomeEmail({
                             <td style="padding: 0 8px;">
                               <a href="https://instagram.com/psicomais" style="text-decoration: none;">
                                 <img src="https://img.icons8.com/fluency/24/instagram-new.png" alt="Instagram" width="24" height="24" style="display: block;" />
-                              </a>
-                            </td>
-                            <td style="padding: 0 8px;">
-                              <a href="https://facebook.com/psicomais" style="text-decoration: none;">
-                                <img src="https://img.icons8.com/fluency/24/facebook-new.png" alt="Facebook" width="24" height="24" style="display: block;" />
-                              </a>
-                            </td>
-                            <td style="padding: 0 8px;">
-                              <a href="https://linkedin.com/company/psicomais" style="text-decoration: none;">
-                                <img src="https://img.icons8.com/fluency/24/linkedin.png" alt="LinkedIn" width="24" height="24" style="display: block;" />
                               </a>
                             </td>
                           </tr>
