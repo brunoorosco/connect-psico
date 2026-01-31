@@ -59,28 +59,15 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        therapy: {
-          primary: "#9b87f5",
-          secondary: "#7E69AB",
+        psicomais: {
+          primary: "#6B448C",
+          secondary: "#EFEBF0",
           accent: "#1EAEDB",
           light: "#F9FAFB",
           dark: "#111827",
           "blue-calm": "#60A5FA",
           "green-heal": "#34D399",
           "purple-wisdom": "#8B5CF6",
-        },
-        psychology: {
-          primary: "#9b87f5",
-          secondary: "#7E69AB",
-          tertiary: "#6E59A5",
-          accent: "#1EAEDB",
-          light: "#E5DEFF",
-          dark: "#1A1F2C",
-          gray: {
-            light: "#F1F1F1",
-            medium: "#999",
-            dark: "#8E9196",
-          },
         },
       },
       borderRadius: {
