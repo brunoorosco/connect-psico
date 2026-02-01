@@ -1,6 +1,9 @@
 export type SummaryResult = {
-    summary: string;
-    key_points: string[];
-    action_items: string[];
-    warnings: string[];
+  overview: string;
+  highlights: {
+    positives: string[];
+    negatives: string[];
+  };
+  next_steps: string[];
+  alerts: string[];
 };

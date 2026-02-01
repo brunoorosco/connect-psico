@@ -153,6 +153,7 @@ model NotePatient {
   id             Int       @id @default(autoincrement())
   patientId      Int       @map("patitent_id")
   notes          String
+  summaryIdMongo String?   @map("summary_id_mongo")
   createdAt      DateTime  @default(now())
   prescription   String
   professionalId String    @map("professional_id")

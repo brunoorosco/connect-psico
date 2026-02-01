@@ -14,6 +14,7 @@ const schema = z.object({
   notes: z.string(),
   prescription: z.string().optional(),
   professionalId: z.string(),
+  summaryIdMongo: z.string(),
 })
 
 export type ConsultationFormData = z.infer<typeof schema>
@@ -29,6 +30,7 @@ export function useConsultationForm({ notePatient, onSubmit }: UseConsultationFo
   const form = useForm<ConsultationFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      summaryIdMongo: notePatient?.summaryIdMongo,
       notes: notePatient?.notes || "",
       patientId: notePatient?.patientId ?? 0,
       prescription: notePatient?.prescription || "",

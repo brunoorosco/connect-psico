@@ -29,6 +29,7 @@ import { getPresignedPutForKey, transcribeChunk, putToPresignedUrl } from "@/ser
 import { SummaryResult } from "./types"
 import { useChatStore } from "@/infra/stores/useChatStore"
 import { sendMessageApiWhatsapp } from "@/infra/httpClient/chatzMessageApi"
+import { SessionSummary } from "./SessionSummary"
 
 type CertificateConfig = any
 
@@ -87,6 +88,7 @@ const ConsultationSession = () => {
   const [cpf, setCpf] = useState<string>("")
   const [sintomas, setSintomas] = useState("")
   const [aiSummary, setAiSummary] = useState<SummaryResult | null>(null)
+  const [summaryId, setSummaryId] = useState<string>("")
   const [summLoading, setSummLoading] = useState(false)
   const { socket } = useSocket()
 
@@ -100,6 +102,15 @@ const ConsultationSession = () => {
     () => `consult:draft:${patientId}:${id}:${consultationDate}`,
     [patientId, id, consultationDate],
   )
+
+  function adaptSummary(api: any): SummaryResult {
+    return {
+      overview: api.summary,
+      highlights: api.key_points,
+      next_steps: api.action_items,
+      alerts: api.warnings,
+    }
+  }
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
   async function withRetry<T>(fn: () => Promise<T>, tries = 3, base = 300): Promise<T> {
@@ -155,19 +166,20 @@ const ConsultationSession = () => {
   useEffect(() => {
     if (!socket) return
 
-    function onProcessed(data: any) {
-      console.log("Consultation processed:", data)
-      if (data.sessionId === sessionIdRef.current) {
-        if (data.text) setTranscript(data.text)
-        if (data.summary) {
-          setAiSummary(data.summary)
-          toast.success("Resumo gerado com sucesso!")
-        }
-        setSummLoading(false)
+    const onProcessed = (data: any) => {
+      if (!data || data.sessionId !== sessionIdRef.current) return
+      if (data.summaryIdMongo) setSummaryId(data.summaryIdMongo)
+      if (data.text) setTranscript(data.text)
+      if (data.summary) {
+        setAiSummary(adaptSummary(data.summary))
+        toast.success("Resumo gerado com sucesso!")
       }
+
+      setSummLoading(false)
     }
 
     socket.on("consultation.processed", onProcessed)
+
     return () => {
       socket.off("consultation.processed", onProcessed)
     }
@@ -202,7 +214,6 @@ const ConsultationSession = () => {
   }, [roomId, currentUser?.id])
 
   const sendMessageLinkUrlRoom = async (url: string) => {
-    console.log("patient :>> ", patient)
     await sendMessage({
       text: url,
       image: "",
@@ -296,6 +307,7 @@ const ConsultationSession = () => {
     setIsSubmitting(true)
     try {
       await handleSubmit({
+        summaryIdMongo: summaryId as string,
         notes: notes,
         patientId: patient?.id ?? 0,
         professionalId: id,
@@ -395,11 +407,16 @@ const ConsultationSession = () => {
   async function handleSummarize() {
     try {
       setSummLoading(true)
-      const fullText = [transcript, notes].filter(Boolean).join("\n\n")
 
-      if (audioBlob && sessionIdRef.current) {
-        toast.info("Iniciando processamento em segundo plano...", { description: "Isso pode levar alguns minutos." })
-        const sid = sessionIdRef.current
+      const fullText = [transcript, notes].filter(Boolean).join("\n\n")
+      const sid = sessionIdRef.current || crypto.randomUUID()
+      sessionIdRef.current = sid
+
+      toast.info("Resumo em processamento", {
+        description: "Você será avisado assim que estiver pronto.",
+      })
+
+      if (audioBlob) {
         const key = `sessions/${sid}/full.webm`
 
         await withRetry(async () => {
@@ -408,20 +425,15 @@ const ConsultationSession = () => {
         }, 3)
 
         await startAsyncTranscription(sid, key, "pt-BR", currentUser?.id, fullText)
+      } else if (fullText) {
+        await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, fullText)
       } else {
-        if (transcript || notes) {
-          toast.info("Gerando resumo a partir do texto...", { description: "Processando em segundo plano." })
-          const sid = sessionIdRef.current || `s-${Date.now()}`
-          sessionIdRef.current = sid
-          await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, fullText)
-        } else {
-          toast.error("Nada para resumir (sem áudio/texto)")
-          setSummLoading(false)
-        }
+        toast.error("Nada para resumir")
+        setSummLoading(false)
       }
     } catch (e: any) {
       console.error(e)
-      toast.error(`Falha ao solicitar resumo: ${e?.message ?? "Erro desconhecido"}`)
+      toast.error("Falha ao iniciar o resumo")
       setSummLoading(false)
     }
   }
@@ -682,11 +694,9 @@ const ConsultationSession = () => {
                       onClick={handleSummarize}
                       variant="outline"
                       disabled={summLoading || (!transcript && !notes) || !!aiSummary || isRecording}
-                      className=" grid-cols-1"
                     >
                       {!summLoading && <img src="/icons/generative.png" alt="Gerar resumo" className="w-5 h-5" />}
-
-                      {summLoading ? "Resumindo..." : "Gerar Resumo"}
+                      {summLoading ? "Processando..." : "Gerar Resumo"}
                     </Button>
 
                     <Button onClick={saveConsultation} className="text-white grid-cols-1" disabled={isSubmitting}>
@@ -720,38 +730,7 @@ const ConsultationSession = () => {
             </div>
 
             {/* 🤖 Resumo IA */}
-            {aiSummary && (
-              <Card className="mt-4 bg-muted/30 border-none sm:border">
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl">Resumo IA</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <p>{aiSummary.summary}</p>
-
-                  {aiSummary.key_points?.length > 0 && (
-                    <div>
-                      <Label>Pontos-chave</Label>
-                      <ul className="list-disc ml-5 space-y-1">
-                        {aiSummary.key_points.map((p, i) => (
-                          <li key={i}>{p}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {aiSummary.action_items?.length > 0 && (
-                    <div>
-                      <Label>Itens de Ação</Label>
-                      <ul className="list-disc ml-5 space-y-1">
-                        {aiSummary.action_items.map((p, i) => (
-                          <li key={i}>{p}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            {aiSummary && <SessionSummary summary={aiSummary} />}
           </CardContent>
         </Card>
       </div>
