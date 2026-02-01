@@ -30,7 +30,7 @@ export function useConsultationForm({ notePatient, onSubmit }: UseConsultationFo
   const form = useForm<ConsultationFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      summaryIdMongo: notePatient?.summaryIdMongo,
+      summaryIdMongo: notePatient?.summaryIdMongo ?? "",
       notes: notePatient?.notes || "",
       patientId: notePatient?.patientId ?? 0,
       prescription: notePatient?.prescription || "",
