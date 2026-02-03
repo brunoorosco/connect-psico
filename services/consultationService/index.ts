@@ -26,7 +26,14 @@ export async function finalizeRecordingRequest(sessionId: string) {
   return res.json()
 }
 
-export async function startAsyncTranscription(sessionId: string, key?: string, language = "pt-BR", userId?: string, text?: string) {
+export async function startAsyncTranscription(
+  sessionId: string,
+  key?: string,
+  language = "pt-BR",
+  userId?: string,
+  patientId?: string,
+  text?: string,
+) {
   const res = await fetch("/api/audio/recordings/process-async", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,7 +42,8 @@ export async function startAsyncTranscription(sessionId: string, key?: string, l
       key,
       language,
       userId,
-      text
+      patientId,
+      text,
     }),
   })
 

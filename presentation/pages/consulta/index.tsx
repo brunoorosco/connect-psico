@@ -424,9 +424,10 @@ const ConsultationSession = () => {
           await putToPresignedUrl(url, audioBlob)
         }, 3)
 
-        await startAsyncTranscription(sid, key, "pt-BR", currentUser?.id, fullText)
+        if (currentUser?.id || patientId) return
+        await startAsyncTranscription(sid, key, "pt-BR", currentUser?.id, patientId, fullText)
       } else if (fullText) {
-        await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, fullText)
+        await startAsyncTranscription(sid, undefined, "pt-BR", currentUser?.id, patientId, fullText)
       } else {
         toast.error("Nada para resumir")
         setSummLoading(false)

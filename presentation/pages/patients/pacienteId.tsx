@@ -11,19 +11,10 @@ import { usePatientForm } from "@hooks/usePatientForm"
 
 export function PatientsIdPage() {
   const { patientId } = useParams<{ patientId: string }>()
-  const {
-    selectedPatient,
-    showForm,
-    backToList,
-    editingPatient,
-    handleEditClick,
-    fetchPatientById,
-    cancelForm,
-  } = usePatientManager()
-  
-  const { mutate } = useSWR(patientId ? `patients/${patientId}` : null, () =>
-    fetchPatientById(patientId!)
-  )
+  const { selectedPatient, showForm, backToList, editingPatient, handleEditClick, fetchPatientById, cancelForm } =
+    usePatientManager()
+
+  const { mutate } = useSWR(patientId ? `patients/${patientId}` : null, () => fetchPatientById(patientId!))
 
   const patientFormHook = usePatientForm({
     patient: editingPatient ?? selectedPatient,
@@ -35,7 +26,6 @@ export function PatientsIdPage() {
       fetchPatientById(patientId)
     }
   }, [patientId])
-  console.log(selectedPatient)
 
   if (!selectedPatient) {
     return (
@@ -73,7 +63,7 @@ export function PatientsIdPage() {
               </CardHeader>
               <CardContent>
                 <PatientForm
-                   patient={editingPatient ?? selectedPatient}
+                  patient={editingPatient ?? selectedPatient}
                   onSubmit={patientFormHook.handleSubmit}
                   onCancel={cancelForm}
                   form={patientFormHook.form}

@@ -1,4 +1,3 @@
-'use server'
 import axios from "axios"
 import { env } from "@/config/application"
 import { getAccessToken } from "@/actions/token/getToken"
