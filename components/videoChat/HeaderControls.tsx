@@ -15,6 +15,7 @@ import {
   PhoneOff,
   PlayIcon,
 } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip"
 
 interface HeaderControlsProps {
   roomId: string
@@ -114,16 +115,23 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
           </Button>
 
           {btnRecorder && (
-            <Button
-              variant={isRecording ? "destructive" : "secondary"}
-              className="bg-primary text-gray-50 hover:bg-primary/60"
-              size="sm"
-              disabled={participantCount <= 1}
-              onClick={onToggleRecording}
-              title={isRecording ? "Parar gravação" : "Iniciar gravação"}
-            >
-              {isRecording ? <Square className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isRecording ? "destructive" : "secondary"}
+                  className="bg-primary text-gray-50 hover:bg-primary/60"
+                  size="sm"
+                  disabled={participantCount <= 1}
+                  onClick={onToggleRecording}
+                  // title={isRecording ? "Parar Transcrição" : "Iniciar Transcriçao de Audio"}
+                >
+                  {isRecording ? <Square className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="text-gray-50">
+                {isRecording ? "Parar Transcrição" : "Iniciar Transcriçao de Audio"}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           <Button variant="outline" size="sm" onClick={onOpenChat}>
