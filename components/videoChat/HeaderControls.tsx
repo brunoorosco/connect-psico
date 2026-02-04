@@ -2,7 +2,19 @@
 
 import React from "react"
 import { Button } from "@/components/ui/button"
-import { Users, Mic, MicOff, Video, VideoOff, Square, CircleDot, MessageSquare, Settings, PhoneOff, PlayIcon } from "lucide-react"
+import {
+  Users,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Square,
+  CircleDot,
+  MessageSquare,
+  Settings,
+  PhoneOff,
+  PlayIcon,
+} from "lucide-react"
 
 interface HeaderControlsProps {
   roomId: string
@@ -104,8 +116,9 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
           {btnRecorder && (
             <Button
               variant={isRecording ? "destructive" : "secondary"}
-              className="bg-primary text-gray-50"
+              className="bg-primary text-gray-50 hover:bg-primary/60"
               size="sm"
+              disabled={participantCount <= 1}
               onClick={onToggleRecording}
               title={isRecording ? "Parar gravação" : "Iniciar gravação"}
             >
