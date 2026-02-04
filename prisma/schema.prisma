@@ -26,6 +26,7 @@ model User {
   active                   Boolean                @default(true)
   index                    Int                    @default(autoincrement())
   isNewProfile             Boolean                @default(true)
+  ipAddress                String?                @map("ip_address") @db.VarChar(15)
   Account                  Account[]
   Session                  Session[]
   VideoCallParticipant     VideoCallParticipant[]
