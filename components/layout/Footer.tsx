@@ -8,13 +8,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-white">PsicoMais</span>
+              <span className="text-2xl font-bold text-primary">PsicoMais</span>
             </Link>
-            <p className="mt-4 text-sm text-gray-300">
+            <p className="mt-4 text-sm text-gray-500">
               Conectando pacientes e profissionais de psicologia para promover saúde mental e bem-estar.
             </p>
             <div className="mt-6 flex space-x-4">
-              <a href="https://www.instagram.com/psicomais.br" className="text-gray-300 hover:text-white">
+              <a href="https://www.instagram.com/psicomais.br" className="text-gray-500 hover:text-white">
                 <span className="sr-only">Instagram</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -28,25 +28,25 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Para Pacientes</h3>
+            <h3 className="text-sm font-semibold text-primary tracking-wider uppercase">Para Pacientes</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/terapeutas" className="text-gray-300 hover:text-white">
+                <Link href="/terapeutas" className="text-gray-500 hover:text-white">
                   Encontrar Terapeuta
                 </Link>
               </li>
               <li>
-                <Link href="/howItWorks" className="text-gray-300 hover:text-white">
+                <Link href="/howItWorks" className="text-gray-500 hover:text-white">
                   Como Funciona
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-gray-300 hover:text-white">
+                <Link href="/pricing" className="text-gray-500 hover:text-white">
                   Valores
                 </Link>
               </li>
               {/* <li>
-                <Link href="/faq" className="text-gray-300 hover:text-white">
+                <Link href="/faq" className="text-gray-500 hover:text-white">
                   Perguntas Frequentes
                 </Link>
               </li> */}
@@ -54,25 +54,25 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Para Profissionais</h3>
+            <h3 className="text-sm font-semibold text-primary tracking-wider uppercase">Para Profissionais</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/join-as-professional" className="text-gray-300 hover:text-white">
+                <Link href="/join-as-professional" className="text-gray-500 hover:text-white">
                   Junte-se a Nós
                 </Link>
               </li>
               <li>
-                <Link href="/resources" className="text-gray-300 hover:text-white">
+                <Link href="/resources" className="text-gray-500 hover:text-white">
                   Recursos
                 </Link>
               </li>
               <li>
-                <Link href="/plans" className="text-gray-300 hover:text-white">
+                <Link href="/plans" className="text-gray-500 hover:text-white">
                   Planos
                 </Link>
               </li>
               {/* <li>
-                <Link href="/professional-faq" className="text-gray-300 hover:text-white">
+                <Link href="/professional-faq" className="text-gray-500 hover:text-white">
                   Perguntas Frequentes
                 </Link>
               </li> */}
@@ -80,25 +80,25 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Empresa</h3>
+            <h3 className="text-sm font-semibold text-primary tracking-wider uppercase">Empresa</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-white">
+                <Link href="/about" className="text-gray-500 hover:text-white">
                   Sobre Nós
                 </Link>
               </li>
               <li>
-                <Link href="https://blog.psicomais.com" className="text-gray-300 hover:text-white">
+                <Link href="https://blog.psicomais.com" className="text-gray-500 hover:text-white">
                   Blog
                 </Link>
               </li>
               {/* <li>
-                <Link href="/careers" className="text-gray-300 hover:text-white">
+                <Link href="/careers" className="text-gray-500 hover:text-white">
                   Carreiras
                 </Link>
               </li> */}
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-white">
+                <Link href="/contact" className="text-gray-500 hover:text-white">
                   Contato
                 </Link>
               </li>
