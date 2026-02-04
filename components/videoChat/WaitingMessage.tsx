@@ -89,10 +89,15 @@ export function WaitingMessage({
             <Clock className="w-4 h-4" />
             <span>Compartilhe o ID da sala com outros participantes</span>
           </div> */}
-
-          <Button className="w-full mt-4 text-gray-50" variant="default" onClick={onJoinRoom}>
-            {!isWaiting ? "Ingressar na Sala" : " Aguardando Participantes"}
-          </Button>
+          {!isWaiting ? (
+            <Button className="w-full mt-4 text-gray-50" variant="default" onClick={onJoinRoom} disabled={isWaiting}>
+              Ingressar na Sala
+            </Button>
+          ) : (
+            <span className="w-full mt-4 text-gray-50 border-primary bg-primary py-3 px-10 rounded-sm">
+              Aguardando Participantes
+            </span>
+          )}
         </div>
 
         {/* Loading Indicator */}

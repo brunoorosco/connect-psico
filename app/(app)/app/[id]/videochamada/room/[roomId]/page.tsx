@@ -27,6 +27,18 @@ export default function VideoCallPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting")
   const [hasJoined, setHasJoined] = useState(false)
+  const [isJoining, setIsJoining] = useState(false)
+
+  const handleJoinRoom = () => {
+    if (roomId && userId && !isJoining) {
+      setIsJoining(true) // Marca que está em processo de join
+      console.log(`Iniciando joinRoom para ${roomId} por ${userId}`)
+      joinRoom()
+      setHasJoined(true)
+      // Não resetar isJoining aqui, apenas quando socket se conectar de fato
+      // ou quando houver um timeout/erro.
+    }
+  }
 
   const localVideoRef = useRef<HTMLVideoElement>(null)
   // Initialize WebRTC
@@ -80,21 +92,33 @@ export default function VideoCallPage() {
     autoStart: false, // Start recording automatically when joining
   })
 
+  useEffect(() => {
+    // Chamada inicial para entrar na sala se o usuário e a sala estiverem definidos
+    // e se a conexão ainda não foi estabelecida ou está em processo.
+    // Evitar re-joining se já tem participantes ou está conectado.
+    if (roomId && userId && !hasJoined && participants.length === 0 && connectionStatus === "connecting") {
+      console.log("Tentativa automática de entrar na sala...")
+      handleJoinRoom()
+    }
+  }, [roomId, userId, hasJoined, participants, connectionStatus, handleJoinRoom]) // Adicionar dependências necessárias
+
   // Update connection status
   useEffect(() => {
     if (isConnected) {
       setConnectionStatus("connected")
+      setIsJoining(false) // Resetar o estado de join
+      console.log("Conexão WebRTC estabelecida.")
     } else {
       setConnectionStatus("connecting")
     }
   }, [isConnected])
 
   // Join room on mount
-  // useEffect(() => {
-  //   if (roomId && userId) {
-  //     joinRoom()
-  //   }
-  // }, [roomId, userId, joinRoom])
+  useEffect(() => {
+    if (roomId && userId) {
+      joinRoom()
+    }
+  }, [roomId, userId, joinRoom])
 
   // Set up local video stream
   useEffect(() => {
@@ -114,11 +138,6 @@ export default function VideoCallPage() {
     }
     setHasJoined(false)
     window.location.href = "../../../"
-  }
-
-  const handleJoinRoom = () => {
-    joinRoom()
-    setHasJoined(true)
   }
 
   // Usa o hook para gravar o áudio mixado
