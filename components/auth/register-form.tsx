@@ -35,6 +35,7 @@ export default function RegisterForm() {
       professional: false,
       phone: "",
       noRegistration: false,
+      website: "",
     },
   })
 
@@ -137,6 +138,7 @@ export default function RegisterForm() {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="phone"
@@ -178,6 +180,13 @@ export default function RegisterForm() {
                     </FormControl>
                     <FormMessage />
                   </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <input type="text" tabIndex={-1} autoComplete="off" className="hidden" {...field} />
                 )}
               />
 
