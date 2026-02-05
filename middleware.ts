@@ -2,16 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  const ip =
-    forwardedFor?.split(",")[0]?.trim() ||
-    req.ip ||
-    "unknown";
+   // Lista de IPs a bloquear
+  const BLOCKED_IP_PREFIXES = ["185.212.","45.84."];
+  
+  // Obtém o IP do usuário (funciona na Vercel)
+  const ip = req.ip || req.headers.get('x-forwarded-for') || '127.0.0.1';
 
-  // 🚫 Bloqueia 45.84.xxx.xxx
-  if (ip.startsWith("45.84.")) {
-    return new NextResponse("Access denied", { status: 403 });
-  }
+
+if (BLOCKED_IP_PREFIXES.some(prefix => ip.startsWith(prefix))) {
+  return new NextResponse("Access denied", { status: 403 });
+}
 
   const isLoggedIn =
     req.cookies.has("next-auth.session-token") ||
