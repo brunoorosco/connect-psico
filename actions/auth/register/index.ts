@@ -23,6 +23,21 @@ export const register = async (user: z.infer<typeof RegisterSchema>) => {
     return { error: "Cadastro inválido" }
   }
 
+  /* ------------------------------------
+   * 🔒 Bloqueio simples por IP
+   * ------------------------------------ */
+  const headersList = headers()
+
+  const forwardedFor = headersList.get("x-forwarded-for")
+  const realIp = headersList.get("x-real-ip")
+
+  const ip = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown"
+  const BLOCKED_IP_PREFIXES = ["185.212.", "45.84.", "185.220."]
+
+  if (BLOCKED_IP_PREFIXES.some((prefix) => ip.startsWith(prefix))) {
+    return { error: "Access denied" }
+  }
+
   const valid = await RegisterSchema.safeParse(user)
 
   if (!valid.success) {
@@ -31,12 +46,6 @@ export const register = async (user: z.infer<typeof RegisterSchema>) => {
     }
   }
 
-  const headersList = headers()
-
-  const forwardedFor = headersList.get("x-forwarded-for")
-  const realIp = headersList.get("x-real-ip")
-
-  const ip = forwardedFor?.split(",")[0]?.trim() || realIp || "unknown"
   try {
     const { name, email, password } = user
     const hashedPassword = await bcryptjs.hash(password, 10)
