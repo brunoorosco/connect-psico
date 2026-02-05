@@ -16,6 +16,13 @@ import { headers } from "next/headers"
  * @returns {Promise<{error?: string, success?: string}>} The result of the password change request.
  */
 export const register = async (user: z.infer<typeof RegisterSchema>) => {
+  /* -------------------------------------------------
+   * 🕳️ Honeypot (bots)
+   * ------------------------------------------------- */
+  if ((user as any).website) {
+    return { error: "Cadastro inválido" }
+  }
+
   const valid = await RegisterSchema.safeParse(user)
 
   if (!valid.success) {
