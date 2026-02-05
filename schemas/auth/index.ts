@@ -14,6 +14,7 @@ export const RegisterSchema = z
     numConselho: z.string().optional(),
     ufConselho: z.string().optional(),
     especialidade: z.string().optional(),
+    website: z.string().optional(),
     publico: z.string().optional(),
     professional: z.coerce.boolean(),
     phone: z.string().min(14, "Número muito curto").max(15),
