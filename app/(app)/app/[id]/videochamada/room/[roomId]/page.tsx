@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
-import { useChat, useWebRTC } from "@hooks/videoChat"
-import { useAudioRecording } from "@components/videoChat/useAudioRecording"
+import { useChat, useWebRTC, useVideoCallRecorder } from "@hooks/videoChat"
+// import { useAudioRecording } from "@components/videoChat/useAudioRecording" // REMOVIDO
 import { ChatOverlay } from "@components/videoChat/ChatOverlay"
 import { SidebarMenu } from "@components/videoChat/SidebarMenu"
 import { WaitingMessage } from "@components/videoChat/WaitingMessage"
@@ -12,7 +12,7 @@ import { useCurrentUser } from "@hooks/use-current-user"
 import { MobileControls } from "@components/videoChat/MobileControls"
 import { HeaderControls } from "@components/videoChat/HeaderControls"
 import { env } from "@/config/application"
-import { useMixedAudioRecording } from "@hooks/videoChat/useMixedAudioRecording"
+// import { useMixedAudioRecording } from "@hooks/videoChat/useMixedAudioRecording" // REMOVIDO
 import { SettingsDialogDynamic as SettingsDialog } from "@components/videoChat/SettingsDialogDynamic"
 
 export default function VideoCallPage() {
@@ -74,23 +74,36 @@ export default function VideoCallPage() {
     userName: String(userName),
   })
 
-  // Initialize Audio Recording
+  // Initialize Video Call Recorder (Transcription + S3)
   const {
-    isRecording,
-    isUploading,
-    recordingDuration,
-    startRecording,
-    stopRecording,
-    formatDuration,
-    error: recordingError,
-  } = useAudioRecording({
+    isRecording: isMixedRecording, // Usando mesmo nome de variável para minimizar mudanças no UI
+    recordingTime,
+    start: startMixedRecording,
+    stop: stopMixedRecording,
+    transcript,
+    error: recordingError
+    // audioBlob se precisar
+  } = useVideoCallRecorder({
     roomId,
-    userId,
-    localStream, // stream do próprio microfone
+    localStream,
     remoteStreams,
-    socket,
-    autoStart: false, // Start recording automatically when joining
+    withTimestamps: false,
+    onTranscriptUpdate: (text) => {
+      console.log("Transcript updated:", text.slice(-50))
+    }
   })
+
+  // Mock para manter compatibilidade com interface antiga se necessário, 
+  // mas HeaderControls usa isUploading e formatDuration. 
+  // O hook useVideoCallRecorder retorna recordingTime (ms).
+  const isUploading = false; // TODO: expor estado de uploading do hook se necessario
+  const formatDuration = (ms: number) => {
+    const seconds = Math.floor(ms / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
 
   useEffect(() => {
     // Chamada inicial para entrar na sala se o usuário e a sala estiverem definidos
@@ -133,31 +146,27 @@ export default function VideoCallPage() {
 
   const handleLeaveCall = () => {
     leaveRoom()
-    if (isRecording) {
-      stopRecording()
+    if (isMixedRecording) {
+      stopMixedRecording()
     }
     setHasJoined(false)
     window.location.href = "../../../"
   }
 
-  // Usa o hook para gravar o áudio mixado
-  const {
-    isRecording: isMixedRecording,
-    recordedChunks,
-    startRecording: startMixedRecording,
-    stopRecording: stopMixedRecording,
-  } = useMixedAudioRecording(localStream, remoteStreams)
+  // Hook antigo removido 
 
   const handleToggleRecording = () => {
     if (isMixedRecording) {
       stopMixedRecording()
-      stopRecording()
+      // stopRecording() // Removido pois useVideoCallRecorder gerencia tudo
     } else {
-      startRecording()
+      // startRecording() // Removido
       startMixedRecording()
     }
   }
-  const audioURL = recordedChunks.length > 0 ? URL.createObjectURL(new Blob(recordedChunks)) : null
+  const recordedChunks: any[] = [] // Mock para audioURL se nao for usar
+  const audioURL = null
+
 
   const handleDeviceChange = (deviceId: string, kind: MediaDeviceKind) => {
     console.log("Dispositivo alterado:", deviceId, kind)
@@ -179,7 +188,7 @@ export default function VideoCallPage() {
         isVideoEnabled={isVideoEnabled}
         audioAvailable={audioAvailable}
         videoAvailable={videoAvailable}
-        formatDuration={formatDuration}
+        formatDuration={() => formatDuration(recordingTime * 1000)}
         onToggleAudio={toggleAudio}
         onToggleVideo={toggleVideo}
         onToggleRecording={handleToggleRecording}
@@ -252,9 +261,8 @@ export default function VideoCallPage() {
                 />
               ) : (
                 <div
-                  className={`grid gap-2 h-full ${
-                    participants.length === 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2"
-                  }`}
+                  className={`grid gap-2 h-full ${participants.length === 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2"
+                    }`}
                 >
                   {participants.map((participant) => (
                     <VideoParticipant
@@ -354,7 +362,7 @@ export default function VideoCallPage() {
         isAudioEnabled={isAudioEnabled}
         btnRecorder={user?.role !== "DEFAULT"}
         isVideoEnabled={isVideoEnabled}
-        isRecording={isRecording}
+        isRecording={isMixedRecording}
         audioAvailable={audioAvailable}
         videoAvailable={videoAvailable}
         onToggleAudio={toggleAudio}

@@ -123,7 +123,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
                   size="sm"
                   disabled={participantCount <= 1}
                   onClick={onToggleRecording}
-                  // title={isRecording ? "Parar Transcrição" : "Iniciar Transcriçao de Audio"}
+                // title={isRecording ? "Parar Transcrição" : "Iniciar Transcriçao de Audio"}
                 >
                   {isRecording ? <Square className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
                 </Button>

@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useRef, useState } from "react"
 
 /** Informações sobre cada parte gravada (arquivo independente). */
@@ -21,6 +19,9 @@ export type UseAudioRecorderOptions = {
   overlapMs?: number
 
   onPart?: (blob: Blob, info: PartInfo) => Promise<void> | void
+
+  /** Se informado, usa este stream em vez de solicitar o microfone padrão. */
+  customStream?: MediaStream | null
 }
 
 export type UseAudioRecorderReturn = {
@@ -72,7 +73,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
   const [isStopping, setIsStopping] = useState(false)
   const [isCutting, setIsCutting] = useState(false)
 
-  const canRecord = permission === "granted"
+  const canRecord = permission === "granted" || !!opts?.customStream
 
   // timers
   const sessionTimerRef = useRef<number | null>(null)
@@ -111,7 +112,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
           supportedMimeRef.current = c
           return c
         }
-      } catch {}
+      } catch { }
     }
     supportedMimeRef.current = undefined
     return undefined
@@ -124,11 +125,17 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
         setPermission(res.state as PermissionState)
         return res.state as PermissionState
       }
-    } catch {}
+    } catch { }
     return null
   }
 
   async function requestPermission(): Promise<boolean> {
+    // Se tiver customStream, consideramos granted
+    if (opts?.customStream) {
+      setPermission("granted")
+      return true
+    }
+
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setError("Ambiente sem suporte a getUserMedia.")
       setPermission(null)
@@ -194,6 +201,20 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
   }
 
   async function ensureStream(): Promise<MediaStream> {
+    // Se customStream foi passado, prioriza ele
+    if (opts?.customStream) {
+      // Verifica se está "ativo"
+      if (opts.customStream.active || opts.customStream.getTracks().some(t => t.readyState === 'live')) {
+        streamRef.current = opts.customStream
+        setPermission("granted")
+        return opts.customStream
+      }
+      // Se tiver inativo, tenta usar assim mesmo ou falha? Geralmente falha se tracks estiverem ended.
+      // Mas vamos retornar e deixar explodir no MediaRecorder se for o caso
+      streamRef.current = opts.customStream
+      return opts.customStream
+    }
+
     // se já existe stream vivo, reutiliza
     if (streamRef.current && streamRef.current.getAudioTracks().some((t) => t.readyState === "live")) {
       return streamRef.current
@@ -339,7 +360,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
       if (prevRef.current && prevRef.current.state === "recording") {
         try {
           prevRef.current.requestData()
-        } catch {}
+        } catch { }
         prevRef.current.stop()
       }
     }, overlapMs)
@@ -427,19 +448,19 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
         if (mr.state === "recording") {
           try {
             mr.requestData()
-          } catch {}
+          } catch { }
           mr.stop()
         } else if (mr.state !== "inactive") {
           mr.stop()
         }
-      } catch {}
+      } catch { }
     }
 
     stopRec(recARef.current)
     stopRec(recBRef.current)
     try {
       streamRef.current?.getTracks().forEach((t) => t.stop())
-    } catch {}
+    } catch { }
   }
 
   async function cutNow() {
@@ -463,7 +484,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
         if (mr && mr.state === "recording") {
           try {
             mr.requestData()
-          } catch {}
+          } catch { }
           mr.stop()
         }
         await new Promise((r) => setTimeout(r, Math.max(100, overlapMs)))
@@ -488,7 +509,7 @@ export function useAudioRecorder(opts?: UseAudioRecorderOptions): UseAudioRecord
     return () => {
       try {
         stop()
-      } catch {}
+      } catch { }
       clearCutTick()
       clearSessionTimer()
     }
