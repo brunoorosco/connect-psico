@@ -17,8 +17,10 @@ export const env = {
   baseUrlEVOApi: process.env.EVO_APIURL || "https://evo2.orostec.com.br",
   instanceEVO: process.env.EVO_INSTANCE || "psicomais",
   apiKeyEVO: process.env.EVO_APIKEY as string,
-  apikeyASAAS: process.env.ASAAS_API_KEY as string || 'api_key_asaas',
+  apikeyASAAS: (process.env.ASAAS_API_KEY as string) || "api_key_asaas",
   asaasWebhookSecret: process.env.ASAAS_WEBHOOK_SECRET,
   asaasFallbackTaxId: process.env.ASAAS_FALLBACK_TAXID || "00000000000",
-  jwtSecret: process.env.AUTH_SECRET || "secret@2026"
+  jwtSecret: process.env.AUTH_SECRET || "secret@2026",
+  urlRedis: process.env.UPSTASH_REDIS_REST_URL!,
+  tokenRedis: process.env.UPSTASH_REDIS_REST_TOKEN! 
 }
