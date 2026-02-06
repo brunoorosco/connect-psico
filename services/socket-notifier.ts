@@ -1,4 +1,3 @@
-import { io } from "socket.io-client";
 import { env } from "@/config/application";
 
 export async function notifyConsultationProcessed(sessionId: string, result: any, userId?: string) {

@@ -10,6 +10,10 @@ import { ptBR } from "date-fns/locale"
 import { useEffect, useState } from "react"
 import { usePatientRecords, MongoSessionData } from "@hooks/useConsultation"
 import { NotePatient } from "@/domain/model/notePatient"
+import { useCurrentUser } from "@hooks/use-current-user"
+import { startAsyncTranscription } from "@/services/consultationService"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import {
   FileText,
   Calendar,
@@ -42,8 +46,9 @@ type RecordItem = NotePatient & {
 export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({ patientId }) => {
   const { records, fetchPatientRecords, loading, sessionCache, fetchSessionById, loadingSessionIds } =
     usePatientRecords()
-
+  const user = useCurrentUser()
   const [expandedRecords, setExpandedRecords] = useState<Set<number>>(new Set())
+  const [generatingId, setGeneratingId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchPatientRecords(patientId)
@@ -60,6 +65,35 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({ patientId 
 
     if (willExpand && summaryIdMongo) {
       fetchSessionById(summaryIdMongo)
+    }
+  }
+
+  const handleGenerateSummary = async (rec: RecordItem, text?: string) => {
+    if (!rec.summaryIdMongo || !user?.id) return
+    // Se não tiver texto (transcrição) nem do Mongo nem nas notas, não dá pra gerar
+    const textToSummarize = text || rec.notes
+    if (!textToSummarize) {
+      toast.error("Sem texto para resumir.")
+      return
+    }
+
+    setGeneratingId(rec.id)
+    try {
+      toast.info("Solicitando resumo...")
+      await startAsyncTranscription(
+        rec.summaryIdMongo,
+        undefined,
+        "pt-BR",
+        user.id,
+        patientId,
+        textToSummarize
+      )
+      toast.success("Resumo solicitado! Aguarde a notificação.")
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao solicitar resumo.")
+    } finally {
+      setGeneratingId(null)
     }
   }
 
@@ -127,6 +161,10 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({ patientId 
               const mongoData: MongoSessionData | undefined = mongoId ? sessionCache.get(mongoId) : undefined
               const hasPrescription = !!rec.prescription
               const hasMongoData = !!mongoId
+
+              // Verifica se deve mostrar o botão de gerar resumo:
+              // Tem ID do Mongo (sessão), tem texto (do mongo ou nas notas), mas NÃO tem resumo no Mongo
+              const canGenerateSummary = mongoId && !mongoData?.summary && (mongoData?.text || rec.notes)
 
               return (
                 <div
@@ -213,6 +251,26 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({ patientId 
 
                       {!isLoadingMongo && (
                         <>
+                          {/* Botão de Gerar Resumo (se aplicável) */}
+                          {canGenerateSummary && (
+                            <div className="flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleGenerateSummary(rec, mongoData?.text)}
+                                disabled={generatingId === rec.id}
+                                className="gap-2 border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-400"
+                              >
+                                {generatingId === rec.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                )}
+                                Gerar Resumo com IA
+                              </Button>
+                            </div>
+                          )}
+
                           {/* Anotações (Prisma) */}
                           {rec.notes && (
                             <div className="space-y-2">
@@ -254,7 +312,6 @@ export const PatientRecordsTab: React.FC<PatientRecordsTabProps> = ({ patientId 
                                       <Sparkles className="h-4 w-4 text-primary" />
                                       <span>Resumo com IA</span>
                                     </div>
-
                                     <div className="space-y-3 rounded-lg bg-primary/5 p-3">
                                       <p className="text-sm leading-relaxed">{mongoData.summary.summary}</p>
 
